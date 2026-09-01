@@ -19,11 +19,13 @@
     "@tanstack/table-core": "^8.21.0",
     "animejs": "^3.2.2",
     "astro": "^7.2.10",
+    "html2canvas": "^1.4.1",
     "lucide": "^0.475.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/animejs": "^3.1.13",
+    "@types/html2canvas": "^1.0.0",
     "@types/node": "^22.10.7",
     "p-limit": "^6.2.0",
     "tsx": "^4.19.2",

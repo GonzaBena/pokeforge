@@ -670,8 +670,9 @@ teamCardOverlay?.addEventListener("click", (e) => {
 });
 
 downloadPngBtn?.addEventListener("click", () => {
-  const pokemonMap = new Map(allPokemon.map((p) => [p.id, p]));
-  downloadTeamCardCanvas(team, pokemonMap);
+  if (teamCardPreview) {
+    downloadTeamCardCanvas(teamCardPreview);
+  }
 });
 
 copyShowdownBtn?.addEventListener("click", () => {

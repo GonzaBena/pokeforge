@@ -1,3 +1,4 @@
+import html2canvas from "html2canvas";
 import type { Pokemon, TeamState } from "./types";
 import { typeColor } from "./typeColors";
 import { toast } from "./toast";
@@ -111,158 +112,30 @@ export function renderTeamCardHTML(team: TeamState, pokemonMap: Map<number, Poke
   `;
 }
 
-export async function downloadTeamCardCanvas(team: TeamState, pokemonMap: Map<number, Pokemon>): Promise<void> {
-  const canvas = document.createElement("canvas");
-  const width = 1200;
-  const height = 670;
-  canvas.width = width;
-  canvas.height = height;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  // Background Gradient
-  const grad = ctx.createLinearGradient(0, 0, width, height);
-  grad.addColorStop(0, "#101014");
-  grad.addColorStop(0.5, "#181822");
-  grad.addColorStop(1, "#0d0d12");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, width, height);
-
-  // Red Ambient Glow at top
-  const radial = ctx.createRadialGradient(width / 2, 0, 10, width / 2, 0, 450);
-  radial.addColorStop(0, "rgba(239, 68, 68, 0.25)");
-  radial.addColorStop(1, "rgba(16, 16, 20, 0)");
-  ctx.fillStyle = radial;
-  ctx.fillRect(0, 0, width, height);
-
-  // Header Title
-  ctx.fillStyle = "#ef4444";
-  ctx.font = "bold 34px sans-serif";
-  ctx.fillText("POKEFORGE", 50, 60);
-
-  ctx.fillStyle = "#a1a1aa";
-  ctx.font = "600 16px sans-serif";
-  ctx.fillText("ALINEACIÓN Y ESTRATEGIA DE EQUIPO", 270, 58);
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(50, 85);
-  ctx.lineTo(width - 50, 85);
-  ctx.stroke();
-
-  // Load and draw sprites
-  const slots = team.slots;
-  const activeSlots = slots.filter((s) => s.pokemonId !== null);
-
-  if (activeSlots.length === 0) {
-    ctx.fillStyle = "#71717a";
-    ctx.font = "20px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Equipo Vacío - Ningún Pokémon Seleccionado", width / 2, height / 2);
-  } else {
-    const cols = 3;
-    const cardW = 340;
-    const cardH = 240;
-    const gapX = 30;
-    const gapY = 24;
-    const startX = (width - (cols * cardW + (cols - 1) * gapX)) / 2;
-    const startY = 115;
-
-    for (let i = 0; i < slots.length; i++) {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const x = startX + col * (cardW + gapX);
-      const y = startY + row * (cardH + gapY);
-      const slot = slots[i];
-
-      // Card Background
-      ctx.fillStyle = "rgba(24, 24, 32, 0.85)";
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(x, y, cardW, cardH, 14);
-      ctx.fill();
-      ctx.stroke();
-
-      if (slot && slot.pokemonId) {
-        const p = pokemonMap.get(slot.pokemonId);
-        if (p) {
-          const mainType = p.types[0] ?? "normal";
-          const glow = typeColor(mainType);
-
-          // Top Type Border Accent
-          ctx.fillStyle = glow;
-          ctx.beginPath();
-          ctx.roundRect(x, y, cardW, 4, [14, 14, 0, 0]);
-          ctx.fill();
-
-          // Dex & Name
-          ctx.fillStyle = "#71717a";
-          ctx.font = "bold 13px monospace";
-          ctx.textAlign = "left";
-          ctx.fillText(dexNumber(p.id), x + 16, y + 28);
-
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "bold 20px sans-serif";
-          ctx.fillText(capitalize(p.name), x + 16, y + 54);
-
-          // Type Badges text
-          ctx.font = "600 12px sans-serif";
-          ctx.fillStyle = glow;
-          ctx.fillText(p.types.map((t) => t.toUpperCase()).join(" / "), x + 16, y + 74);
-
-          // Moves List
-          const moves = (slot.moves ?? []).filter(Boolean);
-          ctx.fillStyle = "#a1a1aa";
-          ctx.font = "12px sans-serif";
-          let moveY = y + 106;
-          for (const m of moves.slice(0, 4)) {
-            ctx.fillText(`• ${m!.split("-").map(capitalize).join(" ")}`, x + 16, moveY);
-            moveY += 20;
-          }
-
-          // Sprite Image
-          const spriteUrl = p.sprites.officialArtwork ?? p.sprites.default ?? "";
-          if (spriteUrl) {
-            try {
-              const img = new Image();
-              img.crossOrigin = "anonymous";
-              img.src = spriteUrl;
-              await new Promise((res) => {
-                img.onload = res;
-                img.onerror = res;
-              });
-              ctx.drawImage(img, x + cardW - 135, y + 45, 120, 120);
-            } catch (err) {
-              // fallback if sprite image fails
-            }
-          }
-        }
-      } else {
-        // Empty slot text
-        ctx.fillStyle = "#52525b";
-        ctx.font = "600 16px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(`Slot ${i + 1} (Vacío)`, x + cardW / 2, y + cardH / 2);
-      }
-    }
+export async function downloadTeamCardCanvas(previewContainerEl: HTMLElement): Promise<void> {
+  const cardGraphicEl = previewContainerEl.querySelector<HTMLElement>(".team-card-graphic");
+  if (!cardGraphicEl) {
+    toast.error("No se encontró el diseño de la tarjeta.");
+    return;
   }
 
-  // Footer
-  ctx.fillStyle = "#52525b";
-  ctx.font = "600 13px sans-serif";
-  ctx.textAlign = "left";
-  ctx.fillText("pokeforges.netlify.app", 50, height - 25);
+  try {
+    toast.info("Generando imagen PNG de alta resolución...");
+    const canvas = await html2canvas(cardGraphicEl, {
+      backgroundColor: "#101014",
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+    });
 
-  ctx.textAlign = "right";
-  ctx.fillText(new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }), width - 50, height - 25);
-
-  // Trigger Download
-  const link = document.createElement("a");
-  link.download = "pokeforge-team.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-  toast.success("¡Tarjeta de equipo descargada como PNG!");
+    const link = document.createElement("a");
+    link.download = "pokeforge-team.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    toast.success("¡Tarjeta de equipo descargada como PNG!");
+  } catch (err) {
+    console.error("Error al exportar la tarjeta del equipo:", err);
+    toast.error("No se pudo generar la imagen del equipo.");
+  }
 }
