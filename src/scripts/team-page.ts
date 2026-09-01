@@ -7,6 +7,7 @@ import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
+import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
 import type { GenerationInfo, MoveData, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
@@ -640,9 +641,55 @@ movePickerOverlayEl.addEventListener("click", (e) => {
   if (e.target === movePickerOverlayEl) closeMovePicker();
 });
 
+const openTeamCardBtn = document.querySelector<HTMLButtonElement>("[data-open-team-card]");
+const teamCardOverlay = document.querySelector<HTMLElement>("[data-team-card-overlay]");
+const teamCardCloseBtn = document.querySelector<HTMLButtonElement>("[data-team-card-close]");
+const teamCardPreview = document.querySelector<HTMLElement>("[data-team-card-preview]");
+const downloadPngBtn = document.querySelector<HTMLButtonElement>("[data-download-card-png]");
+const copyShowdownBtn = document.querySelector<HTMLButtonElement>("[data-copy-showdown]");
+
+function openTeamCardModal(): void {
+  if (!teamCardOverlay || !teamCardPreview) return;
+  const pokemonMap = new Map(allPokemon.map((p) => [p.id, p]));
+  teamCardPreview.innerHTML = renderTeamCardHTML(team, pokemonMap);
+  refreshIcons();
+  teamCardOverlay.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeTeamCardModal(): void {
+  if (!teamCardOverlay) return;
+  teamCardOverlay.hidden = true;
+  document.body.style.overflow = "";
+}
+
+openTeamCardBtn?.addEventListener("click", openTeamCardModal);
+teamCardCloseBtn?.addEventListener("click", closeTeamCardModal);
+teamCardOverlay?.addEventListener("click", (e) => {
+  if (e.target === teamCardOverlay) closeTeamCardModal();
+});
+
+downloadPngBtn?.addEventListener("click", () => {
+  const pokemonMap = new Map(allPokemon.map((p) => [p.id, p]));
+  downloadTeamCardCanvas(team, pokemonMap);
+});
+
+copyShowdownBtn?.addEventListener("click", () => {
+  const pokemonMap = new Map(allPokemon.map((p) => [p.id, p]));
+  const text = generateShowdownText(team, pokemonMap);
+  if (!text) {
+    toast.info("Tu equipo está vacío.");
+    return;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    toast.success("¡Formato Showdown copiado al portapapeles!");
+  });
+});
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    if (!movePickerOverlayEl.hidden) closeMovePicker();
+    if (teamCardOverlay && !teamCardOverlay.hidden) closeTeamCardModal();
+    else if (!movePickerOverlayEl.hidden) closeMovePicker();
     else if (!overlayEl.hidden) closePicker();
   }
 });
