@@ -183,16 +183,26 @@ function computePickerFiltered(): Pokemon[] {
   });
 }
 
+function dexNumber(id: number): string {
+  return `#${String(id).padStart(4, "0")}`;
+}
+
 function renderPickerResults(): void {
   const results = computePickerFiltered();
+  const countEl = overlayEl.querySelector<HTMLElement>("[data-picker-count]");
+  if (countEl) {
+    countEl.textContent = `${results.length} Pokémon`;
+  }
+
   if (!results.length) {
-    pickerResultsEl.innerHTML = `<p class="pokedex-empty">No se encontraron Pokémon.</p>`;
+    pickerResultsEl.innerHTML = `<p class="pokedex-empty">No se encontraron Pokémon con esos filtros.</p>`;
     return;
   }
   pickerResultsEl.innerHTML = results
     .map(
       (p) => `
       <button class="picker-item" type="button" data-picker-pick data-pokemon-id="${p.id}">
+        <span class="picker-item__id">${dexNumber(p.id)}</span>
         <img src="${p.sprites.officialArtwork ?? p.sprites.default ?? ""}" alt="${p.name}" loading="lazy" />
         <span class="picker-item__name">${p.name}</span>
       </button>

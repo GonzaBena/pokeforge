@@ -22,25 +22,42 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
   </div>
 
   <div class="modal-overlay" data-picker-overlay hidden>
-    <div class="modal-panel">
+    <div class="modal-panel picker-modal-panel">
       <div class="modal-panel__header">
-        <h2>Elegir Pokémon</h2>
-        <button class="modal-panel__close" type="button" data-picker-close aria-label="Cerrar">
+        <div class="picker-panel__header-info">
+          <h2><i data-lucide="sparkles"></i> Elegir Pokémon</h2>
+          <span class="picker-panel__count" data-picker-count></span>
+        </div>
+        <button class="modal-panel__close" type="button" data-picker-close aria-label="Cerrar modal">
           <i data-lucide="x"></i>
         </button>
       </div>
       <div class="picker-panel__filters">
-        <input class="search-input" type="search" placeholder="Buscar por nombre o número..." data-picker-search />
-        <div class="filter-group" data-picker-type-filter aria-label="Filtrar por tipo"></div>
-        <div class="filter-group" data-picker-generation-filter aria-label="Filtrar por generación"></div>
-        <input
-          class="search-input"
-          type="text"
-          list="picker-move-options"
-          placeholder="Filtrar por movimiento que puede aprender..."
-          data-picker-move-filter
-        />
-        <datalist id="picker-move-options" data-picker-move-options></datalist>
+        <div class="picker-panel__inputs-row">
+          <div class="picker-input-wrap">
+            <i data-lucide="search" class="picker-input-icon"></i>
+            <input class="picker-input" type="search" placeholder="Buscar por nombre o #..." data-picker-search />
+          </div>
+          <div class="picker-input-wrap">
+            <i data-lucide="swords" class="picker-input-icon"></i>
+            <input
+              class="picker-input"
+              type="text"
+              list="picker-move-options"
+              placeholder="Filtrar por movimiento..."
+              data-picker-move-filter
+            />
+            <datalist id="picker-move-options" data-picker-move-options></datalist>
+          </div>
+        </div>
+        <div class="picker-panel__filter-section">
+          <span class="picker-panel__section-title">Tipos</span>
+          <div class="filter-group filter-group--compact" data-picker-type-filter aria-label="Filtrar por tipo"></div>
+        </div>
+        <div class="picker-panel__filter-section">
+          <span class="picker-panel__section-title">Generaciones</span>
+          <div class="filter-group filter-group--compact" data-picker-generation-filter aria-label="Filtrar por generación"></div>
+        </div>
       </div>
       <div class="picker-panel__results" data-picker-results></div>
     </div>
