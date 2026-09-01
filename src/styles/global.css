@@ -1755,9 +1755,16 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 .picker-panel__container {
   display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.picker-panel__filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .picker-panel__filters {
@@ -1834,17 +1841,21 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 .filter-group--compact {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
+  align-items: center;
 }
 
 .filter-group--compact .filter-chip {
-  padding: 3px 10px;
+  padding: 4px 12px;
   font-size: 11px;
   border-radius: var(--radius-pill);
-  height: 25px;
+  height: 26px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  white-space: nowrap;
   line-height: 1;
 }
 
