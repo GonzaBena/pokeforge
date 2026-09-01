@@ -152,9 +152,16 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
         <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index="${index}" aria-label="Quitar Pokémon">
           <i data-lucide="x"></i>
         </button>
-        <img class="team-slot__sprite" src="${sprite}" alt="${pokemon.name}" loading="lazy" />
-        <div class="team-slot__name">${pokemon.name}</div>
-        <div class="pokemon-card__types">${typesHtml}</div>
+        <div class="team-slot__card-content">
+          <div class="team-slot__sprite-col">
+            <img class="team-slot__sprite" src="${sprite}" alt="${pokemon.name}" loading="lazy" />
+          </div>
+          <div class="team-slot__info-col">
+            <span class="team-slot__id">${dexNumber(pokemon.id)}</span>
+            <div class="team-slot__name">${pokemon.name}</div>
+            <div class="pokemon-card__types">${typesHtml}</div>
+          </div>
+        </div>
       </div>
 
       <div class="team-slot-moves">

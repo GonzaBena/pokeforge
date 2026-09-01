@@ -9,6 +9,7 @@ interface Props {
 
 const { index, pokemon } = Astro.props;
 const sprite = pokemon ? pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "" : "";
+const dexNumber = pokemon ? `#${String(pokemon.id).padStart(4, "0")}` : "";
 ---
 
 <div class:list={["team-slot", { filled: !!pokemon }]} data-team-slot data-slot-index={index}>
@@ -17,10 +18,17 @@ const sprite = pokemon ? pokemon.sprites.officialArtwork ?? pokemon.sprites.defa
       <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index={index} aria-label="Quitar Pokémon">
         <i data-lucide="x"></i>
       </button>
-      <img class="team-slot__sprite" src={sprite} alt={pokemon.name} loading="lazy" />
-      <div class="team-slot__name">{pokemon.name}</div>
-      <div class="pokemon-card__types">
-        {pokemon.types.map((t) => <TypeBadge type={t} />)}
+      <div class="team-slot__card-content">
+        <div class="team-slot__sprite-col">
+          <img class="team-slot__sprite" src={sprite} alt={pokemon.name} loading="lazy" />
+        </div>
+        <div class="team-slot__info-col">
+          <span class="team-slot__id">{dexNumber}</span>
+          <div class="team-slot__name">{pokemon.name}</div>
+          <div class="pokemon-card__types">
+            {pokemon.types.map((t) => <TypeBadge type={t} />)}
+          </div>
+        </div>
       </div>
     </>
   ) : (
