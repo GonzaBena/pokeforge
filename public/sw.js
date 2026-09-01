@@ -1,12 +1,8 @@
-const CACHE_NAME = 'pokeforge-v2';
+const CACHE_NAME = 'pokeforge-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/pokedex',
-  '/pokedex/',
   '/pokedex/index.html',
-  '/equipo',
-  '/equipo/',
   '/equipo/index.html',
   '/manifest.webmanifest',
   '/manifest.json',
@@ -19,7 +15,7 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return Promise.allSettled(STATIC_ASSETS.map((asset) => cache.add(asset)));
     }).then(() => self.skipWaiting())
   );
 });
@@ -80,10 +76,10 @@ self.addEventListener('fetch', (event) => {
           const cached = await caches.match(event.request);
           if (cached) return cached;
           if (url.pathname.includes('/pokedex')) {
-            return (await caches.match('/pokedex/index.html')) || (await caches.match('/pokedex'));
+            return (await caches.match('/pokedex/index.html')) || (await caches.match('/'));
           }
           if (url.pathname.includes('/equipo')) {
-            return (await caches.match('/equipo/index.html')) || (await caches.match('/equipo'));
+            return (await caches.match('/equipo/index.html')) || (await caches.match('/'));
           }
           return (await caches.match('/index.html')) || (await caches.match('/'));
         })
