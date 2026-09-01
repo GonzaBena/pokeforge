@@ -245,6 +245,16 @@ function renderHeader(ctx: RenderContext): string {
     .map((n) => `<option value="${n.name}" ${overrides.nature === n.name ? "selected" : ""}>${capitalize(n.name)}</option>`)
     .join("");
 
+  const currentStats: PokemonStats = {
+    hp: overrides.stats.hp ?? detail.stats.hp,
+    attack: overrides.stats.attack ?? detail.stats.attack,
+    defense: overrides.stats.defense ?? detail.stats.defense,
+    specialAttack: overrides.stats.specialAttack ?? detail.stats.specialAttack,
+    specialDefense: overrides.stats.specialDefense ?? detail.stats.specialDefense,
+    speed: overrides.stats.speed ?? detail.stats.speed,
+  };
+  const primaryTypeColor = typeColor(pokemon.types[0] ?? "normal");
+
   return `
     <div class="detail-header">
       <div class="detail-header__sprite">
@@ -256,11 +266,20 @@ function renderHeader(ctx: RenderContext): string {
       </div>
       <div class="detail-header__info">
         <div class="detail-header__name-row">
-          <h3 class="detail-header__name">${pokemon.name}</h3>
-          <span class="detail-header__id">${dexNumber(pokemon.id)}</span>
+          <div class="detail-header__title-group">
+            <h3 class="detail-header__name">${pokemon.name}</h3>
+            <span class="detail-header__id">${dexNumber(pokemon.id)}</span>
+          </div>
+          <button class="btn btn--compact detail-chart-toggle-btn ${showHexagonChart ? "btn--primary" : ""}" type="button" data-toggle-chart-view title="Alternar entre lista de estadísticas y gráfico hexágono estilo Juez Pokémon">
+            <i data-lucide="${showHexagonChart ? "bar-chart-2" : "hexagon"}"></i>
+            <span data-chart-toggle-label>${showHexagonChart ? "Ver Barras" : "Gráfico Juez"}</span>
+          </button>
         </div>
         <div class="detail-header__types">${typeBadgesHtml(pokemon.types)}</div>
-        <div class="detail-stats">${statsHtml}</div>
+        <div class="detail-stats" data-stats-bars-view ${showHexagonChart ? "hidden" : ""}>${statsHtml}</div>
+        <div class="detail-hexagon-view" data-stats-hexagon-view ${showHexagonChart ? "" : "hidden"}>
+          ${renderHexagonChart(currentStats, primaryTypeColor)}
+        </div>
         <div class="detail-nature">
           <span class="detail-nature__label">Naturaleza</span>
           <select data-nature-select ${captured ? "" : "disabled"}>
@@ -274,6 +293,103 @@ function renderHeader(ctx: RenderContext): string {
           ${captured ? "Capturado" : "Capturar"}
         </button>
         ${captured ? "" : '<p class="detail-hint" data-capture-hint>Capturá este Pokémon para personalizar sus stats y naturaleza.</p>'}
+      </div>
+    </div>
+  `;
+}
+
+let showHexagonChart = false;
+
+function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string): string {
+  const width = 280;
+  const height = 230;
+  const cx = width / 2;
+  const cy = height / 2;
+  const radius = 70;
+  const MAX_STAT = 255;
+
+  const statList: { key: keyof PokemonStats; label: string }[] = [
+    { key: "hp", label: "HP" },
+    { key: "attack", label: "ATK" },
+    { key: "defense", label: "DEF" },
+    { key: "speed", label: "SPE" },
+    { key: "specialDefense", label: "SPD" },
+    { key: "specialAttack", label: "SPA" },
+  ];
+
+  const angles = statList.map((_, i) => -Math.PI / 2 + (i * Math.PI) / 3);
+
+  function getGridPoints(rRatio: number): string {
+    return angles
+      .map((angle) => {
+        const x = cx + radius * rRatio * Math.cos(angle);
+        const y = cy + radius * rRatio * Math.sin(angle);
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(" ");
+  }
+
+  const valuePoints = statList
+    .map((item, i) => {
+      const val = Math.min(stats[item.key] ?? 0, MAX_STAT);
+      const ratio = Math.max(val / MAX_STAT, 0.08);
+      const x = cx + radius * ratio * Math.cos(angles[i]);
+      const y = cy + radius * ratio * Math.sin(angles[i]);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  const axisLinesHtml = angles
+    .map((angle) => {
+      const x2 = cx + radius * Math.cos(angle);
+      const y2 = cy + radius * Math.sin(angle);
+      return `<line x1="${cx}" y1="${cy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--border-strong)" stroke-width="1" stroke-dasharray="3,3" />`;
+    })
+    .join("");
+
+  const labelsHtml = statList
+    .map((item, i) => {
+      const val = stats[item.key] ?? 0;
+      const labelRadius = radius + 22;
+      const lx = cx + labelRadius * Math.cos(angles[i]);
+      const ly = cy + labelRadius * Math.sin(angles[i]);
+      const anchor = Math.abs(lx - cx) < 10 ? "middle" : lx > cx ? "start" : "end";
+
+      return `
+        <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="central" class="hexagon-chart__label">
+          <tspan class="hexagon-chart__label-title">${item.label}</tspan>
+          <tspan class="hexagon-chart__label-val" dx="3">${val}</tspan>
+        </text>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="hexagon-chart-container">
+      <svg class="hexagon-chart-svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
+        <polygon points="${getGridPoints(1)}" fill="none" stroke="var(--border-strong)" stroke-width="1.5" />
+        <polygon points="${getGridPoints(0.75)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,2" />
+        <polygon points="${getGridPoints(0.5)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,2" />
+        <polygon points="${getGridPoints(0.25)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,2" />
+
+        ${axisLinesHtml}
+
+        <polygon points="${valuePoints}" fill="${primaryTypeColor}33" stroke="${primaryTypeColor}" stroke-width="2.5" class="hexagon-chart__polygon" />
+
+        ${statList
+          .map((item, i) => {
+            const val = Math.min(stats[item.key] ?? 0, MAX_STAT);
+            const ratio = Math.max(val / MAX_STAT, 0.08);
+            const vx = cx + radius * ratio * Math.cos(angles[i]);
+            const vy = cy + radius * ratio * Math.sin(angles[i]);
+            return `<circle cx="${vx.toFixed(1)}" cy="${vy.toFixed(1)}" r="4" fill="${primaryTypeColor}" stroke="#ffffff" stroke-width="1.5" />`;
+          })
+          .join("")}
+
+        ${labelsHtml}
+      </svg>
+      <div class="hexagon-chart__footer">
+        <span>Gráfico Juez de Stats</span>
       </div>
     </div>
   `;
@@ -402,6 +518,25 @@ function bindModalEvents(): void {
     }
 
     if (!bodyEl) return;
+
+    const toggleBtn = target.closest<HTMLButtonElement>("[data-toggle-chart-view]");
+    if (toggleBtn) {
+      showHexagonChart = !showHexagonChart;
+      const barsView = bodyEl.querySelector<HTMLElement>("[data-stats-bars-view]");
+      const hexView = bodyEl.querySelector<HTMLElement>("[data-stats-hexagon-view]");
+      const labelEl = toggleBtn.querySelector<HTMLElement>("[data-chart-toggle-label]");
+
+      if (barsView && hexView) {
+        barsView.hidden = showHexagonChart;
+        hexView.hidden = !showHexagonChart;
+      }
+      if (labelEl) {
+        labelEl.textContent = showHexagonChart ? "Ver Barras" : "Gráfico Juez";
+      }
+      toggleBtn.classList.toggle("btn--primary", showHexagonChart);
+      refreshIcons();
+      return;
+    }
 
     const captureBtn = target.closest<HTMLButtonElement>("[data-modal-capture-btn]");
     if (captureBtn && currentId !== null && lastContext) {

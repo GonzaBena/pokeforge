@@ -1784,8 +1784,82 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 .detail-header__name-row {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.detail-header__title-group {
+  display: flex;
   align-items: baseline;
   gap: 10px;
+}
+
+.detail-chart-toggle-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.detail-hexagon-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.detail-hexagon-view[hidden] {
+  display: none;
+}
+
+.hexagon-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  width: 100%;
+}
+
+.hexagon-chart-svg {
+  overflow: visible;
+  max-width: 100%;
+  height: auto;
+}
+
+.hexagon-chart__polygon {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.35));
+}
+
+.hexagon-chart__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.hexagon-chart__label-title {
+  font-weight: 700;
+  fill: var(--text-muted);
+}
+
+.hexagon-chart__label-val {
+  font-size: 11px;
+  fill: var(--accent);
+  font-weight: 800;
+}
+
+.hexagon-chart__footer {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .detail-header__name {
