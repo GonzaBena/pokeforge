@@ -147,7 +147,9 @@ function renderBarHTML(entry: TeamDefenseEntry): string {
 }
 
 function renderStrengthsPanel(): void {
-  const activePokemon = team.slots.map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) ?? null : null)).filter((p): p is Pokemon => p !== null);
+  const activePokemon = team.slots
+    .map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) ?? null : null))
+    .filter((p): p is Pokemon => p !== null);
 
   if (!activePokemon.length || !typeChart) {
     panelEmptyEl.hidden = false;
@@ -158,11 +160,16 @@ function renderStrengthsPanel(): void {
   panelEmptyEl.hidden = true;
   panelContentEl.hidden = false;
 
-  const defense = computeTeamDefense(activePokemon, typeChart);
+  const defense = computeTeamDefense(typeChart, activePokemon);
   const { weaknesses, resistances } = splitWeaknessesAndResistances(defense);
 
-  weaknessesListEl.innerHTML = weaknesses.map(renderBarHTML).join("");
-  resistancesListEl.innerHTML = resistances.map(renderBarHTML).join("");
+  weaknessesListEl.innerHTML = weaknesses.length
+    ? weaknesses.map(renderBarHTML).join("")
+    : `<p class="side-panel__empty">Sin debilidades destacadas.</p>`;
+
+  resistancesListEl.innerHTML = resistances.length
+    ? resistances.map(renderBarHTML).join("")
+    : `<p class="side-panel__empty">Sin resistencias destacadas.</p>`;
 
   const fills = panelContentEl.querySelectorAll<HTMLElement>(".type-bar__fill");
   barsAnimateIn(fills);
