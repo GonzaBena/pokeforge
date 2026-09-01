@@ -90,32 +90,39 @@ function extractStats(raw: RawPokemonDetail): PokemonStats {
 // moves (highest version-group id) so the movepool reflects current games
 // instead of mixing move-learn data across every game it has ever appeared in.
 function extractMoveDetails(raw: RawPokemonDetail): MoveDetail[] {
-  let latestId = -1;
+  const moveMap = new Map<string, MoveDetail>();
+
   for (const m of raw.moves) {
+    const moveName = m.move.name;
+
     for (const vgd of m.version_group_details) {
-      const id = idFromUrl(vgd.version_group.url);
-      if (id > latestId) latestId = id;
+      let rawMethod = vgd.move_learn_method.name;
+      let method = rawMethod === "train" ? "tutor" : rawMethod;
+
+      const key = `${moveName}:${method}`;
+      const existing = moveMap.get(key);
+
+      const level = vgd.level_learned_at;
+
+      if (!existing) {
+        moveMap.set(key, {
+          name: moveName,
+          method,
+          level,
+        });
+      } else if (method === "level-up" && existing.level === 0 && level > 0) {
+        existing.level = level;
+      }
     }
   }
 
-  const details: MoveDetail[] = [];
-  for (const m of raw.moves) {
-    const match = m.version_group_details.find(
-      (vgd) => idFromUrl(vgd.version_group.url) === latestId,
-    );
-    if (match) {
-      details.push({
-        name: m.move.name,
-        method: match.move_learn_method.name,
-        level: match.level_learned_at,
-      });
-    }
-  }
+  const details = Array.from(moveMap.values());
 
-  const methodOrder = ["level-up", "egg", "tutor", "machine"];
+  const methodOrder = ["level-up", "machine", "tutor", "egg"];
   return details.sort((a, b) => {
-    const orderDiff =
-      methodOrder.indexOf(a.method) - methodOrder.indexOf(b.method);
+    const aOrder = methodOrder.indexOf(a.method) !== -1 ? methodOrder.indexOf(a.method) : 99;
+    const bOrder = methodOrder.indexOf(b.method) !== -1 ? methodOrder.indexOf(b.method) : 99;
+    const orderDiff = aOrder - bOrder;
     if (orderDiff !== 0) return orderDiff;
     if (a.level !== b.level) return a.level - b.level;
     return a.name.localeCompare(b.name);
