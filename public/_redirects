@@ -1,0 +1,5 @@
+# Netlify static routing configuration for PokeForge
+/pokedex    /pokedex/index.html    200
+/pokedex/   /pokedex/index.html    200
+/equipo     /equipo/index.html     200
+/equipo/    /equipo/index.html     200

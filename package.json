@@ -15,6 +15,7 @@
     "fetch:pokedex:force": "tsx scripts/fetch-pokedex.ts --force"
   },
   "dependencies": {
+    "@astrojs/netlify": "^8.2.5",
     "@tanstack/table-core": "^8.21.0",
     "animejs": "^3.2.2",
     "astro": "^7.2.10",

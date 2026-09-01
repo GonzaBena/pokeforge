@@ -1,20 +1,19 @@
-const CACHE_NAME = 'pokeforge-v1';
+const CACHE_NAME = 'pokeforge-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/pokedex',
+  '/pokedex/',
   '/pokedex/index.html',
   '/equipo',
+  '/equipo/',
   '/equipo/index.html',
   '/manifest.webmanifest',
   '/manifest.json',
   '/favicon.png',
   '/icon-192.png',
   '/icon-512.png',
-  '/apple-touch-icon.png',
-  '/Medal-Black.png',
-  '/Medal-White.png',
-  '/Text.png'
+  '/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -44,7 +43,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Skip cross-origin requests unless image/audio
+  // Skip cross-origin requests unless image/audio/pokeapi
   if (url.origin !== location.origin && !url.hostname.includes('pokeapi.co') && !url.hostname.includes('raw.githubusercontent.com')) {
     return;
   }
@@ -65,11 +64,37 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Navigation requests (HTML pages)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            return networkResponse;
+          }
+          return caches.match(event.request).then((cached) => cached || caches.match('/index.html') || networkResponse);
+        })
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          if (url.pathname.includes('/pokedex')) {
+            return (await caches.match('/pokedex/index.html')) || (await caches.match('/pokedex'));
+          }
+          if (url.pathname.includes('/equipo')) {
+            return (await caches.match('/equipo/index.html')) || (await caches.match('/equipo'));
+          }
+          return (await caches.match('/index.html')) || (await caches.match('/'));
+        })
+    );
+    return;
+  }
+
   // Cache First for static resources (CSS, JS, Images, Sounds)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Background update
         fetch(event.request)
           .then((networkResponse) => {
             if (networkResponse && networkResponse.status === 200) {
@@ -80,22 +105,16 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
 
-      return fetch(event.request)
-        .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-            return networkResponse;
-          }
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+      return fetch(event.request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
-        })
-        .catch(() => {
-          if (event.request.mode === 'navigate') {
-            return caches.match('/pokedex') || caches.match('/');
-          }
+        }
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
         });
+        return networkResponse;
+      });
     })
   );
 });
