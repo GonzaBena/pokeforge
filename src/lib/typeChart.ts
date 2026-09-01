@@ -52,7 +52,11 @@ export function computeTeamDefense(chart: TypeChart, team: TeamMember[]): TeamDe
 export function splitWeaknessesAndResistances(entries: TeamDefenseEntry[]) {
   const weaknesses = entries.filter((e) => e.averageMultiplier > 1.01).sort((a, b) => b.averageMultiplier - a.averageMultiplier);
   const resistances = entries
-    .filter((e) => e.averageMultiplier < 0.99)
+    .filter((e) => e.averageMultiplier < 0.99 && e.averageMultiplier > 0.001)
     .sort((a, b) => a.averageMultiplier - b.averageMultiplier);
-  return { weaknesses, resistances };
+  const immunities = entries
+    .filter((e) => e.averageMultiplier <= 0.001)
+    .sort((a, b) => a.type.localeCompare(b.type));
+
+  return { weaknesses, resistances, immunities };
 }

@@ -13,6 +13,7 @@ const panelEmptyEl = document.querySelector<HTMLElement>("[data-panel-empty]")!;
 const panelContentEl = document.querySelector<HTMLElement>("[data-panel-content]")!;
 const weaknessesListEl = document.querySelector<HTMLElement>("[data-weaknesses-list]")!;
 const resistancesListEl = document.querySelector<HTMLElement>("[data-resistances-list]")!;
+const immunitiesListEl = document.querySelector<HTMLElement>("[data-immunities-list]");
 
 const overlayEl = document.querySelector<HTMLElement>("[data-picker-overlay]")!;
 const pickerCloseBtn = document.querySelector<HTMLButtonElement>("[data-picker-close]")!;
@@ -135,9 +136,13 @@ function changeTeamSize(newSize: number): void {
 
 function renderBarHTML(entry: TeamDefenseEntry): string {
   const isWeakness = entry.averageMultiplier > 1;
-  const pct = isWeakness
-    ? Math.min(100, Math.max(15, (entry.averageMultiplier / 4) * 100))
-    : Math.min(100, Math.max(15, (1 - entry.averageMultiplier) * 100));
+  const isImmunity = entry.averageMultiplier <= 0.001;
+
+  const pct = isImmunity
+    ? 100
+    : isWeakness
+      ? Math.min(100, Math.max(15, (entry.averageMultiplier / 4) * 100))
+      : Math.min(100, Math.max(15, (1 - entry.averageMultiplier) * 100));
 
   return `
     <div class="type-bar">
@@ -165,7 +170,7 @@ function renderStrengthsPanel(): void {
   panelContentEl.hidden = false;
 
   const defense = computeTeamDefense(typeChart, activePokemon);
-  const { weaknesses, resistances } = splitWeaknessesAndResistances(defense);
+  const { weaknesses, resistances, immunities } = splitWeaknessesAndResistances(defense);
 
   weaknessesListEl.innerHTML = weaknesses.length
     ? weaknesses.map(renderBarHTML).join("")
@@ -174,6 +179,12 @@ function renderStrengthsPanel(): void {
   resistancesListEl.innerHTML = resistances.length
     ? resistances.map(renderBarHTML).join("")
     : `<p class="side-panel__empty">Sin resistencias destacadas.</p>`;
+
+  if (immunitiesListEl) {
+    immunitiesListEl.innerHTML = immunities.length
+      ? immunities.map(renderBarHTML).join("")
+      : `<p class="side-panel__empty">Sin inmunidades.</p>`;
+  }
 
   const fills = panelContentEl.querySelectorAll<HTMLElement>(".type-bar__fill");
   barsAnimateIn(fills);
