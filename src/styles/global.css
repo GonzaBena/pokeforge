@@ -2140,67 +2140,183 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 /* --------------------------------------------------------------- home */
 
+/* --------------------------------------------------------------- home */
+
+.hero-container {
+  position: relative;
+  overflow: hidden;
+  padding: 40px 0 80px;
+}
+
+.hero-ambient-glow {
+  position: absolute;
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, rgba(16, 16, 20, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .hero {
-  max-width: 1240px;
+  position: relative;
+  z-index: 1;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 100px 24px;
+  padding: 40px 24px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 24px;
 }
 
 .hero__title {
-  font-size: 44px;
+  font-size: clamp(32px, 5vw, 54px);
   font-weight: 800;
+  line-height: 1.15;
   letter-spacing: -0.02em;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
+}
+
+.hero__title-accent {
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #eab308 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero__subtitle {
   color: var(--text-muted);
-  font-size: 17px;
-  max-width: 560px;
-  margin: 0 auto 32px;
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 680px;
+  margin: 0 auto 40px;
 }
 
 .hero__actions {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 680px;
+  margin-bottom: 50px;
 }
 
 .hero__card {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 28px 32px;
+  gap: 16px;
+  padding: 20px 24px;
   border-radius: var(--radius-lg);
   background: var(--bg-card);
   border: 1px solid var(--border);
   text-decoration: none;
   color: var(--text);
-  min-width: 200px;
-  transition:
-    transform 0.15s,
-    border-color 0.15s;
+  text-align: left;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .hero__card:hover {
   transform: translateY(-4px);
   border-color: var(--accent);
+  box-shadow: 0 12px 32px rgba(239, 68, 68, 0.15);
 }
 
-.hero__card svg {
+.hero__card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--accent-soft);
   color: var(--accent);
-  width: 28px;
-  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.hero__card strong {
+.hero__card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.hero__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.hero__card-body strong {
   font-size: 16px;
+  font-weight: 700;
 }
 
-.hero__card span {
-  color: var(--text-muted);
+.hero__card-body span {
   font-size: 13px;
+  color: var(--text-muted);
+}
+
+.hero__card-arrow {
+  color: var(--text-faint);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.hero__card:hover .hero__card-arrow {
+  transform: translateX(4px);
+  color: var(--accent);
+}
+
+.hero__features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 900px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  text-align: left;
+}
+
+.hero__feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.hero__feature svg {
+  color: var(--accent);
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.hero__feature h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.hero__feature p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
 }

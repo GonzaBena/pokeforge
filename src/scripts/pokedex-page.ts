@@ -48,8 +48,11 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
     .map((t) => `<span class="type-badge" style="--badge-bg:${typeColor(t)}">${t}</span>`)
     .join("");
 
+  const primaryType = p.types[0] ?? "normal";
+  const glowColor = typeColor(primaryType);
+
   return `
-    <article class="pokemon-card${captured ? " captured" : ""}" data-pokemon-id="${p.id}">
+    <article class="pokemon-card${captured ? " captured" : ""}" data-pokemon-id="${p.id}" style="--type-glow:${glowColor};">
       <div class="pokemon-card__id">${dexNumber(p.id)}</div>
       <div class="pokemon-card__sprite-wrap">
         <img class="pokemon-card__sprite" src="${sprite}" alt="${p.name}" loading="lazy" decoding="async" width="120" height="120" />

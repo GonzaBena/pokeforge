@@ -1,6 +1,7 @@
 ---
 import TypeBadge from "./TypeBadge.astro";
 import type { Pokemon } from "../lib/types";
+import { typeColor } from "../lib/typeColors";
 
 interface Props {
   pokemon: Pokemon;
@@ -10,9 +11,16 @@ interface Props {
 const { pokemon, captured } = Astro.props;
 const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
 const dexNumber = `#${String(pokemon.id).padStart(4, "0")}`;
+const primaryType = pokemon.types[0] ?? "normal";
+const glowColor = typeColor(primaryType);
 ---
 
-<article class:list={["pokemon-card", { captured }]} data-pokemon-id={pokemon.id} data-batch>
+<article
+  class:list={["pokemon-card", { captured }]}
+  data-pokemon-id={pokemon.id}
+  style={`--type-glow:${glowColor};`}
+  data-batch
+>
   <div class="pokemon-card__id">{dexNumber}</div>
   <div class="pokemon-card__sprite-wrap">
     <img class="pokemon-card__sprite" src={sprite} alt={pokemon.name} loading="lazy" decoding="async" width="120" height="120" />
