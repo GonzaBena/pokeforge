@@ -54,3 +54,10 @@ export function getGenerations(): Promise<GenerationInfo[]> {
   generationsPromise ??= fetchJson<GenerationInfo[]>(`${DATA_ROOT}/generations/generations.json`);
   return generationsPromise;
 }
+
+let moveDetailsMapPromise: Promise<Record<string, import("./types").MoveData>> | null = null;
+
+export function getMoveDetailsMap(): Promise<Record<string, import("./types").MoveData>> {
+  moveDetailsMapPromise ??= fetchJson<Record<string, import("./types").MoveData>>(`${DATA_ROOT}/moves/details.json`);
+  return moveDetailsMapPromise;
+}

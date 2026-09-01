@@ -1,6 +1,7 @@
 import { buildGenerations } from "./lib/buildGenerations.ts";
 import { buildTypeChart } from "./lib/buildTypeChart.ts";
 import { buildMovesIndex } from "./lib/buildMovesIndex.ts";
+import { buildMoveDetails } from "./lib/buildMoveDetails.ts";
 import { buildNatures } from "./lib/buildNatures.ts";
 import { buildPokedex } from "./lib/buildPokedex.ts";
 import { buildSpeciesInfo } from "./lib/buildSpeciesInfo.ts";
@@ -14,6 +15,7 @@ async function main() {
   const { generations, speciesToGeneration, versionToGroup, groupToGeneration } = await buildGenerations(force);
   await buildTypeChart(force);
   await buildMovesIndex(force);
+  await buildMoveDetails(force);
   await buildNatures(force);
   const pokedexResult = await buildPokedex(speciesToGeneration, force);
 

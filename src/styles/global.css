@@ -648,47 +648,68 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   height: 14px;
 }
 
-.move-slot-btn.filled {
+.move-slot-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-strong);
-  background: var(--bg-elevated);
-  color: var(--text);
-  padding: 0 4px 0 8px;
+  background: var(--bg-card);
+  transition: all 0.15s ease;
 }
 
-.move-slot-btn__name {
+.move-slot-card:hover {
+  border-color: var(--accent);
+  background: var(--bg-card-hover);
+}
+
+.move-slot-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.move-slot-card__name-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: transparent;
+  background: none;
   border: none;
-  color: inherit;
-  font-size: 12px;
+  padding: 0;
+  color: var(--text);
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  flex: 1;
   text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
 }
 
-.move-slot-btn__name svg {
-  width: 13px;
-  height: 13px;
+.move-slot-card__name-btn:hover {
+  color: var(--accent);
+}
+
+.move-slot-card__name-btn svg {
+  width: 14px;
+  height: 14px;
   color: var(--accent);
   flex-shrink: 0;
 }
 
-.move-slot-btn__name:hover {
-  color: var(--accent);
+.move-slot-card__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.move-slot-btn__clear {
+.move-slot-card__clear {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: transparent;
   border: none;
@@ -698,14 +719,68 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   flex-shrink: 0;
 }
 
-.move-slot-btn__clear:hover {
-  background: var(--bg-card-hover);
+.move-slot-card__clear:hover {
+  background: var(--bg-elevated);
   color: var(--text);
 }
 
-.move-slot-btn__clear svg {
-  width: 13px;
-  height: 13px;
+.move-slot-card__clear svg {
+  width: 12px;
+  height: 12px;
+}
+
+.move-slot-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+
+.move-category-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.move-category-badge--physical {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.move-category-badge--special {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+}
+
+.move-category-badge--status {
+  background: rgba(156, 163, 175, 0.15);
+  border: 1px solid rgba(156, 163, 175, 0.4);
+  color: #9ca3af;
+}
+
+.move-stat-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.move-stat-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
 /* --- Move Picker Modal & Table --- */

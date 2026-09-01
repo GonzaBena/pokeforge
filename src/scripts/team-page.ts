@@ -1,4 +1,4 @@
-import { getAllPokemon, getGenerations, getMoveIndex, getTypeChart } from "../lib/pokedexData";
+import { getAllPokemon, getGenerations, getMoveDetailsMap, getMoveIndex, getTypeChart } from "../lib/pokedexData";
 import { getPokemonDetail } from "../lib/pokemonDetail";
 import { getTeam, setTeam, setTeamSlot, setTeamSlotMove } from "../lib/storage";
 import { computeTeamDefense, splitWeaknessesAndResistances, type TeamDefenseEntry } from "../lib/typeChart";
@@ -6,7 +6,7 @@ import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
-import type { GenerationInfo, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
+import type { GenerationInfo, MoveData, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
 const slotsEl = document.querySelector<HTMLElement>("[data-team-slots]")!;
@@ -38,6 +38,7 @@ let pokemonById = new Map<number, Pokemon>();
 let typeChart: TypeChart | null = null;
 let generations: GenerationInfo[] = [];
 let moveIndex: string[] = [];
+let moveDetailsMap: Record<string, MoveData> = {};
 
 let activeSlotIndex: number | null = null;
 let activeMoveSlotIndex: number | null = null;
@@ -71,6 +72,13 @@ function formatLabel(s: string): string {
   return s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+function categoryLabel(cat: string): string {
+  if (cat === "physical") return "Físico";
+  if (cat === "special") return "Especial";
+  if (cat === "status") return "Estado";
+  return cat;
+}
+
 // Mirrors src/components/TeamSlot.astro — keep both in sync when the markup changes.
 function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
   if (!pokemon) {
@@ -101,14 +109,34 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
           </button>
         `;
       }
+
+      const meta = moveDetailsMap[moveName];
+      const typeBadgeHtml = meta
+        ? `<span class="type-badge type-badge--sm" style="--badge-bg:${typeColor(meta.type)}">${meta.type}</span>`
+        : "";
+      const categoryBadgeHtml = meta
+        ? `<span class="move-category-badge move-category-badge--${meta.category}">${categoryLabel(meta.category)}</span>`
+        : "";
+      const powerText = meta?.power !== null && meta?.power !== undefined ? meta.power : "-";
+      const ppText = meta?.pp !== null && meta?.pp !== undefined ? meta.pp : "-";
+
       return `
-        <div class="move-slot-btn filled">
-          <button class="move-slot-btn__name" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
-            <i data-lucide="swords"></i> <span>${formatLabel(moveName)}</span>
-          </button>
-          <button class="move-slot-btn__clear" type="button" data-clear-move data-slot-index="${index}" data-move-index="${mIdx}" aria-label="Quitar movimiento">
-            <i data-lucide="x"></i>
-          </button>
+        <div class="move-slot-card filled">
+          <div class="move-slot-card__top">
+            <button class="move-slot-card__name-btn" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
+              <i data-lucide="swords"></i>
+              <span class="move-slot-card__title">${formatLabel(moveName)}</span>
+            </button>
+            <button class="move-slot-card__clear" type="button" data-clear-move data-slot-index="${index}" data-move-index="${mIdx}" aria-label="Quitar movimiento">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          <div class="move-slot-card__meta">
+            ${typeBadgeHtml}
+            ${categoryBadgeHtml}
+            <span class="move-stat-pill" title="Potencia"><span class="move-stat-label">POT</span> ${powerText}</span>
+            <span class="move-stat-pill" title="Puntos de Poder"><span class="move-stat-label">PP</span> ${ppText}</span>
+          </div>
         </div>
       `;
     })
@@ -411,13 +439,23 @@ function renderMovePickerTable(): void {
 
   const rowsHtml = filtered
     .map((r) => {
+      const meta = moveDetailsMap[r.name];
+      const typeBadgeHtml = meta ? `<span class="type-badge type-badge--sm" style="--badge-bg:${typeColor(meta.type)}">${meta.type}</span>` : "-";
+      const categoryBadgeHtml = meta ? `<span class="move-category-badge move-category-badge--${meta.category}">${categoryLabel(meta.category)}</span>` : "-";
+      const powerText = meta?.power !== null && meta?.power !== undefined ? meta.power : "-";
+      const ppText = meta?.pp !== null && meta?.pp !== undefined ? meta.pp : "-";
       const levelText = r.method === "level-up" ? `Nv. ${r.level}` : "-";
       const methodBadgeClass = `move-method-badge move-method-badge--${r.method}`;
+
       return `
         <tr>
           <td class="move-table__cell-name">
             <span class="move-table__name">${formatLabel(r.name)}</span>
           </td>
+          <td class="move-table__cell-type">${typeBadgeHtml}</td>
+          <td class="move-table__cell-category">${categoryBadgeHtml}</td>
+          <td class="move-table__cell-stat">${powerText}</td>
+          <td class="move-table__cell-stat">${ppText}</td>
           <td class="move-table__cell-method">
             <span class="${methodBadgeClass}">${r.methodLabel}</span>
           </td>
@@ -438,6 +476,10 @@ function renderMovePickerTable(): void {
         <thead>
           <tr>
             <th>Movimiento</th>
+            <th>Tipo</th>
+            <th>Cat.</th>
+            <th>POT</th>
+            <th>PP</th>
             <th>Método</th>
             <th>Nivel</th>
             <th>Acción</th>
@@ -596,11 +638,12 @@ async function init(): Promise<void> {
   team = getTeam();
   renderSizeSelector();
 
-  const [full, chart, gens, moves] = await Promise.all([
+  const [full, chart, gens, moves, moveDetails] = await Promise.all([
     getAllPokemon(),
     getTypeChart(),
     getGenerations(),
     getMoveIndex(),
+    getMoveDetailsMap(),
   ]);
 
   allPokemon = full;
@@ -608,6 +651,7 @@ async function init(): Promise<void> {
   typeChart = chart;
   generations = gens;
   moveIndex = moves;
+  moveDetailsMap = moveDetails;
 
   populatePickerFilters();
   renderAllSlots();

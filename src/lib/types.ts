@@ -61,6 +61,17 @@ export interface MovesIndex {
   moves: string[];
 }
 
+export interface MoveData {
+  name: string;
+  type: string;
+  category: "physical" | "special" | "status";
+  power: number | null;
+  pp: number | null;
+  accuracy: number | null;
+}
+
+export type MovesDetailsMap = Record<string, MoveData>;
+
 export interface TeamSlotState {
   pokemonId: number | null;
   moves?: (string | null)[];
