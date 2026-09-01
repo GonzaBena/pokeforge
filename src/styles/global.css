@@ -149,6 +149,13 @@ svg.lucide {
   display: none !important;
 }
 
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+  .nav__pwa-wrapper,
+  .nav__pwa-row {
+    display: none !important;
+  }
+}
+
 .nav__pwa-btn {
   display: inline-flex;
   align-items: center;

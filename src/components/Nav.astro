@@ -59,13 +59,32 @@ const path = Astro.url.pathname;
 
   let deferredPrompt: any = null;
 
+  function isAppInstalled(): boolean {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone === true;
+    const isInstalledStorage = localStorage.getItem("pokeforge_installed") === "true";
+    return isStandalone || isInstalledStorage;
+  }
+
   function initPwaInstall() {
+    const pwaRow = document.querySelector<HTMLElement>("[data-pwa-row]");
     const pwaBtn = document.querySelector<HTMLButtonElement>("[data-pwa-install]");
-    if (!pwaBtn) return;
+    if (!pwaRow || !pwaBtn) return;
+
+    if (isAppInstalled()) {
+      pwaRow.hidden = true;
+      return;
+    }
 
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
+      if (!isAppInstalled()) pwaRow.hidden = false;
+    });
+
+    window.addEventListener("appinstalled", () => {
+      localStorage.setItem("pokeforge_installed", "true");
+      pwaRow.hidden = true;
+      toast.success("¡PokeForge se ha instalado correctamente!");
     });
 
     pwaBtn.addEventListener("click", async () => {
@@ -73,6 +92,8 @@ const path = Astro.url.pathname;
         deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
         if (choice.outcome === "accepted") {
+          localStorage.setItem("pokeforge_installed", "true");
+          pwaRow.hidden = true;
           toast.success("¡PokeForge se ha instalado correctamente!");
         }
         deferredPrompt = null;
