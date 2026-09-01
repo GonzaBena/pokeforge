@@ -786,9 +786,9 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 /* --- Move Picker Modal & Table --- */
 
 .move-picker-modal-panel {
-  height: min(85vh, 700px);
-  width: min(680px, 100%);
-  max-width: 680px;
+  height: min(88vh, 780px);
+  width: min(940px, 95vw);
+  max-width: 940px;
 }
 
 .move-picker__results {
@@ -813,7 +813,7 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 }
 
 .move-table th {
-  padding: 10px 16px;
+  padding: 10px 14px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -824,13 +824,15 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   position: sticky;
   top: 0;
   z-index: 2;
+  white-space: nowrap;
 }
 
 .move-table td {
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border);
   color: var(--text);
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .move-table tbody tr:hover {

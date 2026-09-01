@@ -31,6 +31,7 @@ const movePickerSearchEl = document.querySelector<HTMLInputElement>("[data-move-
 const movePickerResultsEl = document.querySelector<HTMLElement>("[data-move-picker-results]")!;
 const movePickerTitleEl = document.querySelector<HTMLElement>("[data-move-picker-title]")!;
 const moveMethodFilterEl = document.querySelector<HTMLElement>("[data-move-method-filter]");
+const moveCategoryFilterEl = document.querySelector<HTMLElement>("[data-move-category-filter]");
 
 let team: TeamState = { size: 5, slots: [] };
 let allPokemon: Pokemon[] = [];
@@ -44,6 +45,7 @@ let activeSlotIndex: number | null = null;
 let activeMoveSlotIndex: number | null = null;
 let activeMoveIndex: number | null = null;
 let activeMethodFilter: string = "all";
+let activeCategoryFilter: string = "all";
 
 interface MovePickerRow {
   name: string;
@@ -375,6 +377,7 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
   activeMoveSlotIndex = slotIndex;
   activeMoveIndex = moveIndex;
   activeMethodFilter = "all";
+  activeCategoryFilter = "all";
 
   if (movePickerTitleEl) {
     movePickerTitleEl.textContent = `Ataque ${moveIndex + 1} - ${capitalize(pokemon.name)}`;
@@ -384,6 +387,9 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
 
   const methodChips = moveMethodFilterEl?.querySelectorAll<HTMLButtonElement>("[data-method]");
   methodChips?.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.method === "all")));
+
+  const categoryChips = moveCategoryFilterEl?.querySelectorAll<HTMLButtonElement>("[data-category]");
+  categoryChips?.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.category === "all")));
 
   movePickerResultsEl.innerHTML = `<div class="pokedex-loading"><i data-lucide="loader-2" class="spin"></i> Cargando movimientos de ${capitalize(pokemon.name)}...</div>`;
   refreshIcons();
@@ -417,13 +423,25 @@ function renderMovePickerTable(): void {
   const search = movePickerSearchEl.value.trim().toLowerCase();
 
   const filtered = currentMoveRows.filter((r) => {
+    // 1. Method filter
     if (activeMethodFilter !== "all") {
       if (activeMethodFilter === "tutor" && r.method !== "tutor" && r.method !== "train") return false;
-      if (activeMethodFilter !== "tutor" && r.method !== activeMethodFilter) return false;
+      if (activeMethodFilter === "machine" && r.method !== "machine" && r.method !== "TM" && r.method !== "HM") return false;
+      if (activeMethodFilter !== "tutor" && activeMethodFilter !== "machine" && r.method !== activeMethodFilter) return false;
     }
+
+    const meta = moveDetailsMap[r.name];
+
+    // 2. Category filter
+    if (activeCategoryFilter !== "all") {
+      if (!meta || meta.category !== activeCategoryFilter) return false;
+    }
+
+    // 3. Search query filter
     if (search && !r.name.toLowerCase().includes(search) && !formatLabel(r.name).toLowerCase().includes(search)) {
       return false;
     }
+
     return true;
   });
 
@@ -444,6 +462,7 @@ function renderMovePickerTable(): void {
       const categoryBadgeHtml = meta ? `<span class="move-category-badge move-category-badge--${meta.category}">${categoryLabel(meta.category)}</span>` : "-";
       const powerText = meta?.power !== null && meta?.power !== undefined ? meta.power : "-";
       const ppText = meta?.pp !== null && meta?.pp !== undefined ? meta.pp : "-";
+      const accuracyText = meta?.accuracy !== null && meta?.accuracy !== undefined ? `${meta.accuracy}%` : "-";
       const levelText = r.method === "level-up" ? `Nv. ${r.level}` : "-";
       const methodBadgeClass = `move-method-badge move-method-badge--${r.method}`;
 
@@ -456,6 +475,7 @@ function renderMovePickerTable(): void {
           <td class="move-table__cell-category">${categoryBadgeHtml}</td>
           <td class="move-table__cell-stat">${powerText}</td>
           <td class="move-table__cell-stat">${ppText}</td>
+          <td class="move-table__cell-stat">${accuracyText}</td>
           <td class="move-table__cell-method">
             <span class="${methodBadgeClass}">${r.methodLabel}</span>
           </td>
@@ -477,12 +497,13 @@ function renderMovePickerTable(): void {
           <tr>
             <th>Movimiento</th>
             <th>Tipo</th>
-            <th>Cat.</th>
+            <th>Categoría</th>
             <th>POT</th>
             <th>PP</th>
+            <th>Prec.</th>
             <th>Método</th>
             <th>Nivel</th>
-            <th>Acción</th>
+            <th style="text-align: right;">Acción</th>
           </tr>
         </thead>
         <tbody>
@@ -573,6 +594,16 @@ moveMethodFilterEl?.addEventListener("click", (e) => {
   if (!btn) return;
   activeMethodFilter = btn.dataset.method!;
   moveMethodFilterEl.querySelectorAll<HTMLButtonElement>("[data-method]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b === btn));
+  });
+  renderMovePickerTable();
+});
+
+moveCategoryFilterEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-category]");
+  if (!btn) return;
+  activeCategoryFilter = btn.dataset.category!;
+  moveCategoryFilterEl.querySelectorAll<HTMLButtonElement>("[data-category]").forEach((b) => {
     b.setAttribute("aria-pressed", String(b === btn));
   });
   renderMovePickerTable();
