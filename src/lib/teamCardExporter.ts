@@ -1,4 +1,4 @@
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import type { Pokemon, TeamState } from "./types";
 import { typeColor } from "./typeColors";
 import { toast } from "./toast";
@@ -94,7 +94,7 @@ export function renderTeamCardHTML(team: TeamState, pokemonMap: Map<number, Poke
     <div class="team-card-graphic">
       <div class="team-card-graphic__header">
         <div class="team-card-graphic__brand">
-          <img src="/favicon.png" alt="PokeForge Logo" width="28" height="28" />
+          <img src="/favicon.png" alt="PokeForge Logo" width="32" height="32" />
           <span class="team-card-graphic__title">POKEFORGE</span>
         </div>
         <span class="team-card-graphic__subtitle">Alineación Oficial de Equipo</span>
@@ -120,22 +120,20 @@ export async function downloadTeamCardCanvas(previewContainerEl: HTMLElement): P
   }
 
   try {
-    toast.info("Generando imagen PNG de alta resolución...");
-    const canvas = await html2canvas(cardGraphicEl, {
-      backgroundColor: "#101014",
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
+    toast.info("Generando tarjeta PNG en alta definición...");
+    const dataUrl = await toPng(cardGraphicEl, {
+      quality: 0.98,
+      pixelRatio: 2,
+      cacheBust: true,
     });
 
     const link = document.createElement("a");
     link.download = "pokeforge-team.png";
-    link.href = canvas.toDataURL("image/png");
+    link.href = dataUrl;
     link.click();
     toast.success("¡Tarjeta de equipo descargada como PNG!");
   } catch (err) {
-    console.error("Error al exportar la tarjeta del equipo:", err);
+    console.error("Error al exportar tarjeta:", err);
     toast.error("No se pudo generar la imagen del equipo.");
   }
 }

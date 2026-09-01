@@ -19,6 +19,7 @@
     "@tanstack/table-core": "^8.21.0",
     "animejs": "^3.2.2",
     "astro": "^7.2.10",
+    "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "lucide": "^0.475.0"
   },

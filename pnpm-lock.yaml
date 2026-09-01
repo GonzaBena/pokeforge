@@ -17,6 +17,9 @@ dependencies:
   astro:
     specifier: ^7.2.10
     version: 7.2.10(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@types/node@22.20.1)(tsx@4.23.13)
+  html-to-image:
+    specifier: ^1.11.13
+    version: 1.11.13
   html2canvas:
     specifier: ^1.4.1
     version: 1.4.1
@@ -4524,6 +4527,10 @@ packages:
 
   /html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
+    dev: false
+
+  /html-to-image@1.11.13:
+    resolution: {integrity: sha512-cuOPoI7WApyhBElTTb9oqsawRvZ0rHhaHwghRLlTuffoD1B2aDemlCruLeZrUIIdvG7gs9xeELEPm6PhuASqrg==}
     dev: false
 
   /html-void-elements@3.0.0:
