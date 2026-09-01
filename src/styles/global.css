@@ -627,11 +627,37 @@ svg.lucide {
   position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--type-glow, var(--accent));
   border-radius: var(--radius-lg);
   padding: 14px;
   box-shadow: var(--shadow-card);
   perspective: 600px;
   transform-style: preserve-3d;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.pokemon-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: radial-gradient(ellipse at top, var(--type-glow) 0%, transparent 75%);
+  opacity: 0.18;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.pokemon-card:hover::before {
+  opacity: 0.4;
+}
+
+.pokemon-card:hover {
+  border-color: var(--type-glow, var(--accent));
+  border-top-color: var(--type-glow, var(--accent));
+  box-shadow: 0 10px 30px -4px var(--type-glow, rgba(239, 68, 68, 0.4)), var(--shadow-card);
 }
 
 .pokemon-card__id {
