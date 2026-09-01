@@ -1,5 +1,5 @@
 import { getAllPokemon, getGenerations, getMoveIndex, getTypeChart } from "../lib/pokedexData";
-import { getTeam, setTeam, setTeamSlot } from "../lib/storage";
+import { getTeam, setTeam, setTeamSlot, setTeamSlotMove } from "../lib/storage";
 import { computeTeamDefense, splitWeaknessesAndResistances, type TeamDefenseEntry } from "../lib/typeChart";
 import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../lib/animations";
 import { toast } from "../lib/toast";
@@ -24,13 +24,23 @@ const pickerGenFilterEl = document.querySelector<HTMLElement>("[data-picker-gene
 const pickerMoveFilterEl = document.querySelector<HTMLInputElement>("[data-picker-move-filter]")!;
 const pickerMoveOptionsEl = document.querySelector<HTMLElement>("[data-picker-move-options]")!;
 
+const movePickerOverlayEl = document.querySelector<HTMLElement>("[data-move-picker-overlay]")!;
+const movePickerCloseBtn = document.querySelector<HTMLButtonElement>("[data-move-picker-close]")!;
+const movePickerSearchEl = document.querySelector<HTMLInputElement>("[data-move-picker-search]")!;
+const movePickerResultsEl = document.querySelector<HTMLElement>("[data-move-picker-results]")!;
+const movePickerTitleEl = document.querySelector<HTMLElement>("[data-move-picker-title]")!;
+
 let team: TeamState = { size: 5, slots: [] };
 let allPokemon: Pokemon[] = [];
 let pokemonById = new Map<number, Pokemon>();
 let typeChart: TypeChart | null = null;
 let generations: GenerationInfo[] = [];
 let moveIndex: string[] = [];
+
 let activeSlotIndex: number | null = null;
+let activeMoveSlotIndex: number | null = null;
+let activeMoveIndex: number | null = null;
+let currentAvailableMoves: string[] = [];
 
 const pickerState = { search: "", types: new Set<string>(), generations: new Set<string>(), move: "" };
 
@@ -42,26 +52,62 @@ function capitalize(s: string): string {
 function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
   if (!pokemon) {
     return `
-      <div class="team-slot" data-team-slot data-slot-index="${index}">
-        <i data-lucide="plus-circle"></i>
-        <span>Elegir Pokémon</span>
+      <div class="team-slot-column" data-slot-column="${index}">
+        <div class="team-slot" data-team-slot data-slot-index="${index}">
+          <i data-lucide="plus-circle"></i>
+          <span>Elegir Pokémon</span>
+        </div>
       </div>
     `;
   }
+
+  const slotData = team.slots[index];
+  const slotMoves = Array.from({ length: 4 }, (_, i) => slotData?.moves?.[i] ?? null);
 
   const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
   const typesHtml = pokemon.types
     .map((t) => `<span class="type-badge" style="--badge-bg:${typeColor(t)}">${t}</span>`)
     .join("");
 
+  const movesHtml = slotMoves
+    .map((moveName, mIdx) => {
+      if (!moveName) {
+        return `
+          <button class="move-slot-btn empty" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
+            <i data-lucide="plus"></i> <span>Ataque ${mIdx + 1}</span>
+          </button>
+        `;
+      }
+      return `
+        <div class="move-slot-btn filled">
+          <button class="move-slot-btn__name" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
+            <i data-lucide="swords"></i> <span>${capitalize(moveName)}</span>
+          </button>
+          <button class="move-slot-btn__clear" type="button" data-clear-move data-slot-index="${index}" data-move-index="${mIdx}" aria-label="Quitar movimiento">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+      `;
+    })
+    .join("");
+
   return `
-    <div class="team-slot filled" data-team-slot data-slot-index="${index}">
-      <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index="${index}" aria-label="Quitar Pokémon">
-        <i data-lucide="x"></i>
-      </button>
-      <img class="team-slot__sprite" src="${sprite}" alt="${pokemon.name}" loading="lazy" />
-      <div class="team-slot__name">${pokemon.name}</div>
-      <div class="pokemon-card__types">${typesHtml}</div>
+    <div class="team-slot-column" data-slot-column="${index}">
+      <div class="team-slot filled" data-team-slot data-slot-index="${index}">
+        <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index="${index}" aria-label="Quitar Pokémon">
+          <i data-lucide="x"></i>
+        </button>
+        <img class="team-slot__sprite" src="${sprite}" alt="${pokemon.name}" loading="lazy" />
+        <div class="team-slot__name">${pokemon.name}</div>
+        <div class="pokemon-card__types">${typesHtml}</div>
+      </div>
+
+      <div class="team-slot-moves">
+        <span class="team-slot-moves__title">Ataques</span>
+        <div class="team-slot-moves__list">
+          ${movesHtml}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -83,7 +129,7 @@ function renderAllSlots(): void {
 }
 
 function renderSingleSlot(index: number, animatePop = false): void {
-  const oldEl = slotsEl.querySelector<HTMLElement>(`[data-slot-index="${index}"]`);
+  const oldEl = slotsEl.querySelector<HTMLElement>(`[data-slot-column="${index}"]`) ?? slotsEl.querySelector<HTMLElement>(`[data-slot-index="${index}"]`);
   const template = document.createElement("template");
   template.innerHTML = renderSlotHTML(index, pokemonForSlot(index));
   const newEl = template.content.firstElementChild as HTMLElement;
@@ -93,7 +139,8 @@ function renderSingleSlot(index: number, animatePop = false): void {
   refreshIcons();
 
   if (animatePop) {
-    slotPopIn(newEl);
+    const cardEl = newEl.querySelector<HTMLElement>(".team-slot");
+    if (cardEl) slotPopIn(cardEl);
     const badges = newEl.querySelectorAll(".type-badge");
     if (badges.length) badgeBounceIn(badges);
   }
@@ -190,7 +237,7 @@ function renderStrengthsPanel(): void {
   barsAnimateIn(fills);
 }
 
-// --- picker ---------------------------------------------------------
+// --- pokemon picker --------------------------------------------------
 
 function computePickerFiltered(): Pokemon[] {
   return allPokemon.filter((p) => {
@@ -266,6 +313,57 @@ function populatePickerFilters(): void {
   pickerMoveOptionsEl.innerHTML = moveIndex.map((m) => `<option value="${m}"></option>`).join("");
 }
 
+// --- move picker modal ------------------------------------------------
+
+function openMovePicker(slotIndex: number, moveIndex: number): void {
+  const slot = team.slots[slotIndex];
+  if (!slot || slot.pokemonId === null) return;
+  const pokemon = pokemonById.get(slot.pokemonId);
+  if (!pokemon) return;
+
+  activeMoveSlotIndex = slotIndex;
+  activeMoveIndex = moveIndex;
+  currentAvailableMoves = [...pokemon.moves].sort((a, b) => a.localeCompare(b));
+
+  if (movePickerTitleEl) {
+    movePickerTitleEl.textContent = `Ataque ${moveIndex + 1} - ${capitalize(pokemon.name)}`;
+  }
+  movePickerSearchEl.value = "";
+  movePickerOverlayEl.hidden = false;
+  renderMovePickerResults();
+  movePickerSearchEl.focus();
+}
+
+function closeMovePicker(): void {
+  movePickerOverlayEl.hidden = true;
+  activeMoveSlotIndex = null;
+  activeMoveIndex = null;
+  currentAvailableMoves = [];
+}
+
+function renderMovePickerResults(): void {
+  const query = movePickerSearchEl.value.trim().toLowerCase();
+  const filtered = currentAvailableMoves.filter((m) => !query || m.toLowerCase().includes(query));
+
+  if (!filtered.length) {
+    movePickerResultsEl.innerHTML = `<p class="pokedex-empty">No se encontraron movimientos.</p>`;
+    return;
+  }
+
+  movePickerResultsEl.innerHTML = filtered
+    .map(
+      (m) => `
+      <button class="move-picker-item" type="button" data-pick-move="${m}">
+        <i data-lucide="zap"></i>
+        <span>${capitalize(m)}</span>
+      </button>
+    `,
+    )
+    .join("");
+
+  refreshIcons();
+}
+
 // --- event wiring -----------------------------------------------------
 
 sizeSelectorEl?.addEventListener("click", (e) => {
@@ -275,7 +373,28 @@ sizeSelectorEl?.addEventListener("click", (e) => {
 });
 
 slotsEl.addEventListener("click", (e) => {
-  const removeBtn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-remove-slot]");
+  const target = e.target as HTMLElement;
+
+  const clearMoveBtn = target.closest<HTMLButtonElement>("[data-clear-move]");
+  if (clearMoveBtn) {
+    e.stopPropagation();
+    const sIdx = Number(clearMoveBtn.dataset.slotIndex);
+    const mIdx = Number(clearMoveBtn.dataset.moveIndex);
+    team = setTeamSlotMove(sIdx, mIdx, null);
+    renderSingleSlot(sIdx);
+    return;
+  }
+
+  const selectMoveBtn = target.closest<HTMLButtonElement>("[data-select-move]");
+  if (selectMoveBtn) {
+    e.stopPropagation();
+    const sIdx = Number(selectMoveBtn.dataset.slotIndex);
+    const mIdx = Number(selectMoveBtn.dataset.moveIndex);
+    openMovePicker(sIdx, mIdx);
+    return;
+  }
+
+  const removeBtn = target.closest<HTMLButtonElement>("[data-remove-slot]");
   if (removeBtn) {
     const idx = Number(removeBtn.dataset.slotIndex);
     team = setTeamSlot(idx, null);
@@ -283,17 +402,28 @@ slotsEl.addEventListener("click", (e) => {
     renderStrengthsPanel();
     return;
   }
-  const slotEl = (e.target as HTMLElement).closest<HTMLElement>("[data-team-slot]");
-  if (!slotEl) return;
-  openPicker(Number(slotEl.dataset.slotIndex));
+
+  const slotEl = target.closest<HTMLElement>("[data-team-slot]");
+  if (slotEl && !slotEl.classList.contains("filled")) {
+    openPicker(Number(slotEl.dataset.slotIndex));
+  }
 });
 
 pickerCloseBtn.addEventListener("click", closePicker);
 overlayEl.addEventListener("click", (e) => {
   if (e.target === overlayEl) closePicker();
 });
+
+movePickerCloseBtn.addEventListener("click", closeMovePicker);
+movePickerOverlayEl.addEventListener("click", (e) => {
+  if (e.target === movePickerOverlayEl) closeMovePicker();
+});
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !overlayEl.hidden) closePicker();
+  if (e.key === "Escape") {
+    if (!movePickerOverlayEl.hidden) closeMovePicker();
+    else if (!overlayEl.hidden) closePicker();
+  }
 });
 
 let pickerSearchDebounce: number | undefined;
@@ -303,6 +433,22 @@ pickerSearchEl.addEventListener("input", () => {
     pickerState.search = pickerSearchEl.value.trim().toLowerCase();
     renderPickerResults();
   }, 200);
+});
+
+movePickerSearchEl.addEventListener("input", renderMovePickerResults);
+
+movePickerResultsEl.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-pick-move]");
+  if (!btn || activeMoveSlotIndex === null || activeMoveIndex === null) return;
+  const moveName = btn.dataset.pickMove!;
+  const pokemon = pokemonForSlot(activeMoveSlotIndex);
+
+  team = setTeamSlotMove(activeMoveSlotIndex, activeMoveIndex, moveName);
+  renderSingleSlot(activeMoveSlotIndex);
+  closeMovePicker();
+  if (pokemon) {
+    toast.success(`Ataque "${capitalize(moveName)}" asignado a ${capitalize(pokemon.name)}.`);
+  }
 });
 
 pickerTypeFilterEl.addEventListener("click", (e) => {

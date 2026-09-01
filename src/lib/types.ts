@@ -63,6 +63,7 @@ export interface MovesIndex {
 
 export interface TeamSlotState {
   pokemonId: number | null;
+  moves?: (string | null)[];
 }
 
 export interface TeamState {

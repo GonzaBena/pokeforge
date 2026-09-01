@@ -58,6 +58,24 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
       </div>
       <div class="picker-panel__results" data-picker-results></div>
     </div>
+  <div class="modal-overlay" data-move-picker-overlay hidden>
+    <div class="modal-panel move-picker-modal-panel">
+      <div class="modal-panel__header">
+        <div class="picker-panel__header-info">
+          <h2><i data-lucide="swords"></i> <span data-move-picker-title>Seleccionar ataque</span></h2>
+        </div>
+        <button class="modal-panel__close" type="button" data-move-picker-close aria-label="Cerrar modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="picker-panel__filters">
+        <div class="picker-input-wrap">
+          <i data-lucide="search" class="picker-input-icon"></i>
+          <input class="picker-input" type="search" placeholder="Buscar movimiento..." data-move-picker-search />
+        </div>
+      </div>
+      <div class="move-picker__results" data-move-picker-results></div>
+    </div>
   </div>
 
   <script>

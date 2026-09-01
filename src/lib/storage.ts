@@ -45,11 +45,16 @@ export function setCaptured(id: number, captured: boolean): Set<number> {
 // --- Active team --------------------------------------------------------
 
 const TEAM_FIXED_SIZE = 5;
-const DEFAULT_SLOTS = Array.from({ length: TEAM_FIXED_SIZE }, () => ({ pokemonId: null }));
+const DEFAULT_SLOTS = Array.from({ length: TEAM_FIXED_SIZE }, () => ({ pokemonId: null, moves: [null, null, null, null] }));
 const DEFAULT_TEAM: TeamState = { size: TEAM_FIXED_SIZE, slots: DEFAULT_SLOTS };
 
 function normalizeTeam(team: TeamState): TeamState {
-  const slots = Array.from({ length: TEAM_FIXED_SIZE }, (_, i) => team?.slots?.[i] ?? { pokemonId: null });
+  const slots = Array.from({ length: TEAM_FIXED_SIZE }, (_, i) => {
+    const raw = team?.slots?.[i];
+    if (!raw || raw.pokemonId === null) return { pokemonId: null, moves: [null, null, null, null] };
+    const moves = Array.from({ length: 4 }, (_, mIdx) => raw.moves?.[mIdx] ?? null);
+    return { pokemonId: raw.pokemonId, moves };
+  });
   return { size: TEAM_FIXED_SIZE, slots };
 }
 
@@ -72,8 +77,25 @@ export function setTeamSlot(index: number, pokemonId: number | null): TeamState 
   const current = getTeam();
   const slots = [...current.slots];
   if (index >= 0 && index < TEAM_FIXED_SIZE) {
-    slots[index] = { pokemonId };
+    slots[index] = { pokemonId, moves: [null, null, null, null] };
   }
+  return setTeam({ ...current, slots });
+}
+
+export function setTeamSlotMove(slotIndex: number, moveIndex: number, moveName: string | null): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  const targetSlot = slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return current;
+
+  const currentMoves = Array.from({ length: 4 }, (_, i) => targetSlot.moves?.[i] ?? null);
+  currentMoves[moveIndex] = moveName;
+
+  slots[slotIndex] = {
+    ...targetSlot,
+    moves: currentMoves,
+  };
+
   return setTeam({ ...current, slots });
 }
 
