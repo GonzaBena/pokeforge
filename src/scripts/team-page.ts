@@ -1,11 +1,12 @@
 import { getAllPokemon, getGenerations, getMoveIndex, getTypeChart } from "../lib/pokedexData";
+import { getPokemonDetail } from "../lib/pokemonDetail";
 import { getTeam, setTeam, setTeamSlot, setTeamSlotMove } from "../lib/storage";
 import { computeTeamDefense, splitWeaknessesAndResistances, type TeamDefenseEntry } from "../lib/typeChart";
 import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../lib/animations";
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
-import type { GenerationInfo, Pokemon, TeamState, TypeChart } from "../lib/types";
+import type { GenerationInfo, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
 const slotsEl = document.querySelector<HTMLElement>("[data-team-slots]")!;
@@ -29,6 +30,7 @@ const movePickerCloseBtn = document.querySelector<HTMLButtonElement>("[data-move
 const movePickerSearchEl = document.querySelector<HTMLInputElement>("[data-move-picker-search]")!;
 const movePickerResultsEl = document.querySelector<HTMLElement>("[data-move-picker-results]")!;
 const movePickerTitleEl = document.querySelector<HTMLElement>("[data-move-picker-title]")!;
+const moveMethodFilterEl = document.querySelector<HTMLElement>("[data-move-method-filter]");
 
 let team: TeamState = { size: 5, slots: [] };
 let allPokemon: Pokemon[] = [];
@@ -40,12 +42,33 @@ let moveIndex: string[] = [];
 let activeSlotIndex: number | null = null;
 let activeMoveSlotIndex: number | null = null;
 let activeMoveIndex: number | null = null;
-let currentAvailableMoves: string[] = [];
+let activeMethodFilter: string = "all";
+
+interface MovePickerRow {
+  name: string;
+  method: string;
+  methodLabel: string;
+  level: number;
+}
+
+let currentMoveRows: MovePickerRow[] = [];
 
 const pickerState = { search: "", types: new Set<string>(), generations: new Set<string>(), move: "" };
 
+const METHOD_LABELS: Record<string, string> = {
+  "level-up": "Nivel",
+  machine: "MT/MO",
+  tutor: "Tutor",
+  train: "Tutor",
+  egg: "Huevo",
+};
+
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function formatLabel(s: string): string {
+  return s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // Mirrors src/components/TeamSlot.astro — keep both in sync when the markup changes.
@@ -81,7 +104,7 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
       return `
         <div class="move-slot-btn filled">
           <button class="move-slot-btn__name" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
-            <i data-lucide="swords"></i> <span>${capitalize(moveName)}</span>
+            <i data-lucide="swords"></i> <span>${formatLabel(moveName)}</span>
           </button>
           <button class="move-slot-btn__clear" type="button" data-clear-move data-slot-index="${index}" data-move-index="${mIdx}" aria-label="Quitar movimiento">
             <i data-lucide="x"></i>
@@ -313,9 +336,9 @@ function populatePickerFilters(): void {
   pickerMoveOptionsEl.innerHTML = moveIndex.map((m) => `<option value="${m}"></option>`).join("");
 }
 
-// --- move picker modal ------------------------------------------------
+// --- move picker modal (table view) ----------------------------------
 
-function openMovePicker(slotIndex: number, moveIndex: number): void {
+async function openMovePicker(slotIndex: number, moveIndex: number): Promise<void> {
   const slot = team.slots[slotIndex];
   if (!slot || slot.pokemonId === null) return;
   const pokemon = pokemonById.get(slot.pokemonId);
@@ -323,14 +346,35 @@ function openMovePicker(slotIndex: number, moveIndex: number): void {
 
   activeMoveSlotIndex = slotIndex;
   activeMoveIndex = moveIndex;
-  currentAvailableMoves = [...pokemon.moves].sort((a, b) => a.localeCompare(b));
+  activeMethodFilter = "all";
 
   if (movePickerTitleEl) {
     movePickerTitleEl.textContent = `Ataque ${moveIndex + 1} - ${capitalize(pokemon.name)}`;
   }
   movePickerSearchEl.value = "";
   movePickerOverlayEl.hidden = false;
-  renderMovePickerResults();
+
+  const methodChips = moveMethodFilterEl?.querySelectorAll<HTMLButtonElement>("[data-method]");
+  methodChips?.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.method === "all")));
+
+  movePickerResultsEl.innerHTML = `<div class="pokedex-loading"><i data-lucide="loader-2" class="spin"></i> Cargando movimientos de ${capitalize(pokemon.name)}...</div>`;
+  refreshIcons();
+
+  const detail = await getPokemonDetail(pokemon.id);
+  if (activeMoveSlotIndex !== slotIndex || activeMoveIndex !== moveIndex) return;
+
+  const rawDetails: MoveDetail[] = detail.moveDetails && detail.moveDetails.length
+    ? detail.moveDetails
+    : pokemon.moves.map((m) => ({ name: m, method: "level-up", level: 0 }));
+
+  currentMoveRows = rawDetails.map((m) => ({
+    name: m.name,
+    method: m.method === "train" ? "tutor" : m.method,
+    methodLabel: METHOD_LABELS[m.method] ?? formatLabel(m.method),
+    level: m.level,
+  }));
+
+  renderMovePickerTable();
   movePickerSearchEl.focus();
 }
 
@@ -338,28 +382,73 @@ function closeMovePicker(): void {
   movePickerOverlayEl.hidden = true;
   activeMoveSlotIndex = null;
   activeMoveIndex = null;
-  currentAvailableMoves = [];
+  currentMoveRows = [];
 }
 
-function renderMovePickerResults(): void {
-  const query = movePickerSearchEl.value.trim().toLowerCase();
-  const filtered = currentAvailableMoves.filter((m) => !query || m.toLowerCase().includes(query));
+function renderMovePickerTable(): void {
+  const search = movePickerSearchEl.value.trim().toLowerCase();
+
+  const filtered = currentMoveRows.filter((r) => {
+    if (activeMethodFilter !== "all") {
+      if (activeMethodFilter === "tutor" && r.method !== "tutor" && r.method !== "train") return false;
+      if (activeMethodFilter !== "tutor" && r.method !== activeMethodFilter) return false;
+    }
+    if (search && !r.name.toLowerCase().includes(search) && !formatLabel(r.name).toLowerCase().includes(search)) {
+      return false;
+    }
+    return true;
+  });
+
+  const countEl = document.querySelector<HTMLElement>("[data-move-picker-count]");
+  if (countEl) {
+    countEl.textContent = `${filtered.length} ataques`;
+  }
 
   if (!filtered.length) {
-    movePickerResultsEl.innerHTML = `<p class="pokedex-empty">No se encontraron movimientos.</p>`;
+    movePickerResultsEl.innerHTML = `<p class="pokedex-empty">No se encontraron movimientos con los filtros seleccionados.</p>`;
     return;
   }
 
-  movePickerResultsEl.innerHTML = filtered
-    .map(
-      (m) => `
-      <button class="move-picker-item" type="button" data-pick-move="${m}">
-        <i data-lucide="zap"></i>
-        <span>${capitalize(m)}</span>
-      </button>
-    `,
-    )
+  const rowsHtml = filtered
+    .map((r) => {
+      const levelText = r.method === "level-up" ? `Nv. ${r.level}` : "-";
+      const methodBadgeClass = `move-method-badge move-method-badge--${r.method}`;
+      return `
+        <tr>
+          <td class="move-table__cell-name">
+            <span class="move-table__name">${formatLabel(r.name)}</span>
+          </td>
+          <td class="move-table__cell-method">
+            <span class="${methodBadgeClass}">${r.methodLabel}</span>
+          </td>
+          <td class="move-table__cell-level">${levelText}</td>
+          <td class="move-table__cell-action">
+            <button class="btn btn--sm btn--primary" type="button" data-pick-move="${r.name}">
+              Elegir
+            </button>
+          </td>
+        </tr>
+      `;
+    })
     .join("");
+
+  movePickerResultsEl.innerHTML = `
+    <div class="move-table-container">
+      <table class="move-table">
+        <thead>
+          <tr>
+            <th>Movimiento</th>
+            <th>Método</th>
+            <th>Nivel</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </div>
+  `;
 
   refreshIcons();
 }
@@ -435,7 +524,17 @@ pickerSearchEl.addEventListener("input", () => {
   }, 200);
 });
 
-movePickerSearchEl.addEventListener("input", renderMovePickerResults);
+movePickerSearchEl.addEventListener("input", renderMovePickerTable);
+
+moveMethodFilterEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-method]");
+  if (!btn) return;
+  activeMethodFilter = btn.dataset.method!;
+  moveMethodFilterEl.querySelectorAll<HTMLButtonElement>("[data-method]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b === btn));
+  });
+  renderMovePickerTable();
+});
 
 movePickerResultsEl.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-pick-move]");
@@ -447,7 +546,7 @@ movePickerResultsEl.addEventListener("click", (e) => {
   renderSingleSlot(activeMoveSlotIndex);
   closeMovePicker();
   if (pokemon) {
-    toast.success(`Ataque "${capitalize(moveName)}" asignado a ${capitalize(pokemon.name)}.`);
+    toast.success(`Ataque "${formatLabel(moveName)}" asignado a ${capitalize(pokemon.name)}.`);
   }
 });
 

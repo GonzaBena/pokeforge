@@ -65,6 +65,7 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
       <div class="modal-panel__header">
         <div class="picker-panel__header-info">
           <h2><i data-lucide="swords"></i> <span data-move-picker-title>Seleccionar ataque</span></h2>
+          <span class="picker-panel__count" data-move-picker-count></span>
         </div>
         <button class="modal-panel__close" type="button" data-move-picker-close aria-label="Cerrar modal">
           <i data-lucide="x"></i>
@@ -73,7 +74,17 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
       <div class="picker-panel__filters">
         <div class="picker-input-wrap">
           <i data-lucide="search" class="picker-input-icon"></i>
-          <input class="picker-input" type="search" placeholder="Buscar movimiento..." data-move-picker-search />
+          <input class="picker-input" type="search" placeholder="Buscar por nombre de movimiento..." data-move-picker-search />
+        </div>
+        <div class="picker-panel__filter-section">
+          <span class="picker-panel__section-title">Método de aprendizaje</span>
+          <div class="filter-group filter-group--compact" data-move-method-filter aria-label="Filtrar por método">
+            <button class="filter-chip" type="button" data-method="all" aria-pressed="true">Todos</button>
+            <button class="filter-chip" type="button" data-method="level-up" aria-pressed="false">Nivel</button>
+            <button class="filter-chip" type="button" data-method="machine" aria-pressed="false">MT/MO</button>
+            <button class="filter-chip" type="button" data-method="tutor" aria-pressed="false">Tutor</button>
+            <button class="filter-chip" type="button" data-method="egg" aria-pressed="false">Huevo</button>
+          </div>
         </div>
       </div>
       <div class="move-picker__results" data-move-picker-results></div>
