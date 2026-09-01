@@ -9,11 +9,11 @@ const path = Astro.url.pathname;
       <span>PokeForge</span>
     </a>
     <div class="nav__right">
-      <a class="nav__link" href="/pokedex" data-astro-prefetch aria-current={path === "/pokedex" ? "page" : undefined}>
+      <a class="nav__link" href="/pokedex/" data-astro-prefetch aria-current={path.startsWith("/pokedex") ? "page" : undefined}>
         <i data-lucide="book-open"></i>
         Pokédex
       </a>
-      <a class="nav__link" href="/equipo" data-astro-prefetch aria-current={path === "/equipo" ? "page" : undefined}>
+      <a class="nav__link" href="/equipo/" data-astro-prefetch aria-current={path.startsWith("/equipo") ? "page" : undefined}>
         <i data-lucide="users"></i>
         Equipo
       </a>
