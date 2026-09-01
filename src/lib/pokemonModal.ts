@@ -110,8 +110,17 @@ function buildMoveTableRows(moveDetails: MoveDetail[]): MoveTableRow[] {
   }));
 }
 
+function formatGeneration(gen: unknown): string {
+  return String(gen ?? "").replace(/^Generación\s*/i, "").trim();
+}
+
 const LOCATION_COLUMNS: ColumnDef<AcquisitionRow, unknown>[] = [
-  { accessorKey: "generation", header: "Gen.", size: 40 },
+  {
+    accessorKey: "generation",
+    header: "Gen.",
+    size: 40,
+    cell: (info) => formatGeneration(info.getValue()),
+  },
   { accessorKey: "game", header: "Juego", size: 190 },
   { accessorKey: "location", header: "Lugar", size: 160 },
   { accessorKey: "method", header: "Método", size: 260 },

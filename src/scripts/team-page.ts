@@ -368,20 +368,14 @@ function closePicker(): void {
 }
 
 function populatePickerFilters(): void {
-  const row1 = typeChart!.types.slice(0, 9);
-  const row2 = typeChart!.types.slice(9);
+  const typeChips = typeChart!.types
+    .map(
+      (t) =>
+        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
+    )
+    .join("");
 
-  const renderRow = (list: string[]) =>
-    `<div class="filter-group__row">` +
-    list
-      .map(
-        (t) =>
-          `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
-      )
-      .join("") +
-    `</div>`;
-
-  pickerTypeFilterEl.innerHTML = renderRow(row1) + renderRow(row2);
+  pickerTypeFilterEl.innerHTML = `<div class="filter-group__row">${typeChips}</div>`;
 
   const genChips = generations
     .map((g) => {
@@ -531,19 +525,19 @@ function renderMovePickerTable(): void {
 
       return `
         <tr>
-          <td class="move-table__cell-name">
+          <td class="move-table__cell-name" data-label="Movimiento">
             <span class="move-table__name">${formatLabel(r.name)}</span>
           </td>
-          <td class="move-table__cell-type">${typeBadgeHtml}</td>
-          <td class="move-table__cell-category">${categoryBadgeHtml}</td>
-          <td class="move-table__cell-stat">${powerText}</td>
-          <td class="move-table__cell-stat">${ppText}</td>
-          <td class="move-table__cell-stat">${accuracyText}</td>
-          <td class="move-table__cell-method">
+          <td class="move-table__cell-type" data-label="Tipo">${typeBadgeHtml}</td>
+          <td class="move-table__cell-category" data-label="Categoría">${categoryBadgeHtml}</td>
+          <td class="move-table__cell-stat" data-label="POT">${powerText}</td>
+          <td class="move-table__cell-stat" data-label="PP">${ppText}</td>
+          <td class="move-table__cell-stat" data-label="Prec.">${accuracyText}</td>
+          <td class="move-table__cell-method" data-label="Método">
             <span class="${methodBadgeClass}">${r.methodLabel}</span>
           </td>
-          <td class="move-table__cell-level">${levelText}</td>
-          <td class="move-table__cell-action">
+          <td class="move-table__cell-level" data-label="Nivel">${levelText}</td>
+          <td class="move-table__cell-action" data-label="Acción">
             <button class="btn btn--sm btn--primary" type="button" data-pick-move="${r.name}">
               Elegir
             </button>
@@ -554,25 +548,30 @@ function renderMovePickerTable(): void {
     .join("");
 
   movePickerResultsEl.innerHTML = `
-    <div class="move-table-container">
-      <table class="move-table">
-        <thead>
-          <tr>
-            <th>Movimiento</th>
-            <th>Tipo</th>
-            <th>Categoría</th>
-            <th>POT</th>
-            <th>PP</th>
-            <th>Prec.</th>
-            <th>Método</th>
-            <th>Nivel</th>
-            <th style="text-align: right;">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rowsHtml}
-        </tbody>
-      </table>
+    <div class="move-table-wrapper">
+      <div class="table-scroll-hint" aria-hidden="true">
+        <span>← Deslizá horizontalmente para ver todos los detalles →</span>
+      </div>
+      <div class="move-table-container">
+        <table class="move-table">
+          <thead>
+            <tr>
+              <th class="move-table__head-name">Movimiento</th>
+              <th>Tipo</th>
+              <th>Categoría</th>
+              <th>POT</th>
+              <th>PP</th>
+              <th>Prec.</th>
+              <th>Método</th>
+              <th>Nivel</th>
+              <th class="move-table__head-action" style="text-align: right;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
     </div>
   `;
 

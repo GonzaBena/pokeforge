@@ -1,0 +1,39 @@
+{
+  "name": "PokeForge - Armador de Equipos Pokémon",
+  "short_name": "PokeForge",
+  "description": "Explorá la Pokédex completa, marcá tus capturas y armá tu equipo Pokémon ideal con análisis de fortalezas y debilidades.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#101014",
+  "theme_color": "#ef4444",
+  "lang": "es",
+  "categories": ["entertainment", "games", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "1200x1200",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

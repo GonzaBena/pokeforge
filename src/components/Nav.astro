@@ -3,28 +3,37 @@ const path = Astro.url.pathname;
 ---
 
 <nav class="nav">
-  <a class="nav__brand" href="/">
-    <i data-lucide="sparkles"></i>
-    PokeTeam
-  </a>
-  <div class="nav__links">
-    <a class="nav__link" href="/pokedex" aria-current={path === "/pokedex" ? "page" : undefined}>
-      <i data-lucide="book-open"></i>
-      Pokédex
+  <div class="nav__inner">
+    <a class="nav__brand" href="/">
+      <img src="/favicon.png" alt="PokeForge Logo" class="nav__brand-logo" />
+      <span>PokeForge</span>
     </a>
-    <a class="nav__link" href="/equipo" aria-current={path === "/equipo" ? "page" : undefined}>
-      <i data-lucide="users"></i>
-      Equipo
-    </a>
-    <button class="nav__sound-btn" type="button" data-sound-toggle title="Activar/desactivar sonido" aria-label="Activar/desactivar sonido">
-      <i data-lucide="volume-2" data-sound-icon-on></i>
-      <i data-lucide="volume-x" data-sound-icon-off hidden></i>
-    </button>
+    <div class="nav__right">
+      <a class="nav__link" href="/pokedex" aria-current={path === "/pokedex" ? "page" : undefined}>
+        <i data-lucide="book-open"></i>
+        Pokédex
+      </a>
+      <a class="nav__link" href="/equipo" aria-current={path === "/equipo" ? "page" : undefined}>
+        <i data-lucide="users"></i>
+        Equipo
+      </a>
+      <div class="nav__pwa-wrapper" data-pwa-row>
+        <button class="nav__pwa-btn" type="button" data-pwa-install title="Instalar aplicación PokeForge" aria-label="Instalar aplicación PokeForge">
+          <i data-lucide="download"></i>
+          <span>Instalar App</span>
+        </button>
+      </div>
+      <button class="nav__sound-btn" type="button" data-sound-toggle title="Activar/desactivar sonido" aria-label="Activar/desactivar sonido">
+        <i data-lucide="volume-2" data-sound-icon-on></i>
+        <i data-lucide="volume-x" data-sound-icon-off hidden></i>
+      </button>
+    </div>
   </div>
 </nav>
 
 <script>
   import { isSoundEnabled, setSoundEnabled } from "../lib/sound";
+  import { toast } from "../lib/toast";
 
   function initSoundToggle() {
     const soundBtn = document.querySelector<HTMLButtonElement>("[data-sound-toggle]");
@@ -48,6 +57,35 @@ const path = Astro.url.pathname;
     });
   }
 
+  let deferredPrompt: any = null;
+
+  function initPwaInstall() {
+    const pwaBtn = document.querySelector<HTMLButtonElement>("[data-pwa-install]");
+    if (!pwaBtn) return;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    pwaBtn.addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice.outcome === "accepted") {
+          toast.success("¡PokeForge se ha instalado correctamente!");
+        }
+        deferredPrompt = null;
+      } else {
+        toast.info("Para instalar PokeForge, usá la opción 'Agregar a pantalla de inicio' en el menú de tu navegador.");
+      }
+    });
+  }
+
   initSoundToggle();
-  document.addEventListener("astro:after-swap", initSoundToggle);
+  initPwaInstall();
+  document.addEventListener("astro:after-swap", () => {
+    initSoundToggle();
+    initPwaInstall();
+  });
 </script>

@@ -58,7 +58,8 @@ export function renderDataTable<T>(container: HTMLElement, columns: ColumnDef<T,
                 .map((cell) => {
                   const def = cell.column.columnDef;
                   const content = typeof def.cell === "function" ? String(def.cell(cell.getContext())) : String(cell.getValue() ?? "");
-                  return `<td>${content}</td>`;
+                  const label = typeof def.header === "string" ? def.header : "";
+                  return `<td data-label="${label}">${content}</td>`;
                 })
                 .join("")}</tr>`,
           )

@@ -66,7 +66,25 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
 }
 
 function updateCapturedCounter(): void {
-  capturedCountEl.textContent = String(getCapturedIds().size);
+  const capturedIds = getCapturedIds();
+
+  if (selectedGame && gameToGenMap.has(selectedGame)) {
+    const genInfo = gameToGenMap.get(selectedGame)!;
+    const maxId = genInfo.speciesIdRange[1];
+
+    let countInGame = 0;
+    for (const id of capturedIds) {
+      if (id <= maxId) {
+        countInGame++;
+      }
+    }
+
+    if (capturedCountEl) capturedCountEl.textContent = String(countInGame);
+    if (totalCountEl) totalCountEl.textContent = String(maxId);
+  } else {
+    if (capturedCountEl) capturedCountEl.textContent = String(capturedIds.size);
+    if (totalCountEl) totalCountEl.textContent = manifestTotal ? String(manifestTotal) : "—";
+  }
 }
 
 // Ids whose card-level capture animation this page's own grid click just
@@ -139,20 +157,14 @@ async function applyFilters(): Promise<void> {
 }
 
 function populateTypeChips(types: string[]): void {
-  const row1 = types.slice(0, 9);
-  const row2 = types.slice(9);
+  const chips = types
+    .map(
+      (t) =>
+        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
+    )
+    .join("");
 
-  const renderRow = (list: string[]) =>
-    `<div class="filter-group__row">` +
-    list
-      .map(
-        (t) =>
-          `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
-      )
-      .join("") +
-    `</div>`;
-
-  typeFilterEl.innerHTML = renderRow(row1) + renderRow(row2);
+  typeFilterEl.innerHTML = `<div class="filter-group__row">${chips}</div>`;
 }
 
 function populateGenerationChips(generations: GenerationInfo[]): void {
@@ -264,6 +276,7 @@ genFilterEl.addEventListener("click", (e) => {
 gameFilterEl?.addEventListener("change", () => {
   selectedGame = gameFilterEl.value;
   setSelectedGame(selectedGame);
+  updateCapturedCounter();
   applyFilters();
 });
 
@@ -289,6 +302,7 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
   if (newGame !== selectedGame) {
     selectedGame = newGame;
     if (gameFilterEl) gameFilterEl.value = newGame;
+    updateCapturedCounter();
     applyFilters();
   }
 });
@@ -298,7 +312,6 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
 async function init(): Promise<void> {
   const manifest = await getManifest();
   manifestTotal = manifest.totalCount;
-  totalCountEl.textContent = String(manifest.totalCount);
   updateCapturedCounter();
 
   const chunk0 = await getChunk(0);
@@ -311,6 +324,7 @@ async function init(): Promise<void> {
   getGenerations().then((gens) => {
     populateGenerationChips(gens);
     populateGameSelect(gens);
+    updateCapturedCounter();
     if (selectedGame) applyFilters();
   });
 }
