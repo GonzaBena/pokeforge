@@ -142,7 +142,10 @@ function populateTypeChips(types: string[]): void {
 
 function populateGenerationChips(generations: { name: string; displayName: string }[]): void {
   genFilterEl.innerHTML = generations
-    .map((g) => `<button class="filter-chip" type="button" data-generation="${g.name}" aria-pressed="false">${g.displayName}</button>`)
+    .map((g) => {
+      const label = g.displayName.replace(/^Generación\s*/i, "");
+      return `<button class="filter-chip" type="button" data-generation="${g.name}" aria-pressed="false">${label}</button>`;
+    })
     .join("");
 }
 
