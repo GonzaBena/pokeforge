@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import TeamSizeSelector from "../components/TeamSizeSelector.astro";
 import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.astro";
 ---
 
@@ -9,11 +8,9 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
     <div class="page__header">
       <div>
         <h1 class="page__title"><i data-lucide="users"></i> Armar equipo</h1>
-        <p class="page__subtitle">Elegí de 1 a 5 Pokémon filtrando por generación, tipo y movimientos.</p>
+        <p class="page__subtitle">Completa tu equipo de 5 Pokémon filtrando por generación, tipo y movimientos.</p>
       </div>
     </div>
-
-    <TeamSizeSelector />
 
     <div class="team-layout">
       <div class="team-slots" data-team-slots></div>

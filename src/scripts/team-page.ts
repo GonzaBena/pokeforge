@@ -7,7 +7,7 @@ import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import type { GenerationInfo, Pokemon, TeamState, TypeChart } from "../lib/types";
 
-const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]")!;
+const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
 const slotsEl = document.querySelector<HTMLElement>("[data-team-slots]")!;
 const panelEmptyEl = document.querySelector<HTMLElement>("[data-panel-empty]")!;
 const panelContentEl = document.querySelector<HTMLElement>("[data-panel-content]")!;
@@ -23,9 +23,9 @@ const pickerGenFilterEl = document.querySelector<HTMLElement>("[data-picker-gene
 const pickerMoveFilterEl = document.querySelector<HTMLInputElement>("[data-picker-move-filter]")!;
 const pickerMoveOptionsEl = document.querySelector<HTMLElement>("[data-picker-move-options]")!;
 
-let team: TeamState = { size: 3, slots: [] };
+let team: TeamState = { size: 5, slots: [] };
 let allPokemon: Pokemon[] = [];
-let pokemonMap = new Map<number, Pokemon>();
+let pokemonById = new Map<number, Pokemon>();
 let typeChart: TypeChart | null = null;
 let generations: GenerationInfo[] = [];
 let moveIndex: string[] = [];
@@ -71,7 +71,7 @@ function pokemonForSlot(index: number): Pokemon | null {
 }
 
 function renderSizeSelector(): void {
-  sizeSelectorEl.querySelectorAll<HTMLButtonElement>("[data-size]").forEach((btn) => {
+  sizeSelectorEl?.querySelectorAll<HTMLButtonElement>("[data-size]").forEach((btn) => {
     btn.setAttribute("aria-pressed", String(Number(btn.dataset.size) === team.size));
   });
 }
@@ -138,19 +138,18 @@ function renderBarHTML(entry: TeamDefenseEntry): string {
   return `
     <div class="type-bar">
       <span class="type-bar__type">${entry.type}</span>
-      <span class="type-bar__track"><span class="type-bar__fill" style="--badge-bg:${typeColor(entry.type)}" data-target-width="${pct}%"></span></span>
-      <span class="type-bar__value">${entry.averageMultiplier.toFixed(2)}&times;</span>
+      <div class="type-bar__track">
+        <div class="type-bar__fill" data-target-width="${pct}%" style="--badge-bg:${typeColor(entry.type)}"></div>
+      </div>
+      <span class="type-bar__value">${entry.averageMultiplier.toFixed(2)}x</span>
     </div>
   `;
 }
 
 function renderStrengthsPanel(): void {
-  const members = team.slots
-    .map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) : null))
-    .filter((p): p is Pokemon => !!p)
-    .map((p) => ({ name: p.name, types: p.types }));
+  const activePokemon = team.slots.map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) ?? null : null)).filter((p): p is Pokemon => p !== null);
 
-  if (!members.length || !typeChart) {
+  if (!activePokemon.length || !typeChart) {
     panelEmptyEl.hidden = false;
     panelContentEl.hidden = true;
     return;
@@ -159,16 +158,14 @@ function renderStrengthsPanel(): void {
   panelEmptyEl.hidden = true;
   panelContentEl.hidden = false;
 
-  const { weaknesses, resistances } = splitWeaknessesAndResistances(computeTeamDefense(typeChart, members));
+  const defense = computeTeamDefense(activePokemon, typeChart);
+  const { weaknesses, resistances } = splitWeaknessesAndResistances(defense);
 
-  weaknessesListEl.innerHTML = weaknesses.length
-    ? weaknesses.map(renderBarHTML).join("")
-    : `<p class="side-panel__empty">Sin debilidades notables.</p>`;
-  resistancesListEl.innerHTML = resistances.length
-    ? resistances.map(renderBarHTML).join("")
-    : `<p class="side-panel__empty">Sin resistencias notables.</p>`;
+  weaknessesListEl.innerHTML = weaknesses.map(renderBarHTML).join("");
+  resistancesListEl.innerHTML = resistances.map(renderBarHTML).join("");
 
-  barsAnimateIn(panelContentEl.querySelectorAll<HTMLElement>(".type-bar__fill"));
+  const fills = panelContentEl.querySelectorAll<HTMLElement>(".type-bar__fill");
+  barsAnimateIn(fills);
 }
 
 // --- picker ---------------------------------------------------------
@@ -232,7 +229,7 @@ function closePicker(): void {
 }
 
 function populatePickerFilters(): void {
-  pickerTypeFilterEl.innerHTML = typeChart.types
+  pickerTypeFilterEl.innerHTML = typeChart!.types
     .map(
       (t) =>
         `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
@@ -246,7 +243,7 @@ function populatePickerFilters(): void {
 
 // --- event wiring -----------------------------------------------------
 
-sizeSelectorEl.addEventListener("click", (e) => {
+sizeSelectorEl?.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-size]");
   if (!btn) return;
   changeTeamSize(Number(btn.dataset.size));
