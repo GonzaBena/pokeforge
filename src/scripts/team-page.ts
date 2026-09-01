@@ -1,6 +1,6 @@
 import { getAllPokemon, getGenerations, getMoveDetailsMap, getMoveIndex, getTypeChart } from "../lib/pokedexData";
 import { getPokemonDetail } from "../lib/pokemonDetail";
-import { getTeam, setTeam, setTeamSlot, setTeamSlotMove } from "../lib/storage";
+import { getTeam, setTeam, setTeamSlot, setTeamSlotMove, getSelectedGame, setSelectedGame } from "../lib/storage";
 import { computeTeamDefense, splitWeaknessesAndResistances, type TeamDefenseEntry } from "../lib/typeChart";
 import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../lib/animations";
 import { toast } from "../lib/toast";
@@ -22,6 +22,7 @@ const pickerResultsEl = document.querySelector<HTMLElement>("[data-picker-result
 const pickerSearchEl = document.querySelector<HTMLInputElement>("[data-picker-search]")!;
 const pickerTypeFilterEl = document.querySelector<HTMLElement>("[data-picker-type-filter]")!;
 const pickerGenFilterEl = document.querySelector<HTMLElement>("[data-picker-generation-filter]")!;
+const pickerGameFilterEl = document.querySelector<HTMLSelectElement>("[data-picker-game-filter]");
 const pickerMoveFilterEl = document.querySelector<HTMLInputElement>("[data-picker-move-filter]")!;
 const pickerMoveOptionsEl = document.querySelector<HTMLElement>("[data-picker-move-options]")!;
 
@@ -41,6 +42,7 @@ let typeChart: TypeChart | null = null;
 let generations: GenerationInfo[] = [];
 let moveIndex: string[] = [];
 let moveDetailsMap: Record<string, MoveData> = {};
+const gameToGenMap = new Map<string, GenerationInfo>();
 
 let activeSlotIndex: number | null = null;
 let activeMoveSlotIndex: number | null = null;
@@ -58,7 +60,7 @@ interface MovePickerRow {
 
 let currentMoveRows: MovePickerRow[] = [];
 
-const pickerState = { search: "", types: new Set<string>(), generations: new Set<string>(), move: "" };
+const pickerState = { search: "", types: new Set<string>(), generations: new Set<string>(), move: "", game: "" };
 
 const METHOD_LABELS: Record<string, string> = {
   "level-up": "Nivel",
@@ -307,6 +309,10 @@ function computePickerFiltered(): Pokemon[] {
     if (pickerState.types.size && !p.types.some((t) => pickerState.types.has(t))) return false;
     if (pickerState.generations.size && !pickerState.generations.has(p.generation)) return false;
     if (pickerState.move && !p.moves.includes(pickerState.move)) return false;
+    if (pickerState.game) {
+      const genInfo = gameToGenMap.get(pickerState.game);
+      if (genInfo && p.id > genInfo.speciesIdRange[1]) return false;
+    }
     return true;
   });
 }
@@ -346,8 +352,10 @@ function openPicker(index: number): void {
   pickerState.types.clear();
   pickerState.generations.clear();
   pickerState.move = "";
+  pickerState.game = getSelectedGame();
   pickerSearchEl.value = "";
   pickerMoveFilterEl.value = "";
+  if (pickerGameFilterEl) pickerGameFilterEl.value = pickerState.game;
   pickerTypeFilterEl.querySelectorAll("[data-type]").forEach((b) => b.setAttribute("aria-pressed", "false"));
   pickerGenFilterEl.querySelectorAll("[data-generation]").forEach((b) => b.setAttribute("aria-pressed", "false"));
   renderPickerResults();
@@ -360,19 +368,45 @@ function closePicker(): void {
 }
 
 function populatePickerFilters(): void {
-  pickerTypeFilterEl.innerHTML = typeChart!.types
-    .map(
-      (t) =>
-        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
-    )
-    .join("");
-  pickerGenFilterEl.innerHTML = generations
+  const row1 = typeChart!.types.slice(0, 9);
+  const row2 = typeChart!.types.slice(9);
+
+  const renderRow = (list: string[]) =>
+    `<div class="filter-group__row">` +
+    list
+      .map(
+        (t) =>
+          `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
+      )
+      .join("") +
+    `</div>`;
+
+  pickerTypeFilterEl.innerHTML = renderRow(row1) + renderRow(row2);
+
+  const genChips = generations
     .map((g) => {
       const label = g.displayName.replace(/^Generación\s*/i, "");
       return `<button class="filter-chip" type="button" data-generation="${g.name}" aria-pressed="false">${label}</button>`;
     })
     .join("");
+
+  pickerGenFilterEl.innerHTML = `<div class="filter-group__row">${genChips}</div>`;
   pickerMoveOptionsEl.innerHTML = moveIndex.map((m) => `<option value="${m}"></option>`).join("");
+
+  if (pickerGameFilterEl) {
+    gameToGenMap.clear();
+    let html = `<option value="">Todos los juegos</option>`;
+    for (const g of generations) {
+      const regionLabel = g.region ? ` (${capitalize(g.region)})` : "";
+      html += `<optgroup label="${g.displayName}${regionLabel}">`;
+      for (const vg of g.versionGroups) {
+        gameToGenMap.set(vg.name, g);
+        html += `<option value="${vg.name}">${vg.displayName}</option>`;
+      }
+      html += `</optgroup>`;
+    }
+    pickerGameFilterEl.innerHTML = html;
+  }
 
   if (moveTypeFilterEl && typeChart) {
     const allBtn = `<button class="filter-chip" type="button" data-move-type="all" aria-pressed="true">Todos</button>`;
@@ -686,6 +720,12 @@ pickerGenFilterEl.addEventListener("click", (e) => {
 
 pickerMoveFilterEl.addEventListener("input", () => {
   pickerState.move = pickerMoveFilterEl.value.trim().toLowerCase();
+  renderPickerResults();
+});
+
+pickerGameFilterEl?.addEventListener("change", () => {
+  pickerState.game = pickerGameFilterEl.value;
+  setSelectedGame(pickerState.game);
   renderPickerResults();
 });
 

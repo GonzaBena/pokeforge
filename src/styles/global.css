@@ -309,6 +309,109 @@ svg.lucide {
   outline-offset: 1px;
 }
 
+.select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 280px;
+}
+
+.select-wrapper__icon {
+  position: absolute;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.select-wrapper__arrow {
+  position: absolute;
+  right: 14px;
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.2s ease;
+}
+
+.select-wrapper:focus-within .select-wrapper__arrow {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.game-select {
+  width: 100%;
+  padding: 10px 38px 10px 38px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
+}
+
+.game-select:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+}
+
+.game-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.game-select optgroup {
+  background: var(--bg-card);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.game-select option {
+  background: var(--bg-card);
+  color: var(--text);
+  font-weight: 400;
+}
+
+.select-wrapper--compact {
+  flex: 1 1 100%;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+.select-wrapper--compact .game-select {
+  padding: 8px 32px 8px 34px;
+  font-size: 13px;
+  border-radius: var(--radius-md);
+}
+
+.select-wrapper--compact .select-wrapper__icon {
+  left: 10px;
+  width: 14px;
+  height: 14px;
+}
+
+.select-wrapper--compact .select-wrapper__arrow {
+  right: 10px;
+  width: 14px;
+  height: 14px;
+}
+
 .filter-stacks {
   display: flex;
   flex-direction: column;
@@ -318,12 +421,22 @@ svg.lucide {
 
 .filter-group {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group__row {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: 6px;
+  width: 100%;
 }
 
 .filter-chip {
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-strong);
   background: var(--bg-card);
@@ -331,6 +444,10 @@ svg.lucide {
   font-size: 12px;
   font-weight: 600;
   text-transform: capitalize;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
   transition:
     background 0.15s,
@@ -342,6 +459,18 @@ svg.lucide {
   background: var(--badge-bg, var(--accent));
   border-color: var(--badge-bg, var(--accent));
   color: white;
+}
+
+@media (max-width: 820px) {
+  .filter-group__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .filter-chip {
+    padding: 6px 12px;
+  }
 }
 
 /* --------------------------------------------------------------- grid */
@@ -1365,7 +1494,7 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 .detail-header__sprite {
   position: relative;
-  height: 300px;
+  height: 280px;
   aspect-ratio: 1/1;
   flex-shrink: 0;
   background: var(--bg-card);

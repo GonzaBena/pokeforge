@@ -55,6 +55,16 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
           <span class="picker-panel__section-title">Generaciones</span>
           <div class="filter-group filter-group--compact" data-picker-generation-filter aria-label="Filtrar por generación"></div>
         </div>
+        <div class="picker-panel__filter-section">
+          <span class="picker-panel__section-title">Juego</span>
+          <div class="select-wrapper select-wrapper--compact">
+            <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+            <select class="game-select" data-picker-game-filter aria-label="Filtrar por juego">
+              <option value="">Todos los juegos</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+          </div>
+        </div>
       </div>
       <div class="picker-panel__results" data-picker-results></div>
     </div>

@@ -21,6 +21,13 @@ import PokemonDetailModal from "../components/PokemonDetailModal.astro";
         <button class="view-toggle__btn" type="button" data-view="captured" aria-pressed="false">Capturados</button>
       </div>
       <input class="search-input" type="search" placeholder="Buscar por nombre o número..." data-search-input />
+      <div class="select-wrapper">
+        <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+        <select class="game-select" data-game-filter aria-label="Filtrar por juego">
+          <option value="">Todos los juegos</option>
+        </select>
+        <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+      </div>
     </div>
 
     <div class="filter-stacks">

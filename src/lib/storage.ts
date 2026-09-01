@@ -130,3 +130,24 @@ export function getSectionOrder(): string[] {
 export function setSectionOrder(order: string[]): void {
   writeJson(SECTION_ORDER_KEY, order);
 }
+
+// --- Selected Game Filter ----------------------------------------------
+
+const GAME_KEY = "poketeam:selected-game";
+export const GAME_CHANGED_EVENT = "poketeam:game-changed";
+
+export function getSelectedGame(): string {
+  try {
+    return localStorage.getItem(GAME_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+export function setSelectedGame(game: string): string {
+  try {
+    localStorage.setItem(GAME_KEY, game);
+  } catch {}
+  window.dispatchEvent(new CustomEvent(GAME_CHANGED_EVENT, { detail: { game } }));
+  return game;
+}

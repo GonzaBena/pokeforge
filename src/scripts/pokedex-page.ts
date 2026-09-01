@@ -1,11 +1,11 @@
 import { getManifest, getChunk, getAllPokemon, getGenerations, getTypeChart } from "../lib/pokedexData";
-import { getCapturedIds, setCaptured, CAPTURED_CHANGED_EVENT } from "../lib/storage";
+import { getCapturedIds, setCaptured, CAPTURED_CHANGED_EVENT, getSelectedGame, setSelectedGame, GAME_CHANGED_EVENT } from "../lib/storage";
 import { staggerCardsIn, cardHoverTilt, animateCaptureReveal } from "../lib/animations";
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
-import type { Pokemon } from "../lib/types";
+import type { GenerationInfo, Pokemon } from "../lib/types";
 
 const PAGE_SIZE = 100;
 
@@ -14,6 +14,7 @@ const emptyMsg = document.querySelector<HTMLElement>("[data-pokedex-empty]")!;
 const loadMoreWrap = document.querySelector<HTMLElement>("[data-load-more-wrap]")!;
 const loadMoreBtn = document.querySelector<HTMLButtonElement>("[data-load-more]")!;
 const searchInput = document.querySelector<HTMLInputElement>("[data-search-input]")!;
+const gameFilterEl = document.querySelector<HTMLSelectElement>("[data-game-filter]")!;
 const typeFilterEl = document.querySelector<HTMLElement>("[data-type-filter]")!;
 const genFilterEl = document.querySelector<HTMLElement>("[data-generation-filter]")!;
 const viewToggleEl = document.querySelector<HTMLElement>("[data-view-toggle]")!;
@@ -27,8 +28,10 @@ let shown = 0;
 let manifestTotal = 0;
 let view: "all" | "captured" = "all";
 let search = "";
+let selectedGame = getSelectedGame();
 const selectedTypes = new Set<string>();
 const selectedGenerations = new Set<string>();
+const gameToGenMap = new Map<string, GenerationInfo>();
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -98,6 +101,10 @@ function computeFiltered(source: Pokemon[]): Pokemon[] {
     if (search && !p.name.includes(search) && !String(p.id).includes(search)) return false;
     if (selectedTypes.size && !p.types.some((t) => selectedTypes.has(t))) return false;
     if (selectedGenerations.size && !selectedGenerations.has(p.generation)) return false;
+    if (selectedGame) {
+      const genInfo = gameToGenMap.get(selectedGame);
+      if (genInfo && p.id > genInfo.speciesIdRange[1]) return false;
+    }
     return true;
   });
 }
@@ -132,21 +139,51 @@ async function applyFilters(): Promise<void> {
 }
 
 function populateTypeChips(types: string[]): void {
-  typeFilterEl.innerHTML = types
-    .map(
-      (t) =>
-        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
-    )
-    .join("");
+  const row1 = types.slice(0, 9);
+  const row2 = types.slice(9);
+
+  const renderRow = (list: string[]) =>
+    `<div class="filter-group__row">` +
+    list
+      .map(
+        (t) =>
+          `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
+      )
+      .join("") +
+    `</div>`;
+
+  typeFilterEl.innerHTML = renderRow(row1) + renderRow(row2);
 }
 
-function populateGenerationChips(generations: { name: string; displayName: string }[]): void {
-  genFilterEl.innerHTML = generations
+function populateGenerationChips(generations: GenerationInfo[]): void {
+  const chips = generations
     .map((g) => {
       const label = g.displayName.replace(/^Generación\s*/i, "");
       return `<button class="filter-chip" type="button" data-generation="${g.name}" aria-pressed="false">${label}</button>`;
     })
     .join("");
+
+  genFilterEl.innerHTML = `<div class="filter-group__row">${chips}</div>`;
+}
+
+function populateGameSelect(generations: GenerationInfo[]): void {
+  gameToGenMap.clear();
+  let html = `<option value="">Todos los juegos</option>`;
+
+  for (const g of generations) {
+    const regionLabel = g.region ? ` (${capitalize(g.region)})` : "";
+    html += `<optgroup label="${g.displayName}${regionLabel}">`;
+    for (const vg of g.versionGroups) {
+      gameToGenMap.set(vg.name, g);
+      html += `<option value="${vg.name}">${vg.displayName}</option>`;
+    }
+    html += `</optgroup>`;
+  }
+
+  if (gameFilterEl) {
+    gameFilterEl.innerHTML = html;
+    gameFilterEl.value = selectedGame;
+  }
 }
 
 // --- event wiring --------------------------------------------------------
@@ -224,6 +261,12 @@ genFilterEl.addEventListener("click", (e) => {
   applyFilters();
 });
 
+gameFilterEl?.addEventListener("change", () => {
+  selectedGame = gameFilterEl.value;
+  setSelectedGame(selectedGame);
+  applyFilters();
+});
+
 loadMoreBtn.addEventListener("click", async () => {
   if (!allPokemonReady) {
     allPokemon = await getAllPokemon();
@@ -238,6 +281,15 @@ window.addEventListener(CAPTURED_CHANGED_EVENT, (e) => {
   const detail = (e as CustomEvent<{ changedId: number; captured: boolean }>).detail;
   if (detail && !animatingIds.has(detail.changedId)) {
     syncCardCapturedState(detail.changedId, detail.captured);
+  }
+});
+
+window.addEventListener(GAME_CHANGED_EVENT, (e) => {
+  const newGame = (e as CustomEvent<{ game: string }>).detail?.game ?? "";
+  if (newGame !== selectedGame) {
+    selectedGame = newGame;
+    if (gameFilterEl) gameFilterEl.value = newGame;
+    applyFilters();
   }
 });
 
@@ -256,7 +308,11 @@ async function init(): Promise<void> {
   cardHoverTilt(grid);
   getAllPokemon(); // warm cache in background for filters/load-more
   getTypeChart().then((chart) => populateTypeChips(chart.types));
-  getGenerations().then(populateGenerationChips);
+  getGenerations().then((gens) => {
+    populateGenerationChips(gens);
+    populateGameSelect(gens);
+    if (selectedGame) applyFilters();
+  });
 }
 
 init();
