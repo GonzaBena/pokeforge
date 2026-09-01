@@ -23,19 +23,24 @@ export function computeTeamDefense(chart: TypeChart, team: TeamMember[]): TeamDe
       const weakMembers: string[] = [];
       const resistMembers: string[] = [];
       const immuneMembers: string[] = [];
-      let total = 0;
+      let product = 1;
 
       for (const member of team) {
         const mult = getTypeMultiplier(chart, attackingType, member.types);
-        total += mult;
+        product *= mult;
         if (mult === 0) immuneMembers.push(member.name);
         else if (mult > 1) weakMembers.push(member.name);
         else if (mult < 1) resistMembers.push(member.name);
       }
 
+      // Multiplicative geometric mean (powers of 2 in Pokemon type effectiveness):
+      // Weakness (2x) and resistance (0.5x) cancel each other out (2.0 * 0.5 = 1.0)
+      const rawAvg = team.length ? Math.pow(product, 1 / team.length) : 1;
+      const averageMultiplier = Math.round(rawAvg * 100) / 100;
+
       return {
         type: attackingType,
-        averageMultiplier: team.length ? total / team.length : 1,
+        averageMultiplier,
         weakMembers,
         resistMembers,
         immuneMembers,
@@ -45,9 +50,9 @@ export function computeTeamDefense(chart: TypeChart, team: TeamMember[]): TeamDe
 }
 
 export function splitWeaknessesAndResistances(entries: TeamDefenseEntry[]) {
-  const weaknesses = entries.filter((e) => e.averageMultiplier > 1).sort((a, b) => b.averageMultiplier - a.averageMultiplier);
+  const weaknesses = entries.filter((e) => e.averageMultiplier > 1.01).sort((a, b) => b.averageMultiplier - a.averageMultiplier);
   const resistances = entries
-    .filter((e) => e.averageMultiplier < 1)
+    .filter((e) => e.averageMultiplier < 0.99)
     .sort((a, b) => a.averageMultiplier - b.averageMultiplier);
   return { weaknesses, resistances };
 }

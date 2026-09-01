@@ -134,7 +134,11 @@ function changeTeamSize(newSize: number): void {
 }
 
 function renderBarHTML(entry: TeamDefenseEntry): string {
-  const pct = Math.min(100, (entry.averageMultiplier / 4) * 100);
+  const isWeakness = entry.averageMultiplier > 1;
+  const pct = isWeakness
+    ? Math.min(100, Math.max(15, (entry.averageMultiplier / 4) * 100))
+    : Math.min(100, Math.max(15, (1 - entry.averageMultiplier) * 100));
+
   return `
     <div class="type-bar">
       <span class="type-bar__type">${entry.type}</span>
