@@ -279,7 +279,7 @@ function renderHeader(ctx: RenderContext): string {
         <div class="detail-stats-wrapper ${showHexagonChart ? "has-hexagon" : ""}" data-stats-wrapper>
           <div class="detail-stats" data-stats-bars-view>${statsHtml}</div>
           <div class="detail-hexagon-view" data-stats-hexagon-view ${showHexagonChart ? "" : "hidden"}>
-            ${renderHexagonChart(currentStats, primaryTypeColor)}
+            ${renderHexagonChart(currentStats, primaryTypeColor, selectedNature)}
           </div>
         </div>
         <div class="detail-footer-row">
@@ -306,12 +306,38 @@ function renderHeader(ctx: RenderContext): string {
 
 let showHexagonChart = false;
 
-function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string): string {
-  const width = 220;
-  const height = 130;
+function isStatUp(nature: Nature | null, key: keyof PokemonStats): boolean {
+  if (!nature || !nature.increasedStat || nature.increasedStat === nature.decreasedStat) return false;
+  const map: Record<string, keyof PokemonStats> = {
+    hp: "hp",
+    attack: "attack",
+    defense: "defense",
+    "special-attack": "specialAttack",
+    "special-defense": "specialDefense",
+    speed: "speed",
+  };
+  return map[nature.increasedStat] === key;
+}
+
+function isStatDown(nature: Nature | null, key: keyof PokemonStats): boolean {
+  if (!nature || !nature.decreasedStat || nature.increasedStat === nature.decreasedStat) return false;
+  const map: Record<string, keyof PokemonStats> = {
+    hp: "hp",
+    attack: "attack",
+    defense: "defense",
+    "special-attack": "specialAttack",
+    "special-defense": "specialDefense",
+    speed: "speed",
+  };
+  return map[nature.decreasedStat] === key;
+}
+
+function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string, nature: Nature | null = null): string {
+  const width = 250;
+  const height = 165;
   const cx = width / 2;
   const cy = height / 2;
-  const radius = 35;
+  const radius = 50;
   const MAX_STAT = 255;
 
   const statList: { key: keyof PokemonStats; label: string }[] = [
@@ -356,31 +382,58 @@ function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string): stri
   const labelsHtml = statList
     .map((item, i) => {
       const val = stats[item.key] ?? 0;
-      const labelRadius = radius + 14;
+      const up = isStatUp(nature, item.key);
+      const down = isStatDown(nature, item.key);
+      const labelRadius = radius + 17;
       const lx = cx + labelRadius * Math.cos(angles[i]);
       const ly = cy + labelRadius * Math.sin(angles[i]);
       const anchor = Math.abs(lx - cx) < 10 ? "middle" : lx > cx ? "start" : "end";
 
+      let symbol = "";
+      let symbolColor = "";
+      if (up) {
+        symbol = "▲";
+        symbolColor = "#f87171";
+      } else if (down) {
+        symbol = "▼";
+        symbolColor = "#60a5fa";
+      }
+
+      const valColor = up ? "#f87171" : down ? "#60a5fa" : val >= 130 ? "var(--accent)" : "var(--text)";
+
       return `
         <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="central" class="hexagon-chart__label">
           <tspan class="hexagon-chart__label-title">${item.label}</tspan>
-          <tspan class="hexagon-chart__label-val" dx="2">${val}</tspan>
+          <tspan class="hexagon-chart__label-val" fill="${valColor}" dx="2">${val}</tspan>
+          ${symbol ? `<tspan fill="${symbolColor}" dx="2" font-size="10px" font-weight="900">${symbol}</tspan>` : ""}
         </text>
       `;
     })
     .join("");
 
+  const cleanColor = primaryTypeColor.replace("#", "");
+
   return `
     <div class="hexagon-chart-container">
-      <svg class="hexagon-chart-svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
-        <polygon points="${getGridPoints(1)}" fill="none" stroke="var(--border-strong)" stroke-width="1.5" />
-        <polygon points="${getGridPoints(0.75)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,2" />
-        <polygon points="${getGridPoints(0.5)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,2" />
-        <polygon points="${getGridPoints(0.25)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,2" />
+      <svg class="hexagon-chart-svg" viewBox="0 0 ${width} ${height}" width="100%" height="auto">
+        <defs>
+          <linearGradient id="hexGrad-${cleanColor}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${primaryTypeColor}" stop-opacity="0.4" />
+            <stop offset="100%" stop-color="${primaryTypeColor}" stop-opacity="0.12" />
+          </linearGradient>
+          <filter id="hexGlow-${cleanColor}" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="${primaryTypeColor}" flood-opacity="0.4" />
+          </filter>
+        </defs>
+
+        <polygon points="${getGridPoints(1)}" fill="var(--bg-elevated)" fill-opacity="0.2" stroke="var(--border-strong)" stroke-width="1.2" />
+        <polygon points="${getGridPoints(0.75)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
+        <polygon points="${getGridPoints(0.5)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
+        <polygon points="${getGridPoints(0.25)}" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
 
         ${axisLinesHtml}
 
-        <polygon points="${valuePoints}" fill="${primaryTypeColor}33" stroke="${primaryTypeColor}" stroke-width="2.5" class="hexagon-chart__polygon" />
+        <polygon points="${valuePoints}" fill="url(#hexGrad-${cleanColor})" stroke="${primaryTypeColor}" stroke-width="2" filter="url(#hexGlow-${cleanColor})" class="hexagon-chart__polygon" />
 
         ${statList
           .map((item, i) => {
@@ -388,7 +441,7 @@ function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string): stri
             const ratio = Math.max(val / MAX_STAT, 0.08);
             const vx = cx + radius * ratio * Math.cos(angles[i]);
             const vy = cy + radius * ratio * Math.sin(angles[i]);
-            return `<circle cx="${vx.toFixed(1)}" cy="${vy.toFixed(1)}" r="3" fill="${primaryTypeColor}" stroke="#ffffff" stroke-width="1.5" />`;
+            return `<circle cx="${vx.toFixed(1)}" cy="${vy.toFixed(1)}" r="2" fill="${primaryTypeColor}" stroke="#ffffff" stroke-width="1" />`;
           })
           .join("")}
 
@@ -396,6 +449,28 @@ function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string): stri
       </svg>
     </div>
   `;
+}
+
+function updateHexagonChartIfVisible(): void {
+  if (!showHexagonChart || currentId === null || !lastContext) return;
+  const { bodyEl } = getModalElements();
+  if (!bodyEl) return;
+  const hexView = bodyEl.querySelector<HTMLElement>("[data-stats-hexagon-view]");
+  if (!hexView) return;
+
+  const overrides = getPokemonOverrides(currentId);
+  const currentStats: PokemonStats = {
+    hp: overrides.stats.hp ?? lastContext.detail.stats.hp,
+    attack: overrides.stats.attack ?? lastContext.detail.stats.attack,
+    defense: overrides.stats.defense ?? lastContext.detail.stats.defense,
+    specialAttack: overrides.stats.specialAttack ?? lastContext.detail.stats.specialAttack,
+    specialDefense: overrides.stats.specialDefense ?? lastContext.detail.stats.specialDefense,
+    speed: overrides.stats.speed ?? lastContext.detail.stats.speed,
+  };
+  const selectedNature = lastContext.natures.find((n) => n.name === overrides.nature) ?? null;
+  const primaryTypeColor = typeColor(lastContext.pokemon.types[0] ?? "normal");
+
+  hexView.innerHTML = renderHexagonChart(currentStats, primaryTypeColor, selectedNature);
 }
 
 function render(ctx: RenderContext): void {
@@ -488,6 +563,7 @@ function bindModalEvents(): void {
     const overrides = getPokemonOverrides(currentId);
     overrides.stats = { ...overrides.stats, [key]: value };
     setPokemonOverrides(currentId, overrides);
+    updateHexagonChartIfVisible();
   });
 
   document.addEventListener("change", (e) => {
@@ -503,6 +579,7 @@ function bindModalEvents(): void {
     const { bodyEl } = getModalElements();
     const tooltipEl = bodyEl?.querySelector<HTMLElement>("[data-nature-tooltip]");
     if (tooltipEl) tooltipEl.setAttribute("title", natureEffectText(nature));
+    updateHexagonChartIfVisible();
   });
 
   document.addEventListener("click", (e) => {
@@ -532,6 +609,7 @@ function bindModalEvents(): void {
       if (wrapper && hexView) {
         wrapper.classList.toggle("has-hexagon", showHexagonChart);
         hexView.hidden = !showHexagonChart;
+        updateHexagonChartIfVisible();
       }
       if (labelEl) {
         labelEl.textContent = showHexagonChart ? "Ocultar Juez" : "Gráfico Juez";
