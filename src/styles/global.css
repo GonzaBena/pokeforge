@@ -1088,6 +1088,13 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 /* --- Picker Filters Section --- */
 
+.picker-panel__container {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .picker-panel__filters {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);

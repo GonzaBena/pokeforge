@@ -76,24 +76,30 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
           <i data-lucide="search" class="picker-input-icon"></i>
           <input class="picker-input" type="search" placeholder="Buscar por nombre de movimiento..." data-move-picker-search />
         </div>
-        <div class="picker-panel__filter-section">
-          <span class="picker-panel__section-title">Categoría</span>
-          <div class="filter-group filter-group--compact" data-move-category-filter aria-label="Filtrar por categoría">
-            <button class="filter-chip" type="button" data-category="all" aria-pressed="true">Todas</button>
-            <button class="filter-chip" type="button" data-category="physical" aria-pressed="false">Físico</button>
-            <button class="filter-chip" type="button" data-category="special" aria-pressed="false">Especial</button>
-            <button class="filter-chip" type="button" data-category="status" aria-pressed="false">Estado</button>
+        <div class="picker-panel__container">
+          <div class="picker-panel__filter-section">
+            <span class="picker-panel__section-title">Categoría</span>
+            <div class="filter-group filter-group--compact" data-move-category-filter aria-label="Filtrar por categoría">
+              <button class="filter-chip" type="button" data-category="all" aria-pressed="true">Todas</button>
+              <button class="filter-chip" type="button" data-category="physical" aria-pressed="false">Físico</button>
+              <button class="filter-chip" type="button" data-category="special" aria-pressed="false">Especial</button>
+              <button class="filter-chip" type="button" data-category="status" aria-pressed="false">Estado</button>
+            </div>
+          </div>
+          <div class="picker-panel__filter-section">
+            <span class="picker-panel__section-title">Método de aprendizaje</span>
+            <div class="filter-group filter-group--compact" data-move-method-filter aria-label="Filtrar por método">
+              <button class="filter-chip" type="button" data-method="all" aria-pressed="true">Todos</button>
+              <button class="filter-chip" type="button" data-method="level-up" aria-pressed="false">Nivel</button>
+              <button class="filter-chip" type="button" data-method="machine" aria-pressed="false">MT/MO</button>
+              <button class="filter-chip" type="button" data-method="tutor" aria-pressed="false">Tutor</button>
+              <button class="filter-chip" type="button" data-method="egg" aria-pressed="false">Huevo</button>
+            </div>
           </div>
         </div>
         <div class="picker-panel__filter-section">
-          <span class="picker-panel__section-title">Método de aprendizaje</span>
-          <div class="filter-group filter-group--compact" data-move-method-filter aria-label="Filtrar por método">
-            <button class="filter-chip" type="button" data-method="all" aria-pressed="true">Todos</button>
-            <button class="filter-chip" type="button" data-method="level-up" aria-pressed="false">Nivel</button>
-            <button class="filter-chip" type="button" data-method="machine" aria-pressed="false">MT/MO</button>
-            <button class="filter-chip" type="button" data-method="tutor" aria-pressed="false">Tutor</button>
-            <button class="filter-chip" type="button" data-method="egg" aria-pressed="false">Huevo</button>
-          </div>
+          <span class="picker-panel__section-title">Tipo de Ataque</span>
+          <div class="filter-group filter-group--compact" data-move-type-filter aria-label="Filtrar por tipo de ataque"></div>
         </div>
       </div>
       <div class="move-picker__results" data-move-picker-results></div>

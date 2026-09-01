@@ -32,6 +32,7 @@ const movePickerResultsEl = document.querySelector<HTMLElement>("[data-move-pick
 const movePickerTitleEl = document.querySelector<HTMLElement>("[data-move-picker-title]")!;
 const moveMethodFilterEl = document.querySelector<HTMLElement>("[data-move-method-filter]");
 const moveCategoryFilterEl = document.querySelector<HTMLElement>("[data-move-category-filter]");
+const moveTypeFilterEl = document.querySelector<HTMLElement>("[data-move-type-filter]");
 
 let team: TeamState = { size: 5, slots: [] };
 let allPokemon: Pokemon[] = [];
@@ -46,6 +47,7 @@ let activeMoveSlotIndex: number | null = null;
 let activeMoveIndex: number | null = null;
 let activeMethodFilter: string = "all";
 let activeCategoryFilter: string = "all";
+let activeMoveTypeFilter: string = "all";
 
 interface MovePickerRow {
   name: string;
@@ -364,6 +366,17 @@ function populatePickerFilters(): void {
     })
     .join("");
   pickerMoveOptionsEl.innerHTML = moveIndex.map((m) => `<option value="${m}"></option>`).join("");
+
+  if (moveTypeFilterEl && typeChart) {
+    const allBtn = `<button class="filter-chip" type="button" data-move-type="all" aria-pressed="true">Todos</button>`;
+    const typeBtns = typeChart.types
+      .map(
+        (t) =>
+          `<button class="filter-chip" type="button" data-move-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
+      )
+      .join("");
+    moveTypeFilterEl.innerHTML = allBtn + typeBtns;
+  }
 }
 
 // --- move picker modal (table view) ----------------------------------
@@ -378,6 +391,7 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
   activeMoveIndex = moveIndex;
   activeMethodFilter = "all";
   activeCategoryFilter = "all";
+  activeMoveTypeFilter = "all";
 
   if (movePickerTitleEl) {
     movePickerTitleEl.textContent = `Ataque ${moveIndex + 1} - ${capitalize(pokemon.name)}`;
@@ -390,6 +404,9 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
 
   const categoryChips = moveCategoryFilterEl?.querySelectorAll<HTMLButtonElement>("[data-category]");
   categoryChips?.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.category === "all")));
+
+  const typeChips = moveTypeFilterEl?.querySelectorAll<HTMLButtonElement>("[data-move-type]");
+  typeChips?.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.moveType === "all")));
 
   movePickerResultsEl.innerHTML = `<div class="pokedex-loading"><i data-lucide="loader-2" class="spin"></i> Cargando movimientos de ${capitalize(pokemon.name)}...</div>`;
   refreshIcons();
@@ -437,7 +454,12 @@ function renderMovePickerTable(): void {
       if (!meta || meta.category !== activeCategoryFilter) return false;
     }
 
-    // 3. Search query filter
+    // 3. Move Type filter (single selection)
+    if (activeMoveTypeFilter !== "all") {
+      if (!meta || meta.type !== activeMoveTypeFilter) return false;
+    }
+
+    // 4. Search query filter
     if (search && !r.name.toLowerCase().includes(search) && !formatLabel(r.name).toLowerCase().includes(search)) {
       return false;
     }
@@ -604,6 +626,16 @@ moveCategoryFilterEl?.addEventListener("click", (e) => {
   if (!btn) return;
   activeCategoryFilter = btn.dataset.category!;
   moveCategoryFilterEl.querySelectorAll<HTMLButtonElement>("[data-category]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b === btn));
+  });
+  renderMovePickerTable();
+});
+
+moveTypeFilterEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-move-type]");
+  if (!btn) return;
+  activeMoveTypeFilter = btn.dataset.moveType!;
+  moveTypeFilterEl.querySelectorAll<HTMLButtonElement>("[data-move-type]").forEach((b) => {
     b.setAttribute("aria-pressed", String(b === btn));
   });
   renderMovePickerTable();
