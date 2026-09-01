@@ -1,0 +1,29 @@
+---
+import TypeBadge from "./TypeBadge.astro";
+import type { Pokemon } from "../lib/types";
+
+interface Props {
+  pokemon: Pokemon;
+  captured: boolean;
+}
+
+const { pokemon, captured } = Astro.props;
+const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
+const dexNumber = `#${String(pokemon.id).padStart(4, "0")}`;
+---
+
+<article class:list={["pokemon-card", { captured }]} data-pokemon-id={pokemon.id} data-batch>
+  <div class="pokemon-card__id">{dexNumber}</div>
+  <div class="pokemon-card__sprite-wrap">
+    <img class="pokemon-card__sprite" src={sprite} alt={pokemon.name} loading="lazy" decoding="async" width="120" height="120" />
+  </div>
+  <div class="captured-badge"><i data-lucide="circle-dot"></i></div>
+  <div class="pokemon-card__name">{pokemon.name}</div>
+  <div class="pokemon-card__types">
+    {pokemon.types.map((t) => <TypeBadge type={t} />)}
+  </div>
+  <button class="pokemon-card__capture-btn" type="button" data-capture-btn data-pokemon-id={pokemon.id}>
+    <i data-lucide={captured ? "check" : "circle-dot"}></i>
+    {captured ? "Capturado" : "Capturar"}
+  </button>
+</article>

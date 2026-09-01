@@ -1,0 +1,1 @@
+{"chainId":492,"nodes":[{"speciesId":940,"speciesName":"wattrel","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":941,"speciesName":"kilowattrel","evolvesFromSpecies":"wattrel","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

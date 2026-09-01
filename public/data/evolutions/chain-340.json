@@ -1,0 +1,1 @@
+{"chainId":340,"nodes":[{"speciesId":659,"speciesName":"bunnelby","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":660,"speciesName":"diggersby","evolvesFromSpecies":"bunnelby","trigger":"level-up","minLevel":20,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":345,"nodes":[{"speciesId":672,"speciesName":"skiddo","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":673,"speciesName":"gogoat","evolvesFromSpecies":"skiddo","trigger":"level-up","minLevel":32,"item":null,"itemDisplay":null}]}

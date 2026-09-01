@@ -1,0 +1,1 @@
+{"chainId":20,"nodes":[{"speciesId":48,"speciesName":"venonat","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":49,"speciesName":"venomoth","evolvesFromSpecies":"venonat","trigger":"level-up","minLevel":31,"item":null,"itemDisplay":null}]}

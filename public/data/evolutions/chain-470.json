@@ -1,0 +1,1 @@
+{"chainId":470,"nodes":[{"speciesId":891,"speciesName":"kubfu","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":892,"speciesName":"urshifu","evolvesFromSpecies":"kubfu","trigger":"tower-of-darkness","minLevel":null,"item":null,"itemDisplay":null}]}

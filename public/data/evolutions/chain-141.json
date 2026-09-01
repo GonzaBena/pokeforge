@@ -1,0 +1,1 @@
+{"chainId":141,"nodes":[{"speciesId":283,"speciesName":"surskit","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":284,"speciesName":"masquerain","evolvesFromSpecies":"surskit","trigger":"level-up","minLevel":22,"item":null,"itemDisplay":null}]}

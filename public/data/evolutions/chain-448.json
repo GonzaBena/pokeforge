@@ -1,0 +1,1 @@
+{"chainId":448,"nodes":[{"speciesId":852,"speciesName":"clobbopus","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":853,"speciesName":"grapploct","evolvesFromSpecies":"clobbopus","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

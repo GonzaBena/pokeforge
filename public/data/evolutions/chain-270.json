@@ -1,0 +1,1 @@
+{"chainId":270,"nodes":[{"speciesId":529,"speciesName":"drilbur","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":530,"speciesName":"excadrill","evolvesFromSpecies":"drilbur","trigger":"level-up","minLevel":31,"item":null,"itemDisplay":null}]}

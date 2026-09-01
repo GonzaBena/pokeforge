@@ -1,0 +1,1 @@
+{"chainId":346,"nodes":[{"speciesId":674,"speciesName":"pancham","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":675,"speciesName":"pangoro","evolvesFromSpecies":"pancham","trigger":"level-up","minLevel":32,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":148,"nodes":[{"speciesId":300,"speciesName":"skitty","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":301,"speciesName":"delcatty","evolvesFromSpecies":"skitty","trigger":"use-item","minLevel":null,"item":"moon-stone","itemDisplay":"Piedra Lunar"}]}

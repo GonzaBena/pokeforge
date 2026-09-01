@@ -1,0 +1,1 @@
+{"chainId":443,"nodes":[{"speciesId":843,"speciesName":"silicobra","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":844,"speciesName":"sandaconda","evolvesFromSpecies":"silicobra","trigger":"level-up","minLevel":36,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":160,"nodes":[{"speciesId":318,"speciesName":"carvanha","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":319,"speciesName":"sharpedo","evolvesFromSpecies":"carvanha","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

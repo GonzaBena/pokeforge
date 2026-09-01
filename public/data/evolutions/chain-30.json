@@ -1,0 +1,1 @@
+{"chainId":30,"nodes":[{"speciesId":72,"speciesName":"tentacool","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":73,"speciesName":"tentacruel","evolvesFromSpecies":"tentacool","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

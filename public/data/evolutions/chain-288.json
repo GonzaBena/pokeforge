@@ -1,0 +1,1 @@
+{"chainId":288,"nodes":[{"speciesId":564,"speciesName":"tirtouga","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":565,"speciesName":"carracosta","evolvesFromSpecies":"tirtouga","trigger":"level-up","minLevel":37,"item":null,"itemDisplay":null}]}

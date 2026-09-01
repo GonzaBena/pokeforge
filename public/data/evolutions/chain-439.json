@@ -1,0 +1,1 @@
+{"chainId":439,"nodes":[{"speciesId":833,"speciesName":"chewtle","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":834,"speciesName":"drednaw","evolvesFromSpecies":"chewtle","trigger":"level-up","minLevel":22,"item":null,"itemDisplay":null}]}

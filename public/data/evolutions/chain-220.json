@@ -1,0 +1,1 @@
+{"chainId":220,"nodes":[{"speciesId":427,"speciesName":"buneary","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":428,"speciesName":"lopunny","evolvesFromSpecies":"buneary","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

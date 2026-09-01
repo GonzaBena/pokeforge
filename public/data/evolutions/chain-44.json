@@ -1,0 +1,1 @@
+{"chainId":44,"nodes":[{"speciesId":100,"speciesName":"voltorb","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":101,"speciesName":"electrode","evolvesFromSpecies":"voltorb","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

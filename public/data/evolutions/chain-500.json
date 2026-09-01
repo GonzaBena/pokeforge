@@ -1,0 +1,1 @@
+{"chainId":500,"nodes":[{"speciesId":955,"speciesName":"flittle","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":956,"speciesName":"espathra","evolvesFromSpecies":"flittle","trigger":"level-up","minLevel":35,"item":null,"itemDisplay":null}]}

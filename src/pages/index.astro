@@ -1,0 +1,25 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Inicio">
+  <section class="hero">
+    <h1 class="hero__title">Tu Pokédex y tu equipo, en un solo lugar</h1>
+    <p class="hero__subtitle">
+      Registrá qué Pokémon capturaste y armá tu equipo ideal viendo sus fortalezas y debilidades de tipo,
+      todo con datos reales de PokeAPI.
+    </p>
+    <div class="hero__actions">
+      <a class="hero__card" href="/pokedex">
+        <i data-lucide="book-open"></i>
+        <strong>Pokédex</strong>
+        <span>Explorá y marcá capturas</span>
+      </a>
+      <a class="hero__card" href="/equipo">
+        <i data-lucide="users"></i>
+        <strong>Armar equipo</strong>
+        <span>Elegí hasta 5 Pokémon</span>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

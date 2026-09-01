@@ -1,0 +1,1 @@
+{"chainId":396,"nodes":[{"speciesId":767,"speciesName":"wimpod","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":768,"speciesName":"golisopod","evolvesFromSpecies":"wimpod","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

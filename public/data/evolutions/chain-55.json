@@ -1,0 +1,1 @@
+{"chainId":55,"nodes":[{"speciesId":118,"speciesName":"goldeen","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":119,"speciesName":"seaking","evolvesFromSpecies":"goldeen","trigger":"level-up","minLevel":33,"item":null,"itemDisplay":null}]}

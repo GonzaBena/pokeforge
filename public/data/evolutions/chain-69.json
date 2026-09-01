@@ -1,0 +1,1 @@
+{"chainId":69,"nodes":[{"speciesId":138,"speciesName":"omanyte","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":139,"speciesName":"omastar","evolvesFromSpecies":"omanyte","trigger":"level-up","minLevel":40,"item":null,"itemDisplay":null}]}

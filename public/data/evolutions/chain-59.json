@@ -1,0 +1,1 @@
+{"chainId":59,"nodes":[{"speciesId":238,"speciesName":"smoochum","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":124,"speciesName":"jynx","evolvesFromSpecies":"smoochum","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":269,"nodes":[{"speciesId":527,"speciesName":"woobat","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":528,"speciesName":"swoobat","evolvesFromSpecies":"woobat","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

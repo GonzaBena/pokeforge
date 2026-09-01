@@ -1,0 +1,1 @@
+{"chainId":39,"nodes":[{"speciesId":90,"speciesName":"shellder","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":91,"speciesName":"cloyster","evolvesFromSpecies":"shellder","trigger":"use-item","minLevel":null,"item":"water-stone","itemDisplay":"Piedra Agua"}]}

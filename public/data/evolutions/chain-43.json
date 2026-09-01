@@ -1,0 +1,1 @@
+{"chainId":43,"nodes":[{"speciesId":98,"speciesName":"krabby","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":99,"speciesName":"kingler","evolvesFromSpecies":"krabby","trigger":"level-up","minLevel":28,"item":null,"itemDisplay":null}]}

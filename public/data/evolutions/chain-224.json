@@ -1,0 +1,1 @@
+{"chainId":224,"nodes":[{"speciesId":436,"speciesName":"bronzor","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":437,"speciesName":"bronzong","evolvesFromSpecies":"bronzor","trigger":"level-up","minLevel":33,"item":null,"itemDisplay":null}]}

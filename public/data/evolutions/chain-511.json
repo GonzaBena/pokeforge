@@ -1,0 +1,1 @@
+{"chainId":511,"nodes":[{"speciesId":974,"speciesName":"cetoddle","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":975,"speciesName":"cetitan","evolvesFromSpecies":"cetoddle","trigger":"use-item","minLevel":null,"item":"ice-stone","itemDisplay":"Piedra Hielo"}]}

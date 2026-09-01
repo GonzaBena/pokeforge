@@ -1,0 +1,1 @@
+{"chainId":119,"nodes":[{"speciesId":231,"speciesName":"phanpy","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":232,"speciesName":"donphan","evolvesFromSpecies":"phanpy","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

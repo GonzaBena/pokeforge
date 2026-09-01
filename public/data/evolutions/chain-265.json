@@ -1,0 +1,1 @@
+{"chainId":265,"nodes":[{"speciesId":517,"speciesName":"munna","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":518,"speciesName":"musharna","evolvesFromSpecies":"munna","trigger":"use-item","minLevel":null,"item":"moon-stone","itemDisplay":"Piedra Lunar"}]}

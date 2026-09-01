@@ -1,0 +1,1 @@
+{"chainId":301,"nodes":[{"speciesId":592,"speciesName":"frillish","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":593,"speciesName":"jellicent","evolvesFromSpecies":"frillish","trigger":"level-up","minLevel":40,"item":null,"itemDisplay":null}]}

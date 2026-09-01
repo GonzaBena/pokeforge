@@ -1,0 +1,1 @@
+{"chainId":219,"nodes":[{"speciesId":425,"speciesName":"drifloon","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":426,"speciesName":"drifblim","evolvesFromSpecies":"drifloon","trigger":"level-up","minLevel":28,"item":null,"itemDisplay":null}]}

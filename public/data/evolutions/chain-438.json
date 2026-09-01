@@ -1,0 +1,1 @@
+{"chainId":438,"nodes":[{"speciesId":831,"speciesName":"wooloo","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":832,"speciesName":"dubwool","evolvesFromSpecies":"wooloo","trigger":"level-up","minLevel":24,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,30 @@
+---
+import Nav from "../components/Nav.astro";
+import ToastContainer from "../components/ToastContainer.astro";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} · PokeTeam</title>
+  </head>
+  <body>
+    <Nav />
+    <slot />
+    <ToastContainer />
+    <script>
+      import { refreshIcons } from "../lib/icons";
+      refreshIcons();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+{"chainId":350,"nodes":[{"speciesId":682,"speciesName":"spritzee","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":683,"speciesName":"aromatisse","evolvesFromSpecies":"spritzee","trigger":"trade","minLevel":null,"item":null,"itemDisplay":null}]}

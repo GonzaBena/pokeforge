@@ -1,0 +1,1 @@
+{"chainId":120,"nodes":[{"speciesId":234,"speciesName":"stantler","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":899,"speciesName":"wyrdeer","evolvesFromSpecies":"stantler","trigger":"agile-style-move","minLevel":null,"item":null,"itemDisplay":null}]}

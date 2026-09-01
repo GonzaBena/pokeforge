@@ -1,0 +1,1 @@
+{"chainId":212,"nodes":[{"speciesId":410,"speciesName":"shieldon","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":411,"speciesName":"bastiodon","evolvesFromSpecies":"shieldon","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

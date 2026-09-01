@@ -1,0 +1,238 @@
+[
+  {
+    "id": 1,
+    "name": "generation-i",
+    "displayName": "Generación I",
+    "region": "kanto",
+    "speciesIdRange": [
+      1,
+      151
+    ],
+    "versionGroups": [
+      {
+        "name": "red-blue",
+        "displayName": "Red - Blue"
+      },
+      {
+        "name": "yellow",
+        "displayName": "Yellow"
+      },
+      {
+        "name": "red-green-japan",
+        "displayName": "Red Japan - Green Japan"
+      },
+      {
+        "name": "blue-japan",
+        "displayName": "Blue Japan"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "generation-ii",
+    "displayName": "Generación II",
+    "region": "johto",
+    "speciesIdRange": [
+      152,
+      251
+    ],
+    "versionGroups": [
+      {
+        "name": "gold-silver",
+        "displayName": "Gold - Silver"
+      },
+      {
+        "name": "crystal",
+        "displayName": "Crystal"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "generation-iii",
+    "displayName": "Generación III",
+    "region": "hoenn",
+    "speciesIdRange": [
+      252,
+      386
+    ],
+    "versionGroups": [
+      {
+        "name": "ruby-sapphire",
+        "displayName": "Ruby - Sapphire"
+      },
+      {
+        "name": "emerald",
+        "displayName": "Emerald"
+      },
+      {
+        "name": "firered-leafgreen",
+        "displayName": "Firered - Leafgreen"
+      },
+      {
+        "name": "colosseum",
+        "displayName": "Colosseum"
+      },
+      {
+        "name": "xd",
+        "displayName": "Xd"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "generation-iv",
+    "displayName": "Generación IV",
+    "region": "sinnoh",
+    "speciesIdRange": [
+      387,
+      493
+    ],
+    "versionGroups": [
+      {
+        "name": "diamond-pearl",
+        "displayName": "Diamond - Pearl"
+      },
+      {
+        "name": "platinum",
+        "displayName": "Platinum"
+      },
+      {
+        "name": "heartgold-soulsilver",
+        "displayName": "Heartgold - Soulsilver"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "generation-v",
+    "displayName": "Generación V",
+    "region": "unova",
+    "speciesIdRange": [
+      494,
+      649
+    ],
+    "versionGroups": [
+      {
+        "name": "black-white",
+        "displayName": "Black - White"
+      },
+      {
+        "name": "black-2-white-2",
+        "displayName": "Black 2 - White 2"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "generation-vi",
+    "displayName": "Generación VI",
+    "region": "kalos",
+    "speciesIdRange": [
+      650,
+      721
+    ],
+    "versionGroups": [
+      {
+        "name": "x-y",
+        "displayName": "X - Y"
+      },
+      {
+        "name": "omega-ruby-alpha-sapphire",
+        "displayName": "Omega Ruby - Alpha Sapphire"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "generation-vii",
+    "displayName": "Generación VII",
+    "region": "alola",
+    "speciesIdRange": [
+      722,
+      809
+    ],
+    "versionGroups": [
+      {
+        "name": "sun-moon",
+        "displayName": "Sun - Moon"
+      },
+      {
+        "name": "ultra-sun-ultra-moon",
+        "displayName": "Ultra Sun - Ultra Moon"
+      },
+      {
+        "name": "lets-go-pikachu-lets-go-eevee",
+        "displayName": "Lets Go Pikachu - Lets Go Eevee"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "generation-viii",
+    "displayName": "Generación VIII",
+    "region": "galar",
+    "speciesIdRange": [
+      810,
+      905
+    ],
+    "versionGroups": [
+      {
+        "name": "sword-shield",
+        "displayName": "Sword - Shield"
+      },
+      {
+        "name": "the-isle-of-armor",
+        "displayName": "The Isle Of Armor Sword - The Isle Of Armor Shield"
+      },
+      {
+        "name": "the-crown-tundra",
+        "displayName": "The Crown Tundra Sword - The Crown Tundra Shield"
+      },
+      {
+        "name": "brilliant-diamond-shining-pearl",
+        "displayName": "Brilliant Diamond - Shining Pearl"
+      },
+      {
+        "name": "legends-arceus",
+        "displayName": "Legends Arceus"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "generation-ix",
+    "displayName": "Generación IX",
+    "region": "paldea",
+    "speciesIdRange": [
+      906,
+      1025
+    ],
+    "versionGroups": [
+      {
+        "name": "scarlet-violet",
+        "displayName": "Scarlet - Violet"
+      },
+      {
+        "name": "the-teal-mask",
+        "displayName": "The Teal Mask Scarlet - The Teal Mask Violet"
+      },
+      {
+        "name": "the-indigo-disk",
+        "displayName": "The Indigo Disk Scarlet - The Indigo Disk Violet"
+      },
+      {
+        "name": "legends-za",
+        "displayName": "Legends Za"
+      },
+      {
+        "name": "mega-dimension",
+        "displayName": "Mega Dimension"
+      },
+      {
+        "name": "champions",
+        "displayName": "Champions"
+      }
+    ]
+  }
+]

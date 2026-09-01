@@ -1,0 +1,1 @@
+{"chainId":175,"nodes":[{"speciesId":343,"speciesName":"baltoy","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":344,"speciesName":"claydol","evolvesFromSpecies":"baltoy","trigger":"level-up","minLevel":36,"item":null,"itemDisplay":null}]}

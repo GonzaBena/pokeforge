@@ -1,0 +1,1 @@
+{"chainId":46,"nodes":[{"speciesId":104,"speciesName":"cubone","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":105,"speciesName":"marowak","evolvesFromSpecies":"cubone","trigger":"level-up","minLevel":28,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":280,"nodes":[{"speciesId":550,"speciesName":"basculin","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":902,"speciesName":"basculegion","evolvesFromSpecies":"basculin","trigger":"recoil-damage","minLevel":null,"item":null,"itemDisplay":null}]}

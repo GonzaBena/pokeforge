@@ -1,0 +1,1 @@
+{"chainId":85,"nodes":[{"speciesId":167,"speciesName":"spinarak","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":168,"speciesName":"ariados","evolvesFromSpecies":"spinarak","trigger":"level-up","minLevel":22,"item":null,"itemDisplay":null}]}

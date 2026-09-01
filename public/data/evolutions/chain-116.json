@@ -1,0 +1,1 @@
+{"chainId":116,"nodes":[{"speciesId":458,"speciesName":"mantyke","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":226,"speciesName":"mantine","evolvesFromSpecies":"mantyke","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

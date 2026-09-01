@@ -1,0 +1,1 @@
+{"chainId":41,"nodes":[{"speciesId":95,"speciesName":"onix","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":208,"speciesName":"steelix","evolvesFromSpecies":"onix","trigger":"trade","minLevel":null,"item":null,"itemDisplay":null}]}

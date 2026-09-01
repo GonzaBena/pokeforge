@@ -1,0 +1,1 @@
+{"chainId":164,"nodes":[{"speciesId":325,"speciesName":"spoink","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":326,"speciesName":"grumpig","evolvesFromSpecies":"spoink","trigger":"level-up","minLevel":32,"item":null,"itemDisplay":null}]}

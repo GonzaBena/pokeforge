@@ -1,0 +1,1 @@
+{"chainId":114,"nodes":[{"speciesId":223,"speciesName":"remoraid","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":224,"speciesName":"octillery","evolvesFromSpecies":"remoraid","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":494,"nodes":[{"speciesId":944,"speciesName":"shroodle","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":945,"speciesName":"grafaiai","evolvesFromSpecies":"shroodle","trigger":"level-up","minLevel":28,"item":null,"itemDisplay":null}]}

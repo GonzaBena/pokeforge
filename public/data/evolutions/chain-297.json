@@ -1,0 +1,1 @@
+{"chainId":297,"nodes":[{"speciesId":585,"speciesName":"deerling","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":586,"speciesName":"sawsbuck","evolvesFromSpecies":"deerling","trigger":"level-up","minLevel":34,"item":null,"itemDisplay":null}]}

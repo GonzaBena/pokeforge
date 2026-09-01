@@ -1,0 +1,1 @@
+{"chainId":208,"nodes":[{"speciesId":401,"speciesName":"kricketot","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":402,"speciesName":"kricketune","evolvesFromSpecies":"kricketot","trigger":"level-up","minLevel":10,"item":null,"itemDisplay":null}]}

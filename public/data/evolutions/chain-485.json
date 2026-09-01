@@ -1,0 +1,1 @@
+{"chainId":485,"nodes":[{"speciesId":924,"speciesName":"tandemaus","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":925,"speciesName":"maushold","evolvesFromSpecies":"tandemaus","trigger":"other","minLevel":25,"item":null,"itemDisplay":null}]}

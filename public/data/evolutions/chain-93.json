@@ -1,0 +1,1 @@
+{"chainId":93,"nodes":[{"speciesId":190,"speciesName":"aipom","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":424,"speciesName":"ambipom","evolvesFromSpecies":"aipom","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

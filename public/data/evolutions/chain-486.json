@@ -1,0 +1,1 @@
+{"chainId":486,"nodes":[{"speciesId":926,"speciesName":"fidough","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":927,"speciesName":"dachsbun","evolvesFromSpecies":"fidough","trigger":"level-up","minLevel":26,"item":null,"itemDisplay":null}]}

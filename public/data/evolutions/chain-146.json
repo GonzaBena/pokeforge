@@ -1,0 +1,1 @@
+{"chainId":146,"nodes":[{"speciesId":296,"speciesName":"makuhita","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":297,"speciesName":"hariyama","evolvesFromSpecies":"makuhita","trigger":"level-up","minLevel":24,"item":null,"itemDisplay":null}]}

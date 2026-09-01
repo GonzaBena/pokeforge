@@ -1,0 +1,1 @@
+{"chainId":97,"nodes":[{"speciesId":198,"speciesName":"murkrow","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":430,"speciesName":"honchkrow","evolvesFromSpecies":"murkrow","trigger":"use-item","minLevel":null,"item":"dusk-stone","itemDisplay":"Piedra Noche"}]}

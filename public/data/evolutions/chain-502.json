@@ -1,0 +1,1 @@
+{"chainId":502,"nodes":[{"speciesId":960,"speciesName":"wiglett","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":961,"speciesName":"wugtrio","evolvesFromSpecies":"wiglett","trigger":"level-up","minLevel":26,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":391,"nodes":[{"speciesId":759,"speciesName":"stufful","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":760,"speciesName":"bewear","evolvesFromSpecies":"stufful","trigger":"level-up","minLevel":27,"item":null,"itemDisplay":null}]}

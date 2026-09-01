@@ -1,0 +1,1 @@
+{"chainId":465,"nodes":[{"speciesId":884,"speciesName":"duraludon","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":1018,"speciesName":"archaludon","evolvesFromSpecies":"duraludon","trigger":"use-item","minLevel":null,"item":"metal-alloy","itemDisplay":"Metal Compuesto"}]}

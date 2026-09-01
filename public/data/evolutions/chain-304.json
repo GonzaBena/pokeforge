@@ -1,0 +1,1 @@
+{"chainId":304,"nodes":[{"speciesId":597,"speciesName":"ferroseed","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":598,"speciesName":"ferrothorn","evolvesFromSpecies":"ferroseed","trigger":"level-up","minLevel":40,"item":null,"itemDisplay":null}]}

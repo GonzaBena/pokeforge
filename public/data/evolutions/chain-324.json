@@ -1,0 +1,1 @@
+{"chainId":324,"nodes":[{"speciesId":636,"speciesName":"larvesta","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":637,"speciesName":"volcarona","evolvesFromSpecies":"larvesta","trigger":"level-up","minLevel":59,"item":null,"itemDisplay":null}]}

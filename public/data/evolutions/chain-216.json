@@ -1,0 +1,1 @@
+{"chainId":216,"nodes":[{"speciesId":418,"speciesName":"buizel","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":419,"speciesName":"floatzel","evolvesFromSpecies":"buizel","trigger":"level-up","minLevel":26,"item":null,"itemDisplay":null}]}

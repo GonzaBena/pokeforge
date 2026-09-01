@@ -1,0 +1,1 @@
+{"chainId":509,"nodes":[{"speciesId":971,"speciesName":"greavard","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":972,"speciesName":"houndstone","evolvesFromSpecies":"greavard","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

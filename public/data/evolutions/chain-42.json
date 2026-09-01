@@ -1,0 +1,1 @@
+{"chainId":42,"nodes":[{"speciesId":96,"speciesName":"drowzee","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":97,"speciesName":"hypno","evolvesFromSpecies":"drowzee","trigger":"level-up","minLevel":26,"item":null,"itemDisplay":null}]}

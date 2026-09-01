@@ -1,0 +1,1 @@
+{"chainId":111,"nodes":[{"speciesId":218,"speciesName":"slugma","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":219,"speciesName":"magcargo","evolvesFromSpecies":"slugma","trigger":"level-up","minLevel":38,"item":null,"itemDisplay":null}]}

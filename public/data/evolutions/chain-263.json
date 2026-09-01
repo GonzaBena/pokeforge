@@ -1,0 +1,1 @@
+{"chainId":263,"nodes":[{"speciesId":513,"speciesName":"pansear","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":514,"speciesName":"simisear","evolvesFromSpecies":"pansear","trigger":"use-item","minLevel":null,"item":"fire-stone","itemDisplay":"Piedra Fuego"}]}

@@ -1,0 +1,1 @@
+{"chainId":365,"nodes":[{"speciesId":710,"speciesName":"pumpkaboo","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":711,"speciesName":"gourgeist","evolvesFromSpecies":"pumpkaboo","trigger":"trade","minLevel":null,"item":null,"itemDisplay":null}]}

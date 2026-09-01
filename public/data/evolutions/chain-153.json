@@ -1,0 +1,1 @@
+{"chainId":153,"nodes":[{"speciesId":309,"speciesName":"electrike","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":310,"speciesName":"manectric","evolvesFromSpecies":"electrike","trigger":"level-up","minLevel":26,"item":null,"itemDisplay":null}]}

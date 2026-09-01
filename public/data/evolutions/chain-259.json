@@ -1,0 +1,1 @@
+{"chainId":259,"nodes":[{"speciesId":504,"speciesName":"patrat","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":505,"speciesName":"watchog","evolvesFromSpecies":"patrat","trigger":"level-up","minLevel":20,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":307,"nodes":[{"speciesId":605,"speciesName":"elgyem","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":606,"speciesName":"beheeyem","evolvesFromSpecies":"elgyem","trigger":"level-up","minLevel":42,"item":null,"itemDisplay":null}]}

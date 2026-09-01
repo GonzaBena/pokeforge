@@ -1,0 +1,1 @@
+{"chainId":35,"nodes":[{"speciesId":83,"speciesName":"farfetchd","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":865,"speciesName":"sirfetchd","evolvesFromSpecies":"farfetchd","trigger":"three-critical-hits","minLevel":null,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":380,"nodes":[{"speciesId":739,"speciesName":"crabrawler","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":740,"speciesName":"crabominable","evolvesFromSpecies":"crabrawler","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

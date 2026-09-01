@@ -1,0 +1,1 @@
+{"chainId":88,"nodes":[{"speciesId":177,"speciesName":"natu","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":178,"speciesName":"xatu","evolvesFromSpecies":"natu","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

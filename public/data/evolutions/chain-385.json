@@ -1,0 +1,1 @@
+{"chainId":385,"nodes":[{"speciesId":747,"speciesName":"mareanie","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":748,"speciesName":"toxapex","evolvesFromSpecies":"mareanie","trigger":"level-up","minLevel":38,"item":null,"itemDisplay":null}]}

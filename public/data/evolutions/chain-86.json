@@ -1,0 +1,1 @@
+{"chainId":86,"nodes":[{"speciesId":170,"speciesName":"chinchou","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":171,"speciesName":"lanturn","evolvesFromSpecies":"chinchou","trigger":"level-up","minLevel":27,"item":null,"itemDisplay":null}]}

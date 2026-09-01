@@ -1,0 +1,1 @@
+{"chainId":159,"nodes":[{"speciesId":316,"speciesName":"gulpin","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":317,"speciesName":"swalot","evolvesFromSpecies":"gulpin","trigger":"level-up","minLevel":26,"item":null,"itemDisplay":null}]}

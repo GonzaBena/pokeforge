@@ -1,0 +1,1 @@
+{"chainId":178,"nodes":[{"speciesId":349,"speciesName":"feebas","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":350,"speciesName":"milotic","evolvesFromSpecies":"feebas","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

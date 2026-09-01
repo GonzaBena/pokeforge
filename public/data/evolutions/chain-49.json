@@ -1,0 +1,1 @@
+{"chainId":49,"nodes":[{"speciesId":109,"speciesName":"koffing","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":110,"speciesName":"weezing","evolvesFromSpecies":"koffing","trigger":"level-up","minLevel":35,"item":null,"itemDisplay":null}]}

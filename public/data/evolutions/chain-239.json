@@ -1,0 +1,1 @@
+{"chainId":239,"nodes":[{"speciesId":459,"speciesName":"snover","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":460,"speciesName":"abomasnow","evolvesFromSpecies":"snover","trigger":"level-up","minLevel":40,"item":null,"itemDisplay":null}]}

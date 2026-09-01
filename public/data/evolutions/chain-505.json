@@ -1,0 +1,1 @@
+{"chainId":505,"nodes":[{"speciesId":965,"speciesName":"varoom","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":966,"speciesName":"revavroom","evolvesFromSpecies":"varoom","trigger":"level-up","minLevel":40,"item":null,"itemDisplay":null}]}

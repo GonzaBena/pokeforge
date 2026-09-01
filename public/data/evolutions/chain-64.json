@@ -1,0 +1,1 @@
+{"chainId":64,"nodes":[{"speciesId":129,"speciesName":"magikarp","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":130,"speciesName":"gyarados","evolvesFromSpecies":"magikarp","trigger":"level-up","minLevel":20,"item":null,"itemDisplay":null}]}

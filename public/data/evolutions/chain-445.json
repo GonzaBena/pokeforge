@@ -1,0 +1,1 @@
+{"chainId":445,"nodes":[{"speciesId":846,"speciesName":"arrokuda","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":847,"speciesName":"barraskewda","evolvesFromSpecies":"arrokuda","trigger":"level-up","minLevel":26,"item":null,"itemDisplay":null}]}

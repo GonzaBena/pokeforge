@@ -1,0 +1,1 @@
+{"chainId":133,"nodes":[{"speciesId":261,"speciesName":"poochyena","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":262,"speciesName":"mightyena","evolvesFromSpecies":"poochyena","trigger":"level-up","minLevel":18,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":452,"nodes":[{"speciesId":868,"speciesName":"milcery","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":869,"speciesName":"alcremie","evolvesFromSpecies":"milcery","trigger":"spin","minLevel":null,"item":null,"itemDisplay":null}]}

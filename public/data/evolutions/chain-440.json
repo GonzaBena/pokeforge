@@ -1,0 +1,1 @@
+{"chainId":440,"nodes":[{"speciesId":835,"speciesName":"yamper","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":836,"speciesName":"boltund","evolvesFromSpecies":"yamper","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

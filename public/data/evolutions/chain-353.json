@@ -1,0 +1,1 @@
+{"chainId":353,"nodes":[{"speciesId":688,"speciesName":"binacle","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":689,"speciesName":"barbaracle","evolvesFromSpecies":"binacle","trigger":"level-up","minLevel":39,"item":null,"itemDisplay":null}]}

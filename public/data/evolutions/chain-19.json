@@ -1,0 +1,1 @@
+{"chainId":19,"nodes":[{"speciesId":46,"speciesName":"paras","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":47,"speciesName":"parasect","evolvesFromSpecies":"paras","trigger":"level-up","minLevel":24,"item":null,"itemDisplay":null}]}

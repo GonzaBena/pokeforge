@@ -1,0 +1,1 @@
+{"chainId":424,"nodes":[{"speciesId":803,"speciesName":"poipole","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":804,"speciesName":"naganadel","evolvesFromSpecies":"poipole","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":289,"nodes":[{"speciesId":566,"speciesName":"archen","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":567,"speciesName":"archeops","evolvesFromSpecies":"archen","trigger":"level-up","minLevel":37,"item":null,"itemDisplay":null}]}

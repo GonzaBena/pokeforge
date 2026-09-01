@@ -1,0 +1,1 @@
+{"chainId":316,"nodes":[{"speciesId":622,"speciesName":"golett","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":623,"speciesName":"golurk","evolvesFromSpecies":"golett","trigger":"level-up","minLevel":43,"item":null,"itemDisplay":null}]}

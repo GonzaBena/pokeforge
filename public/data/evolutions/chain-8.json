@@ -1,0 +1,1 @@
+{"chainId":8,"nodes":[{"speciesId":21,"speciesName":"spearow","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":22,"speciesName":"fearow","evolvesFromSpecies":"spearow","trigger":"level-up","minLevel":20,"item":null,"itemDisplay":null}]}

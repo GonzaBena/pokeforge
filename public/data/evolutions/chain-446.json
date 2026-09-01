@@ -1,0 +1,1 @@
+{"chainId":446,"nodes":[{"speciesId":848,"speciesName":"toxel","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":849,"speciesName":"toxtricity","evolvesFromSpecies":"toxel","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

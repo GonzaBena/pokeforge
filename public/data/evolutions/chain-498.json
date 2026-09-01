@@ -1,0 +1,1 @@
+{"chainId":498,"nodes":[{"speciesId":951,"speciesName":"capsakid","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":952,"speciesName":"scovillain","evolvesFromSpecies":"capsakid","trigger":"use-item","minLevel":null,"item":"fire-stone","itemDisplay":"Piedra Fuego"}]}

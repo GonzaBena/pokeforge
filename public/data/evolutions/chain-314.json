@@ -1,0 +1,1 @@
+{"chainId":314,"nodes":[{"speciesId":619,"speciesName":"mienfoo","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":620,"speciesName":"mienshao","evolvesFromSpecies":"mienfoo","trigger":"level-up","minLevel":50,"item":null,"itemDisplay":null}]}

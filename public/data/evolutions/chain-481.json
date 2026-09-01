@@ -1,0 +1,1 @@
+{"chainId":481,"nodes":[{"speciesId":915,"speciesName":"lechonk","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":916,"speciesName":"oinkologne","evolvesFromSpecies":"lechonk","trigger":"level-up","minLevel":18,"item":null,"itemDisplay":null}]}

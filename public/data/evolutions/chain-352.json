@@ -1,0 +1,1 @@
+{"chainId":352,"nodes":[{"speciesId":686,"speciesName":"inkay","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":687,"speciesName":"malamar","evolvesFromSpecies":"inkay","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

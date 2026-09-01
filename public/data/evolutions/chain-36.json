@@ -1,0 +1,1 @@
+{"chainId":36,"nodes":[{"speciesId":84,"speciesName":"doduo","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":85,"speciesName":"dodrio","evolvesFromSpecies":"doduo","trigger":"level-up","minLevel":31,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":390,"nodes":[{"speciesId":757,"speciesName":"salandit","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":758,"speciesName":"salazzle","evolvesFromSpecies":"salandit","trigger":"level-up","minLevel":33,"item":null,"itemDisplay":null}]}

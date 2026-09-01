@@ -1,0 +1,1 @@
+{"chainId":382,"nodes":[{"speciesId":742,"speciesName":"cutiefly","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":743,"speciesName":"ribombee","evolvesFromSpecies":"cutiefly","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

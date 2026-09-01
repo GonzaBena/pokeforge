@@ -1,0 +1,1 @@
+{"chainId":23,"nodes":[{"speciesId":54,"speciesName":"psyduck","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":55,"speciesName":"golduck","evolvesFromSpecies":"psyduck","trigger":"level-up","minLevel":33,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":447,"nodes":[{"speciesId":850,"speciesName":"sizzlipede","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":851,"speciesName":"centiskorch","evolvesFromSpecies":"sizzlipede","trigger":"level-up","minLevel":28,"item":null,"itemDisplay":null}]}

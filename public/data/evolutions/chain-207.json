@@ -1,0 +1,1 @@
+{"chainId":207,"nodes":[{"speciesId":399,"speciesName":"bidoof","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":400,"speciesName":"bibarel","evolvesFromSpecies":"bidoof","trigger":"level-up","minLevel":15,"item":null,"itemDisplay":null}]}

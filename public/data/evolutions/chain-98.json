@@ -1,0 +1,1 @@
+{"chainId":98,"nodes":[{"speciesId":200,"speciesName":"misdreavus","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":429,"speciesName":"mismagius","evolvesFromSpecies":"misdreavus","trigger":"use-item","minLevel":null,"item":"dusk-stone","itemDisplay":"Piedra Noche"}]}

@@ -1,0 +1,1 @@
+{"chainId":386,"nodes":[{"speciesId":749,"speciesName":"mudbray","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":750,"speciesName":"mudsdale","evolvesFromSpecies":"mudbray","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

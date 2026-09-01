@@ -1,0 +1,1 @@
+{"chainId":52,"nodes":[{"speciesId":114,"speciesName":"tangela","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":465,"speciesName":"tangrowth","evolvesFromSpecies":"tangela","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

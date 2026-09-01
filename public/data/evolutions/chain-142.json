@@ -1,0 +1,1 @@
+{"chainId":142,"nodes":[{"speciesId":285,"speciesName":"shroomish","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":286,"speciesName":"breloom","evolvesFromSpecies":"shroomish","trigger":"level-up","minLevel":23,"item":null,"itemDisplay":null}]}

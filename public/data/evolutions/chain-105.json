@@ -1,0 +1,1 @@
+{"chainId":105,"nodes":[{"speciesId":209,"speciesName":"snubbull","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":210,"speciesName":"granbull","evolvesFromSpecies":"snubbull","trigger":"level-up","minLevel":23,"item":null,"itemDisplay":null}]}

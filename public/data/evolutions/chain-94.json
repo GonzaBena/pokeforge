@@ -1,0 +1,1 @@
+{"chainId":94,"nodes":[{"speciesId":191,"speciesName":"sunkern","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":192,"speciesName":"sunflora","evolvesFromSpecies":"sunkern","trigger":"use-item","minLevel":null,"item":"sun-stone","itemDisplay":"Piedra Solar"}]}

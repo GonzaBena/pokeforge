@@ -1,0 +1,1 @@
+{"chainId":508,"nodes":[{"speciesId":969,"speciesName":"glimmet","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":970,"speciesName":"glimmora","evolvesFromSpecies":"glimmet","trigger":"level-up","minLevel":35,"item":null,"itemDisplay":null}]}

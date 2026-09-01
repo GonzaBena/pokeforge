@@ -1,0 +1,1 @@
+{"chainId":161,"nodes":[{"speciesId":320,"speciesName":"wailmer","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":321,"speciesName":"wailord","evolvesFromSpecies":"wailmer","trigger":"level-up","minLevel":40,"item":null,"itemDisplay":null}]}

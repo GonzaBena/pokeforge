@@ -1,0 +1,1 @@
+{"chainId":279,"nodes":[{"speciesId":548,"speciesName":"petilil","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":549,"speciesName":"lilligant","evolvesFromSpecies":"petilil","trigger":"use-item","minLevel":null,"item":"sun-stone","itemDisplay":"Piedra Solar"}]}

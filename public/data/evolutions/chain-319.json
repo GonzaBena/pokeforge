@@ -1,0 +1,1 @@
+{"chainId":319,"nodes":[{"speciesId":627,"speciesName":"rufflet","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":628,"speciesName":"braviary","evolvesFromSpecies":"rufflet","trigger":"level-up","minLevel":54,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":539,"nodes":[{"speciesId":1012,"speciesName":"poltchageist","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":1013,"speciesName":"sinistcha","evolvesFromSpecies":"poltchageist","trigger":"use-item","minLevel":null,"item":"unremarkable-teacup","itemDisplay":"Cuenco Mediocre"}]}

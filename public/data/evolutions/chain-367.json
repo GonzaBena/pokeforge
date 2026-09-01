@@ -1,0 +1,1 @@
+{"chainId":367,"nodes":[{"speciesId":714,"speciesName":"noibat","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":715,"speciesName":"noivern","evolvesFromSpecies":"noibat","trigger":"level-up","minLevel":48,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":11,"nodes":[{"speciesId":27,"speciesName":"sandshrew","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":28,"speciesName":"sandslash","evolvesFromSpecies":"sandshrew","trigger":"level-up","minLevel":22,"item":null,"itemDisplay":null}]}

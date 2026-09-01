@@ -1,0 +1,1 @@
+{"chainId":82,"nodes":[{"speciesId":161,"speciesName":"sentret","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":162,"speciesName":"furret","evolvesFromSpecies":"sentret","trigger":"level-up","minLevel":15,"item":null,"itemDisplay":null}]}

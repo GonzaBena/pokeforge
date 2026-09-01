@@ -1,0 +1,1 @@
+{"chainId":295,"nodes":[{"speciesId":580,"speciesName":"ducklett","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":581,"speciesName":"swanna","evolvesFromSpecies":"ducklett","trigger":"level-up","minLevel":35,"item":null,"itemDisplay":null}]}

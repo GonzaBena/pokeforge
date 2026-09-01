@@ -1,0 +1,1 @@
+{"chainId":278,"nodes":[{"speciesId":546,"speciesName":"cottonee","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":547,"speciesName":"whimsicott","evolvesFromSpecies":"cottonee","trigger":"use-item","minLevel":null,"item":"sun-stone","itemDisplay":"Piedra Solar"}]}

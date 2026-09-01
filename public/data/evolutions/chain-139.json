@@ -1,0 +1,1 @@
+{"chainId":139,"nodes":[{"speciesId":278,"speciesName":"wingull","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":279,"speciesName":"pelipper","evolvesFromSpecies":"wingull","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":504,"nodes":[{"speciesId":963,"speciesName":"finizen","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":964,"speciesName":"palafin","evolvesFromSpecies":"finizen","trigger":"level-up","minLevel":38,"item":null,"itemDisplay":null}]}

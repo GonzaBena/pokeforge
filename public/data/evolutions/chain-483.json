@@ -1,0 +1,1 @@
+{"chainId":483,"nodes":[{"speciesId":919,"speciesName":"nymble","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":920,"speciesName":"lokix","evolvesFromSpecies":"nymble","trigger":"level-up","minLevel":24,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":285,"nodes":[{"speciesId":559,"speciesName":"scraggy","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":560,"speciesName":"scrafty","evolvesFromSpecies":"scraggy","trigger":"level-up","minLevel":39,"item":null,"itemDisplay":null}]}

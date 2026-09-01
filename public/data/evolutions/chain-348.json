@@ -1,0 +1,1 @@
+{"chainId":348,"nodes":[{"speciesId":677,"speciesName":"espurr","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":678,"speciesName":"meowstic","evolvesFromSpecies":"espurr","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

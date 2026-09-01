@@ -1,0 +1,1 @@
+{"chainId":102,"nodes":[{"speciesId":204,"speciesName":"pineco","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":205,"speciesName":"forretress","evolvesFromSpecies":"pineco","trigger":"level-up","minLevel":31,"item":null,"itemDisplay":null}]}

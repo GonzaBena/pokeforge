@@ -1,0 +1,1 @@
+{"chainId":389,"nodes":[{"speciesId":755,"speciesName":"morelull","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":756,"speciesName":"shiinotic","evolvesFromSpecies":"morelull","trigger":"level-up","minLevel":24,"item":null,"itemDisplay":null}]}

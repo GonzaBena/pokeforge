@@ -1,0 +1,34 @@
+{
+  "name": "poketeam",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro",
+    "fetch:pokedex": "tsx scripts/fetch-pokedex.ts",
+    "fetch:pokedex:force": "tsx scripts/fetch-pokedex.ts --force"
+  },
+  "dependencies": {
+    "@tanstack/table-core": "^8.21.0",
+    "animejs": "^3.2.2",
+    "astro": "^7.2.10",
+    "lucide": "^0.475.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/animejs": "^3.1.13",
+    "@types/node": "^22.10.7",
+    "p-limit": "^6.2.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}

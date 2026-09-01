@@ -1,0 +1,1 @@
+{"chainId":320,"nodes":[{"speciesId":629,"speciesName":"vullaby","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":630,"speciesName":"mandibuzz","evolvesFromSpecies":"vullaby","trigger":"level-up","minLevel":54,"item":null,"itemDisplay":null}]}

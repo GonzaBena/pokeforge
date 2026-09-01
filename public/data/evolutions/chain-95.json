@@ -1,0 +1,1 @@
+{"chainId":95,"nodes":[{"speciesId":193,"speciesName":"yanma","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":469,"speciesName":"yanmega","evolvesFromSpecies":"yanma","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

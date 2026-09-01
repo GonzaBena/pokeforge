@@ -1,0 +1,1 @@
+{"chainId":45,"nodes":[{"speciesId":102,"speciesName":"exeggcute","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":103,"speciesName":"exeggutor","evolvesFromSpecies":"exeggcute","trigger":"use-item","minLevel":null,"item":"leaf-stone","itemDisplay":"Piedra Hoja"}]}

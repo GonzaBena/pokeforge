@@ -1,0 +1,1 @@
+{"chainId":282,"nodes":[{"speciesId":554,"speciesName":"darumaka","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":555,"speciesName":"darmanitan","evolvesFromSpecies":"darumaka","trigger":"level-up","minLevel":35,"item":null,"itemDisplay":null}]}

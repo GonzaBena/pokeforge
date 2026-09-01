@@ -1,0 +1,1 @@
+{"chainId":388,"nodes":[{"speciesId":753,"speciesName":"fomantis","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":754,"speciesName":"lurantis","evolvesFromSpecies":"fomantis","trigger":"level-up","minLevel":34,"item":null,"itemDisplay":null}]}

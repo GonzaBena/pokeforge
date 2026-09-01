@@ -1,0 +1,1 @@
+{"chainId":235,"nodes":[{"speciesId":453,"speciesName":"croagunk","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":454,"speciesName":"toxicroak","evolvesFromSpecies":"croagunk","trigger":"level-up","minLevel":37,"item":null,"itemDisplay":null}]}

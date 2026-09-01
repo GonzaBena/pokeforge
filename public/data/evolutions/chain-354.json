@@ -1,0 +1,1 @@
+{"chainId":354,"nodes":[{"speciesId":690,"speciesName":"skrelp","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":691,"speciesName":"dragalge","evolvesFromSpecies":"skrelp","trigger":"level-up","minLevel":48,"item":null,"itemDisplay":null}]}

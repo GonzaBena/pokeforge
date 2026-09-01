@@ -1,0 +1,1 @@
+{"chainId":499,"nodes":[{"speciesId":953,"speciesName":"rellor","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":954,"speciesName":"rabsca","evolvesFromSpecies":"rellor","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,53 @@
+---
+const path = Astro.url.pathname;
+---
+
+<nav class="nav">
+  <a class="nav__brand" href="/">
+    <i data-lucide="sparkles"></i>
+    PokeTeam
+  </a>
+  <div class="nav__links">
+    <a class="nav__link" href="/pokedex" aria-current={path === "/pokedex" ? "page" : undefined}>
+      <i data-lucide="book-open"></i>
+      Pokédex
+    </a>
+    <a class="nav__link" href="/equipo" aria-current={path === "/equipo" ? "page" : undefined}>
+      <i data-lucide="users"></i>
+      Equipo
+    </a>
+    <button class="nav__sound-btn" type="button" data-sound-toggle title="Activar/desactivar sonido" aria-label="Activar/desactivar sonido">
+      <i data-lucide="volume-2" data-sound-icon-on></i>
+      <i data-lucide="volume-x" data-sound-icon-off hidden></i>
+    </button>
+  </div>
+</nav>
+
+<script>
+  import { isSoundEnabled, setSoundEnabled } from "../lib/sound";
+
+  function initSoundToggle() {
+    const soundBtn = document.querySelector<HTMLButtonElement>("[data-sound-toggle]");
+    if (!soundBtn) return;
+
+    const iconOn = soundBtn.querySelector<HTMLElement>("[data-sound-icon-on]");
+    const iconOff = soundBtn.querySelector<HTMLElement>("[data-sound-icon-off]");
+
+    function updateIcons(enabled: boolean) {
+      if (iconOn) iconOn.hidden = !enabled;
+      if (iconOff) iconOff.hidden = enabled;
+      soundBtn?.classList.toggle("nav__sound-btn--muted", !enabled);
+    }
+
+    updateIcons(isSoundEnabled());
+
+    soundBtn.addEventListener("click", () => {
+      const nextState = !isSoundEnabled();
+      setSoundEnabled(nextState);
+      updateIcons(nextState);
+    });
+  }
+
+  initSoundToggle();
+  document.addEventListener("astro:after-swap", initSoundToggle);
+</script>

@@ -1,0 +1,1 @@
+{"chainId":232,"nodes":[{"speciesId":447,"speciesName":"riolu","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":448,"speciesName":"lucario","evolvesFromSpecies":"riolu","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

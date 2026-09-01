@@ -1,0 +1,1 @@
+{"chainId":300,"nodes":[{"speciesId":590,"speciesName":"foongus","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":591,"speciesName":"amoonguss","evolvesFromSpecies":"foongus","trigger":"level-up","minLevel":39,"item":null,"itemDisplay":null}]}

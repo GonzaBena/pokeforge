@@ -1,0 +1,1 @@
+{"chainId":366,"nodes":[{"speciesId":712,"speciesName":"bergmite","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":713,"speciesName":"avalugg","evolvesFromSpecies":"bergmite","trigger":"level-up","minLevel":37,"item":null,"itemDisplay":null}]}

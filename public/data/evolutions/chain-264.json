@@ -1,0 +1,1 @@
+{"chainId":264,"nodes":[{"speciesId":515,"speciesName":"panpour","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":516,"speciesName":"simipour","evolvesFromSpecies":"panpour","trigger":"use-item","minLevel":null,"item":"water-stone","itemDisplay":"Piedra Agua"}]}

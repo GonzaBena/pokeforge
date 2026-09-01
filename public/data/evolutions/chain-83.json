@@ -1,0 +1,1 @@
+{"chainId":83,"nodes":[{"speciesId":163,"speciesName":"hoothoot","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":164,"speciesName":"noctowl","evolvesFromSpecies":"hoothoot","trigger":"level-up","minLevel":20,"item":null,"itemDisplay":null}]}

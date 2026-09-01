@@ -1,0 +1,1 @@
+{"chainId":32,"nodes":[{"speciesId":77,"speciesName":"ponyta","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":78,"speciesName":"rapidash","evolvesFromSpecies":"ponyta","trigger":"level-up","minLevel":40,"item":null,"itemDisplay":null}]}

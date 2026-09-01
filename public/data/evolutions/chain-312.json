@@ -1,0 +1,1 @@
+{"chainId":312,"nodes":[{"speciesId":616,"speciesName":"shelmet","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":617,"speciesName":"accelgor","evolvesFromSpecies":"shelmet","trigger":"trade","minLevel":null,"item":null,"itemDisplay":null}]}

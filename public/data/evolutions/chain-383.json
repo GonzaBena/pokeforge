@@ -1,0 +1,1 @@
+{"chainId":383,"nodes":[{"speciesId":744,"speciesName":"rockruff","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":745,"speciesName":"lycanroc","evolvesFromSpecies":"rockruff","trigger":"level-up","minLevel":25,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":233,"nodes":[{"speciesId":449,"speciesName":"hippopotas","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":450,"speciesName":"hippowdon","evolvesFromSpecies":"hippopotas","trigger":"level-up","minLevel":34,"item":null,"itemDisplay":null}]}

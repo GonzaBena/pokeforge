@@ -1,0 +1,1 @@
+{"chainId":358,"nodes":[{"speciesId":698,"speciesName":"amaura","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":699,"speciesName":"aurorus","evolvesFromSpecies":"amaura","trigger":"level-up","minLevel":39,"item":null,"itemDisplay":null}]}

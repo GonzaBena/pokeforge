@@ -1,0 +1,1 @@
+{"chainId":56,"nodes":[{"speciesId":120,"speciesName":"staryu","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":121,"speciesName":"starmie","evolvesFromSpecies":"staryu","trigger":"use-item","minLevel":null,"item":"water-stone","itemDisplay":"Piedra Agua"}]}

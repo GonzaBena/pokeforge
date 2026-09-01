@@ -1,0 +1,1 @@
+{"chainId":299,"nodes":[{"speciesId":588,"speciesName":"karrablast","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":589,"speciesName":"escavalier","evolvesFromSpecies":"karrablast","trigger":"trade","minLevel":null,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":262,"nodes":[{"speciesId":511,"speciesName":"pansage","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":512,"speciesName":"simisage","evolvesFromSpecies":"pansage","trigger":"use-item","minLevel":null,"item":"leaf-stone","itemDisplay":"Piedra Hoja"}]}

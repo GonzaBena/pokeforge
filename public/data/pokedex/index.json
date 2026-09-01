@@ -1,0 +1,107 @@
+{
+  "totalCount": 1025,
+  "chunkSize": 100,
+  "chunkCount": 11,
+  "generatedAt": "2026-09-01T14:58:31.654Z",
+  "chunks": [
+    {
+      "index": 0,
+      "file": "chunk-0.json",
+      "idRange": [
+        1,
+        100
+      ],
+      "count": 100
+    },
+    {
+      "index": 1,
+      "file": "chunk-1.json",
+      "idRange": [
+        101,
+        200
+      ],
+      "count": 100
+    },
+    {
+      "index": 2,
+      "file": "chunk-2.json",
+      "idRange": [
+        201,
+        300
+      ],
+      "count": 100
+    },
+    {
+      "index": 3,
+      "file": "chunk-3.json",
+      "idRange": [
+        301,
+        400
+      ],
+      "count": 100
+    },
+    {
+      "index": 4,
+      "file": "chunk-4.json",
+      "idRange": [
+        401,
+        500
+      ],
+      "count": 100
+    },
+    {
+      "index": 5,
+      "file": "chunk-5.json",
+      "idRange": [
+        501,
+        600
+      ],
+      "count": 100
+    },
+    {
+      "index": 6,
+      "file": "chunk-6.json",
+      "idRange": [
+        601,
+        700
+      ],
+      "count": 100
+    },
+    {
+      "index": 7,
+      "file": "chunk-7.json",
+      "idRange": [
+        701,
+        800
+      ],
+      "count": 100
+    },
+    {
+      "index": 8,
+      "file": "chunk-8.json",
+      "idRange": [
+        801,
+        900
+      ],
+      "count": 100
+    },
+    {
+      "index": 9,
+      "file": "chunk-9.json",
+      "idRange": [
+        901,
+        1000
+      ],
+      "count": 100
+    },
+    {
+      "index": 10,
+      "file": "chunk-10.json",
+      "idRange": [
+        1001,
+        1025
+      ],
+      "count": 25
+    }
+  ]
+}

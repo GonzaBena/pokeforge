@@ -1,0 +1,1 @@
+{"chainId":184,"nodes":[{"speciesId":433,"speciesName":"chingling","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":358,"speciesName":"chimecho","evolvesFromSpecies":"chingling","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

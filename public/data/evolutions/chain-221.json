@@ -1,0 +1,1 @@
+{"chainId":221,"nodes":[{"speciesId":431,"speciesName":"glameow","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":432,"speciesName":"purugly","evolvesFromSpecies":"glameow","trigger":"level-up","minLevel":38,"item":null,"itemDisplay":null}]}

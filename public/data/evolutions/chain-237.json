@@ -1,0 +1,1 @@
+{"chainId":237,"nodes":[{"speciesId":456,"speciesName":"finneon","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":457,"speciesName":"lumineon","evolvesFromSpecies":"finneon","trigger":"level-up","minLevel":31,"item":null,"itemDisplay":null}]}

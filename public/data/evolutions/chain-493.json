@@ -1,0 +1,1 @@
+{"chainId":493,"nodes":[{"speciesId":942,"speciesName":"maschiff","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":943,"speciesName":"mabosstiff","evolvesFromSpecies":"maschiff","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":9,"nodes":[{"speciesId":23,"speciesName":"ekans","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":24,"speciesName":"arbok","evolvesFromSpecies":"ekans","trigger":"level-up","minLevel":22,"item":null,"itemDisplay":null}]}

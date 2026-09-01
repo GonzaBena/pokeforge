@@ -1,0 +1,1 @@
+{"chainId":364,"nodes":[{"speciesId":708,"speciesName":"phantump","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":709,"speciesName":"trevenant","evolvesFromSpecies":"phantump","trigger":"trade","minLevel":null,"item":null,"itemDisplay":null}]}

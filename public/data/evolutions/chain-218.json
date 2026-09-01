@@ -1,0 +1,1 @@
+{"chainId":218,"nodes":[{"speciesId":422,"speciesName":"shellos","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":423,"speciesName":"gastrodon","evolvesFromSpecies":"shellos","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}

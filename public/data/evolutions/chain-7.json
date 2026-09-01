@@ -1,0 +1,1 @@
+{"chainId":7,"nodes":[{"speciesId":19,"speciesName":"rattata","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":20,"speciesName":"raticate","evolvesFromSpecies":"rattata","trigger":"level-up","minLevel":20,"item":null,"itemDisplay":null}]}

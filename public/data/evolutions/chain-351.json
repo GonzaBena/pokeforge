@@ -1,0 +1,1 @@
+{"chainId":351,"nodes":[{"speciesId":684,"speciesName":"swirlix","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":685,"speciesName":"slurpuff","evolvesFromSpecies":"swirlix","trigger":"trade","minLevel":null,"item":null,"itemDisplay":null}]}

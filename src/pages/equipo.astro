@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TeamSizeSelector from "../components/TeamSizeSelector.astro";
+import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.astro";
+---
+
+<BaseLayout title="Equipo">
+  <div class="page">
+    <div class="page__header">
+      <div>
+        <h1 class="page__title"><i data-lucide="users"></i> Armar equipo</h1>
+        <p class="page__subtitle">Elegí de 1 a 5 Pokémon filtrando por generación, tipo y movimientos.</p>
+      </div>
+    </div>
+
+    <TeamSizeSelector />
+
+    <div class="team-layout">
+      <div class="team-slots" data-team-slots></div>
+      <StrengthsWeaknessesPanel />
+    </div>
+  </div>
+
+  <div class="modal-overlay" data-picker-overlay hidden>
+    <div class="modal-panel">
+      <div class="modal-panel__header">
+        <h2>Elegir Pokémon</h2>
+        <button class="modal-panel__close" type="button" data-picker-close aria-label="Cerrar">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="picker-panel__filters">
+        <input class="search-input" type="search" placeholder="Buscar por nombre o número..." data-picker-search />
+        <div class="filter-group" data-picker-type-filter aria-label="Filtrar por tipo"></div>
+        <div class="filter-group" data-picker-generation-filter aria-label="Filtrar por generación"></div>
+        <input
+          class="search-input"
+          type="text"
+          list="picker-move-options"
+          placeholder="Filtrar por movimiento que puede aprender..."
+          data-picker-move-filter
+        />
+        <datalist id="picker-move-options" data-picker-move-options></datalist>
+      </div>
+      <div class="picker-panel__results" data-picker-results></div>
+    </div>
+  </div>
+
+  <script>
+    import "../scripts/team-page";
+  </script>
+</BaseLayout>

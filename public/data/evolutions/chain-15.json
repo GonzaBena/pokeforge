@@ -1,0 +1,1 @@
+{"chainId":15,"nodes":[{"speciesId":37,"speciesName":"vulpix","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":38,"speciesName":"ninetales","evolvesFromSpecies":"vulpix","trigger":"use-item","minLevel":null,"item":"fire-stone","itemDisplay":"Piedra Fuego"}]}

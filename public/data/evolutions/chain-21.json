@@ -1,0 +1,1 @@
+{"chainId":21,"nodes":[{"speciesId":50,"speciesName":"diglett","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":51,"speciesName":"dugtrio","evolvesFromSpecies":"diglett","trigger":"level-up","minLevel":26,"item":null,"itemDisplay":null}]}

@@ -1,0 +1,1 @@
+{"chainId":147,"nodes":[{"speciesId":299,"speciesName":"nosepass","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":476,"speciesName":"probopass","evolvesFromSpecies":"nosepass","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

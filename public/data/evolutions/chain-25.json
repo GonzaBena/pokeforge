@@ -1,0 +1,1 @@
+{"chainId":25,"nodes":[{"speciesId":58,"speciesName":"growlithe","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":59,"speciesName":"arcanine","evolvesFromSpecies":"growlithe","trigger":"use-item","minLevel":null,"item":"fire-stone","itemDisplay":"Piedra Fuego"}]}

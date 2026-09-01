@@ -1,0 +1,1 @@
+{"chainId":101,"nodes":[{"speciesId":203,"speciesName":"girafarig","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":981,"speciesName":"farigiraf","evolvesFromSpecies":"girafarig","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

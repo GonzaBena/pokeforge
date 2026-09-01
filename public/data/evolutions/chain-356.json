@@ -1,0 +1,1 @@
+{"chainId":356,"nodes":[{"speciesId":694,"speciesName":"helioptile","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":695,"speciesName":"heliolisk","evolvesFromSpecies":"helioptile","trigger":"use-item","minLevel":null,"item":"sun-stone","itemDisplay":"Piedra Solar"}]}

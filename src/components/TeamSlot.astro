@@ -1,0 +1,32 @@
+---
+import TypeBadge from "./TypeBadge.astro";
+import type { Pokemon } from "../lib/types";
+
+interface Props {
+  index: number;
+  pokemon: Pokemon | null;
+}
+
+const { index, pokemon } = Astro.props;
+const sprite = pokemon ? pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "" : "";
+---
+
+<div class:list={["team-slot", { filled: !!pokemon }]} data-team-slot data-slot-index={index}>
+  {pokemon ? (
+    <>
+      <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index={index} aria-label="Quitar Pokémon">
+        <i data-lucide="x"></i>
+      </button>
+      <img class="team-slot__sprite" src={sprite} alt={pokemon.name} loading="lazy" />
+      <div class="team-slot__name">{pokemon.name}</div>
+      <div class="pokemon-card__types">
+        {pokemon.types.map((t) => <TypeBadge type={t} />)}
+      </div>
+    </>
+  ) : (
+    <>
+      <i data-lucide="plus-circle"></i>
+      <span>Elegir Pokémon</span>
+    </>
+  )}
+</div>

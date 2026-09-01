@@ -1,0 +1,1 @@
+{"chainId":72,"nodes":[{"speciesId":446,"speciesName":"munchlax","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":143,"speciesName":"snorlax","evolvesFromSpecies":"munchlax","trigger":"level-up","minLevel":null,"item":null,"itemDisplay":null}]}

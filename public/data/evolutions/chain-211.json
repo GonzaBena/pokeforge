@@ -1,0 +1,1 @@
+{"chainId":211,"nodes":[{"speciesId":408,"speciesName":"cranidos","evolvesFromSpecies":null,"trigger":null,"minLevel":null,"item":null,"itemDisplay":null},{"speciesId":409,"speciesName":"rampardos","evolvesFromSpecies":"cranidos","trigger":"level-up","minLevel":30,"item":null,"itemDisplay":null}]}
