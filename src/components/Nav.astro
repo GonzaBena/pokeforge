@@ -4,16 +4,16 @@ const path = Astro.url.pathname;
 
 <nav class="nav">
   <div class="nav__inner">
-    <a class="nav__brand" href="/">
+    <a class="nav__brand" href="/" data-astro-prefetch>
       <img src="/favicon.png" alt="PokeForge Logo" class="nav__brand-logo" />
       <span>PokeForge</span>
     </a>
     <div class="nav__right">
-      <a class="nav__link" href="/pokedex" aria-current={path === "/pokedex" ? "page" : undefined}>
+      <a class="nav__link" href="/pokedex" data-astro-prefetch aria-current={path === "/pokedex" ? "page" : undefined}>
         <i data-lucide="book-open"></i>
         Pokédex
       </a>
-      <a class="nav__link" href="/equipo" aria-current={path === "/equipo" ? "page" : undefined}>
+      <a class="nav__link" href="/equipo" data-astro-prefetch aria-current={path === "/equipo" ? "page" : undefined}>
         <i data-lucide="users"></i>
         Equipo
       </a>
