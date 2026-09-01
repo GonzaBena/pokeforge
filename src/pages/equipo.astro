@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.astro";
+import PokemonDetailModal from "../components/PokemonDetailModal.astro";
 ---
 
 <BaseLayout title="Equipo">
@@ -115,6 +116,8 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
       <div class="move-picker__results" data-move-picker-results></div>
     </div>
   </div>
+
+  <PokemonDetailModal />
 
   <script>
     import "../scripts/team-page";

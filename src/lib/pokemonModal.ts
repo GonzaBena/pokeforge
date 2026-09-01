@@ -457,26 +457,37 @@ bindModalEvents();
 
 export async function openPokemonModal(id: number): Promise<void> {
   currentId = id;
-
-  const [allPokemon, detail, natures] = await Promise.all([getAllPokemon(), getPokemonDetail(id), getNatures()]);
-  if (currentId !== id) return;
-
-  const pokemon = allPokemon.find((p) => p.id === id);
-  if (!pokemon) return;
-
-  const allById = new Map(allPokemon.map((p) => [p.id, p]));
-  const chain = detail.evolutionChainId !== null ? await getEvolutionChain(detail.evolutionChainId) : null;
-  if (currentId !== id) return;
-
-  render({ pokemon, detail, chain, natures, allById });
   const { overlayEl, panelEl, bodyEl } = getModalElements();
   if (!overlayEl || !panelEl || !bodyEl) return;
 
-  bodyEl.scrollTop = 0;
-
   if (overlayEl.hidden) {
+    bodyEl.innerHTML = `<div class="detail-loading"><div class="spinner"></div><p>Cargando datos del Pokémon...</p></div>`;
     overlayEl.hidden = false;
     document.body.style.overflow = "hidden";
     modalIn(overlayEl, panelEl);
+  } else {
+    bodyEl.innerHTML = `<div class="detail-loading"><div class="spinner"></div><p>Cargando datos del Pokémon...</p></div>`;
+  }
+
+  try {
+    const [allPokemon, detail, natures] = await Promise.all([getAllPokemon(), getPokemonDetail(id), getNatures()]);
+    if (currentId !== id) return;
+
+    const pokemon = allPokemon.find((p) => p.id === id);
+    if (!pokemon) {
+      closeModal();
+      return;
+    }
+
+    const allById = new Map(allPokemon.map((p) => [p.id, p]));
+    const chain = detail.evolutionChainId !== null ? await getEvolutionChain(detail.evolutionChainId) : null;
+    if (currentId !== id) return;
+
+    render({ pokemon, detail, chain, natures, allById });
+    bodyEl.scrollTop = 0;
+  } catch (err) {
+    console.error("Error cargando detalles del Pokémon:", err);
+    toast.error("No se pudieron cargar los detalles del Pokémon.");
+    closeModal();
   }
 }

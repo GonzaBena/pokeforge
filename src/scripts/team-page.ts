@@ -6,6 +6,7 @@ import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
+import { openPokemonModal } from "../lib/pokemonModal";
 import type { GenerationInfo, MoveData, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
@@ -618,8 +619,14 @@ slotsEl.addEventListener("click", (e) => {
   }
 
   const slotEl = target.closest<HTMLElement>("[data-team-slot]");
-  if (slotEl && !slotEl.classList.contains("filled")) {
-    openPicker(Number(slotEl.dataset.slotIndex));
+  if (slotEl) {
+    const idx = Number(slotEl.dataset.slotIndex);
+    const slot = team.slots[idx];
+    if (!slot || slot.pokemonId === null) {
+      openPicker(idx);
+    } else {
+      openPokemonModal(slot.pokemonId);
+    }
   }
 });
 
