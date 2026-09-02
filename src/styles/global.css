@@ -2176,12 +2176,52 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   gap: 8px;
 }
 
+.detail-stat__label-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .detail-stat__label {
   color: var(--text-muted);
   font-weight: 700;
   text-transform: uppercase;
   font-size: 10px;
   letter-spacing: 0.03em;
+}
+
+.detail-stat__mod {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+.detail-stat__mod--up {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.detail-stat__mod--down {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.detail-stat.is-nature-up .detail-stat__input {
+  color: #ef4444;
+  font-weight: 800;
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.detail-stat.is-nature-down .detail-stat__input {
+  color: #3b82f6;
+  font-weight: 800;
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.08);
 }
 
 .detail-stat__input {
@@ -2201,6 +2241,12 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 }
 
 .detail-nature {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-nature__select-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2233,6 +2279,47 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   cursor: help;
   width: 15px;
   height: 15px;
+}
+
+.detail-nature__effects {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.detail-nature-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detail-nature-tag--up {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.detail-nature-tag--down {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.detail-nature-tag--neutral {
+  color: var(--text-muted);
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid var(--border);
+}
+
+.detail-nature-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .detail-hint {

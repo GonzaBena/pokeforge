@@ -225,9 +225,24 @@ function renderHeader(ctx: RenderContext): string {
   const statsHtml = STAT_KEYS.map((key) => {
     const base = detail.stats[key];
     const value = overrides.stats[key] ?? base;
+    const modifier = getNatureModifier(selectedNature, key);
+    let modBadge = "";
+    let modClass = "";
+
+    if (modifier === "up") {
+      modBadge = `<span class="detail-stat__mod detail-stat__mod--up" title="+10% por naturaleza">▲ +10%</span>`;
+      modClass = "is-nature-up";
+    } else if (modifier === "down") {
+      modBadge = `<span class="detail-stat__mod detail-stat__mod--down" title="-10% por naturaleza">▼ -10%</span>`;
+      modClass = "is-nature-down";
+    }
+
     return `
-      <div class="detail-stat">
-        <span class="detail-stat__label">${STAT_LABELS[key]}</span>
+      <div class="detail-stat ${modClass}">
+        <div class="detail-stat__label-group">
+          <span class="detail-stat__label">${STAT_LABELS[key]}</span>
+          ${modBadge}
+        </div>
         <input
           class="detail-stat__input"
           type="number"
@@ -285,12 +300,17 @@ function renderHeader(ctx: RenderContext): string {
         <div class="detail-footer-row">
           <div class="detail-footer-row__nature">
             <div class="detail-nature">
-              <span class="detail-nature__label">Naturaleza</span>
-              <select data-nature-select ${captured ? "" : "disabled"}>
-                <option value="">Sin definir</option>
-                ${natureOptionsHtml}
-              </select>
-              <i data-lucide="info" class="detail-nature__tooltip" data-nature-tooltip title="${natureEffectText(selectedNature)}"></i>
+              <div class="detail-nature__select-row">
+                <span class="detail-nature__label">Naturaleza</span>
+                <select data-nature-select ${captured ? "" : "disabled"}>
+                  <option value="">Sin definir</option>
+                  ${natureOptionsHtml}
+                </select>
+                <i data-lucide="info" class="detail-nature__tooltip" data-nature-tooltip title="${natureEffectText(selectedNature)}"></i>
+              </div>
+              <div class="detail-nature__effects" data-nature-effects-container>
+                ${renderNatureEffectBadges(selectedNature)}
+              </div>
             </div>
             ${captured ? "" : '<p class="detail-hint" data-capture-hint>Capturá este Pokémon para personalizar sus stats y naturaleza.</p>'}
           </div>
@@ -304,10 +324,8 @@ function renderHeader(ctx: RenderContext): string {
   `;
 }
 
-let showHexagonChart = false;
-
-function isStatUp(nature: Nature | null, key: keyof PokemonStats): boolean {
-  if (!nature || !nature.increasedStat || nature.increasedStat === nature.decreasedStat) return false;
+function getNatureModifier(nature: Nature | null, key: keyof PokemonStats): "up" | "down" | null {
+  if (!nature || !nature.increasedStat || nature.increasedStat === nature.decreasedStat) return null;
   const map: Record<string, keyof PokemonStats> = {
     hp: "hp",
     attack: "attack",
@@ -316,20 +334,31 @@ function isStatUp(nature: Nature | null, key: keyof PokemonStats): boolean {
     "special-defense": "specialDefense",
     speed: "speed",
   };
-  return map[nature.increasedStat] === key;
+  if (map[nature.increasedStat] === key) return "up";
+  if (map[nature.decreasedStat] === key) return "down";
+  return null;
+}
+
+function renderNatureEffectBadges(nature: Nature | null): string {
+  if (!nature) return `<span class="detail-nature-hint">Elegí una naturaleza para ver su efecto.</span>`;
+  if (!nature.increasedStat || !nature.decreasedStat || nature.increasedStat === nature.decreasedStat) {
+    return `<span class="detail-nature-tag detail-nature-tag--neutral">Naturaleza neutra (sin cambios)</span>`;
+  }
+  const upLabel = NATURE_STAT_DISPLAY[nature.increasedStat] ?? nature.increasedStat;
+  const downLabel = NATURE_STAT_DISPLAY[nature.decreasedStat] ?? nature.decreasedStat;
+
+  return `
+    <span class="detail-nature-tag detail-nature-tag--up">▲ ${upLabel} (+10%)</span>
+    <span class="detail-nature-tag detail-nature-tag--down">▼ ${downLabel} (-10%)</span>
+  `;
+}
+
+function isStatUp(nature: Nature | null, key: keyof PokemonStats): boolean {
+  return getNatureModifier(nature, key) === "up";
 }
 
 function isStatDown(nature: Nature | null, key: keyof PokemonStats): boolean {
-  if (!nature || !nature.decreasedStat || nature.increasedStat === nature.decreasedStat) return false;
-  const map: Record<string, keyof PokemonStats> = {
-    hp: "hp",
-    attack: "attack",
-    defense: "defense",
-    "special-attack": "specialAttack",
-    "special-defense": "specialDefense",
-    speed: "speed",
-  };
-  return map[nature.decreasedStat] === key;
+  return getNatureModifier(nature, key) === "down";
 }
 
 function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string, nature: Nature | null = null): string {
@@ -577,8 +606,48 @@ function bindModalEvents(): void {
 
     const nature = lastContext?.natures.find((n) => n.name === value) ?? null;
     const { bodyEl } = getModalElements();
-    const tooltipEl = bodyEl?.querySelector<HTMLElement>("[data-nature-tooltip]");
-    if (tooltipEl) tooltipEl.setAttribute("title", natureEffectText(nature));
+
+    if (bodyEl && lastContext) {
+      const tooltipEl = bodyEl.querySelector<HTMLElement>("[data-nature-tooltip]");
+      if (tooltipEl) tooltipEl.setAttribute("title", natureEffectText(nature));
+
+      const effectsEl = bodyEl.querySelector<HTMLElement>("[data-nature-effects-container]");
+      if (effectsEl) effectsEl.innerHTML = renderNatureEffectBadges(nature);
+
+      STAT_KEYS.forEach((key) => {
+        const inputEl = bodyEl.querySelector<HTMLInputElement>(`[data-stat-input][data-stat-key="${key}"]`);
+        const statEl = inputEl?.closest<HTMLElement>(".detail-stat");
+        if (statEl) {
+          const mod = getNatureModifier(nature, key);
+          statEl.classList.toggle("is-nature-up", mod === "up");
+          statEl.classList.toggle("is-nature-down", mod === "down");
+
+          let labelGroup = statEl.querySelector<HTMLElement>(".detail-stat__label-group");
+          let modBadge = statEl.querySelector<HTMLElement>(".detail-stat__mod");
+
+          if (mod === "up") {
+            if (!modBadge) {
+              modBadge = document.createElement("span");
+              labelGroup?.appendChild(modBadge);
+            }
+            modBadge.className = "detail-stat__mod detail-stat__mod--up";
+            modBadge.textContent = "▲ +10%";
+            modBadge.title = "+10% por naturaleza";
+          } else if (mod === "down") {
+            if (!modBadge) {
+              modBadge = document.createElement("span");
+              labelGroup?.appendChild(modBadge);
+            }
+            modBadge.className = "detail-stat__mod detail-stat__mod--down";
+            modBadge.textContent = "▼ -10%";
+            modBadge.title = "-10% por naturaleza";
+          } else if (modBadge) {
+            modBadge.remove();
+          }
+        }
+      });
+    }
+
     updateHexagonChartIfVisible();
   });
 
