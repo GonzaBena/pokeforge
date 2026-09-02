@@ -109,7 +109,11 @@ export interface PokemonOverrides {
 const DEFAULT_OVERRIDES: PokemonOverrides = { stats: {}, nature: null };
 
 export function getPokemonOverrides(id: number): PokemonOverrides {
-  return readJson<PokemonOverrides>(overridesKey(id), DEFAULT_OVERRIDES);
+  const stored = readJson<PokemonOverrides>(overridesKey(id), DEFAULT_OVERRIDES);
+  return {
+    stats: stored && typeof stored.stats === "object" && stored.stats !== null ? stored.stats : {},
+    nature: stored?.nature ?? null,
+  };
 }
 
 export function setPokemonOverrides(id: number, overrides: PokemonOverrides): void {

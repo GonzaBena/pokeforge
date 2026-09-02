@@ -76,6 +76,7 @@ interface RenderContext {
 
 let currentId: number | null = null;
 let lastContext: RenderContext | null = null;
+let showHexagonChart = false;
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -218,13 +219,15 @@ function renderSection(id: string, index: number, total: number, ctx: RenderCont
 function renderHeader(ctx: RenderContext): string {
   const { pokemon, detail } = ctx;
   const captured = isCaptured(pokemon.id);
-  const overrides = getPokemonOverrides(pokemon.id);
+  const overrides = getPokemonOverrides(pokemon.id) ?? { stats: {}, nature: null };
+  const userStats = overrides.stats ?? {};
   const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
-  const selectedNature = ctx.natures.find((n) => n.name === overrides.nature) ?? null;
+  const naturesList = ctx.natures ?? [];
+  const selectedNature = naturesList.find((n) => n.name === overrides.nature) ?? null;
 
   const statsHtml = STAT_KEYS.map((key) => {
-    const base = detail.stats[key];
-    const value = overrides.stats[key] ?? base;
+    const base = detail.stats?.[key] ?? 0;
+    const value = userStats[key] ?? base;
     const modifier = getNatureModifier(selectedNature, key);
     let modBadge = "";
     let modClass = "";
@@ -256,17 +259,17 @@ function renderHeader(ctx: RenderContext): string {
     `;
   }).join("");
 
-  const natureOptionsHtml = ctx.natures
+  const natureOptionsHtml = naturesList
     .map((n) => `<option value="${n.name}" ${overrides.nature === n.name ? "selected" : ""}>${capitalize(n.name)}</option>`)
     .join("");
 
   const currentStats: PokemonStats = {
-    hp: overrides.stats.hp ?? detail.stats.hp,
-    attack: overrides.stats.attack ?? detail.stats.attack,
-    defense: overrides.stats.defense ?? detail.stats.defense,
-    specialAttack: overrides.stats.specialAttack ?? detail.stats.specialAttack,
-    specialDefense: overrides.stats.specialDefense ?? detail.stats.specialDefense,
-    speed: overrides.stats.speed ?? detail.stats.speed,
+    hp: userStats.hp ?? detail.stats.hp,
+    attack: userStats.attack ?? detail.stats.attack,
+    defense: userStats.defense ?? detail.stats.defense,
+    specialAttack: userStats.specialAttack ?? detail.stats.specialAttack,
+    specialDefense: userStats.specialDefense ?? detail.stats.specialDefense,
+    speed: userStats.speed ?? detail.stats.speed,
   };
   const primaryTypeColor = typeColor(pokemon.types[0] ?? "normal");
 
@@ -325,7 +328,7 @@ function renderHeader(ctx: RenderContext): string {
 }
 
 function getNatureModifier(nature: Nature | null, key: keyof PokemonStats): "up" | "down" | null {
-  if (!nature || !nature.increasedStat || nature.increasedStat === nature.decreasedStat) return null;
+  if (!nature || !nature.increasedStat || !nature.decreasedStat || nature.increasedStat === nature.decreasedStat) return null;
   const map: Record<string, keyof PokemonStats> = {
     hp: "hp",
     attack: "attack",
@@ -487,16 +490,17 @@ function updateHexagonChartIfVisible(): void {
   const hexView = bodyEl.querySelector<HTMLElement>("[data-stats-hexagon-view]");
   if (!hexView) return;
 
-  const overrides = getPokemonOverrides(currentId);
+  const overrides = getPokemonOverrides(currentId) ?? { stats: {}, nature: null };
+  const userStats = overrides.stats ?? {};
   const currentStats: PokemonStats = {
-    hp: overrides.stats.hp ?? lastContext.detail.stats.hp,
-    attack: overrides.stats.attack ?? lastContext.detail.stats.attack,
-    defense: overrides.stats.defense ?? lastContext.detail.stats.defense,
-    specialAttack: overrides.stats.specialAttack ?? lastContext.detail.stats.specialAttack,
-    specialDefense: overrides.stats.specialDefense ?? lastContext.detail.stats.specialDefense,
-    speed: overrides.stats.speed ?? lastContext.detail.stats.speed,
+    hp: userStats.hp ?? lastContext.detail.stats.hp,
+    attack: userStats.attack ?? lastContext.detail.stats.attack,
+    defense: userStats.defense ?? lastContext.detail.stats.defense,
+    specialAttack: userStats.specialAttack ?? lastContext.detail.stats.specialAttack,
+    specialDefense: userStats.specialDefense ?? lastContext.detail.stats.specialDefense,
+    speed: userStats.speed ?? lastContext.detail.stats.speed,
   };
-  const selectedNature = lastContext.natures.find((n) => n.name === overrides.nature) ?? null;
+  const selectedNature = (lastContext.natures ?? []).find((n) => n.name === overrides.nature) ?? null;
   const primaryTypeColor = typeColor(lastContext.pokemon.types[0] ?? "normal");
 
   hexView.innerHTML = renderHexagonChart(currentStats, primaryTypeColor, selectedNature);
@@ -765,7 +769,7 @@ export async function openPokemonModal(id: number): Promise<void> {
     }
 
     const allById = new Map(allPokemon.map((p) => [p.id, p]));
-    const chain = detail.evolutionChainId !== null ? await getEvolutionChain(detail.evolutionChainId) : null;
+    const chain = detail.evolutionChainId !== null ? await getEvolutionChain(detail.evolutionChainId).catch(() => null) : null;
     if (currentId !== id) return;
 
     render({ pokemon, detail, chain, natures, allById });
