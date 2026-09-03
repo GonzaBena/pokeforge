@@ -5,6 +5,7 @@ import {
   setTeam,
   setTeamSlot,
   setTeamSlotMove,
+  swapTeamSlotMoves,
   getSelectedGame,
   setSelectedGame,
   getGameDexMode,
@@ -30,6 +31,7 @@ import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
 import { getCurrentLocale, getTranslations, getTypeName, getGameTitle, getRegionName, type Locale } from "../lib/i18n/translations";
+import { computeTeamSynergy } from "../lib/teamSynergy";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamSlotState, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
@@ -39,6 +41,8 @@ const panelContentEl = document.querySelector<HTMLElement>("[data-panel-content]
 const panelTabToggleEl = document.querySelector<HTMLElement>("[data-panel-tab-toggle]");
 const tabContentDefenseEl = document.querySelector<HTMLElement>("[data-tab-content-defense]");
 const tabContentOffenseEl = document.querySelector<HTMLElement>("[data-tab-content-offense]");
+const tabContentSynergyEl = document.querySelector<HTMLElement>("[data-tab-content-synergy]");
+const synergyPanelContentEl = document.querySelector<HTMLElement>("[data-synergy-panel-content]");
 
 const weaknessesListEl = document.querySelector<HTMLElement>("[data-weaknesses-list]")!;
 const resistancesListEl = document.querySelector<HTMLElement>("[data-resistances-list]")!;
@@ -56,7 +60,7 @@ const offenseBlindspotsCountEl = document.querySelector<HTMLElement>("[data-offe
 const offenseCoveredListEl = document.querySelector<HTMLElement>("[data-offense-covered-list]");
 const offenseBlindspotsListEl = document.querySelector<HTMLElement>("[data-offense-blindspots-list]");
 
-let activePanelTab: "defense" | "offense" = "defense";
+let activePanelTab: "defense" | "offense" | "synergy" = "defense";
 let activeOffenseMode: "moves" | "stab" = "moves";
 
 const overlayEl = document.querySelector<HTMLElement>("[data-picker-overlay]")!;
@@ -179,7 +183,7 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
     .map((moveName, mIdx) => {
       if (!moveName) {
         return `
-          <button class="move-slot-btn empty" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
+          <button class="move-slot-btn empty" type="button" data-move-slot data-slot-index="${index}" data-move-index="${mIdx}" data-select-move>
             <i data-lucide="plus"></i> <span>${locale === "es" ? `Ataque ${mIdx + 1}` : `Move ${mIdx + 1}`}</span>
           </button>
         `;
@@ -196,8 +200,11 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
       const ppText = meta?.pp !== null && meta?.pp !== undefined ? meta.pp : "-";
 
       return `
-        <div class="move-slot-card filled">
+        <div class="move-slot-card filled" data-move-slot data-slot-index="${index}" data-move-index="${mIdx}" draggable="true">
           <div class="move-slot-card__top">
+            <div class="move-slot-drag-handle" data-drag-handle title="${locale === "es" ? "Arrastrar para reordenar" : "Drag to reorder"}" aria-label="${locale === "es" ? "Arrastrar para reordenar" : "Drag to reorder"}">
+              <i data-lucide="grip-vertical"></i>
+            </div>
             <button class="move-slot-card__name-btn" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
               <i data-lucide="swords"></i>
               <span class="move-slot-card__title">${formatLabel(moveName)}</span>
@@ -549,6 +556,7 @@ function renderStrengthsPanel(): void {
   }
 
   renderOffensePanel();
+  renderSynergyPanel();
 
   refreshIcons();
 }
@@ -708,6 +716,203 @@ function renderOffensePanel(): void {
       ? offense.blindSpots.map(renderOffenseBlindSpotItemHTML).join("")
       : `<p class="side-panel__empty">${t.strengthsWeaknesses.noBlindSpots}</p>`;
   }
+}
+
+function renderSynergyPanel(): void {
+  if (!typeChart || !tabContentSynergyEl || !synergyPanelContentEl || !allPokemon.length) return;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  const activePokemon = team.slots
+    .map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) ?? null : null))
+    .filter((p): p is Pokemon => p !== null);
+
+  if (!activePokemon.length) {
+    synergyPanelContentEl.innerHTML = `<p class="side-panel__empty">${t.strengthsWeaknesses.noTeam}</p>`;
+    return;
+  }
+
+  const currentSet = pickerState.game ? gameSpeciesSets.get(pickerState.game)?.[pickerState.dexMode] : undefined;
+  const report = computeTeamSynergy(typeChart, activePokemon, allPokemon, { gameSpeciesSet: currentSet });
+
+  const hasEmptySlot = team.slots.some((s) => s.pokemonId === null);
+
+  // 1. Diagnosis
+  const weaknessesToCover = [...report.criticalWeaknesses, ...report.exposedWeaknesses];
+  const weaknessesHtml = weaknessesToCover.length
+    ? weaknessesToCover
+        .map(
+          (ty) => `
+        <span class="type-badge type-badge--sm" data-type="${ty}" style="--badge-bg:${typeColor(ty)}">
+          ${getTypeName(ty, locale)}
+        </span>
+      `
+        )
+        .join("")
+    : `<span style="color: #86efac; font-size: 11px;">✓ ${locale === "es" ? "Sin debilidades desprotegidas" : "No unprotected weaknesses"}</span>`;
+
+  const blindSpotsHtml = report.blindSpots.length
+    ? report.blindSpots
+        .map(
+          (ty) => `
+        <span class="type-badge type-badge--sm" data-type="${ty}" style="--badge-bg:${typeColor(ty)}">
+          ${getTypeName(ty, locale)}
+        </span>
+      `
+        )
+        .join("")
+    : `<span style="color: #86efac; font-size: 11px;">✓ ${locale === "es" ? "Cobertura ofensiva completa" : "Full offensive coverage"}</span>`;
+
+  const diagnosisHtml = `
+    <div class="synergy-diagnosis">
+      <div class="synergy-diagnosis__title">
+        <i data-lucide="sparkles"></i> <span>${t.strengthsWeaknesses.synergyTitle}</span>
+      </div>
+      <div class="synergy-diagnosis__section">
+        <span class="synergy-diagnosis__subtitle">${locale === "es" ? "Debilidades a mitigar:" : "Weaknesses to mitigate:"}</span>
+        <div class="synergy-diagnosis__types">${weaknessesHtml}</div>
+      </div>
+      <div class="synergy-diagnosis__section">
+        <span class="synergy-diagnosis__subtitle">${locale === "es" ? "Puntos ciegos a cubrir:" : "Blind spots to cover:"}</span>
+        <div class="synergy-diagnosis__types">${blindSpotsHtml}</div>
+      </div>
+    </div>
+  `;
+
+  // 2. Recommended types
+  let typesHtml = "";
+  if (report.recommendedTypes.length) {
+    const typeItems = report.recommendedTypes
+      .map((rt) => {
+        const badges: string[] = [];
+        if (rt.resistsTeamWeaknesses.length) {
+          const names = rt.resistsTeamWeaknesses.map((w) => getTypeName(w, locale)).join(", ");
+          badges.push(
+            `<span class="synergy-tag synergy-tag--resist"><i data-lucide="shield"></i> ${t.strengthsWeaknesses.resistsVulnerability.replace("{types}", names)}</span>`
+          );
+        }
+        if (rt.coversBlindSpots.length) {
+          const names = rt.coversBlindSpots.map((b) => getTypeName(b, locale)).join(", ");
+          badges.push(
+            `<span class="synergy-tag synergy-tag--offense"><i data-lucide="swords"></i> ${t.strengthsWeaknesses.coversBlindSpotBadge.replace("{types}", names)}</span>`
+          );
+        }
+
+        return `
+          <div class="synergy-type-row">
+            <span class="type-badge type-badge--sm" data-type="${rt.type}" style="--badge-bg:${typeColor(rt.type)}">
+              ${getTypeName(rt.type, locale)}
+            </span>
+            <div class="synergy-type-row__badges">${badges.join("")}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    typesHtml = `
+      <div class="synergy-types-section">
+        <span class="defense-group__label" style="margin-bottom: 4px;">${t.strengthsWeaknesses.recommendedTypesTitle}</span>
+        <div class="synergy-types-list">${typeItems}</div>
+      </div>
+    `;
+  }
+
+  // 3. Recommended Pokémon cards
+  let pokemonCardsHtml = "";
+  if (report.suggestions.length) {
+    const cards = report.suggestions
+      .map((sug) => {
+        const p = sug.pokemon;
+        const sprite = p.sprites.officialArtwork ?? p.sprites.default ?? "";
+        const typesBadges = p.types
+          .map(
+            (ty) => `
+          <span class="type-badge type-badge--sm" data-type="${ty}" style="--badge-bg:${typeColor(ty)}">
+            ${getTypeName(ty, locale)}
+          </span>
+        `
+          )
+          .join("");
+
+        const reasonTags: string[] = [];
+
+        if (sug.keyImmunities.length) {
+          const immStr = sug.keyImmunities.map((ty) => getTypeName(ty, locale)).join(", ");
+          reasonTags.push(
+            `<span class="synergy-tag synergy-tag--immune"><i data-lucide="shield-check"></i> ${t.strengthsWeaknesses.immuneToVulnerability.replace("{types}", immStr)}</span>`
+          );
+        }
+
+        if (sug.keyResistances.length) {
+          const resStr = sug.keyResistances.map((ty) => getTypeName(ty, locale)).join(", ");
+          reasonTags.push(
+            `<span class="synergy-tag synergy-tag--resist"><i data-lucide="shield"></i> ${t.strengthsWeaknesses.resistsVulnerability.replace("{types}", resStr)}</span>`
+          );
+        }
+
+        if (sug.coveredBlindSpots.length) {
+          const covStr = sug.coveredBlindSpots.map((ty) => getTypeName(ty, locale)).join(", ");
+          reasonTags.push(
+            `<span class="synergy-tag synergy-tag--offense"><i data-lucide="swords"></i> ${t.strengthsWeaknesses.coversBlindSpotBadge.replace("{types}", covStr)}</span>`
+          );
+        }
+
+        if (sug.newTypes.length) {
+          const newStr = sug.newTypes.map((ty) => getTypeName(ty, locale)).join(", ");
+          reasonTags.push(
+            `<span class="synergy-tag synergy-tag--new"><i data-lucide="sparkles"></i> ${t.strengthsWeaknesses.bringsNewTypeBadge.replace("{types}", newStr)}</span>`
+          );
+        }
+
+        const actionBtn = hasEmptySlot
+          ? `
+            <button class="btn btn--xs btn--primary" type="button" data-synergy-add="${p.id}">
+              <i data-lucide="plus"></i> <span>${t.strengthsWeaknesses.addToTeam}</span>
+            </button>
+          `
+          : `
+            <button class="btn btn--xs btn--subtle" type="button" disabled title="${t.strengthsWeaknesses.teamFull.replace("{max}", String(team.size))}">
+              <i data-lucide="check"></i> <span>${team.size}/${team.size}</span>
+            </button>
+          `;
+
+        return `
+          <div class="synergy-card">
+            <div class="synergy-card__header">
+              <div class="synergy-card__info">
+                <img class="synergy-card__sprite" src="${sprite}" alt="${p.name}" loading="lazy" />
+                <div class="synergy-card__meta">
+                  <span class="synergy-card__name">${capitalize(p.name)}</span>
+                  <div class="synergy-card__types">${typesBadges}</div>
+                </div>
+              </div>
+              ${actionBtn}
+            </div>
+            <div class="synergy-card__reasons">
+              ${reasonTags.join("")}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    pokemonCardsHtml = `
+      <div class="synergy-pokemon-section">
+        <span class="defense-group__label" style="margin-bottom: 4px;">${t.strengthsWeaknesses.suggestedPokemonTitle}</span>
+        <div class="synergy-list">${cards}</div>
+      </div>
+    `;
+  } else {
+    pokemonCardsHtml = `
+      <p class="side-panel__empty">${t.strengthsWeaknesses.synergyNoSuggestions}</p>
+    `;
+  }
+
+  synergyPanelContentEl.innerHTML = `
+    ${diagnosisHtml}
+    ${typesHtml}
+    ${pokemonCardsHtml}
+  `;
 }
 
 // --- pokemon picker --------------------------------------------------
@@ -1095,7 +1300,7 @@ function renderMovePickerTable(): void {
 panelTabToggleEl?.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-panel-tab]");
   if (!btn) return;
-  const tab = btn.dataset.panelTab as "defense" | "offense";
+  const tab = btn.dataset.panelTab as "defense" | "offense" | "synergy";
   if (!tab || tab === activePanelTab) return;
 
   activePanelTab = tab;
@@ -1105,7 +1310,30 @@ panelTabToggleEl?.addEventListener("click", (e) => {
 
   if (tabContentDefenseEl) tabContentDefenseEl.hidden = activePanelTab !== "defense";
   if (tabContentOffenseEl) tabContentOffenseEl.hidden = activePanelTab !== "offense";
+  if (tabContentSynergyEl) tabContentSynergyEl.hidden = activePanelTab !== "synergy";
   refreshIcons();
+});
+
+synergyPanelContentEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-synergy-add]");
+  if (!btn) return;
+  const pId = Number(btn.dataset.synergyAdd);
+  const pokemon = pokemonById.get(pId);
+  if (!pokemon) return;
+
+  const emptySlotIndex = team.slots.findIndex((s) => s.pokemonId === null);
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  if (emptySlotIndex === -1) {
+    toast.info(t.strengthsWeaknesses.teamFull.replace("{max}", String(team.size)));
+    return;
+  }
+
+  team = setTeamSlot(emptySlotIndex, pId);
+  renderSingleSlot(emptySlotIndex);
+  renderStrengthsPanel();
+  toast.success(t.strengthsWeaknesses.teamAddedSuccess.replace("{name}", capitalize(pokemon.name)));
 });
 
 offenseModeToggleEl?.addEventListener("click", (e) => {
@@ -1171,6 +1399,167 @@ slotsEl.addEventListener("click", (e) => {
       openPokemonModal(slot.pokemonId);
     }
   }
+});
+
+// --- Drag and Drop for Move Slots (Desktop & Touch) ---
+
+let draggedMove: { slotIndex: number; moveIndex: number } | null = null;
+
+slotsEl.addEventListener("dragstart", (e) => {
+  const target = e.target as HTMLElement;
+  const card = target.closest<HTMLElement>(".move-slot-card[draggable='true']");
+  if (!card) return;
+
+  if (target.closest("[data-clear-move]")) {
+    e.preventDefault();
+    return;
+  }
+
+  const sIdx = Number(card.dataset.slotIndex);
+  const mIdx = Number(card.dataset.moveIndex);
+  draggedMove = { slotIndex: sIdx, moveIndex: mIdx };
+
+  if (e.dataTransfer) {
+    e.dataTransfer.setData("text/plain", `${sIdx}:${mIdx}`);
+    e.dataTransfer.effectAllowed = "move";
+  }
+
+  requestAnimationFrame(() => {
+    card.classList.add("is-dragging");
+  });
+});
+
+slotsEl.addEventListener("dragend", () => {
+  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot]").forEach((el) => {
+    el.classList.remove("is-dragging", "is-dragover");
+  });
+  draggedMove = null;
+});
+
+slotsEl.addEventListener("dragover", (e) => {
+  if (!draggedMove) return;
+  const targetSlot = (e.target as HTMLElement).closest<HTMLElement>("[data-move-slot]");
+  if (!targetSlot) return;
+
+  const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
+  if (targetSlotIdx !== draggedMove.slotIndex) return;
+
+  e.preventDefault();
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = "move";
+  }
+
+  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+    if (el !== targetSlot) el.classList.remove("is-dragover");
+  });
+  targetSlot.classList.add("is-dragover");
+});
+
+slotsEl.addEventListener("dragleave", (e) => {
+  const targetSlot = (e.target as HTMLElement).closest<HTMLElement>("[data-move-slot]");
+  targetSlot?.classList.remove("is-dragover");
+});
+
+slotsEl.addEventListener("drop", (e) => {
+  if (!draggedMove) return;
+  const targetSlot = (e.target as HTMLElement).closest<HTMLElement>("[data-move-slot]");
+  if (!targetSlot) return;
+
+  const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
+  const targetMoveIdx = Number(targetSlot.dataset.moveIndex);
+
+  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+    el.classList.remove("is-dragover");
+  });
+
+  if (targetSlotIdx === draggedMove.slotIndex && targetMoveIdx !== draggedMove.moveIndex) {
+    e.preventDefault();
+    team = swapTeamSlotMoves(targetSlotIdx, draggedMove.moveIndex, targetMoveIdx);
+    renderSingleSlot(targetSlotIdx);
+    renderStrengthsPanel();
+  }
+
+  draggedMove = null;
+});
+
+// Touch drag & drop support for mobile devices
+let touchDragState: {
+  slotIndex: number;
+  moveIndex: number;
+  card: HTMLElement;
+} | null = null;
+
+slotsEl.addEventListener(
+  "touchstart",
+  (e) => {
+    const handle = (e.target as HTMLElement).closest<HTMLElement>("[data-drag-handle]");
+    if (!handle) return;
+    const card = handle.closest<HTMLElement>(".move-slot-card");
+    if (!card) return;
+
+    const sIdx = Number(card.dataset.slotIndex);
+    const mIdx = Number(card.dataset.moveIndex);
+    touchDragState = { slotIndex: sIdx, moveIndex: mIdx, card };
+    card.classList.add("is-dragging");
+  },
+  { passive: true }
+);
+
+slotsEl.addEventListener(
+  "touchmove",
+  (e) => {
+    if (!touchDragState) return;
+    const touch = e.touches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetSlot = targetEl?.closest<HTMLElement>("[data-move-slot]");
+
+    slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+      if (el !== targetSlot) el.classList.remove("is-dragover");
+    });
+
+    if (targetSlot) {
+      const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
+      if (targetSlotIdx === touchDragState.slotIndex) {
+        targetSlot.classList.add("is-dragover");
+        if (e.cancelable) e.preventDefault();
+      }
+    }
+  },
+  { passive: false }
+);
+
+slotsEl.addEventListener("touchend", (e) => {
+  if (!touchDragState) return;
+  touchDragState.card.classList.remove("is-dragging");
+
+  const touch = e.changedTouches[0];
+  const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+  const targetSlot = targetEl?.closest<HTMLElement>("[data-move-slot]");
+
+  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+    el.classList.remove("is-dragover");
+  });
+
+  if (targetSlot) {
+    const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
+    const targetMoveIdx = Number(targetSlot.dataset.moveIndex);
+    if (targetSlotIdx === touchDragState.slotIndex && targetMoveIdx !== touchDragState.moveIndex) {
+      team = swapTeamSlotMoves(targetSlotIdx, touchDragState.moveIndex, targetMoveIdx);
+      renderSingleSlot(targetSlotIdx);
+      renderStrengthsPanel();
+    }
+  }
+
+  touchDragState = null;
+});
+
+slotsEl.addEventListener("touchcancel", () => {
+  if (!touchDragState) return;
+  touchDragState.card.classList.remove("is-dragging");
+  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+    el.classList.remove("is-dragover");
+  });
+  touchDragState = null;
 });
 
 pickerCloseBtn.addEventListener("click", closePicker);

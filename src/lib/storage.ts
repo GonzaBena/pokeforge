@@ -99,6 +99,25 @@ export function setTeamSlotMove(slotIndex: number, moveIndex: number, moveName: 
   return setTeam({ ...current, slots });
 }
 
+export function swapTeamSlotMoves(slotIndex: number, fromMoveIndex: number, toMoveIndex: number): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  const targetSlot = slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return current;
+
+  const currentMoves = Array.from({ length: 4 }, (_, i) => targetSlot.moves?.[i] ?? null);
+  const temp = currentMoves[fromMoveIndex];
+  currentMoves[fromMoveIndex] = currentMoves[toMoveIndex];
+  currentMoves[toMoveIndex] = temp;
+
+  slots[slotIndex] = {
+    ...targetSlot,
+    moves: currentMoves,
+  };
+
+  return setTeam({ ...current, slots });
+}
+
 // --- Per-pokemon detail overrides (stats/nature, informational only) ----
 
 export interface PokemonOverrides {

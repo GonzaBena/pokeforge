@@ -188,6 +188,20 @@ export interface Translations {
     noBlindSpots: string;
     noOffenseCovered: string;
     blindSpotHint: string;
+    tabSynergy: string;
+    synergyTitle: string;
+    synergySubtitle: string;
+    recommendedTypesTitle: string;
+    suggestedPokemonTitle: string;
+    addToTeam: string;
+    teamFull: string;
+    teamAddedSuccess: string;
+    synergyNoSuggestions: string;
+    whyRecommended: string;
+    resistsVulnerability: string;
+    immuneToVulnerability: string;
+    coversBlindSpotBadge: string;
+    bringsNewTypeBadge: string;
   };
   modal: {
     stats: string;
@@ -446,6 +460,20 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       noBlindSpots: "Excellent! The team covers all 18 elemental types.",
       noOffenseCovered: "No super-effective coverage against any type.",
       blindSpotHint: "No team member can hit this type with super-effective damage.",
+      tabSynergy: "Synergy",
+      synergyTitle: "Synergy Suggestions",
+      synergySubtitle: "Smart suggestions to cover weaknesses and complete your team",
+      recommendedTypesTitle: "Key Recommended Types",
+      suggestedPokemonTitle: "Suggested Pokémon",
+      addToTeam: "Add to team",
+      teamFull: "Team full ({max}/{max})",
+      teamAddedSuccess: "{name} added to your team!",
+      synergyNoSuggestions: "Your team is well-balanced or no candidates were found.",
+      whyRecommended: "Why recommended?",
+      resistsVulnerability: "Resists {types}",
+      immuneToVulnerability: "Immune to {types}",
+      coversBlindSpotBadge: "Covers {types}",
+      bringsNewTypeBadge: "New: {types}",
     },
     modal: {
       stats: "Stats",
@@ -713,6 +741,20 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       noBlindSpots: "¡Excelente! El equipo cubre los 18 tipos elementales.",
       noOffenseCovered: "Sin tipos cubiertos con daño súper eficaz.",
       blindSpotHint: "Ningún miembro del equipo puede golpear este tipo con súper eficacia.",
+      tabSynergy: "Sinergia",
+      synergyTitle: "Sugerencias de Sinergia",
+      synergySubtitle: "Recomendaciones inteligentes para completar o balancear tu equipo",
+      recommendedTypesTitle: "Tipos Clave Recomendados",
+      suggestedPokemonTitle: "Pokémon Sugeridos",
+      addToTeam: "Agregar al equipo",
+      teamFull: "Equipo lleno ({max}/{max})",
+      teamAddedSuccess: "¡{name} fue agregado a tu equipo!",
+      synergyNoSuggestions: "Tu equipo está bien balanceado o no se encontraron candidatos.",
+      whyRecommended: "¿Por qué se recomienda?",
+      resistsVulnerability: "Resiste {types}",
+      immuneToVulnerability: "Inmune a {types}",
+      coversBlindSpotBadge: "Cubre {types}",
+      bringsNewTypeBadge: "Nuevo: {types}",
     },
     modal: {
       stats: "Estadísticas",
