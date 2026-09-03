@@ -54,6 +54,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip API requests so sync and dynamic data are never served stale from SW cache
+  if (url.pathname.startsWith('/api/')) {
+    return;
+  }
+
   // Stale-While-Revalidate for static data (/data/*.json)
   if (url.pathname.startsWith('/data/')) {
     event.respondWith(

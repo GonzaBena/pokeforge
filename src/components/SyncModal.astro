@@ -143,12 +143,21 @@ const t = getTranslations(currentLocale);
             </div>
           </div>
 
+          <div class="cloud-worker-badge">
+            <i data-lucide="shield-check"></i>
+            <span>{t.syncModal.cloudAutosaveInfo}</span>
+          </div>
+
           <div class="cloud-actions-grid">
             <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-sync-now>
-              <i data-lucide="refresh-cw"></i>
+              <i data-lucide="upload"></i>
               <span>{t.syncModal.cloudSyncNow}</span>
             </button>
-            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-unlink-btn>
+            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-check-now>
+              <i data-lucide="refresh-cw"></i>
+              <span>{t.syncModal.cloudCheckUpdates}</span>
+            </button>
+            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-unlink-btn style="grid-column: 1 / -1;">
               <i data-lucide="unlink"></i>
               <span>{t.syncModal.cloudUnlink}</span>
             </button>
@@ -277,6 +286,8 @@ const t = getTranslations(currentLocale);
     createCloudVault,
     joinCloudVault,
     syncToCloudNow,
+    fetchFromCloud,
+    pingSyncWorkerCheck,
     unlinkCloudVault,
     deleteCloudVault,
     setCloudSecretKey,
@@ -327,6 +338,7 @@ const t = getTranslations(currentLocale);
     const cloudUpgradeKeyInput = overlay.querySelector<HTMLInputElement>("[data-cloud-upgrade-key-input]");
     const cloudUpgradeKeyBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-upgrade-key-btn]");
     const cloudSyncNowBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-sync-now]");
+    const cloudCheckNowBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-check-now]");
     const cloudUnlinkBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-unlink-btn]");
     const cloudDeleteTrigger = overlay.querySelector<HTMLButtonElement>("[data-cloud-delete-trigger]");
     const cloudDeleteConfirm = overlay.querySelector<HTMLDivElement>("[data-cloud-delete-confirm]");
@@ -593,14 +605,24 @@ const t = getTranslations(currentLocale);
     cloudSyncNowBtn?.addEventListener("click", async () => {
       const locale = getCurrentLocale();
       cloudSyncNowBtn.disabled = true;
-      toast.info(locale === "es" ? "Sincronizando..." : "Syncing...");
+      toast.info(locale === "es" ? "Guardando en la nube..." : "Saving to cloud...");
       const res = await syncToCloudNow();
       cloudSyncNowBtn.disabled = false;
       if (res.success) {
-        toast.success(locale === "es" ? "¡Datos sincronizados con la DB!" : "Data synced with DB!");
+        toast.success(locale === "es" ? "¡Datos guardados con éxito en la DB!" : "Data successfully saved to DB!");
       } else {
         toast.error(res.error || (locale === "es" ? "Error al sincronizar" : "Error syncing"));
       }
+    });
+
+    cloudCheckNowBtn?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
+      cloudCheckNowBtn.disabled = true;
+      toast.info(locale === "es" ? "Comprobando cambios en la nube..." : "Checking for updates in cloud...");
+      await fetchFromCloud();
+      pingSyncWorkerCheck();
+      cloudCheckNowBtn.disabled = false;
+      toast.success(locale === "es" ? "Comprobación finalizada." : "Check completed.");
     });
 
     cloudUnlinkBtn?.addEventListener("click", () => {

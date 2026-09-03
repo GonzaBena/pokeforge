@@ -40,9 +40,46 @@ const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : path.s
           <span>{t.nav.installApp}</span>
         </button>
       </div>
-      <button class="nav__sync-btn" type="button" data-sync-open title={t.nav.syncTitle} aria-label={t.nav.syncTitle}>
-        <i data-lucide="qr-code"></i>
-        <span>{t.nav.sync}</span>
+      <button
+        class="nav__sync-btn"
+        type="button"
+        data-sync-open
+        data-cloud-btn
+        title={t.nav.syncTitle}
+        aria-label={t.nav.syncTitle}
+      >
+        <span class="nav__cloud-wrapper" aria-hidden="true">
+          <!-- 1. Sincronizado / Guardado (Google Docs: Nube con check) -->
+          <span class="nav__cloud-icon nav__cloud-icon--synced" data-cloud-state="synced" hidden>
+            <i data-lucide="cloud"></i>
+            <span class="nav__cloud-badge nav__cloud-badge--check">
+              <i data-lucide="check"></i>
+            </span>
+          </span>
+          <!-- 2. Sincronizando / Guardando... (Nube con spinner) -->
+          <span class="nav__cloud-icon nav__cloud-icon--syncing" data-cloud-state="syncing" hidden>
+            <i data-lucide="cloud"></i>
+            <span class="nav__cloud-badge nav__cloud-badge--spin">
+              <i data-lucide="loader-2" class="spin"></i>
+            </span>
+          </span>
+          <!-- 3. Offline / Sin conexión (Nube tachada) -->
+          <span class="nav__cloud-icon nav__cloud-icon--offline" data-cloud-state="offline" hidden>
+            <i data-lucide="cloud-off"></i>
+          </span>
+          <!-- 4. Error al guardar (Nube con alerta) -->
+          <span class="nav__cloud-icon nav__cloud-icon--error" data-cloud-state="error" hidden>
+            <i data-lucide="cloud"></i>
+            <span class="nav__cloud-badge nav__cloud-badge--error">
+              <i data-lucide="alert-triangle"></i>
+            </span>
+          </span>
+          <!-- 5. No vinculado / Solo local (Nube por defecto) -->
+          <span class="nav__cloud-icon nav__cloud-icon--unlinked" data-cloud-state="unlinked">
+            <i data-lucide="cloud"></i>
+          </span>
+        </span>
+        <span class="nav__sync-text" data-cloud-text>{t.nav.sync}</span>
       </button>
       <button class="nav__sound-btn" type="button" data-sound-toggle title={t.nav.soundTitle} aria-label={t.nav.soundTitle}>
         <i data-lucide="volume-2" data-sound-icon-on></i>
@@ -71,6 +108,13 @@ const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : path.s
   import { isSoundEnabled, setSoundEnabled } from "../lib/sound";
   import { toast } from "../lib/toast";
   import { getCurrentLocale, getTranslations } from "../lib/i18n/translations";
+  import { refreshIcons } from "../lib/icons";
+  import {
+    getCloudState,
+    initCloudSyncClient,
+    CLOUD_STATUS_EVENT,
+    type CloudState,
+  } from "../lib/cloudSync";
 
   function initSoundToggle() {
     const soundBtn = document.querySelector<HTMLButtonElement>("[data-sound-toggle]");
@@ -142,10 +186,84 @@ const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : path.s
     });
   }
 
+  function initCloudStatus() {
+    const cloudBtn = document.querySelector<HTMLButtonElement>("[data-cloud-btn]");
+    if (!cloudBtn) return;
+
+    const textEl = cloudBtn.querySelector<HTMLElement>("[data-cloud-text]");
+    const stateIcons = cloudBtn.querySelectorAll<HTMLElement>("[data-cloud-state]");
+
+    function updateCloudUI(state: CloudState) {
+      const locale = getCurrentLocale();
+      const t = getTranslations(locale);
+      const status = state.status;
+
+      cloudBtn?.setAttribute("data-status", status);
+
+      stateIcons.forEach((el) => {
+        el.hidden = el.dataset.cloudState !== status;
+      });
+
+      cloudBtn?.classList.remove(
+        "nav__sync-btn--synced",
+        "nav__sync-btn--syncing",
+        "nav__sync-btn--offline",
+        "nav__sync-btn--error",
+        "nav__sync-btn--unlinked"
+      );
+      cloudBtn?.classList.add(`nav__sync-btn--${status}`);
+
+      let label = t.nav.sync;
+      let tooltip = t.nav.cloudTooltipUnlinked;
+
+      switch (status) {
+        case "synced":
+          label = t.nav.cloudSynced;
+          tooltip = state.code ? `${t.nav.cloudTooltipSynced} (${state.code})` : t.nav.cloudTooltipSynced;
+          break;
+        case "syncing":
+          label = t.nav.cloudSyncing;
+          tooltip = t.nav.cloudTooltipSyncing;
+          break;
+        case "offline":
+          label = t.nav.cloudOffline;
+          tooltip = t.nav.cloudTooltipOffline;
+          break;
+        case "error":
+          label = t.nav.cloudError;
+          tooltip = state.lastError || t.nav.cloudTooltipError;
+          break;
+        case "unlinked":
+        default:
+          label = t.nav.sync;
+          tooltip = t.nav.cloudTooltipUnlinked;
+          break;
+      }
+
+      if (textEl) textEl.textContent = label;
+      cloudBtn?.setAttribute("title", tooltip);
+      cloudBtn?.setAttribute("aria-label", tooltip);
+    }
+
+    initCloudSyncClient();
+    updateCloudUI(getCloudState());
+    refreshIcons();
+
+    window.addEventListener(CLOUD_STATUS_EVENT, (e) => {
+      const detail = (e as CustomEvent<CloudState>).detail;
+      if (detail) {
+        updateCloudUI(detail);
+        refreshIcons();
+      }
+    });
+  }
+
   initSoundToggle();
   initPwaInstall();
+  initCloudStatus();
   document.addEventListener("astro:after-swap", () => {
     initSoundToggle();
     initPwaInstall();
+    initCloudStatus();
   });
 </script>

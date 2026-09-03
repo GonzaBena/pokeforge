@@ -55,6 +55,16 @@ export interface Translations {
     home: string;
     installedSuccess: string;
     pwaHint: string;
+    cloudSynced: string;
+    cloudSyncing: string;
+    cloudOffline: string;
+    cloudError: string;
+    cloudTooltipSynced: string;
+    cloudTooltipSyncing: string;
+    cloudTooltipOffline: string;
+    cloudTooltipError: string;
+    cloudTooltipUnlinked: string;
+    cloudRemoteUpdated: string;
   };
   home: {
     badge: string;
@@ -191,6 +201,8 @@ export interface Translations {
     cloudCopyTitle: string;
     cloudHelp: string;
     cloudSyncNow: string;
+    cloudAutosaveInfo: string;
+    cloudCheckUpdates: string;
     cloudUnlink: string;
     cloudDeleteVault: string;
     cloudDeleteConfirmTitle: string;
@@ -236,6 +248,16 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       installedSuccess: "PokeForge was installed successfully!",
       pwaHint:
         "To install PokeForge, use 'Add to Home Screen' in your browser menu.",
+      cloudSynced: "Synced",
+      cloudSyncing: "Saving...",
+      cloudOffline: "Offline",
+      cloudError: "Save error",
+      cloudTooltipSynced: "All changes saved to cloud",
+      cloudTooltipSyncing: "Saving changes to database...",
+      cloudTooltipOffline: "Offline mode. Changes will sync when reconnected.",
+      cloudTooltipError: "Error syncing with cloud. Click to retry.",
+      cloudTooltipUnlinked: "Sync with cloud and other devices",
+      cloudRemoteUpdated: "Data updated from cloud",
     },
     home: {
       badge: "PokeForge PWA v1.0 · Gen I to IX",
@@ -377,7 +399,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudCopyTitle: "Copy code",
       cloudHelp:
         "Enter this code on your phone or another PC to keep them synced in real time.",
-      cloudSyncNow: "Sync now",
+      cloudSyncNow: "Save to cloud now",
+      cloudAutosaveInfo: "Autosave active · Web Worker checks for updates every ~5 mins.",
+      cloudCheckUpdates: "Check for updates",
       cloudUnlink: "Unlink",
       cloudDeleteVault: "Delete vault from cloud",
       cloudDeleteConfirmTitle: "Delete vault from DB?",
@@ -426,6 +450,16 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       installedSuccess: "¡PokeForge se ha instalado correctamente!",
       pwaHint:
         "Para instalar PokeForge, usá la opción 'Agregar a pantalla de inicio' en el menú de tu navegador.",
+      cloudSynced: "Sincronizado",
+      cloudSyncing: "Guardando...",
+      cloudOffline: "Sin conexión",
+      cloudError: "Error al guardar",
+      cloudTooltipSynced: "Todos los cambios están guardados en la nube",
+      cloudTooltipSyncing: "Guardando cambios en la base de datos...",
+      cloudTooltipOffline: "Modo sin conexión. Se sincronizará al reconectar.",
+      cloudTooltipError: "Error al sincronizar con la nube. Clic para reintentar.",
+      cloudTooltipUnlinked: "Sincronizar con la nube y otros dispositivos",
+      cloudRemoteUpdated: "Datos actualizados desde la nube",
     },
     home: {
       badge: "PokeForge PWA v1.0 · Gen I a IX",
@@ -573,7 +607,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudCopyTitle: "Copiar código",
       cloudHelp:
         "Ingresá este código en tu celular o en otra PC para mantenerlos sincronizados en tiempo real.",
-      cloudSyncNow: "Sincronizar ahora",
+      cloudSyncNow: "Guardar en la nube ahora",
+      cloudAutosaveInfo: "Guardado automático activo · El Web Worker revisa cambios cada ~5 min.",
+      cloudCheckUpdates: "Comprobar actualizaciones",
       cloudUnlink: "Desvincular",
       cloudDeleteVault: "Eliminar bóveda de la nube",
       cloudDeleteConfirmTitle: "¿Eliminar bóveda de la DB?",
