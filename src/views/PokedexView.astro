@@ -19,29 +19,81 @@ const t = getTranslations(currentLocale);
       <CapturedCounter />
     </div>
 
-    <div class="filters-bar">
-      <div class="view-toggle" data-view-toggle>
-        <button class="view-toggle__btn" type="button" data-view="all" aria-pressed="true">{t.pokedex.all}</button>
-        <button class="view-toggle__btn" type="button" data-view="captured" aria-pressed="false">{t.pokedex.captured}</button>
+    <div class="pokedex-controls">
+      <div class="filters-bar">
+        <div class="view-toggle" data-view-toggle>
+          <button class="view-toggle__btn" type="button" data-view="all" aria-pressed="true">{t.pokedex.all}</button>
+          <button class="view-toggle__btn" type="button" data-view="captured" aria-pressed="false">{t.pokedex.captured}</button>
+        </div>
+        <div class="search-input-wrap">
+          <i data-lucide="search" class="search-input-icon"></i>
+          <input class="search-input" type="search" placeholder={t.pokedex.searchPlaceholder} data-search-input />
+        </div>
+        <button
+          class="filter-toggle-btn"
+          type="button"
+          data-filter-toggle
+          aria-expanded="false"
+          aria-controls="pokedex-filters-panel"
+          title={t.pokedex.showFilters}
+          aria-label={t.pokedex.showFilters}
+        >
+          <i data-lucide="sliders-horizontal" class="filter-toggle-btn__icon"></i>
+          <span class="filter-toggle-btn__text">{t.pokedex.filters}</span>
+          <span class="filter-toggle-btn__badge" data-filter-active-count hidden>0</span>
+          <i data-lucide="chevron-down" class="filter-toggle-btn__chevron"></i>
+        </button>
       </div>
-      <input class="search-input" type="search" placeholder={t.pokedex.searchPlaceholder} data-search-input />
-      <div class="select-wrapper">
-        <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
-        <select class="game-select" data-game-filter aria-label={t.pokedex.allGames}>
-          <option value="">{t.pokedex.allGames}</option>
-        </select>
-        <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
-      </div>
-      <div class="view-toggle" data-game-mode-toggle aria-label={t.pokedex.dexMode} hidden>
-        <button class="view-toggle__btn" type="button" data-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
-        <button class="view-toggle__btn" type="button" data-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
-      </div>
-      <div class="view-toggle exclusive-toggle" data-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden></div>
-    </div>
 
-    <div class="filter-stacks">
-      <div class="filter-group" data-type-filter aria-label={t.pokedex.filterByType}></div>
-      <div class="filter-group" data-generation-filter aria-label={t.pokedex.filterByGen}></div>
+      <div id="pokedex-filters-panel" class="filters-collapsible is-collapsed" data-filters-panel>
+        <div class="filters-collapsible__inner">
+          <div class="filters-panel-card">
+            <div class="filters-panel__top">
+              <div class="filters-panel__title">
+                <i data-lucide="filter"></i>
+                <span>{t.pokedex.filters}</span>
+              </div>
+              <button class="filter-clear-btn" type="button" data-clear-filters hidden title={t.pokedex.clearFilters}>
+                <i data-lucide="rotate-ccw"></i>
+                <span>{t.pokedex.clearFilters}</span>
+              </button>
+            </div>
+
+            <div class="filters-panel__game-row">
+              <div class="select-wrapper">
+                <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+                <select class="game-select" data-game-filter aria-label={t.pokedex.allGames}>
+                  <option value="">{t.pokedex.allGames}</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+              </div>
+              <div class="view-toggle" data-game-mode-toggle aria-label={t.pokedex.dexMode} hidden>
+                <button class="view-toggle__btn" type="button" data-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
+                <button class="view-toggle__btn" type="button" data-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
+              </div>
+              <div class="view-toggle exclusive-toggle" data-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden></div>
+            </div>
+
+            <div class="filter-stacks">
+              <div class="filter-section">
+                <span class="filter-section__label">{t.pokedex.filterByType}</span>
+                <div class="filter-group" data-type-filter aria-label={t.pokedex.filterByType}></div>
+              </div>
+              <div class="filter-section">
+                <span class="filter-section__label">{t.pokedex.filterByGen}</span>
+                <div class="filter-group" data-generation-filter aria-label={t.pokedex.filterByGen}></div>
+              </div>
+            </div>
+
+            <div class="filters-panel__footer">
+              <button class="filters-panel__collapse-btn" type="button" data-close-filters>
+                <i data-lucide="chevron-up"></i>
+                <span>{t.pokedex.hideFilters}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="pokedex-grid" data-pokedex-grid></div>

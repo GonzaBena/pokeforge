@@ -34,6 +34,11 @@ const genFilterEl = document.querySelector<HTMLElement>("[data-generation-filter
 const viewToggleEl = document.querySelector<HTMLElement>("[data-view-toggle]")!;
 const capturedCountEl = document.querySelector<HTMLElement>("[data-captured-count]")!;
 const totalCountEl = document.querySelector<HTMLElement>("[data-total-count]")!;
+const filterToggleBtn = document.querySelector<HTMLButtonElement>("[data-filter-toggle]");
+const filtersPanelEl = document.querySelector<HTMLElement>("[data-filters-panel]");
+const filterActiveCountEl = document.querySelector<HTMLElement>("[data-filter-active-count]");
+const clearFiltersBtn = document.querySelector<HTMLButtonElement>("[data-clear-filters]");
+const closeFiltersBtn = document.querySelector<HTMLButtonElement>("[data-close-filters]");
 
 let allPokemon: Pokemon[] = [];
 let allPokemonReady = false;
@@ -310,7 +315,7 @@ function populateTypeChips(types: string[]): void {
   const chips = types
     .map(
       (t) =>
-        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${getTypeName(t, locale)}</button>`,
+        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="${String(selectedTypes.has(t))}" style="--badge-bg:${typeColor(t)}">${getTypeName(t, locale)}</button>`,
     )
     .join("");
 
@@ -321,7 +326,7 @@ function populateGenerationChips(generations: GenerationInfo[]): void {
   const chips = generations
     .map((g) => {
       const label = g.displayName.replace(/^(Generación|Generation)\s*/i, "");
-      return `<button class="filter-chip" type="button" data-generation="${g.name}" aria-pressed="false">${label}</button>`;
+      return `<button class="filter-chip" type="button" data-generation="${g.name}" aria-pressed="${String(selectedGenerations.has(g.name))}">${label}</button>`;
     })
     .join("");
 
@@ -350,6 +355,112 @@ function populateGameSelect(generations: GenerationInfo[]): void {
   if (gameFilterEl) {
     gameFilterEl.innerHTML = html;
     gameFilterEl.value = selectedGame;
+  }
+}
+
+// --- filter collapse & active badge --------------------------------------
+
+const STORAGE_KEY_FILTERS_EXPANDED = "poketeam:pokedex-filters-expanded";
+
+function isMobile(): boolean {
+  return window.innerWidth <= 820;
+}
+
+let filtersExpanded = !isMobile();
+
+function updateFiltersCollapseUI(expanded: boolean): void {
+  if (!filtersPanelEl || !filterToggleBtn) return;
+
+  filtersExpanded = expanded;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  if (expanded) {
+    filtersPanelEl.classList.remove("is-collapsed");
+    filtersPanelEl.classList.add("is-expanded");
+    filterToggleBtn.setAttribute("aria-expanded", "true");
+    filterToggleBtn.classList.add("is-panel-open");
+    filterToggleBtn.title = t.pokedex.hideFilters;
+    filterToggleBtn.setAttribute("aria-label", t.pokedex.hideFilters);
+  } else {
+    filtersPanelEl.classList.add("is-collapsed");
+    filtersPanelEl.classList.remove("is-expanded");
+    filterToggleBtn.setAttribute("aria-expanded", "false");
+    filterToggleBtn.classList.remove("is-panel-open");
+    filterToggleBtn.title = t.pokedex.showFilters;
+    filterToggleBtn.setAttribute("aria-label", t.pokedex.showFilters);
+  }
+}
+
+function toggleFilters(): void {
+  const willExpand = !filtersExpanded;
+  updateFiltersCollapseUI(willExpand);
+  try {
+    sessionStorage.setItem(STORAGE_KEY_FILTERS_EXPANDED, String(willExpand));
+  } catch {
+    // Ignore storage issues
+  }
+}
+
+function updateActiveFilterBadge(): void {
+  let count = 0;
+  if (selectedGame) count++;
+  if (selectedExclusiveFilter !== "all") count++;
+  count += selectedTypes.size;
+  count += selectedGenerations.size;
+
+  if (filterActiveCountEl) {
+    if (count > 0) {
+      filterActiveCountEl.textContent = String(count);
+      filterActiveCountEl.hidden = false;
+    } else {
+      filterActiveCountEl.hidden = true;
+    }
+  }
+
+  if (filterToggleBtn) {
+    filterToggleBtn.classList.toggle("has-active-filters", count > 0);
+  }
+
+  if (clearFiltersBtn) {
+    clearFiltersBtn.hidden = count === 0;
+  }
+}
+
+function clearAllFilters(): void {
+  let changed = false;
+
+  if (selectedGame) {
+    selectedGame = "";
+    setSelectedGame("");
+    if (gameFilterEl) gameFilterEl.value = "";
+    activeExclusivesMap.clear();
+    selectedExclusiveFilter = "all";
+    updateGameModeToggleUI();
+    updateExclusiveToggleUI();
+    changed = true;
+  }
+
+  if (selectedTypes.size > 0) {
+    selectedTypes.clear();
+    typeFilterEl.querySelectorAll<HTMLButtonElement>("[data-type]").forEach((btn) => {
+      btn.setAttribute("aria-pressed", "false");
+    });
+    changed = true;
+  }
+
+  if (selectedGenerations.size > 0) {
+    selectedGenerations.clear();
+    genFilterEl.querySelectorAll<HTMLButtonElement>("[data-generation]").forEach((btn) => {
+      btn.setAttribute("aria-pressed", "false");
+    });
+    changed = true;
+  }
+
+  if (changed) {
+    updateCapturedCounter();
+    updateActiveFilterBadge();
+    applyFilters();
   }
 }
 
@@ -416,6 +527,7 @@ typeFilterEl.addEventListener("click", (e) => {
   btn.setAttribute("aria-pressed", String(!pressed));
   if (pressed) selectedTypes.delete(t);
   else selectedTypes.add(t);
+  updateActiveFilterBadge();
   applyFilters();
 });
 
@@ -427,6 +539,7 @@ genFilterEl.addEventListener("click", (e) => {
   btn.setAttribute("aria-pressed", String(!pressed));
   if (pressed) selectedGenerations.delete(g);
   else selectedGenerations.add(g);
+  updateActiveFilterBadge();
   applyFilters();
 });
 
@@ -438,6 +551,7 @@ gameFilterEl?.addEventListener("change", () => {
   updateGameModeToggleUI();
   updateExclusiveToggleUI();
   updateCapturedCounter();
+  updateActiveFilterBadge();
   applyFilters();
 });
 
@@ -464,6 +578,7 @@ exclusiveToggleEl?.addEventListener("click", (e) => {
       b.setAttribute("aria-pressed", String(b.dataset.exclusiveFilter === selectedExclusiveFilter));
     });
     updateCapturedCounter();
+    updateActiveFilterBadge();
     applyFilters();
   }
 });
@@ -500,6 +615,7 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
     updateGameModeToggleUI();
     updateExclusiveToggleUI();
     updateCapturedCounter();
+    updateActiveFilterBadge();
     applyFilters();
   }
 });
@@ -518,6 +634,7 @@ window.addEventListener(DATA_RESET_EVENT, () => {
   updateGameModeToggleUI();
   updateExclusiveToggleUI();
   updateCapturedCounter();
+  updateActiveFilterBadge();
   for (const card of grid.querySelectorAll<HTMLElement>(".pokemon-card")) {
     card.classList.remove("pokemon-card--captured");
     const btn = card.querySelector<HTMLButtonElement>("[data-capture-btn]");
@@ -533,6 +650,39 @@ window.addEventListener(DATA_RESET_EVENT, () => {
 async function init(): Promise<void> {
   const manifest = await getManifest();
   manifestTotal = manifest.totalCount;
+
+  let initialExpanded = !isMobile();
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY_FILTERS_EXPANDED);
+    if (saved !== null) {
+      initialExpanded = saved === "true";
+    }
+  } catch {
+    // Ignore storage issues
+  }
+  updateFiltersCollapseUI(initialExpanded);
+  updateActiveFilterBadge();
+
+  filterToggleBtn?.addEventListener("click", toggleFilters);
+  closeFiltersBtn?.addEventListener("click", () => {
+    updateFiltersCollapseUI(false);
+    try {
+      sessionStorage.setItem(STORAGE_KEY_FILTERS_EXPANDED, "false");
+    } catch {
+      // Ignore
+    }
+  });
+  clearFiltersBtn?.addEventListener("click", clearAllFilters);
+  window.addEventListener("resize", () => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY_FILTERS_EXPANDED);
+      if (saved === null) {
+        updateFiltersCollapseUI(!isMobile());
+      }
+    } catch {
+      updateFiltersCollapseUI(!isMobile());
+    }
+  });
 
   try {
     gameDexData = await getGameDexData();
@@ -575,6 +725,7 @@ async function init(): Promise<void> {
     updateGameModeToggleUI();
     updateExclusiveToggleUI();
     updateCapturedCounter();
+    updateActiveFilterBadge();
   });
 }
 

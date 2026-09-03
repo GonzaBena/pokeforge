@@ -105,6 +105,10 @@ export interface Translations {
     exclusiveBoth: string;
     exclusiveOnly: string;
     exclusiveBadge: string;
+    filters: string;
+    showFilters: string;
+    hideFilters: string;
+    clearFilters: string;
   };
   team: {
     title: string;
@@ -317,6 +321,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       exclusiveBoth: "Both games",
       exclusiveOnly: "Only {version}",
       exclusiveBadge: "Exclusive to {version}",
+      filters: "Filters",
+      showFilters: "Show filters",
+      hideFilters: "Hide filters",
+      clearFilters: "Clear filters",
     },
     team: {
       title: "Team Builder",
@@ -537,6 +545,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       exclusiveBoth: "En ambos",
       exclusiveOnly: "Solo {version}",
       exclusiveBadge: "Exclusivo de {version}",
+      filters: "Filtros",
+      showFilters: "Mostrar filtros",
+      hideFilters: "Ocultar filtros",
+      clearFilters: "Limpiar filtros",
     },
     team: {
       title: "Armar equipo",
