@@ -41,9 +41,14 @@ const currentLocale = Astro.currentLocale ?? "en";
       if ("serviceWorker" in navigator) {
         if (import.meta.env.PROD) {
           window.addEventListener("load", () => {
-            navigator.serviceWorker.register("/sw.js").catch((err) => {
-              console.warn("ServiceWorker error:", err);
-            });
+            navigator.serviceWorker
+              .register("/sw.js")
+              .then((registration) => {
+                registration.update();
+              })
+              .catch((err) => {
+                console.warn("ServiceWorker error:", err);
+              });
           });
         } else {
           // En desarrollo, desregistrar Service Workers para evitar colisiones con Vite HMR y caché de dependencias

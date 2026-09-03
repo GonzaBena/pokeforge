@@ -79,31 +79,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation requests (HTML pages) with Stale-While-Revalidate
+  // Navigation requests (HTML pages): Network-First with Cache Fallback
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match(event.request).then((cached) => {
-        const fetchPromise = fetch(event.request)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              const clone = networkResponse.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-            }
-            return networkResponse;
-          })
-          .catch(async () => {
-            if (cached) return cached;
-            if (url.pathname.includes('/pokedex')) {
-              return (await caches.match('/pokedex/index.html')) || (await caches.match('/'));
-            }
-            if (url.pathname.includes('/equipo')) {
-              return (await caches.match('/equipo/index.html')) || (await caches.match('/'));
-            }
-            return (await caches.match('/index.html')) || (await caches.match('/'));
-          });
-
-        return cached || fetchPromise;
-      })
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          if (url.pathname.includes('/pokedex')) {
+            return (await caches.match('/pokedex/index.html')) || (await caches.match('/'));
+          }
+          if (url.pathname.includes('/equipo')) {
+            return (await caches.match('/equipo/index.html')) || (await caches.match('/'));
+          }
+          return (await caches.match('/index.html')) || (await caches.match('/'));
+        })
     );
     return;
   }
