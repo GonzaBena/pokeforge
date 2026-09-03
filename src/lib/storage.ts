@@ -122,13 +122,23 @@ export function setPokemonOverrides(id: number, overrides: PokemonOverrides): vo
 
 // --- Modal section order -------------------------------------------------
 
-export const DEFAULT_SECTION_ORDER = ["location", "moves", "evolutions"];
+export const DEFAULT_SECTION_ORDER = ["effectiveness", "location", "moves", "evolutions"];
 
 export function getSectionOrder(): string[] {
   const stored = readJson<string[]>(SECTION_ORDER_KEY, DEFAULT_SECTION_ORDER);
   const valid = stored.filter((s) => DEFAULT_SECTION_ORDER.includes(s));
   const missing = DEFAULT_SECTION_ORDER.filter((s) => !valid.includes(s));
-  return [...valid, ...missing];
+  if (missing.length === 0) return valid;
+  const result = [...valid];
+  for (const item of missing) {
+    const defaultIndex = DEFAULT_SECTION_ORDER.indexOf(item);
+    if (defaultIndex === 0) {
+      result.unshift(item);
+    } else {
+      result.push(item);
+    }
+  }
+  return result;
 }
 
 export function setSectionOrder(order: string[]): void {

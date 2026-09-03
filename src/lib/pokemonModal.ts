@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/table-core";
-import { getAllPokemon } from "./pokedexData";
+import { getAllPokemon, getTypeChart } from "./pokedexData";
 import { getEvolutionChain, getNatures, getPokemonDetail } from "./pokemonDetail";
+import { getTypeMultiplier } from "./typeChart";
 import {
   getPokemonOverrides,
   getSectionOrder,
@@ -15,7 +16,7 @@ import { typeColor } from "./typeColors";
 import { renderDataTable } from "./dataTable";
 import { toast } from "./toast";
 import { getCurrentLocale, getTranslations, getTypeName, getEvolutionTriggerName, getGameTitle, type Locale } from "./i18n/translations";
-import type { AcquisitionRow, EvolutionChain, EvolutionNode, MoveDetail, Nature, Pokemon, PokemonDetail, PokemonStats } from "./types";
+import type { AcquisitionRow, EvolutionChain, EvolutionNode, MoveDetail, Nature, Pokemon, PokemonDetail, PokemonStats, TypeChart } from "./types";
 
 function getModalElements() {
   const overlayEl = document.querySelector<HTMLElement>("[data-detail-overlay]");
@@ -73,6 +74,7 @@ interface RenderContext {
   chain: EvolutionChain | null;
   natures: Nature[];
   allById: Map<number, Pokemon>;
+  typeChart: TypeChart;
 }
 
 let currentId: number | null = null;
@@ -225,7 +227,90 @@ function renderEvolutionsContent(chain: EvolutionChain | null, currentPokemonId:
   return `<div class="detail-evolutions">${cards.join("")}</div>`;
 }
 
+interface EffectivenessItem {
+  type: string;
+  multiplier: number;
+}
+
+function getValClass(multiplier: number): string {
+  if (multiplier >= 4) return "quad";
+  if (multiplier > 1) return "double";
+  if (multiplier === 0) return "immune";
+  if (multiplier <= 0.25) return "quarter";
+  if (multiplier < 1) return "half";
+  return "neutral";
+}
+
+function renderEffectivenessItem(item: EffectivenessItem, locale: Locale): string {
+  const typeName = getTypeName(item.type, locale);
+  const color = typeColor(item.type);
+  const valStr = `x${item.multiplier}`;
+  const valClass = getValClass(item.multiplier);
+
+  return `<li class="detail-effectiveness__item"><span class="type-badge type-badge--sm" data-type="${item.type}" style="--badge-bg:${color}">${typeName}</span>, <span class="detail-effectiveness__val detail-effectiveness__val--${valClass}">${valStr}</span></li>`;
+}
+
+function renderEffectivenessContent(pokemon: Pokemon, typeChart: TypeChart): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  if (!typeChart || !typeChart.types) {
+    return `<p class="detail-empty">${locale === "es" ? "Datos de tipos no disponibles." : "Type data not available."}</p>`;
+  }
+
+  const weaknesses: EffectivenessItem[] = [];
+  const resistances: EffectivenessItem[] = [];
+  const immunities: EffectivenessItem[] = [];
+
+  for (const attackingType of typeChart.types) {
+    const mult = getTypeMultiplier(typeChart, attackingType, pokemon.types);
+    if (mult > 1) {
+      weaknesses.push({ type: attackingType, multiplier: mult });
+    } else if (mult === 0) {
+      immunities.push({ type: attackingType, multiplier: mult });
+    } else if (mult < 1) {
+      resistances.push({ type: attackingType, multiplier: mult });
+    }
+  }
+
+  weaknesses.sort((a, b) => b.multiplier - a.multiplier || getTypeName(a.type, locale).localeCompare(getTypeName(b.type, locale)));
+  resistances.sort((a, b) => a.multiplier - b.multiplier || getTypeName(a.type, locale).localeCompare(getTypeName(b.type, locale)));
+  immunities.sort((a, b) => getTypeName(a.type, locale).localeCompare(getTypeName(b.type, locale)));
+
+  const immunitiesHtml = immunities.length
+    ? `
+      <div class="detail-subsection">
+        <h5 class="detail-subsection__title">${t.modal.immunities}</h5>
+        <ul class="detail-effectiveness__list">${immunities.map((item) => renderEffectivenessItem(item, locale)).join("")}</ul>
+      </div>
+    `
+    : "";
+
+  return `
+    <div class="detail-effectiveness">
+      <div class="detail-subsection">
+        <h5 class="detail-subsection__title">${t.modal.weaknesses}</h5>
+        ${
+          weaknesses.length
+            ? `<ul class="detail-effectiveness__list">${weaknesses.map((item) => renderEffectivenessItem(item, locale)).join("")}</ul>`
+            : `<p class="detail-empty">${t.modal.none}</p>`
+        }
+      </div>
+      <div class="detail-subsection">
+        <h5 class="detail-subsection__title">${t.modal.resistances}</h5>
+        ${
+          resistances.length
+            ? `<ul class="detail-effectiveness__list">${resistances.map((item) => renderEffectivenessItem(item, locale)).join("")}</ul>`
+            : `<p class="detail-empty">${t.modal.none}</p>`
+        }
+      </div>
+      ${immunitiesHtml}
+    </div>
+  `;
+}
+
 const SECTION_CONTENT: Record<string, (ctx: RenderContext) => string> = {
+  effectiveness: (ctx) => renderEffectivenessContent(ctx.pokemon, ctx.typeChart),
   location: () => `<div data-table-mount="location"></div>`,
   moves: () => `<div data-table-mount="moves"></div>`,
   evolutions: (ctx) => renderEvolutionsContent(ctx.chain, ctx.pokemon.id, ctx.allById),
@@ -235,6 +320,7 @@ function renderSection(id: string, index: number, total: number, ctx: RenderCont
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
   const titles: Record<string, string> = {
+    effectiveness: t.modal.effectiveness,
     location: t.modal.acquisition,
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
@@ -253,7 +339,7 @@ function renderSection(id: string, index: number, total: number, ctx: RenderCont
           </button>
         </div>
       </div>
-      <div class="detail-section__content">${SECTION_CONTENT[id](ctx)}</div>
+      <div class="detail-section__content">${SECTION_CONTENT[id] ? SECTION_CONTENT[id](ctx) : ""}</div>
     </section>
   `;
 }
@@ -818,7 +904,12 @@ export async function openPokemonModal(id: number): Promise<void> {
   }
 
   try {
-    const [allPokemon, detail, natures] = await Promise.all([getAllPokemon(), getPokemonDetail(id), getNatures()]);
+    const [allPokemon, detail, natures, typeChart] = await Promise.all([
+      getAllPokemon(),
+      getPokemonDetail(id),
+      getNatures(),
+      getTypeChart(),
+    ]);
     if (currentId !== id) return;
 
     const pokemon = allPokemon.find((p) => p.id === id);
@@ -831,7 +922,7 @@ export async function openPokemonModal(id: number): Promise<void> {
     const chain = detail.evolutionChainId !== null ? await getEvolutionChain(detail.evolutionChainId).catch(() => null) : null;
     if (currentId !== id) return;
 
-    render({ pokemon, detail, chain, natures, allById });
+    render({ pokemon, detail, chain, natures, allById, typeChart });
     bodyEl.scrollTop = 0;
   } catch (err) {
     console.error("Error cargando detalles del Pokémon:", err);

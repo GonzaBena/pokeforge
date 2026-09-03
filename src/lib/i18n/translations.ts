@@ -164,6 +164,12 @@ export interface Translations {
     generation: string;
     close: string;
     wildEncounter: string;
+    effectiveness: string;
+    weaknesses: string;
+    resistances: string;
+    immunities: string;
+    neutral: string;
+    none: string;
   };
   sync: {
     title: string;
@@ -367,6 +373,12 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       generation: "Generation",
       close: "Close modal",
       wildEncounter: "Wild encounter",
+      effectiveness: "Type Effectiveness",
+      weaknesses: "Weaknesses",
+      resistances: "Resistances",
+      immunities: "Immunities",
+      neutral: "Neutral",
+      none: "None",
     },
     sync: {
       title: "Sync Devices",
@@ -581,6 +593,12 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       generation: "Generación",
       close: "Cerrar modal",
       wildEncounter: "Encuentro salvaje",
+      effectiveness: "Efectividad de Tipos",
+      weaknesses: "Debilidades",
+      resistances: "Resistencias",
+      immunities: "Inmunidades",
+      neutral: "Neutral",
+      none: "Ninguna",
     },
     sync: {
       title: "Sincronizar Dispositivos",
