@@ -139,18 +139,20 @@ const t = getTranslations(currentLocale);
         </div>
         <div class="picker-panel__filter-section">
           <span class="picker-panel__section-title">{t.team.gameSection}</span>
-          <div class="select-wrapper select-wrapper--compact">
-            <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
-            <select class="game-select" data-picker-game-filter aria-label={t.team.gameSection}>
-              <option value="">{t.pokedex.allGames}</option>
-            </select>
-            <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+          <div class="filters-panel__game-row">
+            <div class="select-wrapper">
+              <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+              <select class="game-select" data-picker-game-filter aria-label={t.team.gameSection}>
+                <option value="">{t.pokedex.allGames}</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+            </div>
+            <div class="view-toggle" data-picker-game-mode-toggle aria-label={t.pokedex.dexMode} hidden>
+              <button class="view-toggle__btn" type="button" data-picker-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
+              <button class="view-toggle__btn" type="button" data-picker-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
+            </div>
+            <div class="view-toggle exclusive-toggle" data-picker-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden></div>
           </div>
-          <div class="view-toggle" data-picker-game-mode-toggle aria-label={t.pokedex.dexMode} hidden style="margin-top: 8px;">
-            <button class="view-toggle__btn" type="button" data-picker-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
-            <button class="view-toggle__btn" type="button" data-picker-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
-          </div>
-          <div class="view-toggle exclusive-toggle" data-picker-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden style="margin-top: 8px;"></div>
         </div>
       </div>
       <div class="picker-panel__results" data-picker-results></div>
