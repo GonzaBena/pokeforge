@@ -5,67 +5,185 @@
   <div class="modal-panel sync-modal-panel">
     <div class="modal-panel__header">
       <div class="sync-modal__title-group">
-        <i data-lucide="qr-code"></i>
-        <h2>Sincronizar Dispositivos</h2>
+        <i data-lucide="cloud"></i>
+        <h2>Sincronización y Datos</h2>
       </div>
       <button class="modal-panel__close" type="button" data-sync-close aria-label="Cerrar">
         <i data-lucide="x"></i>
       </button>
     </div>
 
-    <div class="sync-modal__body">
-      <!-- Sección QR -->
-      <div class="sync-modal__qr-section">
-        <p class="sync-modal__instructions">
-          Escaneá este código con la <strong>cámara de tu celular</strong> para transferir tu equipo y capturas en 1 segundo:
-        </p>
+    <!-- Pestañas de Navegación -->
+    <div class="sync-nav-tabs">
+      <button class="sync-nav-tab is-active" type="button" data-tab-target="cloud">
+        <i data-lucide="cloud"></i>
+        <span>Nube Turso</span>
+      </button>
+      <button class="sync-nav-tab" type="button" data-tab-target="qr">
+        <i data-lucide="qr-code"></i>
+        <span>Código QR</span>
+      </button>
+    </div>
 
-        <div class="sync-modal__qr-wrapper">
-          <canvas id="sync-qr-canvas" class="sync-modal__canvas" width="240" height="240"></canvas>
-          <div class="sync-modal__qr-loading" data-sync-loading>
-            <i data-lucide="loader-2" class="spin"></i>
-            <span>Generando código QR...</span>
+    <div class="sync-modal__body">
+      <!-- PANEL 1: NUBE TURSO -->
+      <div class="sync-tab-panel" data-tab-panel="cloud">
+        <!-- Estado NO vinculado -->
+        <div class="cloud-unlinked-state" data-cloud-unlinked>
+          <div class="cloud-hero-icon">
+            <i data-lucide="cloud"></i>
+          </div>
+          <h3 class="cloud-panel-title">Sincronización Automática en la Nube</h3>
+          <p class="cloud-panel-desc">
+            Conecta tus dispositivos para que tu equipo y capturas se sincronicen automáticamente sin necesidad de cuentas ni contraseñas.
+          </p>
+
+          <button class="btn btn--primary cloud-primary-btn" type="button" data-cloud-create-btn>
+            <i data-lucide="cloud"></i>
+            <span>Crear Bóveda en la Nube</span>
+          </button>
+
+          <div class="sync-modal__divider">
+            <span>o unirse con código existente</span>
+          </div>
+
+          <div class="cloud-join-row">
+            <input
+              type="text"
+              class="cloud-code-input"
+              placeholder="Código (ej. PK-8492)"
+              maxlength="7"
+              data-cloud-join-input
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="btn btn--secondary" type="button" data-cloud-join-btn>
+              <i data-lucide="link"></i>
+              <span>Vincular</span>
+            </button>
           </div>
         </div>
 
-        <div class="sync-modal__stats" data-sync-stats>
-          <!-- Estadísticas dinámicas -->
-        </div>
+        <!-- Estado VINCULADO -->
+        <div class="cloud-linked-state" data-cloud-linked hidden>
+          <div class="cloud-status-card">
+            <div class="cloud-status-header">
+              <span class="cloud-status-pill">
+                <span class="cloud-status-dot"></span>
+                <span>Conectado a Turso</span>
+              </span>
+              <span class="cloud-last-sync" data-cloud-last-sync>Sincronizado</span>
+            </div>
 
-        <button class="sync-modal__copy-btn" type="button" data-sync-copy-link>
-          <i data-lucide="copy"></i>
-          <span>Copiar enlace de sincronización</span>
-        </button>
+            <div class="cloud-code-display">
+              <span class="cloud-code-label">Código de vinculación:</span>
+              <div class="cloud-code-val-wrap">
+                <strong class="cloud-code-value" data-cloud-code-value>------</strong>
+                <button class="cloud-code-copy-btn" type="button" data-cloud-copy-code title="Copiar código">
+                  <i data-lucide="copy"></i>
+                </button>
+              </div>
+            </div>
+
+            <p class="cloud-code-help">
+              Ingresá este código en tu celular o en otra PC para mantenerlos sincronizados en tiempo real.
+            </p>
+          </div>
+
+          <div class="cloud-actions-grid">
+            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-sync-now>
+              <i data-lucide="refresh-cw"></i>
+              <span>Sincronizar ahora</span>
+            </button>
+            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-unlink-btn>
+              <i data-lucide="unlink"></i>
+              <span>Desvincular</span>
+            </button>
+          </div>
+
+          <div class="cloud-danger-box">
+            <button class="btn btn--danger-outline sync-modal__reset-trigger" type="button" data-cloud-delete-trigger>
+              <i data-lucide="trash-2"></i>
+              <span>Eliminar bóveda de la nube</span>
+            </button>
+
+            <div class="sync-modal__confirm-box" data-cloud-delete-confirm hidden>
+              <div class="sync-modal__confirm-header">
+                <i data-lucide="alert-triangle"></i>
+                <strong>¿Eliminar bóveda de Turso?</strong>
+              </div>
+              <p class="sync-modal__confirm-text">
+                Se borrará permanentemente la copia de tus datos en la nube. Tus datos locales en este dispositivo se mantendrán intactos.
+              </p>
+              <div class="sync-modal__confirm-actions">
+                <button class="btn btn--danger btn--sm" type="button" data-cloud-confirm-delete>
+                  <i data-lucide="trash-2"></i>
+                  <span>Sí, borrar de la nube</span>
+                </button>
+                <button class="btn btn--secondary btn--sm" type="button" data-cloud-cancel-delete>
+                  <span>Cancelar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Sección Respaldo Manual -->
-      <div class="sync-modal__manual-section">
-        <div class="sync-modal__divider">
-          <span>o mediante archivo de respaldo</span>
+      <!-- PANEL 2: TRANSFERENCIA DIRECTA (QR / ARCHIVO) -->
+      <div class="sync-tab-panel" data-tab-panel="qr" hidden>
+        <!-- Sección QR -->
+        <div class="sync-modal__qr-section">
+          <p class="sync-modal__instructions">
+            Escaneá este código con la <strong>cámara de tu celular</strong> para transferir tu equipo y capturas en 1 segundo:
+          </p>
+
+          <div class="sync-modal__qr-wrapper">
+            <canvas id="sync-qr-canvas" class="sync-modal__canvas" width="240" height="240"></canvas>
+            <div class="sync-modal__qr-loading" data-sync-loading>
+              <i data-lucide="loader-2" class="spin"></i>
+              <span>Generando código QR...</span>
+            </div>
+          </div>
+
+          <div class="sync-modal__stats" data-sync-stats>
+            <!-- Estadísticas dinámicas -->
+          </div>
+
+          <button class="sync-modal__copy-btn" type="button" data-sync-copy-link>
+            <i data-lucide="copy"></i>
+            <span>Copiar enlace de sincronización</span>
+          </button>
         </div>
-        <div class="sync-modal__actions-row">
-          <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-export-btn>
-            <i data-lucide="download"></i>
-            <span>Exportar JSON</span>
-          </button>
-          <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-import-btn>
-            <i data-lucide="upload"></i>
-            <span>Importar JSON</span>
-          </button>
-          <input type="file" accept=".json" class="visually-hidden" data-sync-file-input hidden aria-hidden="true" />
+
+        <!-- Sección Respaldo Manual -->
+        <div class="sync-modal__manual-section">
+          <div class="sync-modal__divider">
+            <span>o mediante archivo de respaldo</span>
+          </div>
+          <div class="sync-modal__actions-row">
+            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-export-btn>
+              <i data-lucide="download"></i>
+              <span>Exportar JSON</span>
+            </button>
+            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-import-btn>
+              <i data-lucide="upload"></i>
+              <span>Importar JSON</span>
+            </button>
+            <input type="file" accept=".json" class="visually-hidden" data-sync-file-input hidden aria-hidden="true" />
+          </div>
         </div>
       </div>
 
-      <!-- Sección Gestión de Datos / Reinicio -->
+      <!-- Sección Gestión de Datos / Reinicio Local (Común a ambas) -->
       <div class="sync-modal__danger-section">
         <div class="sync-modal__divider">
-          <span>gestión de datos</span>
+          <span>gestión de datos locales</span>
         </div>
 
         <div class="sync-modal__reset-wrapper" data-sync-reset-default>
           <button class="btn btn--danger-outline sync-modal__reset-trigger" type="button" data-sync-reset-trigger>
             <i data-lucide="trash-2"></i>
-            <span>Reiniciar todos mis datos</span>
+            <span>Reiniciar todos mis datos locales</span>
           </button>
         </div>
 
@@ -95,6 +213,17 @@
 <script>
   import { generateSyncUrl, renderQrCode, exportBackupFile, importBackupFile } from "../lib/sync";
   import { getCapturedIds, getTeam, resetAllData } from "../lib/storage";
+  import {
+    getCloudState,
+    createCloudVault,
+    joinCloudVault,
+    syncToCloudNow,
+    unlinkCloudVault,
+    deleteCloudVault,
+    initCloudSyncClient,
+    CLOUD_STATUS_EVENT,
+    type CloudState,
+  } from "../lib/cloudSync";
   import { toast } from "../lib/toast";
   import { refreshIcons } from "../lib/icons";
 
@@ -102,7 +231,14 @@
     const overlay = document.querySelector<HTMLDivElement>("[data-sync-overlay]");
     if (!overlay) return;
 
+    // Inicializar cliente global de sincronización
+    initCloudSyncClient();
+
     const closeBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-close]");
+    const tabBtns = overlay.querySelectorAll<HTMLButtonElement>("[data-tab-target]");
+    const tabPanels = overlay.querySelectorAll<HTMLDivElement>("[data-tab-panel]");
+
+    // Elementos QR
     const canvas = overlay.querySelector<HTMLCanvasElement>("#sync-qr-canvas");
     const loading = overlay.querySelector<HTMLDivElement>("[data-sync-loading]");
     const statsEl = overlay.querySelector<HTMLDivElement>("[data-sync-stats]");
@@ -111,6 +247,23 @@
     const importBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-import-btn]");
     const fileInput = overlay.querySelector<HTMLInputElement>("[data-sync-file-input]");
 
+    // Elementos Cloud
+    const cloudUnlinked = overlay.querySelector<HTMLDivElement>("[data-cloud-unlinked]");
+    const cloudLinked = overlay.querySelector<HTMLDivElement>("[data-cloud-linked]");
+    const cloudCreateBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-create-btn]");
+    const cloudJoinInput = overlay.querySelector<HTMLInputElement>("[data-cloud-join-input]");
+    const cloudJoinBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-join-btn]");
+    const cloudCodeValue = overlay.querySelector<HTMLElement>("[data-cloud-code-value]");
+    const cloudCopyCode = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-code]");
+    const cloudLastSyncEl = overlay.querySelector<HTMLElement>("[data-cloud-last-sync]");
+    const cloudSyncNowBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-sync-now]");
+    const cloudUnlinkBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-unlink-btn]");
+    const cloudDeleteTrigger = overlay.querySelector<HTMLButtonElement>("[data-cloud-delete-trigger]");
+    const cloudDeleteConfirm = overlay.querySelector<HTMLDivElement>("[data-cloud-delete-confirm]");
+    const cloudConfirmDelete = overlay.querySelector<HTMLButtonElement>("[data-cloud-confirm-delete]");
+    const cloudCancelDelete = overlay.querySelector<HTMLButtonElement>("[data-cloud-cancel-delete]");
+
+    // Elementos Reset Local
     const resetTrigger = overlay.querySelector<HTMLButtonElement>("[data-sync-reset-trigger]");
     const resetDefault = overlay.querySelector<HTMLDivElement>("[data-sync-reset-default]");
     const resetConfirm = overlay.querySelector<HTMLDivElement>("[data-sync-reset-confirm]");
@@ -119,6 +272,46 @@
     const cancelDeleteBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-cancel-delete]");
 
     let currentSyncUrl = "";
+
+    // Pestañas
+    tabBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.tabTarget;
+        tabBtns.forEach((b) => b.classList.toggle("is-active", b === btn));
+        tabPanels.forEach((p) => {
+          p.hidden = p.dataset.tabPanel !== target;
+        });
+        refreshIcons();
+      });
+    });
+
+    function formatTime(ts: number | null): string {
+      if (!ts) return "Pendiente";
+      const diffSec = Math.floor((Date.now() - ts) / 1000);
+      if (diffSec < 10) return "Recién actualizado";
+      if (diffSec < 60) return `Hace ${diffSec}s`;
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) return `Hace ${diffMin} min`;
+      return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function renderCloudUI(state: CloudState) {
+      if (!cloudUnlinked || !cloudLinked) return;
+
+      if (state.isLinked) {
+        cloudUnlinked.hidden = true;
+        cloudLinked.hidden = false;
+        if (cloudCodeValue) cloudCodeValue.textContent = state.code || "------";
+        if (cloudLastSyncEl) cloudLastSyncEl.textContent = formatTime(state.lastSync);
+      } else {
+        cloudUnlinked.hidden = false;
+        cloudLinked.hidden = true;
+      }
+
+      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = true;
+      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = false;
+      refreshIcons();
+    }
 
     function hideResetConfirmation() {
       if (resetConfirm) resetConfirm.hidden = true;
@@ -141,6 +334,7 @@
       overlay!.hidden = false;
       document.body.style.overflow = "hidden";
       hideResetConfirmation();
+      renderCloudUI(getCloudState());
       refreshIcons();
 
       // Estadísticas actuales
@@ -198,6 +392,93 @@
       if (e.key === "Escape" && !overlay.hidden) closeModal();
     });
 
+    // Eventos Cloud
+    window.addEventListener(CLOUD_STATUS_EVENT, (e) => {
+      const detail = (e as CustomEvent<CloudState>).detail;
+      if (detail) renderCloudUI(detail);
+    });
+
+    cloudCreateBtn?.addEventListener("click", async () => {
+      cloudCreateBtn.disabled = true;
+      toast.info("Creando bóveda en Turso...");
+      const res = await createCloudVault();
+      cloudCreateBtn.disabled = false;
+      if (res.success) {
+        toast.success(`¡Bóveda creada! Tu código es: ${res.code}`);
+      } else {
+        toast.error(res.error || "No se pudo conectar a la nube");
+      }
+    });
+
+    cloudJoinBtn?.addEventListener("click", async () => {
+      const code = cloudJoinInput?.value?.trim();
+      if (!code) {
+        toast.info("Ingresa un código de 6 caracteres");
+        return;
+      }
+      cloudJoinBtn.disabled = true;
+      toast.info("Conectando con Turso...");
+      const res = await joinCloudVault(code);
+      cloudJoinBtn.disabled = false;
+      if (res.success) {
+        toast.success("¡Dispositivo vinculado con éxito!");
+        if (cloudJoinInput) cloudJoinInput.value = "";
+      } else {
+        toast.error(res.error || "Código no válido o no encontrado");
+      }
+    });
+
+    cloudCopyCode?.addEventListener("click", async () => {
+      const state = getCloudState();
+      if (!state.code) return;
+      try {
+        await navigator.clipboard.writeText(state.code);
+        toast.success("¡Código copiado al portapapeles!");
+      } catch {
+        toast.info("Copia el código manualmente: " + state.code);
+      }
+    });
+
+    cloudSyncNowBtn?.addEventListener("click", async () => {
+      cloudSyncNowBtn.disabled = true;
+      toast.info("Sincronizando...");
+      const res = await syncToCloudNow();
+      cloudSyncNowBtn.disabled = false;
+      if (res.success) {
+        toast.success("¡Datos sincronizados con Turso!");
+      } else {
+        toast.error(res.error || "Error al sincronizar");
+      }
+    });
+
+    cloudUnlinkBtn?.addEventListener("click", () => {
+      unlinkCloudVault();
+      toast.info("Dispositivo desvinculado de la nube.");
+    });
+
+    cloudDeleteTrigger?.addEventListener("click", () => {
+      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = false;
+      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = true;
+      refreshIcons();
+    });
+
+    cloudCancelDelete?.addEventListener("click", () => {
+      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = true;
+      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = false;
+    });
+
+    cloudConfirmDelete?.addEventListener("click", async () => {
+      cloudConfirmDelete.disabled = true;
+      const res = await deleteCloudVault();
+      cloudConfirmDelete.disabled = false;
+      if (res.success) {
+        toast.success("Bóveda eliminada permanentemente de Turso.");
+      } else {
+        toast.error(res.error || "Error al eliminar la bóveda");
+      }
+    });
+
+    // Copiar enlace QR
     copyBtn?.addEventListener("click", async () => {
       if (!currentSyncUrl) currentSyncUrl = await generateSyncUrl();
       try {
