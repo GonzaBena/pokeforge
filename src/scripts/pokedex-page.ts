@@ -1,12 +1,23 @@
-import { getManifest, getChunk, getAllPokemon, getGenerations, getTypeChart } from "../lib/pokedexData";
-import { getCapturedIds, setCaptured, CAPTURED_CHANGED_EVENT, getSelectedGame, setSelectedGame, GAME_CHANGED_EVENT, DATA_RESET_EVENT } from "../lib/storage";
+import { getManifest, getChunk, getAllPokemon, getGenerations, getTypeChart, getGameDexData } from "../lib/pokedexData";
+import {
+  getCapturedIds,
+  setCaptured,
+  CAPTURED_CHANGED_EVENT,
+  getSelectedGame,
+  setSelectedGame,
+  GAME_CHANGED_EVENT,
+  getGameDexMode,
+  setGameDexMode,
+  GAME_DEX_MODE_CHANGED_EVENT,
+  DATA_RESET_EVENT,
+} from "../lib/storage";
 import { staggerCardsIn, cardHoverTilt, animateCaptureReveal } from "../lib/animations";
 import { getCurrentLocale, getTranslations, getTypeName } from "../lib/i18n/translations";
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
-import type { GenerationInfo, Pokemon } from "../lib/types";
+import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, Pokemon } from "../lib/types";
 
 const PAGE_SIZE = 100;
 
@@ -16,6 +27,8 @@ const loadMoreWrap = document.querySelector<HTMLElement>("[data-load-more-wrap]"
 const loadMoreBtn = document.querySelector<HTMLButtonElement>("[data-load-more]")!;
 const searchInput = document.querySelector<HTMLInputElement>("[data-search-input]")!;
 const gameFilterEl = document.querySelector<HTMLSelectElement>("[data-game-filter]")!;
+const gameModeToggleEl = document.querySelector<HTMLElement>("[data-game-mode-toggle]");
+const exclusiveToggleEl = document.querySelector<HTMLElement>("[data-exclusive-toggle]");
 const typeFilterEl = document.querySelector<HTMLElement>("[data-type-filter]")!;
 const genFilterEl = document.querySelector<HTMLElement>("[data-generation-filter]")!;
 const viewToggleEl = document.querySelector<HTMLElement>("[data-view-toggle]")!;
@@ -30,6 +43,11 @@ let manifestTotal = 0;
 let view: "all" | "captured" = "all";
 let search = "";
 let selectedGame = getSelectedGame();
+let selectedGameMode: GameDexMode = getGameDexMode();
+let selectedExclusiveFilter: string = "all";
+let gameDexData: GameDexData | null = null;
+let activeExclusivesMap = new Map<number, GameVersionMeta>();
+const gameSpeciesSets = new Map<string, { regional: Set<number>; obtainable: Set<number> }>();
 const selectedTypes = new Set<string>();
 const selectedGenerations = new Set<string>();
 const gameToGenMap = new Map<string, GenerationInfo>();
@@ -54,9 +72,25 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
   const primaryType = p.types[0] ?? "normal";
   const glowColor = typeColor(primaryType);
 
+  let exclusiveBadgeHtml = "";
+  if (selectedGame && activeExclusivesMap.has(p.id)) {
+    const meta = activeExclusivesMap.get(p.id)!;
+    const vName = locale === "es" ? meta.nameEs : meta.name;
+    const badgeTitle = t.pokedex.exclusiveBadge.replace("{version}", vName);
+    exclusiveBadgeHtml = `
+      <span class="exclusive-badge" style="--version-color:${meta.color};" title="${badgeTitle}">
+        <span class="exclusive-badge__dot"></span>
+        <span class="exclusive-badge__label">${vName}</span>
+      </span>
+    `;
+  }
+
   return `
     <article class="pokemon-card${captured ? " captured" : ""}" data-pokemon-id="${p.id}" style="--type-glow:${glowColor};">
-      <div class="pokemon-card__id">${dexNumber(p.id)}</div>
+      <div class="pokemon-card__header">
+        <span class="pokemon-card__id">${dexNumber(p.id)}</span>
+        ${exclusiveBadgeHtml}
+      </div>
       <div class="pokemon-card__sprite-wrap">
         <img class="pokemon-card__sprite" src="${sprite}" alt="${p.name}" loading="lazy" decoding="async" width="120" height="120" />
       </div>
@@ -71,22 +105,110 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
   `;
 }
 
+function getExclusiveMapForGame(game: string): Map<number, GameVersionMeta> {
+  const map = new Map<number, GameVersionMeta>();
+  if (!game || !gameDexData || !gameDexData[game]) return map;
+  const entry = gameDexData[game];
+  if (!entry.exclusives || !entry.versions || entry.versions.length !== 2) return map;
+
+  const versionMetaMap = new Map(entry.versions.map((v) => [v.id, v]));
+  for (const [vId, ids] of Object.entries(entry.exclusives)) {
+    const meta = versionMetaMap.get(vId);
+    if (meta) {
+      for (const id of ids) {
+        map.set(id, meta);
+      }
+    }
+  }
+  return map;
+}
+
+function updateExclusiveToggleUI(): void {
+  if (!exclusiveToggleEl) return;
+  const entry = selectedGame && gameDexData ? gameDexData[selectedGame] : null;
+  const hasExclusives = Boolean(entry?.versions && entry.versions.length === 2 && entry.exclusives && Object.keys(entry.exclusives).length > 0);
+
+  if (!hasExclusives) {
+    exclusiveToggleEl.hidden = true;
+    exclusiveToggleEl.innerHTML = "";
+    selectedExclusiveFilter = "all";
+    return;
+  }
+
+  exclusiveToggleEl.hidden = false;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  const [vA, vB] = entry!.versions!;
+  const nameA = locale === "es" ? vA.nameEs : vA.name;
+  const nameB = locale === "es" ? vB.nameEs : vB.name;
+
+  exclusiveToggleEl.innerHTML = `
+    <button class="view-toggle__btn" type="button" data-exclusive-filter="all" aria-pressed="${String(selectedExclusiveFilter === "all")}">
+      ${t.pokedex.exclusiveAll}
+    </button>
+    <button class="view-toggle__btn" type="button" data-exclusive-filter="${vA.id}" aria-pressed="${String(selectedExclusiveFilter === vA.id)}" style="--btn-color:${vA.color};">
+      <span class="exclusive-dot" style="--btn-color:${vA.color};"></span>
+      ${t.pokedex.exclusiveOnly.replace("{version}", nameA)}
+    </button>
+    <button class="view-toggle__btn" type="button" data-exclusive-filter="${vB.id}" aria-pressed="${String(selectedExclusiveFilter === vB.id)}" style="--btn-color:${vB.color};">
+      <span class="exclusive-dot" style="--btn-color:${vB.color};"></span>
+      ${t.pokedex.exclusiveOnly.replace("{version}", nameB)}
+    </button>
+    <button class="view-toggle__btn" type="button" data-exclusive-filter="both" aria-pressed="${String(selectedExclusiveFilter === "both")}">
+      ${t.pokedex.exclusiveBoth}
+    </button>
+  `;
+}
+
+function getActiveGamePokemonList(game: string): number[] | null {
+  if (!game || !gameDexData || !gameDexData[game]) return null;
+  const entry = gameDexData[game];
+  return selectedGameMode === "obtainable" ? entry.obtainable : entry.regional;
+}
+
+function getActiveGameSpeciesSet(game: string): Set<number> | null {
+  if (!game) return null;
+  const entry = gameSpeciesSets.get(game);
+  if (!entry) return null;
+  return selectedGameMode === "obtainable" ? entry.obtainable : entry.regional;
+}
+
+function updateGameModeToggleUI(): void {
+  if (!gameModeToggleEl) return;
+  if (!selectedGame) {
+    gameModeToggleEl.hidden = true;
+    return;
+  }
+  gameModeToggleEl.hidden = false;
+  gameModeToggleEl.querySelectorAll<HTMLButtonElement>("[data-game-mode]").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.gameMode === selectedGameMode));
+  });
+}
+
 function updateCapturedCounter(): void {
   const capturedIds = getCapturedIds();
 
-  if (selectedGame && gameToGenMap.has(selectedGame)) {
-    const genInfo = gameToGenMap.get(selectedGame)!;
-    const maxId = genInfo.speciesIdRange[1];
+  if (selectedGame && gameDexData && gameDexData[selectedGame]) {
+    const fullGameList = getActiveGamePokemonList(selectedGame)!;
+    let targetList = fullGameList;
+
+    if (selectedExclusiveFilter !== "all" && activeExclusivesMap.size > 0) {
+      if (selectedExclusiveFilter === "both") {
+        targetList = fullGameList.filter((id) => !activeExclusivesMap.has(id));
+      } else {
+        targetList = fullGameList.filter((id) => activeExclusivesMap.get(id)?.id === selectedExclusiveFilter);
+      }
+    }
 
     let countInGame = 0;
-    for (const id of capturedIds) {
-      if (id <= maxId) {
+    for (const id of targetList) {
+      if (capturedIds.has(id)) {
         countInGame++;
       }
     }
 
     if (capturedCountEl) capturedCountEl.textContent = String(countInGame);
-    if (totalCountEl) totalCountEl.textContent = String(maxId);
+    if (totalCountEl) totalCountEl.textContent = String(targetList.length);
   } else {
     if (capturedCountEl) capturedCountEl.textContent = String(capturedIds.size);
     if (totalCountEl) totalCountEl.textContent = manifestTotal ? String(manifestTotal) : "—";
@@ -132,15 +254,24 @@ function syncAllCardsCapturedState(): void {
 
 function computeFiltered(source: Pokemon[]): Pokemon[] {
   const capturedIds = getCapturedIds();
+  const gameSpeciesSet = getActiveGameSpeciesSet(selectedGame);
+
   return source.filter((p) => {
     if (view === "captured" && !capturedIds.has(p.id)) return false;
     if (search && !p.name.includes(search) && !String(p.id).includes(search)) return false;
     if (selectedTypes.size && !p.types.some((t) => selectedTypes.has(t))) return false;
     if (selectedGenerations.size && !selectedGenerations.has(p.generation)) return false;
-    if (selectedGame) {
-      const genInfo = gameToGenMap.get(selectedGame);
-      if (genInfo && p.id > genInfo.speciesIdRange[1]) return false;
+    if (gameSpeciesSet && !gameSpeciesSet.has(p.id)) return false;
+
+    if (selectedExclusiveFilter !== "all" && activeExclusivesMap.size > 0) {
+      if (selectedExclusiveFilter === "both") {
+        if (activeExclusivesMap.has(p.id)) return false;
+      } else {
+        const meta = activeExclusivesMap.get(p.id);
+        if (!meta || meta.id !== selectedExclusiveFilter) return false;
+      }
     }
+
     return true;
   });
 }
@@ -300,8 +431,39 @@ genFilterEl.addEventListener("click", (e) => {
 gameFilterEl?.addEventListener("change", () => {
   selectedGame = gameFilterEl.value;
   setSelectedGame(selectedGame);
+  activeExclusivesMap = getExclusiveMapForGame(selectedGame);
+  selectedExclusiveFilter = "all";
+  updateGameModeToggleUI();
+  updateExclusiveToggleUI();
   updateCapturedCounter();
   applyFilters();
+});
+
+gameModeToggleEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-game-mode]");
+  if (!btn) return;
+  const mode = btn.dataset.gameMode as GameDexMode;
+  if (mode && mode !== selectedGameMode) {
+    selectedGameMode = mode;
+    setGameDexMode(mode);
+    updateGameModeToggleUI();
+    updateCapturedCounter();
+    applyFilters();
+  }
+});
+
+exclusiveToggleEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-exclusive-filter]");
+  if (!btn) return;
+  const filter = btn.dataset.exclusiveFilter!;
+  if (filter && filter !== selectedExclusiveFilter) {
+    selectedExclusiveFilter = filter;
+    exclusiveToggleEl.querySelectorAll<HTMLButtonElement>("[data-exclusive-filter]").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b.dataset.exclusiveFilter === selectedExclusiveFilter));
+    });
+    updateCapturedCounter();
+    applyFilters();
+  }
 });
 
 loadMoreBtn.addEventListener("click", async () => {
@@ -331,12 +493,28 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
   if (newGame !== selectedGame) {
     selectedGame = newGame;
     if (gameFilterEl) gameFilterEl.value = newGame;
+    activeExclusivesMap = getExclusiveMapForGame(selectedGame);
+    selectedExclusiveFilter = "all";
+    updateGameModeToggleUI();
+    updateExclusiveToggleUI();
+    updateCapturedCounter();
+    applyFilters();
+  }
+});
+
+window.addEventListener(GAME_DEX_MODE_CHANGED_EVENT, (e) => {
+  const newMode = (e as CustomEvent<{ mode: GameDexMode }>).detail?.mode ?? "regional";
+  if (newMode !== selectedGameMode) {
+    selectedGameMode = newMode;
+    updateGameModeToggleUI();
     updateCapturedCounter();
     applyFilters();
   }
 });
 
 window.addEventListener(DATA_RESET_EVENT, () => {
+  updateGameModeToggleUI();
+  updateExclusiveToggleUI();
   updateCapturedCounter();
   for (const card of grid.querySelectorAll<HTMLElement>(".pokemon-card")) {
     card.classList.remove("pokemon-card--captured");
@@ -353,11 +531,31 @@ window.addEventListener(DATA_RESET_EVENT, () => {
 async function init(): Promise<void> {
   const manifest = await getManifest();
   manifestTotal = manifest.totalCount;
+
+  try {
+    gameDexData = await getGameDexData();
+    for (const [gname, entry] of Object.entries(gameDexData)) {
+      gameSpeciesSets.set(gname, {
+        regional: new Set(entry.regional),
+        obtainable: new Set(entry.obtainable),
+      });
+    }
+  } catch (err) {
+    console.warn("Could not load game dex data:", err);
+  }
+
+  activeExclusivesMap = getExclusiveMapForGame(selectedGame);
+  updateGameModeToggleUI();
+  updateExclusiveToggleUI();
   updateCapturedCounter();
 
-  const chunk0 = await getChunk(0);
-  filtered = chunk0;
-  renderNextBatch();
+  if (selectedGame) {
+    await applyFilters();
+  } else {
+    const chunk0 = await getChunk(0);
+    filtered = chunk0;
+    renderNextBatch();
+  }
 
   cardHoverTilt(grid);
   const warmCache = () => {
@@ -372,8 +570,9 @@ async function init(): Promise<void> {
   getGenerations().then((gens) => {
     populateGenerationChips(gens);
     populateGameSelect(gens);
+    updateGameModeToggleUI();
+    updateExclusiveToggleUI();
     updateCapturedCounter();
-    if (selectedGame) applyFilters();
   });
 }
 

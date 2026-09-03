@@ -47,6 +47,24 @@ export interface GenerationInfo {
   versionGroups: VersionGroupInfo[];
 }
 
+export type GameDexMode = "regional" | "obtainable";
+
+export interface GameVersionMeta {
+  id: string;
+  name: string;
+  nameEs: string;
+  color: string;
+}
+
+export interface GameDexEntry {
+  regional: number[];
+  obtainable: number[];
+  versions?: GameVersionMeta[];
+  exclusives?: Record<string, number[]>;
+}
+
+export type GameDexData = Record<string, GameDexEntry>;
+
 export type TypeName =
   | "normal" | "fighting" | "flying" | "poison" | "ground" | "rock"
   | "bug" | "ghost" | "steel" | "fire" | "water" | "grass"

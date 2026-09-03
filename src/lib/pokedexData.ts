@@ -55,6 +55,13 @@ export function getGenerations(): Promise<GenerationInfo[]> {
   return generationsPromise;
 }
 
+let gameDexPromise: Promise<import("./types").GameDexData> | null = null;
+
+export function getGameDexData(): Promise<import("./types").GameDexData> {
+  gameDexPromise ??= fetchJson<import("./types").GameDexData>(`${DATA_ROOT}/pokedex/game-pokedex.json`);
+  return gameDexPromise;
+}
+
 let moveDetailsMapPromise: Promise<Record<string, import("./types").MoveData>> | null = null;
 
 export function getMoveDetailsMap(): Promise<Record<string, import("./types").MoveData>> {

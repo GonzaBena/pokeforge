@@ -7,6 +7,7 @@ import { buildPokedex } from "./lib/buildPokedex.ts";
 import { buildSpeciesInfo } from "./lib/buildSpeciesInfo.ts";
 import { buildEvolutionChains } from "./lib/buildEvolutionChains.ts";
 import { buildPokemonDetails } from "./lib/buildPokemonDetails.ts";
+import { buildGamePokedex } from "./lib/buildGamePokedex.ts";
 
 async function main() {
   const force = process.argv.includes("--force");
@@ -52,6 +53,8 @@ async function main() {
     process.exitCode = 1;
     return;
   }
+
+  await buildGamePokedex();
 
   console.log("fetch-pokedex: done.");
 }

@@ -24,7 +24,9 @@ const glowColor = typeColor(primaryType);
   style={`--type-glow:${glowColor};`}
   data-batch
 >
-  <div class="pokemon-card__id">{dexNumber}</div>
+  <div class="pokemon-card__header">
+    <span class="pokemon-card__id">{dexNumber}</span>
+  </div>
   <div class="pokemon-card__sprite-wrap">
     <img class="pokemon-card__sprite" src={sprite} alt={pokemon.name} loading="lazy" decoding="async" width="120" height="120" />
   </div>

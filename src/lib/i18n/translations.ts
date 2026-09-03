@@ -97,6 +97,14 @@ export interface Translations {
     loadMore: string;
     catch: string;
     caught: string;
+    regionalDex: string;
+    obtainable: string;
+    dexMode: string;
+    exclusiveFilter: string;
+    exclusiveAll: string;
+    exclusiveBoth: string;
+    exclusiveOnly: string;
+    exclusiveBadge: string;
   };
   team: {
     title: string;
@@ -183,6 +191,7 @@ export interface Translations {
     cloudLinkSubtitleRW: string;
     cloudLinkSubtitleRO: string;
     cloudLinkSuccessToast: string;
+    cloudLinkConfirmBtn: string;
   };
   syncModal: {
     modalTitle: string;
@@ -291,6 +300,14 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       loadMore: "Load more Pokémon",
       catch: "Catch",
       caught: "Caught",
+      regionalDex: "Regional Dex",
+      obtainable: "Obtainable",
+      dexMode: "Pokédex Mode",
+      exclusiveFilter: "Exclusives",
+      exclusiveAll: "All",
+      exclusiveBoth: "Both games",
+      exclusiveOnly: "Only {version}",
+      exclusiveBadge: "Exclusive to {version}",
     },
     team: {
       title: "Team Builder",
@@ -380,6 +397,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudLinkSubtitleRW: "Cloud vault {code} detected. This device will be linked with full sync permissions (read & write).",
       cloudLinkSubtitleRO: "Cloud vault {code} detected. This device will be linked in read-only mode.",
       cloudLinkSuccessToast: "Device linked successfully with read & write permissions!",
+      cloudLinkConfirmBtn: "Link & Sync Now",
     },
     syncModal: {
       modalTitle: "Data & Synchronization",
@@ -493,6 +511,14 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       loadMore: "Cargar más Pokémon",
       catch: "Capturar",
       caught: "Capturado",
+      regionalDex: "Pokédex Regional",
+      obtainable: "Obtenibles",
+      dexMode: "Modo de Pokédex",
+      exclusiveFilter: "Exclusividad",
+      exclusiveAll: "Todos",
+      exclusiveBoth: "En ambos",
+      exclusiveOnly: "Solo {version}",
+      exclusiveBadge: "Exclusivo de {version}",
     },
     team: {
       title: "Armar equipo",
@@ -588,6 +614,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudLinkSubtitleRW: "Bóveda {code} detectada. Se vinculará este dispositivo con permisos completos (lectura y escritura).",
       cloudLinkSubtitleRO: "Bóveda {code} detectada. Se vinculará este dispositivo en modo solo lectura.",
       cloudLinkSuccessToast: "¡Dispositivo vinculado con éxito con permisos de lectura y escritura!",
+      cloudLinkConfirmBtn: "Vincular y Sincronizar",
     },
     syncModal: {
       modalTitle: "Sincronización y Datos",

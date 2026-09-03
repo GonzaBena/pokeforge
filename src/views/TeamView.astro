@@ -101,6 +101,11 @@ const t = getTranslations(currentLocale);
             </select>
             <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
           </div>
+          <div class="view-toggle" data-picker-game-mode-toggle aria-label={t.pokedex.dexMode} hidden style="margin-top: 8px;">
+            <button class="view-toggle__btn" type="button" data-picker-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
+            <button class="view-toggle__btn" type="button" data-picker-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
+          </div>
+          <div class="view-toggle exclusive-toggle" data-picker-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden style="margin-top: 8px;"></div>
         </div>
       </div>
       <div class="picker-panel__results" data-picker-results></div>

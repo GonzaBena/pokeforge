@@ -32,6 +32,11 @@ const t = getTranslations(currentLocale);
         </select>
         <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
       </div>
+      <div class="view-toggle" data-game-mode-toggle aria-label={t.pokedex.dexMode} hidden>
+        <button class="view-toggle__btn" type="button" data-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
+        <button class="view-toggle__btn" type="button" data-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
+      </div>
+      <div class="view-toggle exclusive-toggle" data-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden></div>
     </div>
 
     <div class="filter-stacks">

@@ -531,8 +531,24 @@ svg.lucide {
 }
 
 .view-toggle__btn[aria-pressed="true"] {
-  background: var(--accent);
-  color: white;
+  background: var(--btn-color, var(--accent));
+  color: var(--btn-text, white);
+}
+
+.view-toggle__btn[data-exclusive-filter] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exclusive-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--btn-color, currentColor);
+  flex-shrink: 0;
+  box-shadow: 0 0 5px var(--btn-color, currentColor);
 }
 
 .search-input {
@@ -827,11 +843,54 @@ svg.lucide {
     var(--shadow-card);
 }
 
+.pokemon-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-right: 26px;
+  min-height: 20px;
+}
+
 .pokemon-card__id {
   color: var(--text-faint);
   font-size: 12px;
   font-weight: 700;
   font-family: var(--font-mono);
+}
+
+.exclusive-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--version-color, var(--accent));
+  background: color-mix(in srgb, var(--version-color, var(--accent)) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--version-color, var(--accent)) 35%, transparent);
+  line-height: 1.3;
+  white-space: nowrap;
+  max-width: 105px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exclusive-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--version-color, var(--accent));
+  box-shadow: 0 0 4px var(--version-color, var(--accent));
+  flex-shrink: 0;
+}
+
+.exclusive-badge__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pokemon-card__sprite-wrap {
@@ -2169,6 +2228,20 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   font-weight: 600;
   text-transform: capitalize;
   color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.picker-item__exclusive-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--version-color);
+  box-shadow: 0 0 5px var(--version-color);
+  flex-shrink: 0;
 }
 
 /* ----------------------------------------------------- detail modal */

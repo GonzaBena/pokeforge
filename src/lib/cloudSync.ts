@@ -260,7 +260,7 @@ export async function createCloudVault(): Promise<{ success: boolean; code?: str
     const data = await res.json();
     if (!res.ok || !data.success) {
       lastSyncError = data.message || "Error al crear bóveda en la nube";
-      return { success: false, error: lastSyncError };
+      return { success: false, error: lastSyncError ?? undefined };
     }
 
     localStorage.setItem(CLOUD_CODE_KEY, data.code);
@@ -302,7 +302,7 @@ export async function joinCloudVault(
 
     if (!res.ok || !data.success) {
       lastSyncError = data.message || "Bóveda no encontrada";
-      return { success: false, error: lastSyncError };
+      return { success: false, error: lastSyncError ?? undefined };
     }
 
     const payload = await decodeSyncPayload(data.payload);
@@ -367,7 +367,7 @@ export async function syncToCloudNow(): Promise<{ success: boolean; error?: stri
     const data = await res.json();
     if (!res.ok || !data.success) {
       lastSyncError = data.message || "Error al actualizar nube";
-      return { success: false, error: lastSyncError };
+      return { success: false, error: lastSyncError ?? undefined };
     }
 
     localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt));
@@ -484,14 +484,14 @@ export async function deleteCloudVault(): Promise<{ success: boolean; error?: st
     const data = await res.json();
     if (!res.ok || !data.success) {
       lastSyncError = data.message || "Error al eliminar bóveda";
-      return { success: false, error: lastSyncError };
+      return { success: false, error: lastSyncError ?? undefined };
     }
 
     unlinkCloudVault();
     return { success: true };
   } catch {
     lastSyncError = "Error al comunicar con la DB";
-    return { success: false, error: lastSyncError };
+    return { success: false, error: lastSyncError ?? undefined };
   } finally {
     isSyncing = false;
     notifyStatusChange();

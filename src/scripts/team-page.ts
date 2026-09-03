@@ -1,6 +1,19 @@
-import { getAllPokemon, getGenerations, getMoveDetailsMap, getMoveIndex, getTypeChart } from "../lib/pokedexData";
+import { getAllPokemon, getGenerations, getMoveDetailsMap, getMoveIndex, getTypeChart, getGameDexData } from "../lib/pokedexData";
 import { getPokemonDetail } from "../lib/pokemonDetail";
-import { getTeam, setTeam, setTeamSlot, setTeamSlotMove, getSelectedGame, setSelectedGame, TEAM_CHANGED_EVENT, DATA_RESET_EVENT } from "../lib/storage";
+import {
+  getTeam,
+  setTeam,
+  setTeamSlot,
+  setTeamSlotMove,
+  getSelectedGame,
+  setSelectedGame,
+  getGameDexMode,
+  setGameDexMode,
+  GAME_CHANGED_EVENT,
+  GAME_DEX_MODE_CHANGED_EVENT,
+  TEAM_CHANGED_EVENT,
+  DATA_RESET_EVENT,
+} from "../lib/storage";
 import { computeTeamDefense, splitWeaknessesAndResistances, type TeamDefenseEntry } from "../lib/typeChart";
 import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../lib/animations";
 import { toast } from "../lib/toast";
@@ -9,7 +22,7 @@ import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
 import { getCurrentLocale, getTranslations, getTypeName, type Locale } from "../lib/i18n/translations";
-import type { GenerationInfo, MoveData, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
+import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
 const slotsEl = document.querySelector<HTMLElement>("[data-team-slots]")!;
@@ -26,6 +39,8 @@ const pickerSearchEl = document.querySelector<HTMLInputElement>("[data-picker-se
 const pickerTypeFilterEl = document.querySelector<HTMLElement>("[data-picker-type-filter]")!;
 const pickerGenFilterEl = document.querySelector<HTMLElement>("[data-picker-generation-filter]")!;
 const pickerGameFilterEl = document.querySelector<HTMLSelectElement>("[data-picker-game-filter]");
+const pickerGameModeToggleEl = document.querySelector<HTMLElement>("[data-picker-game-mode-toggle]");
+const pickerExclusiveToggleEl = document.querySelector<HTMLElement>("[data-picker-exclusive-toggle]");
 const pickerMoveFilterEl = document.querySelector<HTMLInputElement>("[data-picker-move-filter]")!;
 const pickerMoveOptionsEl = document.querySelector<HTMLElement>("[data-picker-move-options]")!;
 
@@ -63,7 +78,18 @@ interface MovePickerRow {
 
 let currentMoveRows: MovePickerRow[] = [];
 
-const pickerState = { search: "", types: new Set<string>(), generations: new Set<string>(), move: "", game: "" };
+let gameDexData: GameDexData | null = null;
+const gameSpeciesSets = new Map<string, { regional: Set<number>; obtainable: Set<number> }>();
+
+const pickerState = {
+  search: "",
+  types: new Set<string>(),
+  generations: new Set<string>(),
+  move: "",
+  game: "",
+  dexMode: getGameDexMode(),
+  exclusive: "all",
+};
 
 const METHOD_LABELS: Record<Locale, Record<string, string>> = {
   es: {
@@ -326,17 +352,97 @@ function renderStrengthsPanel(): void {
 
 // --- pokemon picker --------------------------------------------------
 
+function getPickerExclusiveMap(): Map<number, GameVersionMeta> {
+  const map = new Map<number, GameVersionMeta>();
+  if (!pickerState.game || !gameDexData || !gameDexData[pickerState.game]) return map;
+  const entry = gameDexData[pickerState.game];
+  if (!entry.exclusives || !entry.versions || entry.versions.length !== 2) return map;
+
+  const versionMetaMap = new Map(entry.versions.map((v) => [v.id, v]));
+  for (const [vId, ids] of Object.entries(entry.exclusives)) {
+    const meta = versionMetaMap.get(vId);
+    if (meta) {
+      for (const id of ids) {
+        map.set(id, meta);
+      }
+    }
+  }
+  return map;
+}
+
+function updatePickerExclusiveToggleUI(): void {
+  if (!pickerExclusiveToggleEl) return;
+  const entry = pickerState.game && gameDexData ? gameDexData[pickerState.game] : null;
+  const hasExclusives = Boolean(entry?.versions && entry.versions.length === 2 && entry.exclusives && Object.keys(entry.exclusives).length > 0);
+
+  if (!hasExclusives) {
+    pickerExclusiveToggleEl.hidden = true;
+    pickerExclusiveToggleEl.innerHTML = "";
+    pickerState.exclusive = "all";
+    return;
+  }
+
+  pickerExclusiveToggleEl.hidden = false;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  const [vA, vB] = entry!.versions!;
+  const nameA = locale === "es" ? vA.nameEs : vA.name;
+  const nameB = locale === "es" ? vB.nameEs : vB.name;
+
+  pickerExclusiveToggleEl.innerHTML = `
+    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="all" aria-pressed="${String(pickerState.exclusive === "all")}">
+      ${t.pokedex.exclusiveAll}
+    </button>
+    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="${vA.id}" aria-pressed="${String(pickerState.exclusive === vA.id)}" style="--btn-color:${vA.color};">
+      <span class="exclusive-dot" style="--btn-color:${vA.color};"></span>
+      ${t.pokedex.exclusiveOnly.replace("{version}", nameA)}
+    </button>
+    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="${vB.id}" aria-pressed="${String(pickerState.exclusive === vB.id)}" style="--btn-color:${vB.color};">
+      <span class="exclusive-dot" style="--btn-color:${vB.color};"></span>
+      ${t.pokedex.exclusiveOnly.replace("{version}", nameB)}
+    </button>
+    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="both" aria-pressed="${String(pickerState.exclusive === "both")}">
+      ${t.pokedex.exclusiveBoth}
+    </button>
+  `;
+}
+
 function computePickerFiltered(): Pokemon[] {
+  const gameSpeciesSet = pickerState.game && gameSpeciesSets.has(pickerState.game)
+    ? (pickerState.dexMode === "obtainable" ? gameSpeciesSets.get(pickerState.game)!.obtainable : gameSpeciesSets.get(pickerState.game)!.regional)
+    : null;
+
+  const exclusivesMap = getPickerExclusiveMap();
+
   return allPokemon.filter((p) => {
     if (pickerState.search && !p.name.includes(pickerState.search) && !String(p.id).includes(pickerState.search)) return false;
     if (pickerState.types.size && !p.types.some((t) => pickerState.types.has(t))) return false;
     if (pickerState.generations.size && !pickerState.generations.has(p.generation)) return false;
     if (pickerState.move && !p.moves.includes(pickerState.move)) return false;
-    if (pickerState.game) {
-      const genInfo = gameToGenMap.get(pickerState.game);
-      if (genInfo && p.id > genInfo.speciesIdRange[1]) return false;
+    if (gameSpeciesSet && !gameSpeciesSet.has(p.id)) return false;
+
+    if (pickerState.exclusive !== "all" && exclusivesMap.size > 0) {
+      if (pickerState.exclusive === "both") {
+        if (exclusivesMap.has(p.id)) return false;
+      } else {
+        const meta = exclusivesMap.get(p.id);
+        if (!meta || meta.id !== pickerState.exclusive) return false;
+      }
     }
+
     return true;
+  });
+}
+
+function updatePickerGameModeToggleUI(): void {
+  if (!pickerGameModeToggleEl) return;
+  if (!pickerState.game) {
+    pickerGameModeToggleEl.hidden = true;
+    return;
+  }
+  pickerGameModeToggleEl.hidden = false;
+  pickerGameModeToggleEl.querySelectorAll<HTMLButtonElement>("[data-picker-game-mode]").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.pickerGameMode === pickerState.dexMode));
   });
 }
 
@@ -348,6 +454,7 @@ function renderPickerResults(): void {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
   const results = computePickerFiltered();
+  const exclusivesMap = getPickerExclusiveMap();
   const countEl = overlayEl.querySelector<HTMLElement>("[data-picker-count]");
   if (countEl) {
     countEl.textContent = `${results.length} Pokémon`;
@@ -358,15 +465,22 @@ function renderPickerResults(): void {
     return;
   }
   pickerResultsEl.innerHTML = results
-    .map(
-      (p) => `
+    .map((p) => {
+      let dotHtml = "";
+      if (exclusivesMap.has(p.id)) {
+        const meta = exclusivesMap.get(p.id)!;
+        const vName = locale === "es" ? meta.nameEs : meta.name;
+        const badgeTitle = t.pokedex.exclusiveBadge.replace("{version}", vName);
+        dotHtml = `<span class="picker-item__exclusive-dot" style="--version-color:${meta.color};" title="${badgeTitle}"></span>`;
+      }
+      return `
       <button class="picker-item" type="button" data-picker-pick data-pokemon-id="${p.id}">
         <span class="picker-item__id">${dexNumber(p.id)}</span>
         <img src="${p.sprites.officialArtwork ?? p.sprites.default ?? ""}" alt="${p.name}" loading="lazy" />
-        <span class="picker-item__name">${p.name}</span>
+        <span class="picker-item__name">${p.name}${dotHtml}</span>
       </button>
-    `,
-    )
+    `;
+    })
     .join("");
 }
 
@@ -378,9 +492,13 @@ function openPicker(index: number): void {
   pickerState.generations.clear();
   pickerState.move = "";
   pickerState.game = getSelectedGame();
+  pickerState.dexMode = getGameDexMode();
+  pickerState.exclusive = "all";
   pickerSearchEl.value = "";
   pickerMoveFilterEl.value = "";
   if (pickerGameFilterEl) pickerGameFilterEl.value = pickerState.game;
+  updatePickerGameModeToggleUI();
+  updatePickerExclusiveToggleUI();
   pickerTypeFilterEl.querySelectorAll("[data-type]").forEach((b) => b.setAttribute("aria-pressed", "false"));
   pickerGenFilterEl.querySelectorAll("[data-generation]").forEach((b) => b.setAttribute("aria-pressed", "false"));
   renderPickerResults();
@@ -833,7 +951,56 @@ pickerMoveFilterEl.addEventListener("input", () => {
 pickerGameFilterEl?.addEventListener("change", () => {
   pickerState.game = pickerGameFilterEl.value;
   setSelectedGame(pickerState.game);
+  pickerState.exclusive = "all";
+  updatePickerGameModeToggleUI();
+  updatePickerExclusiveToggleUI();
   renderPickerResults();
+});
+
+pickerGameModeToggleEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-picker-game-mode]");
+  if (!btn) return;
+  const mode = btn.dataset.pickerGameMode as GameDexMode;
+  if (mode && mode !== pickerState.dexMode) {
+    pickerState.dexMode = mode;
+    setGameDexMode(mode);
+    updatePickerGameModeToggleUI();
+    renderPickerResults();
+  }
+});
+
+pickerExclusiveToggleEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-picker-exclusive-filter]");
+  if (!btn) return;
+  const filter = btn.dataset.pickerExclusiveFilter!;
+  if (filter && filter !== pickerState.exclusive) {
+    pickerState.exclusive = filter;
+    pickerExclusiveToggleEl.querySelectorAll<HTMLButtonElement>("[data-picker-exclusive-filter]").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b.dataset.pickerExclusiveFilter === pickerState.exclusive));
+    });
+    renderPickerResults();
+  }
+});
+
+window.addEventListener(GAME_CHANGED_EVENT, (e) => {
+  const newGame = (e as CustomEvent<{ game: string }>).detail?.game ?? "";
+  if (newGame !== pickerState.game) {
+    pickerState.game = newGame;
+    if (pickerGameFilterEl) pickerGameFilterEl.value = newGame;
+    pickerState.exclusive = "all";
+    updatePickerGameModeToggleUI();
+    updatePickerExclusiveToggleUI();
+    if (!overlayEl.hidden) renderPickerResults();
+  }
+});
+
+window.addEventListener(GAME_DEX_MODE_CHANGED_EVENT, (e) => {
+  const newMode = (e as CustomEvent<{ mode: GameDexMode }>).detail?.mode ?? "regional";
+  if (newMode !== pickerState.dexMode) {
+    pickerState.dexMode = newMode;
+    updatePickerGameModeToggleUI();
+    if (!overlayEl.hidden) renderPickerResults();
+  }
 });
 
 pickerResultsEl.addEventListener("click", (e) => {
@@ -862,12 +1029,13 @@ async function init(): Promise<void> {
   team = getTeam();
   renderSizeSelector();
 
-  const [full, chart, gens, moves, moveDetails] = await Promise.all([
+  const [full, chart, gens, moves, moveDetails, gameDex] = await Promise.all([
     getAllPokemon(),
     getTypeChart(),
     getGenerations(),
     getMoveIndex(),
     getMoveDetailsMap(),
+    getGameDexData().catch(() => null),
   ]);
 
   allPokemon = full;
@@ -876,6 +1044,16 @@ async function init(): Promise<void> {
   generations = gens;
   moveIndex = moves;
   moveDetailsMap = moveDetails;
+
+  if (gameDex) {
+    gameDexData = gameDex;
+    for (const [gname, entry] of Object.entries(gameDex)) {
+      gameSpeciesSets.set(gname, {
+        regional: new Set(entry.regional),
+        obtainable: new Set(entry.obtainable),
+      });
+    }
+  }
 
   populatePickerFilters();
   renderAllSlots();

@@ -156,6 +156,28 @@ export function setSelectedGame(game: string): string {
   return game;
 }
 
+import type { GameDexMode } from "./types";
+
+const GAME_DEX_MODE_KEY = "poketeam:game-dex-mode";
+export const GAME_DEX_MODE_CHANGED_EVENT = "poketeam:game-dex-mode-changed";
+
+export function getGameDexMode(): GameDexMode {
+  try {
+    const val = localStorage.getItem(GAME_DEX_MODE_KEY);
+    return val === "obtainable" ? "obtainable" : "regional";
+  } catch {
+    return "regional";
+  }
+}
+
+export function setGameDexMode(mode: GameDexMode): GameDexMode {
+  try {
+    localStorage.setItem(GAME_DEX_MODE_KEY, mode);
+  } catch {}
+  window.dispatchEvent(new CustomEvent(GAME_DEX_MODE_CHANGED_EVENT, { detail: { mode } }));
+  return mode;
+}
+
 // --- Reset all data ----------------------------------------------------
 
 export const DATA_RESET_EVENT = "poketeam:data-reset";
@@ -179,4 +201,5 @@ export function resetAllData(): void {
   window.dispatchEvent(new CustomEvent(CAPTURED_CHANGED_EVENT, { detail: { ids: new Set(), reset: true } }));
   window.dispatchEvent(new CustomEvent(TEAM_CHANGED_EVENT, { detail: { team: DEFAULT_TEAM } }));
   window.dispatchEvent(new CustomEvent(GAME_CHANGED_EVENT, { detail: { game: "" } }));
+  window.dispatchEvent(new CustomEvent(GAME_DEX_MODE_CHANGED_EVENT, { detail: { mode: "regional" } }));
 }
