@@ -16,6 +16,10 @@ const t = getTranslations(currentLocale);
         <p class="page__subtitle">{t.team.subtitle}</p>
       </div>
       <div class="page__header-actions">
+        <button class="btn" type="button" data-open-synergy title={t.strengthsWeaknesses.synergyTitle}>
+          <i data-lucide="sparkles"></i>
+          <span>{t.strengthsWeaknesses.tabSynergy}</span>
+        </button>
         <button class="btn" type="button" data-open-type-matrix title={t.team.typeMatrixTitle}>
           <i data-lucide="grid"></i>
           <span>{t.team.typeMatrix}</span>
@@ -31,20 +35,21 @@ const t = getTranslations(currentLocale);
       <div class="team-slots" data-team-slots></div>
       <StrengthsWeaknessesPanel />
     </div>
+  </div>
 
-    <!-- Sección de Sinergia y Pokémon Aconsejados a ancho completo -->
-    <section class="team-synergy-section" id="synergy-section" data-team-synergy-section hidden>
-      <div class="team-synergy-section__header">
-        <div class="team-synergy-section__title-wrap">
-          <h2 class="team-synergy-section__title">
-            <i data-lucide="sparkles"></i>
-            <span>{t.strengthsWeaknesses.synergyTitle}</span>
-          </h2>
-          <p class="team-synergy-section__subtitle">{t.strengthsWeaknesses.synergySubtitle}</p>
+  <div class="modal-overlay" data-synergy-modal-overlay hidden>
+    <div class="modal-panel synergy-modal-panel">
+      <div class="modal-panel__header">
+        <div class="picker-panel__header-info">
+          <h2><i data-lucide="sparkles"></i> {t.strengthsWeaknesses.synergyTitle}</h2>
+          <span class="type-matrix-modal__subtitle">{t.strengthsWeaknesses.synergySubtitle}</span>
         </div>
+        <button class="modal-panel__close" type="button" data-synergy-modal-close aria-label={t.modal.close}>
+          <i data-lucide="x"></i>
+        </button>
       </div>
-      <div class="team-synergy-section__body" data-synergy-panel-content></div>
-    </section>
+      <div class="synergy-modal__body" data-synergy-panel-content></div>
+    </div>
   </div>
 
   <div class="modal-overlay" data-type-matrix-overlay hidden>

@@ -8,10 +8,16 @@ const t = getTranslations(currentLocale);
   <div class="side-panel__header">
     <div class="side-panel__title-row">
       <h2 class="side-panel__title">{t.strengthsWeaknesses.title}</h2>
-      <button class="panel-matrix-trigger-btn" type="button" data-open-type-matrix title={t.team.typeMatrixTitle}>
-        <i data-lucide="grid"></i>
-        <span>{t.team.typeMatrixShort}</span>
-      </button>
+      <div class="side-panel__header-btns">
+        <button class="panel-matrix-trigger-btn" type="button" data-open-synergy title={t.strengthsWeaknesses.synergyTitle}>
+          <i data-lucide="sparkles"></i>
+          <span>{t.strengthsWeaknesses.tabSynergy}</span>
+        </button>
+        <button class="panel-matrix-trigger-btn" type="button" data-open-type-matrix title={t.team.typeMatrixTitle}>
+          <i data-lucide="grid"></i>
+          <span>{t.team.typeMatrixShort}</span>
+        </button>
+      </div>
     </div>
     <div class="panel-tab-toggle" data-panel-tab-toggle>
       <button class="panel-tab-btn" type="button" data-panel-tab="defense" aria-pressed="true">
@@ -112,15 +118,15 @@ const t = getTranslations(currentLocale);
       </div>
     </div>
 
-    <!-- QUICK CALLOUT TO FULL SYNERGY SECTION -->
+    <!-- QUICK CALLOUT TO SYNERGY MODAL -->
     <div class="side-panel__synergy-callout" data-synergy-sidebar-callout>
-      <a href="#synergy-section" class="side-panel__synergy-btn">
+      <button type="button" class="side-panel__synergy-btn" data-open-synergy>
         <div class="side-panel__synergy-btn-left">
           <i data-lucide="sparkles"></i>
           <span>{t.strengthsWeaknesses.synergyTitle}</span>
         </div>
-        <i data-lucide="chevron-down" class="side-panel__synergy-btn-arrow"></i>
-      </a>
+        <i data-lucide="arrow-right" class="side-panel__synergy-btn-arrow"></i>
+      </button>
     </div>
   </div>
 </aside>

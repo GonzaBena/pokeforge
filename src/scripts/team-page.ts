@@ -42,8 +42,10 @@ const panelTabToggleEl = document.querySelector<HTMLElement>("[data-panel-tab-to
 const tabContentDefenseEl = document.querySelector<HTMLElement>("[data-tab-content-defense]");
 const tabContentOffenseEl = document.querySelector<HTMLElement>("[data-tab-content-offense]");
 
-const teamSynergySectionEl = document.querySelector<HTMLElement>("[data-team-synergy-section]");
-const synergyPanelContentEl = document.querySelector<HTMLElement>("[data-synergy-panel-content]");
+const openSynergyBtns = document.querySelectorAll<HTMLButtonElement>("[data-open-synergy]");
+const synergyModalOverlay = document.querySelector<HTMLElement>("[data-synergy-modal-overlay]");
+const synergyModalCloseBtn = document.querySelector<HTMLButtonElement>("[data-synergy-modal-close]");
+const synergyModalContent = document.querySelector<HTMLElement>("[data-synergy-panel-content]");
 const synergySidebarCalloutEl = document.querySelector<HTMLElement>("[data-synergy-sidebar-callout]");
 
 const weaknessesListEl = document.querySelector<HTMLElement>("[data-weaknesses-list]")!;
@@ -721,7 +723,7 @@ function renderOffensePanel(): void {
 }
 
 function renderSynergyPanel(): void {
-  if (!typeChart || !synergyPanelContentEl || !allPokemon.length) return;
+  if (!typeChart || !synergyModalContent || !allPokemon.length) return;
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
 
@@ -730,12 +732,17 @@ function renderSynergyPanel(): void {
     .filter((p): p is Pokemon => p !== null);
 
   if (!activePokemon.length) {
-    if (teamSynergySectionEl) teamSynergySectionEl.hidden = true;
     if (synergySidebarCalloutEl) synergySidebarCalloutEl.hidden = true;
+    synergyModalContent.innerHTML = `
+      <p class="side-panel__empty" style="text-align: center; padding: 40px 20px;">
+        <i data-lucide="info" style="margin-bottom: 8px;"></i><br />
+        ${locale === "es" ? "Agregá al menos un Pokémon a tu equipo para analizar sinergias y ver recomendaciones inteligentes." : "Add at least one Pokémon to your team to analyze synergies and see smart recommendations."}
+      </p>
+    `;
+    refreshIcons();
     return;
   }
 
-  if (teamSynergySectionEl) teamSynergySectionEl.hidden = false;
   if (synergySidebarCalloutEl) synergySidebarCalloutEl.hidden = false;
 
   const currentSet = pickerState.game ? gameSpeciesSets.get(pickerState.game)?.[pickerState.dexMode] : undefined;
@@ -915,7 +922,7 @@ function renderSynergyPanel(): void {
     `;
   }
 
-  synergyPanelContentEl.innerHTML = `
+  synergyModalContent.innerHTML = `
     ${overviewHtml}
     ${pokemonCardsHtml}
   `;
@@ -1319,14 +1326,7 @@ panelTabToggleEl?.addEventListener("click", (e) => {
   refreshIcons();
 });
 
-synergySidebarCalloutEl?.addEventListener("click", (e) => {
-  const link = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[href='#synergy-section']");
-  if (!link) return;
-  e.preventDefault();
-  teamSynergySectionEl?.scrollIntoView({ behavior: "smooth", block: "start" });
-});
-
-synergyPanelContentEl?.addEventListener("click", (e) => {
+synergyModalContent?.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-synergy-add]");
   if (!btn) return;
   const pId = Number(btn.dataset.synergyAdd);
@@ -1918,6 +1918,26 @@ typeMatrixOverlay?.addEventListener("click", (e) => {
   if (e.target === typeMatrixOverlay) closeTypeMatrixModal();
 });
 
+function openSynergyModal(): void {
+  if (!synergyModalOverlay || !synergyModalContent) return;
+  renderSynergyPanel();
+  synergyModalOverlay.hidden = false;
+  document.body.style.overflow = "hidden";
+  refreshIcons();
+}
+
+function closeSynergyModal(): void {
+  if (!synergyModalOverlay) return;
+  synergyModalOverlay.hidden = true;
+  document.body.style.overflow = "";
+}
+
+openSynergyBtns.forEach((btn) => btn.addEventListener("click", openSynergyModal));
+synergyModalCloseBtn?.addEventListener("click", closeSynergyModal);
+synergyModalOverlay?.addEventListener("click", (e) => {
+  if (e.target === synergyModalOverlay) closeSynergyModal();
+});
+
 openTeamCardBtn?.addEventListener("click", openTeamCardModal);
 teamCardCloseBtn?.addEventListener("click", closeTeamCardModal);
 teamCardOverlay?.addEventListener("click", (e) => {
@@ -1945,7 +1965,8 @@ copyShowdownBtn?.addEventListener("click", () => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    if (typeMatrixOverlay && !typeMatrixOverlay.hidden) closeTypeMatrixModal();
+    if (synergyModalOverlay && !synergyModalOverlay.hidden) closeSynergyModal();
+    else if (typeMatrixOverlay && !typeMatrixOverlay.hidden) closeTypeMatrixModal();
     else if (teamCardOverlay && !teamCardOverlay.hidden) closeTeamCardModal();
     else if (!movePickerOverlayEl.hidden) closeMovePicker();
     else if (!overlayEl.hidden) closePicker();

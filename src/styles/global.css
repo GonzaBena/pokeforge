@@ -2826,6 +2826,12 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   gap: 8px;
 }
 
+.side-panel__header-btns {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .panel-matrix-trigger-btn {
   display: inline-flex;
   align-items: center;
@@ -2852,61 +2858,21 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   border-color: var(--border-strong);
 }
 
-/* --- Full-width Synergy Section & Recommendations --- */
+/* --- Synergy Modal & Recommendations --- */
 
-.team-synergy-section {
-  margin-top: 36px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
+.synergy-modal-panel {
+  width: min(1100px, 96vw);
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  box-shadow: var(--shadow-card);
 }
 
-.team-synergy-section__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.team-synergy-section__title-wrap {
+.synergy-modal__body {
+  padding: 20px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.team-synergy-section__title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-
-.team-synergy-section__title svg {
-  width: 20px;
-  height: 20px;
-  color: #f59e0b;
-}
-
-.team-synergy-section__subtitle {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.team-synergy-section__body {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+  gap: 20px;
 }
 
 .synergy-overview-grid {
