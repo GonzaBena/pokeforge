@@ -14,23 +14,50 @@ import {
   TEAM_CHANGED_EVENT,
   DATA_RESET_EVENT,
 } from "../lib/storage";
-import { computeTeamDefense, splitWeaknessesAndResistances, type TeamDefenseEntry } from "../lib/typeChart";
-import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../lib/animations";
+import {
+  computeTeamDefense,
+  splitWeaknessesAndResistances,
+  computeTeamOffense,
+  getTypeMultiplier,
+  type TeamDefenseEntry,
+  type TeamOffenseEntry,
+  type AttackSource,
+} from "../lib/typeChart";
+import { badgeBounceIn, slotPopIn, teamSizeTransition } from "../lib/animations";
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
 import { getCurrentLocale, getTranslations, getTypeName, getGameTitle, getRegionName, type Locale } from "../lib/i18n/translations";
-import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
+import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamSlotState, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
 const slotsEl = document.querySelector<HTMLElement>("[data-team-slots]")!;
 const panelEmptyEl = document.querySelector<HTMLElement>("[data-panel-empty]")!;
 const panelContentEl = document.querySelector<HTMLElement>("[data-panel-content]")!;
+const panelTabToggleEl = document.querySelector<HTMLElement>("[data-panel-tab-toggle]");
+const tabContentDefenseEl = document.querySelector<HTMLElement>("[data-tab-content-defense]");
+const tabContentOffenseEl = document.querySelector<HTMLElement>("[data-tab-content-offense]");
+
 const weaknessesListEl = document.querySelector<HTMLElement>("[data-weaknesses-list]")!;
 const resistancesListEl = document.querySelector<HTMLElement>("[data-resistances-list]")!;
 const immunitiesListEl = document.querySelector<HTMLElement>("[data-immunities-list]");
+const weaknessesCountEl = document.querySelector<HTMLElement>("[data-weaknesses-count]");
+const resistancesCountEl = document.querySelector<HTMLElement>("[data-resistances-count]");
+const immunitiesCountEl = document.querySelector<HTMLElement>("[data-immunities-count]");
+
+const offenseModeToggleEl = document.querySelector<HTMLElement>("[data-offense-mode-toggle]");
+const offensePctEl = document.querySelector<HTMLElement>("[data-offense-pct]");
+const offenseMeterEl = document.querySelector<HTMLElement>("[data-offense-meter]");
+const offenseScoreLabelEl = document.querySelector<HTMLElement>("[data-offense-score-label]");
+const offenseCoveredCountEl = document.querySelector<HTMLElement>("[data-offense-covered-count]");
+const offenseBlindspotsCountEl = document.querySelector<HTMLElement>("[data-offense-blindspots-count]");
+const offenseCoveredListEl = document.querySelector<HTMLElement>("[data-offense-covered-list]");
+const offenseBlindspotsListEl = document.querySelector<HTMLElement>("[data-offense-blindspots-list]");
+
+let activePanelTab: "defense" | "offense" = "defense";
+let activeOffenseMode: "moves" | "stab" = "moves";
 
 const overlayEl = document.querySelector<HTMLElement>("[data-picker-overlay]")!;
 const pickerCloseBtn = document.querySelector<HTMLButtonElement>("[data-picker-close]")!;
@@ -292,30 +319,195 @@ function changeTeamSize(newSize: number): void {
   renderStrengthsPanel();
 }
 
-function renderBarHTML(entry: TeamDefenseEntry): string {
-  const locale = getCurrentLocale();
-  const isWeakness = entry.averageMultiplier > 1;
-  const isImmunity = entry.averageMultiplier <= 0.001;
+function formatMult(mult: number): string {
+  if (mult === 0) return "0×";
+  if (mult === 0.25) return "¼×";
+  if (mult === 0.5) return "½×";
+  if (mult === 2) return "2×";
+  if (mult === 4) return "4×";
+  return `${mult}×`;
+}
 
-  const pct = isImmunity
-    ? 100
-    : isWeakness
-      ? Math.min(100, Math.max(15, (entry.averageMultiplier / 4) * 100))
-      : Math.min(100, Math.max(15, (1 - entry.averageMultiplier) * 100));
+function renderWeaknessItemHTML(entry: TeamDefenseEntry): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  let threatBadge = "";
+  if (entry.threatLevel === "critical") {
+    threatBadge = `<span class="threat-pill threat-pill--critical"><i data-lucide="alert-triangle"></i> ${t.strengthsWeaknesses.threatCritical}</span>`;
+  } else if (entry.threatLevel === "exposed") {
+    threatBadge = `<span class="threat-pill threat-pill--exposed">${t.strengthsWeaknesses.threatExposed}</span>`;
+  } else {
+    threatBadge = `<span class="threat-pill threat-pill--covered">${t.strengthsWeaknesses.threatCovered}</span>`;
+  }
+
+  const has4x = entry.weakDetails.some((m) => m.multiplier >= 4);
+  const countLabel = entry.weakCount === 1
+    ? t.strengthsWeaknesses.weakLabel.replace("{n}", "1")
+    : t.strengthsWeaknesses.weakLabelPlural.replace("{n}", String(entry.weakCount));
+  const weakCountBadge = `<span class="threat-pill threat-pill--weak">${countLabel}${has4x ? " (4×)" : ""}</span>`;
+
+  let supportBadge = "";
+  if (entry.immuneCount > 0) {
+    const immuneLabel = entry.immuneCount === 1
+      ? t.strengthsWeaknesses.immuneLabel.replace("{n}", "1")
+      : t.strengthsWeaknesses.immuneLabelPlural.replace("{n}", String(entry.immuneCount));
+    supportBadge = `<span class="threat-pill threat-pill--immune">${immuneLabel}</span>`;
+  } else if (entry.resistCount > 0) {
+    const resistLabel = entry.resistCount === 1
+      ? t.strengthsWeaknesses.resistLabel.replace("{n}", "1")
+      : t.strengthsWeaknesses.resistLabelPlural.replace("{n}", String(entry.resistCount));
+    supportBadge = `<span class="threat-pill threat-pill--resist">${resistLabel}</span>`;
+  }
+
+  const weakTags = entry.weakDetails
+    .map(
+      (m) =>
+        `<span class="member-tag member-tag--weak">${capitalize(m.name)} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`
+    )
+    .join("");
+
+  const safeTags = [
+    ...entry.immuneDetails.map(
+      (m) =>
+        `<span class="member-tag member-tag--immune">${capitalize(m.name)} <span class="member-tag__mult">0×</span></span>`
+    ),
+    ...entry.resistDetails.map(
+      (m) =>
+        `<span class="member-tag member-tag--resist">${capitalize(m.name)} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`
+    ),
+  ].join("");
 
   return `
-    <div class="type-bar">
-      <span class="type-bar__type">${getTypeName(entry.type, locale)}</span>
-      <div class="type-bar__track">
-        <div class="type-bar__fill" data-target-width="${pct}%" style="--badge-bg:${typeColor(entry.type)}"></div>
+    <details class="defense-item defense-item--${entry.threatLevel}" data-defense-item>
+      <summary class="defense-item__summary">
+        <div class="defense-item__type-col">
+          <span class="type-badge type-badge--sm" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
+            ${getTypeName(entry.type, locale)}
+          </span>
+        </div>
+        <div class="defense-item__badges-col">
+          ${threatBadge}
+          ${weakCountBadge}
+          ${supportBadge}
+        </div>
+        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
+      </summary>
+      <div class="defense-item__details">
+        <div class="defense-item__group">
+          <span class="defense-item__group-title defense-item__group-title--weak">
+            <i data-lucide="x"></i> ${t.strengthsWeaknesses.vulnerableGroup}
+          </span>
+          <div class="defense-item__tags">${weakTags}</div>
+        </div>
+        ${
+          safeTags
+            ? `
+          <div class="defense-item__group">
+            <span class="defense-item__group-title defense-item__group-title--safe">
+              <i data-lucide="shield"></i> ${t.strengthsWeaknesses.resistantGroup}
+            </span>
+            <div class="defense-item__tags">${safeTags}</div>
+          </div>
+        `
+            : `
+          <div class="defense-item__notice defense-item__notice--warn">
+            <i data-lucide="info"></i>
+            <span>${t.strengthsWeaknesses.noResistWarning}</span>
+          </div>
+        `
+        }
       </div>
-      <span class="type-bar__value">${entry.averageMultiplier.toFixed(2)}x</span>
-    </div>
+    </details>
+  `;
+}
+
+function renderResistItemHTML(entry: TeamDefenseEntry): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  const resistLabel = entry.resistCount === 1
+    ? t.strengthsWeaknesses.resistLabel.replace("{n}", "1")
+    : t.strengthsWeaknesses.resistLabelPlural.replace("{n}", String(entry.resistCount));
+  const hasQuarter = entry.resistDetails.some((m) => m.multiplier <= 0.25);
+  const resistBadge = `<span class="threat-pill threat-pill--resist">${resistLabel}${hasQuarter ? " (¼×)" : ""}</span>`;
+
+  const resistTags = entry.resistDetails
+    .map(
+      (m) =>
+        `<span class="member-tag member-tag--resist">${capitalize(m.name)} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`
+    )
+    .join("");
+
+  return `
+    <details class="defense-item defense-item--safe" data-defense-item>
+      <summary class="defense-item__summary">
+        <div class="defense-item__type-col">
+          <span class="type-badge type-badge--sm" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
+            ${getTypeName(entry.type, locale)}
+          </span>
+        </div>
+        <div class="defense-item__badges-col">
+          ${resistBadge}
+        </div>
+        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
+      </summary>
+      <div class="defense-item__details">
+        <div class="defense-item__group">
+          <span class="defense-item__group-title defense-item__group-title--safe">
+            <i data-lucide="shield"></i> ${t.strengthsWeaknesses.resistantGroup}
+          </span>
+          <div class="defense-item__tags">${resistTags}</div>
+        </div>
+      </div>
+    </details>
+  `;
+}
+
+function renderImmunityItemHTML(entry: TeamDefenseEntry): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  const immuneLabel = entry.immuneCount === 1
+    ? t.strengthsWeaknesses.immuneLabel.replace("{n}", "1")
+    : t.strengthsWeaknesses.immuneLabelPlural.replace("{n}", String(entry.immuneCount));
+  const immuneBadge = `<span class="threat-pill threat-pill--immune">${immuneLabel} (0×)</span>`;
+
+  const immuneTags = entry.immuneDetails
+    .map(
+      (m) =>
+        `<span class="member-tag member-tag--immune">${capitalize(m.name)} <span class="member-tag__mult">0×</span></span>`
+    )
+    .join("");
+
+  return `
+    <details class="defense-item defense-item--immune" data-defense-item>
+      <summary class="defense-item__summary">
+        <div class="defense-item__type-col">
+          <span class="type-badge type-badge--sm" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
+            ${getTypeName(entry.type, locale)}
+          </span>
+        </div>
+        <div class="defense-item__badges-col">
+          ${immuneBadge}
+        </div>
+        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
+      </summary>
+      <div class="defense-item__details">
+        <div class="defense-item__group">
+          <span class="defense-item__group-title defense-item__group-title--immune">
+            <i data-lucide="shield-off"></i> ${t.strengthsWeaknesses.immuneGroup}
+          </span>
+          <div class="defense-item__tags">${immuneTags}</div>
+        </div>
+      </div>
+    </details>
   `;
 }
 
 function renderStrengthsPanel(): void {
   const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   const activePokemon = team.slots
     .map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) ?? null : null))
     .filter((p): p is Pokemon => p !== null);
@@ -332,22 +524,190 @@ function renderStrengthsPanel(): void {
   const defense = computeTeamDefense(typeChart, activePokemon);
   const { weaknesses, resistances, immunities } = splitWeaknessesAndResistances(defense);
 
+  if (weaknessesCountEl) {
+    weaknessesCountEl.textContent = weaknesses.length ? `(${weaknesses.length})` : "";
+  }
+  if (resistancesCountEl) {
+    resistancesCountEl.textContent = resistances.length ? `(${resistances.length})` : "";
+  }
+  if (immunitiesCountEl) {
+    immunitiesCountEl.textContent = immunities.length ? `(${immunities.length})` : "";
+  }
+
   weaknessesListEl.innerHTML = weaknesses.length
-    ? weaknesses.map(renderBarHTML).join("")
-    : `<p class="side-panel__empty">${locale === "es" ? "Sin debilidades destacadas." : "No significant weaknesses."}</p>`;
+    ? weaknesses.map(renderWeaknessItemHTML).join("")
+    : `<p class="side-panel__empty">${t.strengthsWeaknesses.noWeaknesses}</p>`;
 
   resistancesListEl.innerHTML = resistances.length
-    ? resistances.map(renderBarHTML).join("")
-    : `<p class="side-panel__empty">${locale === "es" ? "Sin resistencias destacadas." : "No significant resistances."}</p>`;
+    ? resistances.map(renderResistItemHTML).join("")
+    : `<p class="side-panel__empty">${t.strengthsWeaknesses.noResistances}</p>`;
 
   if (immunitiesListEl) {
     immunitiesListEl.innerHTML = immunities.length
-      ? immunities.map(renderBarHTML).join("")
-      : `<p class="side-panel__empty">${locale === "es" ? "Sin inmunidades." : "No immunities."}</p>`;
+      ? immunities.map(renderImmunityItemHTML).join("")
+      : `<p class="side-panel__empty">${t.strengthsWeaknesses.noImmunities}</p>`;
   }
 
-  const fills = panelContentEl.querySelectorAll<HTMLElement>(".type-bar__fill");
-  barsAnimateIn(fills);
+  renderOffensePanel();
+
+  refreshIcons();
+}
+
+function getAttackSources(): AttackSource[] {
+  const sources: AttackSource[] = [];
+
+  for (let i = 0; i < team.slots.length; i++) {
+    const slot = team.slots[i];
+    if (!slot || slot.pokemonId === null) continue;
+    const pokemon = pokemonById.get(slot.pokemonId);
+    if (!pokemon) continue;
+
+    if (activeOffenseMode === "moves") {
+      let hasDamagingMove = false;
+      if (slot.moves && slot.moves.length) {
+        for (const moveName of slot.moves) {
+          if (!moveName) continue;
+          const meta = moveDetailsMap[moveName];
+          if (meta && meta.category !== "status") {
+            hasDamagingMove = true;
+            sources.push({
+              pokemonName: pokemon.name,
+              type: meta.type,
+              moveName,
+            });
+          }
+        }
+      }
+      if (!hasDamagingMove) {
+        for (const pType of pokemon.types) {
+          sources.push({
+            pokemonName: pokemon.name,
+            type: pType,
+          });
+        }
+      }
+    } else {
+      for (const pType of pokemon.types) {
+        sources.push({
+          pokemonName: pokemon.name,
+          type: pType,
+        });
+      }
+    }
+  }
+
+  return sources;
+}
+
+function renderOffenseCoveredItemHTML(entry: TeamOffenseEntry): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  const countLabel = entry.attackers.length === 1
+    ? t.strengthsWeaknesses.attackerCount.replace("{n}", "1")
+    : t.strengthsWeaknesses.attackerCountPlural.replace("{n}", String(entry.attackers.length));
+
+  const attackerTags = entry.attackers
+    .map((att) => {
+      const moveLabel = att.moveName ? ` (${formatLabel(att.moveName)})` : "";
+      return `
+        <span class="member-tag member-tag--attacker">
+          ${capitalize(att.pokemonName)}${moveLabel} <span class="member-tag__mult">${formatMult(att.multiplier)}</span>
+        </span>
+      `;
+    })
+    .join("");
+
+  return `
+    <details class="defense-item defense-item--covered-offense" data-defense-item>
+      <summary class="defense-item__summary">
+        <div class="defense-item__type-col">
+          <span class="type-badge type-badge--sm" data-type="${entry.targetType}" style="--badge-bg:${typeColor(entry.targetType)}">
+            ${getTypeName(entry.targetType, locale)}
+          </span>
+        </div>
+        <div class="defense-item__badges-col">
+          <span class="threat-pill threat-pill--covered-offense">${countLabel}</span>
+          <span class="threat-pill threat-pill--covered-offense">2×</span>
+        </div>
+        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
+      </summary>
+      <div class="defense-item__details">
+        <div class="defense-item__group">
+          <span class="defense-item__group-title defense-item__group-title--attacker">
+            <i data-lucide="swords"></i> ${t.strengthsWeaknesses.superEffectiveTypes}:
+          </span>
+          <div class="defense-item__tags">${attackerTags}</div>
+        </div>
+      </div>
+    </details>
+  `;
+}
+
+function renderOffenseBlindSpotItemHTML(entry: TeamOffenseEntry): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  return `
+    <details class="defense-item defense-item--blindspot" data-defense-item>
+      <summary class="defense-item__summary">
+        <div class="defense-item__type-col">
+          <span class="type-badge type-badge--sm" data-type="${entry.targetType}" style="--badge-bg:${typeColor(entry.targetType)}">
+            ${getTypeName(entry.targetType, locale)}
+          </span>
+        </div>
+        <div class="defense-item__badges-col">
+          <span class="threat-pill threat-pill--blindspot">${t.strengthsWeaknesses.blindSpots}</span>
+        </div>
+        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
+      </summary>
+      <div class="defense-item__details">
+        <div class="defense-item__notice defense-item__notice--warn">
+          <i data-lucide="info"></i>
+          <span>${t.strengthsWeaknesses.blindSpotHint}</span>
+        </div>
+      </div>
+    </details>
+  `;
+}
+
+function renderOffensePanel(): void {
+  if (!typeChart || !tabContentOffenseEl) return;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  const sources = getAttackSources();
+  const offense = computeTeamOffense(typeChart, sources);
+
+  if (offensePctEl) {
+    offensePctEl.textContent = `${offense.coveragePercentage}%`;
+  }
+  if (offenseMeterEl) {
+    offenseMeterEl.style.width = `${offense.coveragePercentage}%`;
+  }
+  if (offenseScoreLabelEl) {
+    offenseScoreLabelEl.textContent = t.strengthsWeaknesses.coverageScore
+      .replace("{count}", String(offense.coveredCount))
+      .replace("{total}", String(offense.totalTypes));
+  }
+  if (offenseCoveredCountEl) {
+    offenseCoveredCountEl.textContent = offense.coveredCount ? `(${offense.coveredCount})` : "";
+  }
+  if (offenseBlindspotsCountEl) {
+    offenseBlindspotsCountEl.textContent = offense.blindSpots.length ? `(${offense.blindSpots.length})` : "";
+  }
+
+  if (offenseCoveredListEl) {
+    offenseCoveredListEl.innerHTML = offense.coveredTypes.length
+      ? offense.coveredTypes.map(renderOffenseCoveredItemHTML).join("")
+      : `<p class="side-panel__empty">${t.strengthsWeaknesses.noOffenseCovered}</p>`;
+  }
+
+  if (offenseBlindspotsListEl) {
+    offenseBlindspotsListEl.innerHTML = offense.blindSpots.length
+      ? offense.blindSpots.map(renderOffenseBlindSpotItemHTML).join("")
+      : `<p class="side-panel__empty">${t.strengthsWeaknesses.noBlindSpots}</p>`;
+  }
 }
 
 // --- pokemon picker --------------------------------------------------
@@ -732,6 +1092,37 @@ function renderMovePickerTable(): void {
 
 // --- event wiring -----------------------------------------------------
 
+panelTabToggleEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-panel-tab]");
+  if (!btn) return;
+  const tab = btn.dataset.panelTab as "defense" | "offense";
+  if (!tab || tab === activePanelTab) return;
+
+  activePanelTab = tab;
+  panelTabToggleEl.querySelectorAll<HTMLButtonElement>("[data-panel-tab]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.panelTab === activePanelTab));
+  });
+
+  if (tabContentDefenseEl) tabContentDefenseEl.hidden = activePanelTab !== "defense";
+  if (tabContentOffenseEl) tabContentOffenseEl.hidden = activePanelTab !== "offense";
+  refreshIcons();
+});
+
+offenseModeToggleEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-offense-mode]");
+  if (!btn) return;
+  const mode = btn.dataset.offenseMode as "moves" | "stab";
+  if (!mode || mode === activeOffenseMode) return;
+
+  activeOffenseMode = mode;
+  offenseModeToggleEl.querySelectorAll<HTMLButtonElement>("[data-offense-mode]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.offenseMode === activeOffenseMode));
+  });
+
+  renderOffensePanel();
+  refreshIcons();
+});
+
 sizeSelectorEl?.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-size]");
   if (!btn) return;
@@ -748,6 +1139,7 @@ slotsEl.addEventListener("click", (e) => {
     const mIdx = Number(clearMoveBtn.dataset.moveIndex);
     team = setTeamSlotMove(sIdx, mIdx, null);
     renderSingleSlot(sIdx);
+    renderStrengthsPanel();
     return;
   }
 
@@ -797,6 +1189,7 @@ window.addEventListener(DATA_RESET_EVENT, () => {
     renderSingleSlot(i);
   }
   renderStrengthsPanel();
+  if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
 });
 
 // Cloud sync / import can replace the team from outside this tab's own
@@ -806,6 +1199,7 @@ window.addEventListener(TEAM_CHANGED_EVENT, () => {
   renderSizeSelector();
   renderAllSlots();
   renderStrengthsPanel();
+  if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
 });
 
 const openTeamCardBtn = document.querySelector<HTMLButtonElement>("[data-open-team-card]");
@@ -829,6 +1223,299 @@ function closeTeamCardModal(): void {
   teamCardOverlay.hidden = true;
   document.body.style.overflow = "";
 }
+
+const openTypeMatrixBtns = document.querySelectorAll<HTMLButtonElement>("[data-open-type-matrix]");
+const typeMatrixOverlay = document.querySelector<HTMLElement>("[data-type-matrix-overlay]");
+const typeMatrixCloseBtn = document.querySelector<HTMLButtonElement>("[data-type-matrix-close]");
+const typeMatrixContent = document.querySelector<HTMLElement>("[data-type-matrix-content]");
+
+let activeMatrixMode: "defense" | "offense" = "defense";
+
+function renderTypeMatrix(): void {
+  if (!typeMatrixContent || !typeChart) return;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  const activeMembers = team.slots
+    .map((s) => {
+      if (s.pokemonId === null) return null;
+      const p = pokemonById.get(s.pokemonId);
+      return p ? { pokemon: p, slot: s } : null;
+    })
+    .filter((m): m is { pokemon: Pokemon; slot: TeamSlotState } => m !== null);
+
+  if (!activeMembers.length) {
+    typeMatrixContent.innerHTML = `
+      <p class="side-panel__empty" style="text-align: center; padding: 40px 20px;">
+        <i data-lucide="info" style="margin-bottom: 8px;"></i><br />
+        ${t.team.typeMatrixEmpty}
+      </p>
+    `;
+    refreshIcons();
+    return;
+  }
+
+  const modeToolbar = `
+    <div class="type-matrix-toolbar">
+      <div class="view-toggle" data-matrix-mode-toggle>
+        <button class="view-toggle__btn" type="button" data-matrix-mode="defense" aria-pressed="${String(activeMatrixMode === "defense")}">
+          <i data-lucide="shield"></i> ${t.strengthsWeaknesses.tabDefense}
+        </button>
+        <button class="view-toggle__btn" type="button" data-matrix-mode="offense" aria-pressed="${String(activeMatrixMode === "offense")}">
+          <i data-lucide="swords"></i> ${t.strengthsWeaknesses.tabOffense}
+        </button>
+      </div>
+      <div class="table-scroll-hint" aria-hidden="true">
+        <span>${locale === "es" ? "← Deslizá horizontalmente para ver los 18 tipos →" : "← Scroll horizontally to see all 18 types →"}</span>
+      </div>
+    </div>
+  `;
+
+  // Header row
+  const headerCols = typeChart.types
+    .map(
+      (type) => `
+      <th class="type-matrix__th-type" title="${getTypeName(type, locale)}">
+        <span class="type-badge type-badge--sm" data-type="${type}" style="--badge-bg:${typeColor(type)}; font-size: 10px; padding: 2px 4px;">
+          ${getTypeName(type, locale).slice(0, 3)}
+        </span>
+      </th>
+    `
+    )
+    .join("");
+
+  // Body rows
+  const rowsHtml = activeMembers
+    .map(({ pokemon, slot }) => {
+      const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
+      const typesHtml = pokemon.types
+        .map((ty) => `<span class="type-badge type-badge--sm" data-type="${ty}" style="--badge-bg:${typeColor(ty)}; font-size: 9.5px; padding: 1px 4px;">${getTypeName(ty, locale)}</span>`)
+        .join("");
+
+      const cellsHtml = typeChart!.types
+        .map((type) => {
+          if (activeMatrixMode === "defense") {
+            const mult = getTypeMultiplier(typeChart!, type, pokemon.types);
+            let badgeClass = "matrix-badge--1x";
+            let label = "-";
+
+            if (mult === 0) {
+              badgeClass = "matrix-badge--immune";
+              label = "0";
+            } else if (mult >= 4) {
+              badgeClass = "matrix-badge--4x";
+              label = "4×";
+            } else if (mult > 1) {
+              badgeClass = "matrix-badge--2x";
+              label = "2×";
+            } else if (mult <= 0.25) {
+              badgeClass = "matrix-badge--quarter";
+              label = "¼";
+            } else if (mult < 1) {
+              badgeClass = "matrix-badge--half";
+              label = "½";
+            }
+
+            return `
+              <td>
+                <span class="matrix-badge ${badgeClass}" title="${capitalize(pokemon.name)} vs ${getTypeName(type, locale)}: ${mult}×">${label}</span>
+              </td>
+            `;
+          } else {
+            let bestMult = 1;
+            const sources: string[] = [];
+
+            if (slot.moves && slot.moves.length) {
+              for (const moveName of slot.moves) {
+                if (!moveName) continue;
+                const meta = moveDetailsMap[moveName];
+                if (meta && meta.category !== "status") {
+                  sources.push(meta.type);
+                }
+              }
+            }
+            if (!sources.length) {
+              sources.push(...pokemon.types);
+            }
+
+            for (const sType of sources) {
+              const m = typeChart!.chart[sType]?.[type] ?? 1;
+              if (m > bestMult) bestMult = m;
+              else if (bestMult === 1 && m < 1) bestMult = m;
+            }
+
+            let badgeClass = "matrix-badge--1x";
+            let label = "-";
+            if (bestMult >= 2) {
+              badgeClass = "matrix-badge--super";
+              label = `${bestMult}×`;
+            } else if (bestMult === 0) {
+              badgeClass = "matrix-badge--immune";
+              label = "0";
+            } else if (bestMult < 1) {
+              badgeClass = "matrix-badge--notvery";
+              label = "½";
+            }
+
+            return `
+              <td>
+                <span class="matrix-badge ${badgeClass}" title="${capitalize(pokemon.name)} → ${getTypeName(type, locale)}: ${bestMult}×">${label}</span>
+              </td>
+            `;
+          }
+        })
+        .join("");
+
+      return `
+        <tr>
+          <td class="type-matrix__col-pkmn">
+            <div class="type-matrix__pkmn-cell">
+              <img class="type-matrix__pkmn-sprite" src="${sprite}" alt="${pokemon.name}" loading="lazy" />
+              <div>
+                <div class="type-matrix__pkmn-name">${capitalize(pokemon.name)}</div>
+                <div class="type-matrix__pkmn-types">${typesHtml}</div>
+              </div>
+            </div>
+          </td>
+          ${cellsHtml}
+        </tr>
+      `;
+    })
+    .join("");
+
+  // Summary / Footer row
+  const summaryCells = typeChart.types
+    .map((type) => {
+      if (activeMatrixMode === "defense") {
+        let weak = 0;
+        let resist = 0;
+        let immune = 0;
+
+        for (const { pokemon } of activeMembers) {
+          const mult = getTypeMultiplier(typeChart!, type, pokemon.types);
+          if (mult === 0) immune++;
+          else if (mult > 1) weak++;
+          else if (mult < 1) resist++;
+        }
+
+        const netScore = (resist + immune) - weak;
+        const balanceClass = netScore < 0 ? "matrix-balance--neg" : netScore > 0 ? "matrix-balance--pos" : "matrix-balance--zero";
+        const sign = netScore > 0 ? `+${netScore}` : `${netScore}`;
+
+        return `
+          <td>
+            <div class="matrix-balance ${balanceClass}" title="${getTypeName(type, locale)}: ${weak} ${locale === "es" ? "débiles" : "weak"} / ${resist} ${locale === "es" ? "resistentes" : "resist"} / ${immune} ${locale === "es" ? "inmunes" : "immune"}">
+              <span class="matrix-balance__num">${sign}</span>
+              <span class="matrix-balance__sub">${weak}D / ${resist + immune}R</span>
+            </div>
+          </td>
+        `;
+      } else {
+        let superCount = 0;
+        for (const { pokemon, slot } of activeMembers) {
+          const slotMoves: (string | null)[] = slot.moves ?? [];
+          const sources: string[] = slotMoves
+            .map((m: string | null): string | null => (m ? moveDetailsMap[m]?.type ?? null : null))
+            .filter((t: string | null): t is string => Boolean(t));
+          const effectiveSources = sources.length ? sources : pokemon.types;
+          if (effectiveSources.some((st: string) => (typeChart!.chart[st]?.[type] ?? 1) >= 2)) {
+            superCount++;
+          }
+        }
+
+        const balanceClass = superCount > 0 ? "matrix-balance--pos" : "matrix-balance--neg";
+        return `
+          <td>
+            <div class="matrix-balance ${balanceClass}" title="${superCount} ${locale === "es" ? "atacantes con súper eficacia" : "super-effective attackers"}">
+              <span class="matrix-balance__num">${superCount}</span>
+            </div>
+          </td>
+        `;
+      }
+    })
+    .join("");
+
+  const legendHtml = activeMatrixMode === "defense"
+    ? `
+      <div class="type-matrix-legend">
+        <span style="font-weight: 700; color: var(--text);">${t.team.legend}:</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--4x">4×</span> ${t.team.legend4x}</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--2x">2×</span> ${t.team.legend2x}</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--1x">-</span> ${t.team.legend1x}</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--half">½</span> ${t.team.legendHalf}</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--quarter">¼</span> ${t.team.legendQuarter}</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--immune">0</span> ${t.team.legendImmune}</span>
+      </div>
+    `
+    : `
+      <div class="type-matrix-legend">
+        <span style="font-weight: 700; color: var(--text);">${t.team.legend}:</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--super">2×</span> ${t.strengthsWeaknesses.superEffectiveTypes}</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--1x">-</span> ${t.team.legend1x}</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--notvery">½</span> ${locale === "es" ? "Poco eficaz" : "Not very effective"}</span>
+        <span class="type-matrix-legend__item"><span class="matrix-badge matrix-badge--immune">0</span> ${t.team.legendImmune}</span>
+      </div>
+    `;
+
+  typeMatrixContent.innerHTML = `
+    ${modeToolbar}
+    <div class="type-matrix-wrapper">
+      <table class="type-matrix-table">
+        <thead>
+          <tr>
+            <th class="type-matrix__col-pkmn" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Pokémon</th>
+            ${headerCols}
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="type-matrix__col-pkmn">
+              <span style="font-size: 11.5px; font-weight: 700; color: var(--text);">
+                ${activeMatrixMode === "defense" ? t.team.netBalance : locale === "es" ? "Atacantes 2×" : "2× Attackers"}
+              </span>
+            </td>
+            ${summaryCells}
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    ${legendHtml}
+  `;
+
+  const modeToggleEl = typeMatrixContent.querySelector<HTMLElement>("[data-matrix-mode-toggle]");
+  modeToggleEl?.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-matrix-mode]");
+    if (!btn) return;
+    const mode = btn.dataset.matrixMode as "defense" | "offense";
+    if (!mode || mode === activeMatrixMode) return;
+    activeMatrixMode = mode;
+    renderTypeMatrix();
+    refreshIcons();
+  });
+}
+
+function openTypeMatrixModal(): void {
+  if (!typeMatrixOverlay || !typeMatrixContent) return;
+  renderTypeMatrix();
+  typeMatrixOverlay.hidden = false;
+  document.body.style.overflow = "hidden";
+  refreshIcons();
+}
+
+function closeTypeMatrixModal(): void {
+  if (!typeMatrixOverlay) return;
+  typeMatrixOverlay.hidden = true;
+  document.body.style.overflow = "";
+}
+
+openTypeMatrixBtns.forEach((btn) => btn.addEventListener("click", openTypeMatrixModal));
+typeMatrixCloseBtn?.addEventListener("click", closeTypeMatrixModal);
+typeMatrixOverlay?.addEventListener("click", (e) => {
+  if (e.target === typeMatrixOverlay) closeTypeMatrixModal();
+});
 
 openTeamCardBtn?.addEventListener("click", openTeamCardModal);
 teamCardCloseBtn?.addEventListener("click", closeTeamCardModal);
@@ -857,7 +1544,8 @@ copyShowdownBtn?.addEventListener("click", () => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    if (teamCardOverlay && !teamCardOverlay.hidden) closeTeamCardModal();
+    if (typeMatrixOverlay && !typeMatrixOverlay.hidden) closeTypeMatrixModal();
+    else if (teamCardOverlay && !teamCardOverlay.hidden) closeTeamCardModal();
     else if (!movePickerOverlayEl.hidden) closeMovePicker();
     else if (!overlayEl.hidden) closePicker();
   }
@@ -912,6 +1600,7 @@ movePickerResultsEl.addEventListener("click", (e) => {
 
   team = setTeamSlotMove(activeMoveSlotIndex, activeMoveIndex, moveName);
   renderSingleSlot(activeMoveSlotIndex);
+  renderStrengthsPanel();
   closeMovePicker();
   if (pokemon) {
     const locale = getCurrentLocale();

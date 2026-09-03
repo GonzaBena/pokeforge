@@ -138,6 +138,19 @@ export interface Translations {
     typesSection: string;
     gensSection: string;
     gameSection: string;
+    typeMatrix: string;
+    typeMatrixTitle: string;
+    typeMatrixSubtitle: string;
+    typeMatrixShort: string;
+    typeMatrixEmpty: string;
+    netBalance: string;
+    legend: string;
+    legend4x: string;
+    legend2x: string;
+    legend1x: string;
+    legendHalf: string;
+    legendQuarter: string;
+    legendImmune: string;
   };
   strengthsWeaknesses: {
     title: string;
@@ -146,6 +159,35 @@ export interface Translations {
     immunities: string;
     coverage: string;
     noTeam: string;
+    threatCritical: string;
+    threatExposed: string;
+    threatCovered: string;
+    weakLabel: string;
+    weakLabelPlural: string;
+    resistLabel: string;
+    resistLabelPlural: string;
+    immuneLabel: string;
+    immuneLabelPlural: string;
+    vulnerableGroup: string;
+    resistantGroup: string;
+    immuneGroup: string;
+    neutralGroup: string;
+    noResistWarning: string;
+    noWeaknesses: string;
+    noResistances: string;
+    noImmunities: string;
+    tabDefense: string;
+    tabOffense: string;
+    coverageScore: string;
+    superEffectiveTypes: string;
+    blindSpots: string;
+    attackerCount: string;
+    attackerCountPlural: string;
+    offenseModeStab: string;
+    offenseModeMoves: string;
+    noBlindSpots: string;
+    noOffenseCovered: string;
+    blindSpotHint: string;
   };
   modal: {
     stats: string;
@@ -354,14 +396,56 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       typesSection: "Types",
       gensSection: "Generations",
       gameSection: "Game",
+      typeMatrix: "Type Matrix",
+      typeMatrixTitle: "Team Type Matrix",
+      typeMatrixSubtitle: "Cross-table of weaknesses, resistances, and balances for all 18 elemental types",
+      typeMatrixShort: "Matrix",
+      typeMatrixEmpty: "Add at least one Pokémon to your team to view the type matrix.",
+      netBalance: "Net Balance",
+      legend: "Legend",
+      legend4x: "4× Double weakness",
+      legend2x: "2× Weakness",
+      legend1x: "- Neutral damage",
+      legendHalf: "½× Resistance",
+      legendQuarter: "¼× Double resistance",
+      legendImmune: "0× Immunity",
     },
     strengthsWeaknesses: {
-      title: "Team Analysis",
+      title: "Team Defense Analysis",
       weaknesses: "Weaknesses",
       resistances: "Resistances",
       immunities: "Immunities",
       coverage: "Defensive Coverage",
       noTeam: "Add Pokémon to see weaknesses and resistances",
+      threatCritical: "Critical",
+      threatExposed: "Unprotected",
+      threatCovered: "Covered",
+      weakLabel: "{n} weak",
+      weakLabelPlural: "{n} weak",
+      resistLabel: "{n} resist",
+      resistLabelPlural: "{n} resist",
+      immuneLabel: "{n} immune",
+      immuneLabelPlural: "{n} immune",
+      vulnerableGroup: "Vulnerable",
+      resistantGroup: "Resistances",
+      immuneGroup: "Immunities",
+      neutralGroup: "Neutral",
+      noResistWarning: "No Pokémon on the team resists this type.",
+      noWeaknesses: "No shared weaknesses in the team.",
+      noResistances: "No pure resistances.",
+      noImmunities: "No immunities.",
+      tabDefense: "Defense",
+      tabOffense: "Offense",
+      coverageScore: "{count} of {total} types covered",
+      superEffectiveTypes: "Super Effective Coverage",
+      blindSpots: "Blind Spots",
+      attackerCount: "{n} attacker",
+      attackerCountPlural: "{n} attackers",
+      offenseModeStab: "Base Types (STAB)",
+      offenseModeMoves: "Equipped Moves",
+      noBlindSpots: "Excellent! The team covers all 18 elemental types.",
+      noOffenseCovered: "No super-effective coverage against any type.",
+      blindSpotHint: "No team member can hit this type with super-effective damage.",
     },
     modal: {
       stats: "Stats",
@@ -579,6 +663,19 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       typesSection: "Tipos",
       gensSection: "Generaciones",
       gameSection: "Juego",
+      typeMatrix: "Matriz de Tipos",
+      typeMatrixTitle: "Matriz de Tipos del Equipo",
+      typeMatrixSubtitle: "Tabla cruzada de debilidades, resistencias y balances para los 18 tipos elementales",
+      typeMatrixShort: "Matriz",
+      typeMatrixEmpty: "Agregá al menos un Pokémon a tu equipo para ver la matriz de tipos.",
+      netBalance: "Balance Neto",
+      legend: "Leyenda",
+      legend4x: "4× Doble debilidad",
+      legend2x: "2× Debilidad",
+      legend1x: "- Daño neutro",
+      legendHalf: "½× Resistencia",
+      legendQuarter: "¼× Doble resistencia",
+      legendImmune: "0× Inmunidad",
     },
     strengthsWeaknesses: {
       title: "Análisis del Equipo",
@@ -587,6 +684,35 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       immunities: "Inmunidades",
       coverage: "Cobertura Defensiva",
       noTeam: "Agregá Pokémon para ver debilidades y resistencias",
+      threatCritical: "Crítica",
+      threatExposed: "Desprotegido",
+      threatCovered: "Cubierto",
+      weakLabel: "{n} débil",
+      weakLabelPlural: "{n} débiles",
+      resistLabel: "{n} resiste",
+      resistLabelPlural: "{n} resisten",
+      immuneLabel: "{n} inmune",
+      immuneLabelPlural: "{n} inmunes",
+      vulnerableGroup: "Vulnerables",
+      resistantGroup: "Resistencias",
+      immuneGroup: "Inmunidades",
+      neutralGroup: "Neutros",
+      noResistWarning: "Ningún Pokémon del equipo resiste este tipo.",
+      noWeaknesses: "Sin debilidades destacadas en el equipo.",
+      noResistances: "Sin resistencias puras.",
+      noImmunities: "Sin inmunidades.",
+      tabDefense: "Defensa",
+      tabOffense: "Ataque",
+      coverageScore: "{count} de {total} tipos cubiertos",
+      superEffectiveTypes: "Cobertura Súper Eficaz",
+      blindSpots: "Puntos Ciegos",
+      attackerCount: "{n} atacante",
+      attackerCountPlural: "{n} atacantes",
+      offenseModeStab: "Tipos Base (STAB)",
+      offenseModeMoves: "Ataques Equipados",
+      noBlindSpots: "¡Excelente! El equipo cubre los 18 tipos elementales.",
+      noOffenseCovered: "Sin tipos cubiertos con daño súper eficaz.",
+      blindSpotHint: "Ningún miembro del equipo puede golpear este tipo con súper eficacia.",
     },
     modal: {
       stats: "Estadísticas",

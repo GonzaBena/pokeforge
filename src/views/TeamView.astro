@@ -16,6 +16,10 @@ const t = getTranslations(currentLocale);
         <p class="page__subtitle">{t.team.subtitle}</p>
       </div>
       <div class="page__header-actions">
+        <button class="btn" type="button" data-open-type-matrix title={t.team.typeMatrixTitle}>
+          <i data-lucide="grid"></i>
+          <span>{t.team.typeMatrix}</span>
+        </button>
         <button class="btn btn--primary" type="button" data-open-team-card title={t.team.teamCardTitle}>
           <i data-lucide="share-2"></i>
           <span>{t.team.teamCard}</span>
@@ -26,6 +30,21 @@ const t = getTranslations(currentLocale);
     <div class="team-layout">
       <div class="team-slots" data-team-slots></div>
       <StrengthsWeaknessesPanel />
+    </div>
+  </div>
+
+  <div class="modal-overlay" data-type-matrix-overlay hidden>
+    <div class="modal-panel type-matrix-modal-panel">
+      <div class="modal-panel__header">
+        <div class="picker-panel__header-info">
+          <h2><i data-lucide="grid"></i> {t.team.typeMatrixTitle}</h2>
+          <span class="type-matrix-modal__subtitle">{t.team.typeMatrixSubtitle}</span>
+        </div>
+        <button class="modal-panel__close" type="button" data-type-matrix-close aria-label={t.modal.close}>
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="type-matrix-modal__body" data-type-matrix-content></div>
     </div>
   </div>
 
