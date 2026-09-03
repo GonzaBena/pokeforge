@@ -145,6 +145,28 @@ export function setSectionOrder(order: string[]): void {
   writeJson(SECTION_ORDER_KEY, order);
 }
 
+// --- Modal collapsed sections --------------------------------------------
+
+const COLLAPSED_SECTIONS_KEY = "poketeam:modal-collapsed-sections";
+
+export function getCollapsedSections(): Set<string> {
+  return new Set(readJson<string[]>(COLLAPSED_SECTIONS_KEY, []));
+}
+
+export function isSectionCollapsed(id: string): boolean {
+  return getCollapsedSections().has(id);
+}
+
+export function setSectionCollapsed(id: string, collapsed: boolean): void {
+  const current = getCollapsedSections();
+  if (collapsed) {
+    current.add(id);
+  } else {
+    current.delete(id);
+  }
+  writeJson(COLLAPSED_SECTIONS_KEY, [...current]);
+}
+
 // --- Selected Game Filter ----------------------------------------------
 
 const GAME_KEY = "poketeam:selected-game";

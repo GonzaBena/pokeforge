@@ -6,8 +6,10 @@ import {
   getPokemonOverrides,
   getSectionOrder,
   isCaptured,
+  isSectionCollapsed,
   setCaptured,
   setPokemonOverrides,
+  setSectionCollapsed,
   setSectionOrder,
 } from "./storage";
 import { animateMedalReveal, modalIn, modalOut, sectionSwap } from "./animations";
@@ -23,7 +25,11 @@ function getModalElements() {
   const panelEl = overlayEl?.querySelector<HTMLElement>(".modal-panel") ?? null;
   const closeBtn = document.querySelector<HTMLButtonElement>("[data-detail-close]");
   const bodyEl = document.querySelector<HTMLElement>("[data-detail-body]");
-  return { overlayEl, panelEl, closeBtn, bodyEl };
+  const fabContainer = panelEl?.querySelector<HTMLElement>("[data-detail-fab-container]") ?? null;
+  const fabBtn = panelEl?.querySelector<HTMLButtonElement>("[data-detail-fab-btn]") ?? null;
+  const tocMenu = panelEl?.querySelector<HTMLElement>("[data-detail-toc-menu]") ?? null;
+  const tocList = panelEl?.querySelector<HTMLElement>("[data-detail-toc-list]") ?? null;
+  return { overlayEl, panelEl, closeBtn, bodyEl, fabContainer, fabBtn, tocMenu, tocList };
 }
 
 const STAT_KEYS: (keyof PokemonStats)[] = ["hp", "attack", "defense", "specialAttack", "specialDefense", "speed"];
@@ -325,11 +331,24 @@ function renderSection(id: string, index: number, total: number, ctx: RenderCont
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
   };
+  const isCollapsed = isSectionCollapsed(id);
 
   return `
-    <section class="detail-section" data-section-id="${id}">
-      <div class="detail-section__header">
-        <h4 class="detail-section__title">${titles[id] ?? capitalize(id)}</h4>
+    <section class="detail-section${isCollapsed ? " is-collapsed" : ""}" data-section-id="${id}">
+      <div
+        class="detail-section__header"
+        data-section-toggle="${id}"
+        role="button"
+        tabindex="0"
+        aria-expanded="${!isCollapsed}"
+        aria-label="${titles[id] ?? capitalize(id)}"
+      >
+        <div class="detail-section__title-group">
+          <span class="detail-section__collapse-icon">
+            <i data-lucide="chevron-down"></i>
+          </span>
+          <h4 class="detail-section__title">${titles[id] ?? capitalize(id)}</h4>
+        </div>
         <div class="detail-section__reorder">
           <button type="button" data-move-up data-section-id="${id}" ${index === 0 ? "disabled" : ""} aria-label="${locale === "es" ? "Subir sección" : "Move section up"}">
             <i data-lucide="chevron-up"></i>
@@ -339,7 +358,7 @@ function renderSection(id: string, index: number, total: number, ctx: RenderCont
           </button>
         </div>
       </div>
-      <div class="detail-section__content">${SECTION_CONTENT[id] ? SECTION_CONTENT[id](ctx) : ""}</div>
+      <div class="detail-section__content" ${isCollapsed ? "hidden" : ""}>${SECTION_CONTENT[id] ? SECTION_CONTENT[id](ctx) : ""}</div>
     </section>
   `;
 }
@@ -666,9 +685,108 @@ function render(ctx: RenderContext): void {
       locale === "es" ? "Sin datos de movimientos." : "No move data available."
     );
   }
+
+  updateTocMenu();
 }
 
 // --- interactions ---------------------------------------------------------
+
+function updateTocMenu(): void {
+  const { fabContainer, tocList } = getModalElements();
+  if (!fabContainer || !tocList) return;
+
+  const order = getSectionOrder();
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  const titles: Record<string, string> = {
+    effectiveness: t.modal.effectiveness,
+    location: t.modal.acquisition,
+    moves: t.modal.moves,
+    evolutions: t.modal.evolutions,
+  };
+  const icons: Record<string, string> = {
+    effectiveness: "shield-check",
+    location: "gamepad-2",
+    moves: "swords",
+    evolutions: "sparkles",
+  };
+
+  const topItem = `
+    <button class="detail-toc-item" type="button" data-toc-target="header">
+      <span class="detail-toc-item__icon"><i data-lucide="arrow-up"></i></span>
+      <span class="detail-toc-item__title">${t.modal.top}</span>
+    </button>
+    <div class="detail-toc-divider"></div>
+  `;
+
+  const sectionItems = order
+    .map((id) => {
+      const isCollapsed = isSectionCollapsed(id);
+      return `
+        <button class="detail-toc-item" type="button" data-toc-target="${id}">
+          <span class="detail-toc-item__icon"><i data-lucide="${icons[id] ?? "circle"}"></i></span>
+          <span class="detail-toc-item__title">${titles[id] ?? capitalize(id)}</span>
+          ${isCollapsed ? `<span class="detail-toc-item__status">${t.modal.collapsed}</span>` : ""}
+        </button>
+      `;
+    })
+    .join("");
+
+  tocList.innerHTML = topItem + sectionItems;
+  fabContainer.hidden = false;
+  refreshIcons();
+}
+
+function closeTocMenu(): void {
+  const { fabBtn, tocMenu } = getModalElements();
+  if (!tocMenu || !fabBtn) return;
+  tocMenu.classList.remove("is-open");
+  tocMenu.setAttribute("aria-hidden", "true");
+  fabBtn.classList.remove("is-active");
+  fabBtn.setAttribute("aria-expanded", "false");
+}
+
+function toggleTocMenu(): void {
+  const { fabBtn, tocMenu } = getModalElements();
+  if (!tocMenu || !fabBtn) return;
+  const isOpen = tocMenu.classList.toggle("is-open");
+  tocMenu.setAttribute("aria-hidden", String(!isOpen));
+  fabBtn.classList.toggle("is-active", isOpen);
+  fabBtn.setAttribute("aria-expanded", String(isOpen));
+}
+
+function scrollToSection(targetId: string): void {
+  const { bodyEl } = getModalElements();
+  if (!bodyEl) return;
+
+  closeTocMenu();
+
+  if (targetId === "header") {
+    bodyEl.scrollTo({ top: 0, behavior: "smooth" });
+    const headerEl = bodyEl.querySelector<HTMLElement>(".detail-header");
+    if (headerEl) {
+      headerEl.classList.remove("section-target-highlight");
+      void headerEl.offsetWidth;
+      headerEl.classList.add("section-target-highlight");
+      setTimeout(() => headerEl.classList.remove("section-target-highlight"), 1200);
+    }
+    return;
+  }
+
+  const sectionEl = bodyEl.querySelector<HTMLElement>(`[data-section-id="${targetId}"]`);
+  if (!sectionEl) return;
+
+  if (isSectionCollapsed(targetId)) {
+    toggleSectionCollapse(targetId);
+  }
+
+  sectionEl.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  sectionEl.classList.remove("section-target-highlight");
+  void sectionEl.offsetWidth;
+  sectionEl.classList.add("section-target-highlight");
+  setTimeout(() => sectionEl.classList.remove("section-target-highlight"), 1200);
+}
 
 function swapSection(id: string, direction: -1 | 1): void {
   const order = getSectionOrder();
@@ -687,6 +805,30 @@ function swapSection(id: string, direction: -1 | 1): void {
     const el = bodyEl.querySelector<HTMLElement>(`[data-section-id="${sectionId}"]`);
     if (el) sectionSwap(el);
   }
+}
+
+function toggleSectionCollapse(sectionId: string): void {
+  const { bodyEl } = getModalElements();
+  if (!bodyEl) return;
+
+  const sectionEl = bodyEl.querySelector<HTMLElement>(`[data-section-id="${sectionId}"]`);
+  if (!sectionEl) return;
+
+  const willCollapse = !sectionEl.classList.contains("is-collapsed");
+  sectionEl.classList.toggle("is-collapsed", willCollapse);
+
+  const headerEl = sectionEl.querySelector<HTMLElement>("[data-section-toggle]");
+  if (headerEl) {
+    headerEl.setAttribute("aria-expanded", String(!willCollapse));
+  }
+
+  const contentEl = sectionEl.querySelector<HTMLElement>(".detail-section__content");
+  if (contentEl) {
+    contentEl.hidden = willCollapse;
+  }
+
+  setSectionCollapsed(sectionId, willCollapse);
+  updateTocMenu();
 }
 
 function updateHeaderCapturedState(captured: boolean): void {
@@ -712,7 +854,9 @@ function updateHeaderCapturedState(captured: boolean): void {
 
 function closeModal(): void {
   currentId = null;
-  const { overlayEl, panelEl } = getModalElements();
+  closeTocMenu();
+  const { overlayEl, panelEl, fabContainer } = getModalElements();
+  if (fabContainer) fabContainer.hidden = true;
   if (!overlayEl || !panelEl) return;
 
   const timeout = new Promise<void>((resolve) => window.setTimeout(resolve, 500));
@@ -868,20 +1012,76 @@ function bindModalEvents(): void {
     }
 
     const upBtn = target.closest<HTMLButtonElement>("[data-move-up]");
-    if (upBtn && !upBtn.disabled) {
-      swapSection(upBtn.dataset.sectionId!, -1);
+    if (upBtn) {
+      if (!upBtn.disabled) {
+        swapSection(upBtn.dataset.sectionId!, -1);
+      }
       return;
     }
 
     const downBtn = target.closest<HTMLButtonElement>("[data-move-down]");
-    if (downBtn && !downBtn.disabled) {
-      swapSection(downBtn.dataset.sectionId!, 1);
+    if (downBtn) {
+      if (!downBtn.disabled) {
+        swapSection(downBtn.dataset.sectionId!, 1);
+      }
+      return;
+    }
+
+    if (target.closest(".detail-section__reorder")) {
+      return;
+    }
+
+    const sectionToggle = target.closest<HTMLElement>("[data-section-toggle]");
+    if (sectionToggle) {
+      const sectionId = sectionToggle.dataset.sectionToggle;
+      if (sectionId) {
+        toggleSectionCollapse(sectionId);
+      }
+      return;
+    }
+
+    const fabBtn = target.closest<HTMLButtonElement>("[data-detail-fab-btn]");
+    if (fabBtn) {
+      toggleTocMenu();
+      return;
+    }
+
+    const tocItem = target.closest<HTMLButtonElement>("[data-toc-target]");
+    if (tocItem) {
+      const targetId = tocItem.dataset.tocTarget;
+      if (targetId) scrollToSection(targetId);
+      return;
+    }
+
+    const { tocMenu } = getModalElements();
+    if (tocMenu && tocMenu.classList.contains("is-open") && !target.closest("[data-detail-fab-container]")) {
+      closeTocMenu();
     }
   });
 
   document.addEventListener("keydown", (e) => {
-    const { overlayEl } = getModalElements();
-    if (e.key === "Escape" && overlayEl && !overlayEl.hidden) closeModal();
+    const { overlayEl, tocMenu } = getModalElements();
+    if (e.key === "Escape") {
+      if (tocMenu && tocMenu.classList.contains("is-open")) {
+        closeTocMenu();
+        return;
+      }
+      if (overlayEl && !overlayEl.hidden) {
+        closeModal();
+        return;
+      }
+    }
+
+    if (e.key === "Enter" || e.key === " ") {
+      const target = e.target as HTMLElement;
+      if (target && target.matches("[data-section-toggle]")) {
+        e.preventDefault();
+        const sectionId = target.dataset.sectionToggle;
+        if (sectionId) {
+          toggleSectionCollapse(sectionId);
+        }
+      }
+    }
   });
 }
 
@@ -891,8 +1091,11 @@ bindModalEvents();
 
 export async function openPokemonModal(id: number): Promise<void> {
   currentId = id;
-  const { overlayEl, panelEl, bodyEl } = getModalElements();
+  const { overlayEl, panelEl, bodyEl, fabContainer } = getModalElements();
   if (!overlayEl || !panelEl || !bodyEl) return;
+
+  if (fabContainer) fabContainer.hidden = true;
+  closeTocMenu();
 
   if (overlayEl.hidden) {
     bodyEl.innerHTML = `<div class="detail-loading"><div class="spinner"></div><p>Cargando datos del Pokémon...</p></div>`;

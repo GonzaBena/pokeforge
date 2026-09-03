@@ -170,6 +170,9 @@ export interface Translations {
     immunities: string;
     neutral: string;
     none: string;
+    sectionIndex: string;
+    top: string;
+    collapsed: string;
   };
   sync: {
     title: string;
@@ -379,6 +382,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       immunities: "Immunities",
       neutral: "Neutral",
       none: "None",
+      sectionIndex: "Section Index",
+      top: "Top",
+      collapsed: "Collapsed",
     },
     sync: {
       title: "Sync Devices",
@@ -599,6 +605,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       immunities: "Inmunidades",
       neutral: "Neutral",
       none: "Ninguna",
+      sectionIndex: "Índice de secciones",
+      top: "Inicio (Datos)",
+      collapsed: "Colapsada",
     },
     sync: {
       title: "Sincronizar Dispositivos",

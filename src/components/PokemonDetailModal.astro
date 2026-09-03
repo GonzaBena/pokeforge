@@ -13,5 +13,23 @@ const t = getTranslations(currentLocale);
       </button>
     </div>
     <div class="detail-modal__body" data-detail-body></div>
+    <div class="detail-fab-container" data-detail-fab-container hidden>
+      <div class="detail-toc-menu" data-detail-toc-menu aria-hidden="true">
+        <div class="detail-toc-menu__header">
+          <span>{t.modal.sectionIndex}</span>
+        </div>
+        <div class="detail-toc-menu__list" data-detail-toc-list></div>
+      </div>
+      <button
+        class="detail-fab-btn"
+        type="button"
+        data-detail-fab-btn
+        aria-label={t.modal.sectionIndex}
+        title={t.modal.sectionIndex}
+        aria-expanded="false"
+      >
+        <i data-lucide="list"></i>
+      </button>
+    </div>
   </div>
 </div>
