@@ -202,6 +202,9 @@ export interface Translations {
     immuneToVulnerability: string;
     coversBlindSpotBadge: string;
     bringsNewTypeBadge: string;
+    synergyGameFilterLabel: string;
+    synergyGameAllPrompt: string;
+    synergyGameFilteredNotice: string;
   };
   modal: {
     stats: string;
@@ -474,6 +477,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       immuneToVulnerability: "Immune to {types}",
       coversBlindSpotBadge: "Covers {types}",
       bringsNewTypeBadge: "New: {types}",
+      synergyGameFilterLabel: "Game:",
+      synergyGameAllPrompt: "Select a game to see Pokémon available specifically in that version's Pokédex.",
+      synergyGameFilteredNotice: "Suggestions filtered for {game} ({count} Pokémon in {dex}).",
     },
     modal: {
       stats: "Stats",
@@ -755,6 +761,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       immuneToVulnerability: "Inmune a {types}",
       coversBlindSpotBadge: "Cubre {types}",
       bringsNewTypeBadge: "Nuevo: {types}",
+      synergyGameFilterLabel: "Juego:",
+      synergyGameAllPrompt: "Seleccioná un juego para ver Pokémon disponibles específicamente en la Pokédex de esa versión.",
+      synergyGameFilteredNotice: "Sugerencias filtradas para {game} ({count} Pokémon en {dex}).",
     },
     modal: {
       stats: "Estadísticas",

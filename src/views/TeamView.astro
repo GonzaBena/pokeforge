@@ -16,6 +16,13 @@ const t = getTranslations(currentLocale);
         <p class="page__subtitle">{t.team.subtitle}</p>
       </div>
       <div class="page__header-actions">
+        <div class="select-wrapper select-wrapper--compact team-header-game-select">
+          <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+          <select class="game-select" data-team-header-game-select aria-label={t.team.gameSection}>
+            <option value="">{t.pokedex.allGames}</option>
+          </select>
+          <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+        </div>
         <button class="btn" type="button" data-open-synergy title={t.strengthsWeaknesses.synergyTitle}>
           <i data-lucide="sparkles"></i>
           <span>{t.strengthsWeaknesses.tabSynergy}</span>

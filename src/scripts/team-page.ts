@@ -74,6 +74,7 @@ const pickerSearchEl = document.querySelector<HTMLInputElement>("[data-picker-se
 const pickerTypeFilterEl = document.querySelector<HTMLElement>("[data-picker-type-filter]")!;
 const pickerGenFilterEl = document.querySelector<HTMLElement>("[data-picker-generation-filter]")!;
 const pickerGameFilterEl = document.querySelector<HTMLSelectElement>("[data-picker-game-filter]");
+const teamHeaderGameSelectEl = document.querySelector<HTMLSelectElement>("[data-team-header-game-select]");
 const pickerGameModeToggleEl = document.querySelector<HTMLElement>("[data-picker-game-mode-toggle]");
 const pickerExclusiveToggleEl = document.querySelector<HTMLElement>("[data-picker-exclusive-toggle]");
 const pickerMoveFilterEl = document.querySelector<HTMLInputElement>("[data-picker-move-filter]")!;
@@ -121,7 +122,7 @@ const pickerState = {
   types: new Set<string>(),
   generations: new Set<string>(),
   move: "",
-  game: "",
+  game: getSelectedGame(),
   dexMode: getGameDexMode(),
   exclusive: "all",
 };
@@ -722,6 +723,43 @@ function renderOffensePanel(): void {
   }
 }
 
+function getGameOptionsHTML(selectedGame: string): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  gameToGenMap.clear();
+  let html = `<option value="" ${selectedGame === "" ? "selected" : ""}>${t.pokedex.allGames}</option>`;
+  for (const g of generations) {
+    const regionName = g.region ? getRegionName(g.region, locale) : "";
+    const regionLabel = regionName ? ` (${regionName})` : "";
+    const genName = locale === "es" ? g.displayName : g.displayName.replace("Generación", "Generation");
+    html += `<optgroup label="${genName}${regionLabel}">`;
+    for (const vg of g.versionGroups) {
+      gameToGenMap.set(vg.name, g);
+      const title = getGameTitle(vg.name, locale, vg.displayName);
+      const isSelected = vg.name === selectedGame ? "selected" : "";
+      html += `<option value="${vg.name}" ${isSelected}>${title}</option>`;
+    }
+    html += `</optgroup>`;
+  }
+  return html;
+}
+
+function autoDetectGameFromTeam(): string {
+  const activeIds = team.slots
+    .map((s) => s.pokemonId)
+    .filter((id): id is number => id !== null);
+  if (!activeIds.length || !gameDexData) return "";
+
+  const gameEntries = Object.entries(gameDexData).reverse();
+  for (const [gname] of gameEntries) {
+    const set = gameSpeciesSets.get(gname);
+    if (set && activeIds.every((id) => set.obtainable.has(id))) {
+      return gname;
+    }
+  }
+  return "";
+}
+
 function renderSynergyPanel(): void {
   if (!typeChart || !synergyModalContent || !allPokemon.length) return;
   const locale = getCurrentLocale();
@@ -745,12 +783,78 @@ function renderSynergyPanel(): void {
 
   if (synergySidebarCalloutEl) synergySidebarCalloutEl.hidden = false;
 
-  const currentSet = pickerState.game ? gameSpeciesSets.get(pickerState.game)?.[pickerState.dexMode] : undefined;
+  // If no game is selected yet, attempt auto-detect from the current team
+  if (!pickerState.game) {
+    const detected = autoDetectGameFromTeam();
+    if (detected) {
+      pickerState.game = detected;
+      setSelectedGame(detected);
+      if (teamHeaderGameSelectEl) teamHeaderGameSelectEl.value = detected;
+      if (pickerGameFilterEl) pickerGameFilterEl.value = detected;
+    }
+  }
+
+  const setObj = pickerState.game ? gameSpeciesSets.get(pickerState.game) : undefined;
+  const currentSet = setObj
+    ? (pickerState.dexMode === "obtainable" ? setObj.obtainable : setObj.regional)
+    : undefined;
+
   const report = computeTeamSynergy(typeChart, activePokemon, allPokemon, { gameSpeciesSet: currentSet });
 
   const hasEmptySlot = team.slots.some((s) => s.pokemonId === null);
 
-  // 1. Overview Grid (Debilidades, Puntos ciegos, Tipos clave)
+  // 1. Toolbar with Game Selector and Dex Mode Toggle
+  let noticeHtml = "";
+  if (pickerState.game && currentSet) {
+    const gTitle = getGameTitle(pickerState.game, locale);
+    const dexLabel = pickerState.dexMode === "obtainable" ? t.pokedex.obtainable : t.pokedex.regionalDex;
+    noticeHtml = `
+      <span class="synergy-filter-notice">
+        <i data-lucide="circle-check"></i>
+        <span>${t.strengthsWeaknesses.synergyGameFilteredNotice
+          .replace("{game}", gTitle)
+          .replace("{count}", String(currentSet.size))
+          .replace("{dex}", dexLabel)}</span>
+      </span>
+    `;
+  } else {
+    noticeHtml = `
+      <span class="synergy-filter-notice synergy-filter-notice--warning">
+        <i data-lucide="info"></i>
+        <span>${t.strengthsWeaknesses.synergyGameAllPrompt}</span>
+      </span>
+    `;
+  }
+
+  const toolbarHtml = `
+    <div class="synergy-toolbar">
+      <div class="synergy-toolbar__left">
+        <label class="synergy-toolbar__label">
+          <i data-lucide="gamepad-2"></i>
+          <span>${t.strengthsWeaknesses.synergyGameFilterLabel}</span>
+        </label>
+        <div class="select-wrapper select-wrapper--compact">
+          <select class="game-select" data-synergy-game-filter>
+            ${getGameOptionsHTML(pickerState.game)}
+          </select>
+          <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+        </div>
+        <div class="view-toggle" data-synergy-dex-mode-toggle ${!pickerState.game ? "hidden" : ""}>
+          <button class="view-toggle__btn" type="button" data-synergy-dex-mode="regional" aria-pressed="${String(pickerState.dexMode === "regional")}">
+            ${t.pokedex.regionalDex}
+          </button>
+          <button class="view-toggle__btn" type="button" data-synergy-dex-mode="obtainable" aria-pressed="${String(pickerState.dexMode === "obtainable")}">
+            ${t.pokedex.obtainable}
+          </button>
+        </div>
+      </div>
+      <div class="synergy-toolbar__right">
+        ${noticeHtml}
+      </div>
+    </div>
+  `;
+
+  // 2. Overview Grid (Debilidades, Puntos ciegos, Tipos clave)
   const weaknessesToCover = [...report.criticalWeaknesses, ...report.exposedWeaknesses];
   const weaknessesHtml = weaknessesToCover.length
     ? weaknessesToCover
@@ -829,7 +933,7 @@ function renderSynergyPanel(): void {
     </div>
   `;
 
-  // 2. Suggested Pokémon cards in spacious grid
+  // 3. Suggested Pokémon cards in spacious grid
   let pokemonCardsHtml = "";
   if (report.suggestions.length) {
     const cards = report.suggestions
@@ -918,14 +1022,42 @@ function renderSynergyPanel(): void {
     `;
   } else {
     pokemonCardsHtml = `
-      <p class="side-panel__empty">${t.strengthsWeaknesses.synergyNoSuggestions}</p>
+      <p class="side-panel__empty" style="text-align: center; padding: 30px;">${t.strengthsWeaknesses.synergyNoSuggestions}</p>
     `;
   }
 
   synergyModalContent.innerHTML = `
+    ${toolbarHtml}
     ${overviewHtml}
     ${pokemonCardsHtml}
   `;
+
+  // Wire toolbar listeners inside modal
+  const synergyGameSelect = synergyModalContent.querySelector<HTMLSelectElement>("[data-synergy-game-filter]");
+  synergyGameSelect?.addEventListener("change", () => {
+    pickerState.game = synergyGameSelect.value;
+    setSelectedGame(pickerState.game);
+    if (pickerGameFilterEl) pickerGameFilterEl.value = pickerState.game;
+    if (teamHeaderGameSelectEl) teamHeaderGameSelectEl.value = pickerState.game;
+    updatePickerGameModeToggleUI();
+    updatePickerExclusiveToggleUI();
+    renderSynergyPanel();
+    refreshIcons();
+  });
+
+  const synergyDexToggle = synergyModalContent.querySelector<HTMLElement>("[data-synergy-dex-mode-toggle]");
+  synergyDexToggle?.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-synergy-dex-mode]");
+    if (!btn) return;
+    const mode = btn.dataset.synergyDexMode as GameDexMode;
+    if (mode && mode !== pickerState.dexMode) {
+      pickerState.dexMode = mode;
+      setGameDexMode(mode);
+      updatePickerGameModeToggleUI();
+      renderSynergyPanel();
+      refreshIcons();
+    }
+  });
 }
 
 // --- pokemon picker --------------------------------------------------
@@ -1090,7 +1222,6 @@ function closePicker(): void {
 
 function populatePickerFilters(): void {
   const locale = getCurrentLocale();
-  const t = getTranslations(locale);
   const typeChips = typeChart!.types
     .map(
       (type) =>
@@ -1111,21 +1242,12 @@ function populatePickerFilters(): void {
   pickerMoveOptionsEl.innerHTML = moveIndex.map((m) => `<option value="${m}"></option>`).join("");
 
   if (pickerGameFilterEl) {
-    gameToGenMap.clear();
-    let html = `<option value="">${t.pokedex.allGames}</option>`;
-    for (const g of generations) {
-      const regionName = g.region ? getRegionName(g.region, locale) : "";
-      const regionLabel = regionName ? ` (${regionName})` : "";
-      const genName = locale === "es" ? g.displayName : g.displayName.replace("Generación", "Generation");
-      html += `<optgroup label="${genName}${regionLabel}">`;
-      for (const vg of g.versionGroups) {
-        gameToGenMap.set(vg.name, g);
-        const title = getGameTitle(vg.name, locale, vg.displayName);
-        html += `<option value="${vg.name}">${title}</option>`;
-      }
-      html += `</optgroup>`;
-    }
-    pickerGameFilterEl.innerHTML = html;
+    pickerGameFilterEl.innerHTML = getGameOptionsHTML(pickerState.game);
+    pickerGameFilterEl.value = pickerState.game;
+  }
+  if (teamHeaderGameSelectEl) {
+    teamHeaderGameSelectEl.innerHTML = getGameOptionsHTML(pickerState.game);
+    teamHeaderGameSelectEl.value = pickerState.game;
   }
 
   if (moveTypeFilterEl && typeChart) {
@@ -2064,10 +2186,23 @@ pickerMoveFilterEl.addEventListener("input", () => {
 pickerGameFilterEl?.addEventListener("change", () => {
   pickerState.game = pickerGameFilterEl.value;
   setSelectedGame(pickerState.game);
+  if (teamHeaderGameSelectEl) teamHeaderGameSelectEl.value = pickerState.game;
   pickerState.exclusive = "all";
   updatePickerGameModeToggleUI();
   updatePickerExclusiveToggleUI();
+  renderStrengthsPanel();
   renderPickerResults();
+});
+
+teamHeaderGameSelectEl?.addEventListener("change", () => {
+  pickerState.game = teamHeaderGameSelectEl.value;
+  setSelectedGame(pickerState.game);
+  if (pickerGameFilterEl) pickerGameFilterEl.value = pickerState.game;
+  pickerState.exclusive = "all";
+  updatePickerGameModeToggleUI();
+  updatePickerExclusiveToggleUI();
+  renderStrengthsPanel();
+  if (!overlayEl.hidden) renderPickerResults();
 });
 
 pickerGameModeToggleEl?.addEventListener("click", (e) => {
@@ -2078,6 +2213,7 @@ pickerGameModeToggleEl?.addEventListener("click", (e) => {
     pickerState.dexMode = mode;
     setGameDexMode(mode);
     updatePickerGameModeToggleUI();
+    renderStrengthsPanel();
     renderPickerResults();
   }
 });
@@ -2100,9 +2236,11 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
   if (newGame !== pickerState.game) {
     pickerState.game = newGame;
     if (pickerGameFilterEl) pickerGameFilterEl.value = newGame;
+    if (teamHeaderGameSelectEl) teamHeaderGameSelectEl.value = newGame;
     pickerState.exclusive = "all";
     updatePickerGameModeToggleUI();
     updatePickerExclusiveToggleUI();
+    renderStrengthsPanel();
     if (!overlayEl.hidden) renderPickerResults();
   }
 });
@@ -2165,6 +2303,15 @@ async function init(): Promise<void> {
         regional: new Set(entry.regional),
         obtainable: new Set(entry.obtainable),
       });
+    }
+  }
+
+  // If no game is set yet, try to auto-detect from the current team
+  if (!pickerState.game) {
+    const autoGame = autoDetectGameFromTeam();
+    if (autoGame) {
+      pickerState.game = autoGame;
+      setSelectedGame(autoGame);
     }
   }
 
