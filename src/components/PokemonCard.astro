@@ -2,6 +2,7 @@
 import TypeBadge from "./TypeBadge.astro";
 import type { Pokemon } from "../lib/types";
 import { typeColor } from "../lib/typeColors";
+import { getTranslations, type Locale } from "../lib/i18n/translations";
 
 interface Props {
   pokemon: Pokemon;
@@ -9,6 +10,8 @@ interface Props {
 }
 
 const { pokemon, captured } = Astro.props;
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
 const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
 const dexNumber = `#${String(pokemon.id).padStart(4, "0")}`;
 const primaryType = pokemon.types[0] ?? "normal";
@@ -32,6 +35,6 @@ const glowColor = typeColor(primaryType);
   </div>
   <button class="pokemon-card__capture-btn" type="button" data-capture-btn data-pokemon-id={pokemon.id}>
     <i data-lucide={captured ? "check" : "circle-dot"}></i>
-    {captured ? "Capturado" : "Capturar"}
+    {captured ? t.pokedex.caught : t.pokedex.catch}
   </button>
 </article>

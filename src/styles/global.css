@@ -170,7 +170,9 @@ svg.lucide {
   display: none !important;
 }
 
-@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+@media (display-mode: standalone),
+  (display-mode: fullscreen),
+  (display-mode: minimal-ui) {
   .nav__pwa-wrapper,
   .nav__pwa-row {
     display: none !important;
@@ -269,7 +271,10 @@ svg.lucide {
     color: var(--text-muted);
     font-size: 11px;
     font-weight: 600;
-    transition: color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    transition:
+      color 0.15s ease,
+      transform 0.15s ease,
+      background 0.15s ease;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -351,6 +356,45 @@ svg.lucide {
 .nav__sound-btn--muted {
   opacity: 0.6;
   color: var(--text-muted);
+}
+
+.nav__lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nav__lang-btn {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.nav__lang-btn:hover {
+  color: var(--text);
+}
+
+.nav__lang-btn.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.nav__lang-divider {
+  color: var(--border);
+  user-select: none;
+  font-size: 0.7rem;
 }
 
 /* ------------------------------------------------------------------ btns */
@@ -743,7 +787,10 @@ svg.lucide {
   box-shadow: var(--shadow-card);
   perspective: 600px;
   transform-style: preserve-3d;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   overflow: hidden;
 }
 
@@ -754,7 +801,11 @@ svg.lucide {
   left: 0;
   right: 0;
   height: 70px;
-  background: radial-gradient(ellipse at top, var(--type-glow) 0%, transparent 75%);
+  background: radial-gradient(
+    ellipse at top,
+    var(--type-glow) 0%,
+    transparent 75%
+  );
   opacity: 0.18;
   pointer-events: none;
   transition: opacity 0.25s ease;
@@ -767,7 +818,9 @@ svg.lucide {
 .pokemon-card:hover {
   border-color: var(--type-glow, var(--accent));
   border-top-color: var(--type-glow, var(--accent));
-  box-shadow: 0 10px 30px -4px var(--type-glow, rgba(239, 68, 68, 0.4)), var(--shadow-card);
+  box-shadow:
+    0 10px 30px -4px var(--type-glow, rgba(239, 68, 68, 0.4)),
+    var(--shadow-card);
 }
 
 .pokemon-card__id {
@@ -917,7 +970,9 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .team-size-selector__btn[aria-pressed="true"] {
@@ -1672,7 +1727,11 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   transform: translateX(-50%);
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(239, 68, 68, 0.15) 0%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
@@ -2777,7 +2836,11 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, rgba(16, 16, 20, 0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(239, 68, 68, 0.15) 0%,
+    rgba(16, 16, 20, 0) 70%
+  );
   pointer-events: none;
   z-index: 0;
 }
@@ -2850,7 +2913,10 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   text-decoration: none;
   color: var(--text);
   text-align: left;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .hero__card:hover {
@@ -2895,7 +2961,9 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 .hero__card-arrow {
   color: var(--text-faint);
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
 }
 
 .hero__card:hover .hero__card-arrow {
@@ -3238,6 +3306,9 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 .cloud-danger-box {
   margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .sync-modal__instructions {
@@ -3399,6 +3470,7 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 .sync-modal__danger-section {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
 .sync-modal__reset-wrapper {

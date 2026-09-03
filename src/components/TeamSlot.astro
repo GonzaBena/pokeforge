@@ -1,6 +1,7 @@
 ---
 import TypeBadge from "./TypeBadge.astro";
 import type { Pokemon } from "../lib/types";
+import { getTranslations, type Locale } from "../lib/i18n/translations";
 
 interface Props {
   index: number;
@@ -8,6 +9,8 @@ interface Props {
 }
 
 const { index, pokemon } = Astro.props;
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
 const sprite = pokemon ? pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "" : "";
 const dexNumber = pokemon ? `#${String(pokemon.id).padStart(4, "0")}` : "";
 ---
@@ -15,7 +18,7 @@ const dexNumber = pokemon ? `#${String(pokemon.id).padStart(4, "0")}` : "";
 <div class:list={["team-slot", { filled: !!pokemon }]} data-team-slot data-slot-index={index}>
   {pokemon ? (
     <>
-      <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index={index} aria-label="Quitar Pokémon">
+      <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index={index} aria-label={currentLocale === "es" ? "Quitar Pokémon" : "Remove Pokémon"}>
         <i data-lucide="x"></i>
       </button>
       <div class="team-slot__card-content">
@@ -34,7 +37,7 @@ const dexNumber = pokemon ? `#${String(pokemon.id).padStart(4, "0")}` : "";
   ) : (
     <>
       <i data-lucide="plus-circle"></i>
-      <span>Elegir Pokémon</span>
+      <span>{t.team.choosePokemon}</span>
     </>
   )}
 </div>

@@ -1,4 +1,8 @@
 ---
+import { getTranslations, type Locale } from "../lib/i18n/translations";
+
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
 ---
 
 <div class="modal-overlay" data-sync-overlay hidden>
@@ -6,9 +10,9 @@
     <div class="modal-panel__header">
       <div class="sync-modal__title-group">
         <i data-lucide="cloud"></i>
-        <h2>Sincronización y Datos</h2>
+        <h2>{t.syncModal.modalTitle}</h2>
       </div>
-      <button class="modal-panel__close" type="button" data-sync-close aria-label="Cerrar">
+      <button class="modal-panel__close" type="button" data-sync-close aria-label={t.syncModal.close}>
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -17,11 +21,11 @@
     <div class="sync-nav-tabs">
       <button class="sync-nav-tab is-active" type="button" data-tab-target="cloud">
         <i data-lucide="cloud"></i>
-        <span>Nube Turso</span>
+        <span>{t.syncModal.tabCloud}</span>
       </button>
       <button class="sync-nav-tab" type="button" data-tab-target="qr">
         <i data-lucide="qr-code"></i>
-        <span>Código QR</span>
+        <span>{t.syncModal.tabQr}</span>
       </button>
     </div>
 
@@ -33,25 +37,25 @@
           <div class="cloud-hero-icon">
             <i data-lucide="cloud"></i>
           </div>
-          <h3 class="cloud-panel-title">Sincronización Automática en la Nube</h3>
+          <h3 class="cloud-panel-title">{t.syncModal.cloudTitle}</h3>
           <p class="cloud-panel-desc">
-            Conecta tus dispositivos para que tu equipo y capturas se sincronicen automáticamente sin necesidad de cuentas ni contraseñas.
+            {t.syncModal.cloudDesc}
           </p>
 
           <button class="btn btn--primary cloud-primary-btn" type="button" data-cloud-create-btn>
             <i data-lucide="cloud"></i>
-            <span>Crear Bóveda en la Nube</span>
+            <span>{t.syncModal.cloudCreate}</span>
           </button>
 
           <div class="sync-modal__divider">
-            <span>o unirse con código existente</span>
+            <span>{t.syncModal.cloudOrJoin}</span>
           </div>
 
           <div class="cloud-join-row">
             <input
               type="text"
               class="cloud-code-input"
-              placeholder="Código (ej. PK-8492)"
+              placeholder={t.syncModal.cloudCodePlaceholder}
               maxlength="7"
               data-cloud-join-input
               autocomplete="off"
@@ -59,7 +63,7 @@
             />
             <button class="btn btn--secondary" type="button" data-cloud-join-btn>
               <i data-lucide="link"></i>
-              <span>Vincular</span>
+              <span>{t.syncModal.cloudJoin}</span>
             </button>
           </div>
         </div>
@@ -70,58 +74,58 @@
             <div class="cloud-status-header">
               <span class="cloud-status-pill">
                 <span class="cloud-status-dot"></span>
-                <span>Conectado a Turso</span>
+                <span>{t.syncModal.cloudConnected}</span>
               </span>
-              <span class="cloud-last-sync" data-cloud-last-sync>Sincronizado</span>
+              <span class="cloud-last-sync" data-cloud-last-sync>{t.syncModal.cloudSynced}</span>
             </div>
 
             <div class="cloud-code-display">
-              <span class="cloud-code-label">Código de vinculación:</span>
+              <span class="cloud-code-label">{t.syncModal.cloudCodeLabel}</span>
               <div class="cloud-code-val-wrap">
                 <strong class="cloud-code-value" data-cloud-code-value>------</strong>
-                <button class="cloud-code-copy-btn" type="button" data-cloud-copy-code title="Copiar código">
+                <button class="cloud-code-copy-btn" type="button" data-cloud-copy-code title={t.syncModal.cloudCopyTitle}>
                   <i data-lucide="copy"></i>
                 </button>
               </div>
             </div>
 
             <p class="cloud-code-help">
-              Ingresá este código en tu celular o en otra PC para mantenerlos sincronizados en tiempo real.
+              {t.syncModal.cloudHelp}
             </p>
           </div>
 
           <div class="cloud-actions-grid">
             <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-sync-now>
               <i data-lucide="refresh-cw"></i>
-              <span>Sincronizar ahora</span>
+              <span>{t.syncModal.cloudSyncNow}</span>
             </button>
             <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-unlink-btn>
               <i data-lucide="unlink"></i>
-              <span>Desvincular</span>
+              <span>{t.syncModal.cloudUnlink}</span>
             </button>
           </div>
 
           <div class="cloud-danger-box">
             <button class="btn btn--danger-outline sync-modal__reset-trigger" type="button" data-cloud-delete-trigger>
               <i data-lucide="trash-2"></i>
-              <span>Eliminar bóveda de la nube</span>
+              <span>{t.syncModal.cloudDeleteVault}</span>
             </button>
 
             <div class="sync-modal__confirm-box" data-cloud-delete-confirm hidden>
               <div class="sync-modal__confirm-header">
                 <i data-lucide="alert-triangle"></i>
-                <strong>¿Eliminar bóveda de Turso?</strong>
+                <strong>{t.syncModal.cloudDeleteConfirmTitle}</strong>
               </div>
               <p class="sync-modal__confirm-text">
-                Se borrará permanentemente la copia de tus datos en la nube. Tus datos locales en este dispositivo se mantendrán intactos.
+                {t.syncModal.cloudDeleteConfirmDesc}
               </p>
               <div class="sync-modal__confirm-actions">
                 <button class="btn btn--danger btn--sm" type="button" data-cloud-confirm-delete>
                   <i data-lucide="trash-2"></i>
-                  <span>Sí, borrar de la nube</span>
+                  <span>{t.syncModal.cloudDeleteConfirmBtn}</span>
                 </button>
                 <button class="btn btn--secondary btn--sm" type="button" data-cloud-cancel-delete>
-                  <span>Cancelar</span>
+                  <span>{t.syncModal.cancel}</span>
                 </button>
               </div>
             </div>
@@ -134,14 +138,14 @@
         <!-- Sección QR -->
         <div class="sync-modal__qr-section">
           <p class="sync-modal__instructions">
-            Escaneá este código con la <strong>cámara de tu celular</strong> para transferir tu equipo y capturas en 1 segundo:
+            {t.syncModal.qrInstructions}
           </p>
 
           <div class="sync-modal__qr-wrapper">
             <canvas id="sync-qr-canvas" class="sync-modal__canvas" width="240" height="240"></canvas>
             <div class="sync-modal__qr-loading" data-sync-loading>
               <i data-lucide="loader-2" class="spin"></i>
-              <span>Generando código QR...</span>
+              <span>{t.syncModal.qrGenerating}</span>
             </div>
           </div>
 
@@ -151,23 +155,23 @@
 
           <button class="sync-modal__copy-btn" type="button" data-sync-copy-link>
             <i data-lucide="copy"></i>
-            <span>Copiar enlace de sincronización</span>
+            <span>{t.syncModal.qrCopyLink}</span>
           </button>
         </div>
 
         <!-- Sección Respaldo Manual -->
         <div class="sync-modal__manual-section">
           <div class="sync-modal__divider">
-            <span>o mediante archivo de respaldo</span>
+            <span>{t.syncModal.qrOrManual}</span>
           </div>
           <div class="sync-modal__actions-row">
             <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-export-btn>
               <i data-lucide="download"></i>
-              <span>Exportar JSON</span>
+              <span>{t.syncModal.qrExportJson}</span>
             </button>
             <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-import-btn>
               <i data-lucide="upload"></i>
-              <span>Importar JSON</span>
+              <span>{t.syncModal.qrImportJson}</span>
             </button>
             <input type="file" accept=".json" class="visually-hidden" data-sync-file-input hidden aria-hidden="true" />
           </div>
@@ -177,31 +181,31 @@
       <!-- Sección Gestión de Datos / Reinicio Local (Común a ambas) -->
       <div class="sync-modal__danger-section">
         <div class="sync-modal__divider">
-          <span>gestión de datos locales</span>
+          <span>{t.syncModal.dangerLocalData}</span>
         </div>
 
         <div class="sync-modal__reset-wrapper" data-sync-reset-default>
           <button class="btn btn--danger-outline sync-modal__reset-trigger" type="button" data-sync-reset-trigger>
             <i data-lucide="trash-2"></i>
-            <span>Reiniciar todos mis datos locales</span>
+            <span>{t.syncModal.dangerResetBtn}</span>
           </button>
         </div>
 
         <div class="sync-modal__confirm-box" data-sync-reset-confirm hidden>
           <div class="sync-modal__confirm-header">
             <i data-lucide="alert-triangle"></i>
-            <strong>¿Reiniciar y borrar todo?</strong>
+            <strong>{t.syncModal.dangerResetTitle}</strong>
           </div>
           <p class="sync-modal__confirm-text" data-sync-confirm-msg>
-            Se borrarán tus Pokémon capturados y tu equipo actual. Esta acción es permanente.
+            {t.syncModal.dangerResetDesc}
           </p>
           <div class="sync-modal__confirm-actions">
             <button class="btn btn--danger btn--sm" type="button" data-sync-confirm-delete>
               <i data-lucide="trash-2"></i>
-              <span>Sí, borrar todo</span>
+              <span>{t.syncModal.dangerResetConfirm}</span>
             </button>
             <button class="btn btn--secondary btn--sm" type="button" data-sync-cancel-delete>
-              <span>Cancelar</span>
+              <span>{t.syncModal.cancel}</span>
             </button>
           </div>
         </div>
@@ -226,6 +230,7 @@
   } from "../lib/cloudSync";
   import { toast } from "../lib/toast";
   import { refreshIcons } from "../lib/icons";
+  import { getCurrentLocale } from "../lib/i18n/translations";
 
   function initSyncModal() {
     const overlay = document.querySelector<HTMLDivElement>("[data-sync-overlay]");
@@ -338,6 +343,7 @@
       refreshIcons();
 
       // Estadísticas actuales
+      const locale = getCurrentLocale();
       const capturedCount = getCapturedIds().size;
       const team = getTeam();
       const activeMembers = team.slots.filter((s) => s.pokemonId !== null).length;
@@ -345,11 +351,11 @@
         statsEl.innerHTML = `
           <div class="sync-stat-chip">
             <i data-lucide="users"></i>
-            <span>${activeMembers} en equipo</span>
+            <span>${activeMembers} ${locale === "es" ? "en equipo" : "in team"}</span>
           </div>
           <div class="sync-stat-chip">
             <i data-lucide="check"></i>
-            <span>${capturedCount} capturados</span>
+            <span>${capturedCount} ${locale === "es" ? "capturados" : "caught"}</span>
           </div>
         `;
         refreshIcons();
@@ -364,7 +370,7 @@
           loading.style.display = "none";
         } catch (err) {
           console.error("Error al generar QR:", err);
-          loading.innerHTML = "<span>Error al generar código QR</span>";
+          loading.innerHTML = `<span>${locale === "es" ? "Error al generar código QR" : "Error generating QR code"}</span>`;
         }
       }
     }
@@ -399,61 +405,66 @@
     });
 
     cloudCreateBtn?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
       cloudCreateBtn.disabled = true;
-      toast.info("Creando bóveda en Turso...");
+      toast.info(locale === "es" ? "Creando bóveda en Turso..." : "Creating vault in Turso...");
       const res = await createCloudVault();
       cloudCreateBtn.disabled = false;
       if (res.success) {
-        toast.success(`¡Bóveda creada! Tu código es: ${res.code}`);
+        toast.success(locale === "es" ? `¡Bóveda creada! Tu código es: ${res.code}` : `Vault created! Your code is: ${res.code}`);
       } else {
-        toast.error(res.error || "No se pudo conectar a la nube");
+        toast.error(res.error || (locale === "es" ? "No se pudo conectar a la nube" : "Could not connect to the cloud"));
       }
     });
 
     cloudJoinBtn?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
       const code = cloudJoinInput?.value?.trim();
       if (!code) {
-        toast.info("Ingresa un código de 6 caracteres");
+        toast.info(locale === "es" ? "Ingresa un código de 6 caracteres" : "Enter a 6-character code");
         return;
       }
       cloudJoinBtn.disabled = true;
-      toast.info("Conectando con Turso...");
+      toast.info(locale === "es" ? "Conectando con Turso..." : "Connecting to Turso...");
       const res = await joinCloudVault(code);
       cloudJoinBtn.disabled = false;
       if (res.success) {
-        toast.success("¡Dispositivo vinculado con éxito!");
+        toast.success(locale === "es" ? "¡Dispositivo vinculado con éxito!" : "Device linked successfully!");
         if (cloudJoinInput) cloudJoinInput.value = "";
       } else {
-        toast.error(res.error || "Código no válido o no encontrado");
+        toast.error(res.error || (locale === "es" ? "Código no válido o no encontrado" : "Invalid or not found code"));
       }
     });
 
     cloudCopyCode?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
       const state = getCloudState();
       if (!state.code) return;
       try {
         await navigator.clipboard.writeText(state.code);
-        toast.success("¡Código copiado al portapapeles!");
+        toast.success(locale === "es" ? "¡Código copiado al portapapeles!" : "Code copied to clipboard!");
       } catch {
-        toast.info("Copia el código manualmente: " + state.code);
+        toast.info(locale === "es" ? "Copia el código manualmente: " + state.code : "Copy the code manually: " + state.code);
       }
     });
 
     cloudSyncNowBtn?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
       cloudSyncNowBtn.disabled = true;
-      toast.info("Sincronizando...");
+      toast.info(locale === "es" ? "Sincronizando..." : "Syncing...");
       const res = await syncToCloudNow();
       cloudSyncNowBtn.disabled = false;
       if (res.success) {
-        toast.success("¡Datos sincronizados con Turso!");
+        toast.success(locale === "es" ? "¡Datos sincronizados con Turso!" : "Data synced with Turso!");
       } else {
-        toast.error(res.error || "Error al sincronizar");
+        toast.error(res.error || (locale === "es" ? "Error al sincronizar" : "Error syncing"));
       }
     });
 
     cloudUnlinkBtn?.addEventListener("click", () => {
+      const locale = getCurrentLocale();
       unlinkCloudVault();
-      toast.info("Dispositivo desvinculado de la nube.");
+      toast.info(locale === "es" ? "Dispositivo desvinculado de la nube." : "Device unlinked from cloud.");
     });
 
     cloudDeleteTrigger?.addEventListener("click", () => {
@@ -468,33 +479,36 @@
     });
 
     cloudConfirmDelete?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
       cloudConfirmDelete.disabled = true;
       const res = await deleteCloudVault();
       cloudConfirmDelete.disabled = false;
       if (res.success) {
-        toast.success("Bóveda eliminada permanentemente de Turso.");
+        toast.success(locale === "es" ? "Bóveda eliminada permanentemente de Turso." : "Vault permanently deleted from Turso.");
       } else {
-        toast.error(res.error || "Error al eliminar la bóveda");
+        toast.error(res.error || (locale === "es" ? "Error al eliminar la bóveda" : "Error deleting vault"));
       }
     });
 
     // Copiar enlace QR
     copyBtn?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
       if (!currentSyncUrl) currentSyncUrl = await generateSyncUrl();
       try {
         await navigator.clipboard.writeText(currentSyncUrl);
-        toast.success("¡Enlace de sincronización copiado!");
+        toast.success(locale === "es" ? "¡Enlace de sincronización copiado!" : "Sync link copied!");
       } catch {
-        toast.info("Copia el enlace manualmente desde la barra");
+        toast.info(locale === "es" ? "Copia el enlace manualmente desde la barra" : "Copy the link manually from address bar");
       }
     });
 
     exportBtn?.addEventListener("click", () => {
+      const locale = getCurrentLocale();
       try {
         exportBackupFile();
-        toast.success("Archivo de respaldo descargado");
+        toast.success(locale === "es" ? "Archivo de respaldo descargado" : "Backup file downloaded");
       } catch {
-        toast.error("Error al exportar el respaldo");
+        toast.error(locale === "es" ? "Error al exportar el respaldo" : "Error exporting backup");
       }
     });
 
@@ -503,14 +517,15 @@
     });
 
     fileInput?.addEventListener("change", async () => {
+      const locale = getCurrentLocale();
       const file = fileInput.files?.[0];
       if (!file) return;
       try {
         const result = await importBackupFile(file, "merge");
-        toast.success(`¡Sincronizado! Se añadieron ${result.addedCaptures} nuevas capturas.`);
+        toast.success(locale === "es" ? `¡Sincronizado! Se añadieron ${result.addedCaptures} nuevas capturas.` : `Synced! Added ${result.addedCaptures} new captures.`);
         closeModal();
       } catch {
-        toast.error("El archivo no tiene un formato válido");
+        toast.error(locale === "es" ? "El archivo no tiene un formato válido" : "File does not have a valid format");
       } finally {
         fileInput.value = "";
       }
@@ -520,10 +535,11 @@
     cancelDeleteBtn?.addEventListener("click", hideResetConfirmation);
 
     confirmDeleteBtn?.addEventListener("click", () => {
+      const locale = getCurrentLocale();
       resetAllData();
       hideResetConfirmation();
       closeModal();
-      toast.success("Todos tus datos han sido reiniciados a cero.");
+      toast.success(locale === "es" ? "Todos tus datos han sido reiniciados a cero." : "All your data has been reset to zero.");
     });
   }
 

@@ -14,6 +14,7 @@ import { refreshIcons } from "./icons";
 import { typeColor } from "./typeColors";
 import { renderDataTable } from "./dataTable";
 import { toast } from "./toast";
+import { getCurrentLocale, getTranslations, getTypeName, getEvolutionTriggerName, type Locale } from "./i18n/translations";
 import type { AcquisitionRow, EvolutionChain, EvolutionNode, MoveDetail, Nature, Pokemon, PokemonDetail, PokemonStats } from "./types";
 
 function getModalElements() {
@@ -34,36 +35,36 @@ const STAT_LABELS: Record<keyof PokemonStats, string> = {
   speed: "SPE",
 };
 
-const NATURE_STAT_DISPLAY: Record<string, string> = {
-  attack: "Ataque",
-  defense: "Defensa",
-  "special-attack": "At. Especial",
-  "special-defense": "Def. Especial",
-  speed: "Velocidad",
+const NATURE_STAT_DISPLAY: Record<Locale, Record<string, string>> = {
+  es: {
+    attack: "Ataque",
+    defense: "Defensa",
+    "special-attack": "At. Especial",
+    "special-defense": "Def. Especial",
+    speed: "Velocidad",
+  },
+  en: {
+    attack: "Attack",
+    defense: "Defense",
+    "special-attack": "Sp. Atk",
+    "special-defense": "Sp. Def",
+    speed: "Speed",
+  },
 };
 
-const METHOD_LABELS: Record<string, string> = {
-  "level-up": "Nivel",
-  machine: "MT/MO",
-  tutor: "Tutor",
-  egg: "Huevo",
-};
-
-const TRIGGER_ES: Record<string, string> = {
-  trade: "Intercambio",
-  "use-item": "Usar objeto",
-  shed: "Muda",
-  "agile-style-move": "Movimiento estilo ágil",
-  "strong-style-move": "Movimiento estilo fuerte",
-  "three-critical-hits": "3 golpes críticos",
-  "take-damage": "Recibir daño",
-  other: "Especial",
-};
-
-const SECTION_TITLES: Record<string, string> = {
-  location: "Ubicación",
-  moves: "Movimientos",
-  evolutions: "Evoluciones",
+const METHOD_LABELS: Record<Locale, Record<string, string>> = {
+  es: {
+    "level-up": "Nivel",
+    machine: "MT/MO",
+    tutor: "Tutor",
+    egg: "Huevo",
+  },
+  en: {
+    "level-up": "Level",
+    machine: "TM/HM",
+    tutor: "Tutor",
+    egg: "Egg",
+  },
 };
 
 interface RenderContext {
@@ -91,8 +92,11 @@ function dexNumber(id: number): string {
 }
 
 function typeBadgesHtml(types: string[], small = false): string {
+  const locale = getCurrentLocale();
   const cls = small ? "type-badge type-badge--sm" : "type-badge";
-  return types.map((t) => `<span class="${cls}" style="--badge-bg:${typeColor(t)}">${t}</span>`).join("");
+  return types
+    .map((t) => `<span class="${cls}" data-type="${t}" style="--badge-bg:${typeColor(t)}">${getTypeName(t, locale)}</span>`)
+    .join("");
 }
 
 interface MoveTableRow {
@@ -102,63 +106,88 @@ interface MoveTableRow {
   level: number;
 }
 
-function buildMoveTableRows(moveDetails: MoveDetail[]): MoveTableRow[] {
+function buildMoveTableRows(moveDetails: MoveDetail[], locale: Locale): MoveTableRow[] {
+  const methodMap = METHOD_LABELS[locale] ?? METHOD_LABELS.en;
   return moveDetails.map((m) => ({
     name: m.name,
     method: m.method,
-    methodLabel: METHOD_LABELS[m.method] ?? formatLabel(m.method),
+    methodLabel: methodMap[m.method] ?? formatLabel(m.method),
     level: m.level,
   }));
 }
 
 function formatGeneration(gen: unknown): string {
-  return String(gen ?? "").replace(/^Generación\s*/i, "").trim();
+  return String(gen ?? "").replace(/^(Generación|Generation)\s*/i, "").trim();
 }
 
-const LOCATION_COLUMNS: ColumnDef<AcquisitionRow, unknown>[] = [
-  {
-    accessorKey: "generation",
-    header: "Gen.",
-    size: 40,
-    cell: (info) => formatGeneration(info.getValue()),
-  },
-  { accessorKey: "game", header: "Juego", size: 190 },
-  { accessorKey: "location", header: "Lugar", size: 160 },
-  { accessorKey: "method", header: "Método", size: 260 },
-];
-
-const MOVE_COLUMNS: ColumnDef<MoveTableRow, unknown>[] = [
-  { accessorKey: "name", header: "Movimiento", size: 220, cell: (info) => formatLabel(String(info.getValue())) },
-  { accessorKey: "methodLabel", header: "Método", size: 70 },
-  {
-    accessorFn: (row) => row.level,
-    id: "level",
-    header: "Nivel",
-    size: 50,
-    cell: (info) => (info.row.original.method === "level-up" ? `Nv. ${info.getValue()}` : "-"),
-  },
-];
-
-function natureEffectText(nature: Nature | null): string {
-  if (!nature) return "Elegí una naturaleza para ver su efecto.";
-  if (!nature.increasedStat || !nature.decreasedStat) return "Neutral: no modifica ninguna estadística.";
-  const up = NATURE_STAT_DISPLAY[nature.increasedStat] ?? nature.increasedStat;
-  const down = NATURE_STAT_DISPLAY[nature.decreasedStat] ?? nature.decreasedStat;
-  return `Sube ${up} y baja ${down}.`;
+function getLocationColumns(locale: Locale): ColumnDef<AcquisitionRow, unknown>[] {
+  const t = getTranslations(locale);
+  return [
+    {
+      accessorKey: "generation",
+      header: "Gen.",
+      size: 40,
+      cell: (info) => formatGeneration(info.getValue()),
+    },
+    { accessorKey: "game", header: t.modal.game, size: 190 },
+    { accessorKey: "location", header: t.modal.location, size: 160 },
+    {
+      accessorKey: "method",
+      header: t.modal.method,
+      size: 260,
+      cell: (info) => {
+        const val = String(info.getValue());
+        if (locale === "en" && val === "Encuentro salvaje") return "Wild encounter";
+        return val;
+      },
+    },
+  ];
 }
 
-function evolutionConditionText(node: EvolutionNode): string {
+function getMoveColumns(locale: Locale): ColumnDef<MoveTableRow, unknown>[] {
+  const t = getTranslations(locale);
+  return [
+    { accessorKey: "name", header: t.modal.move, size: 220, cell: (info) => formatLabel(String(info.getValue())) },
+    { accessorKey: "methodLabel", header: t.modal.method, size: 70 },
+    {
+      accessorFn: (row) => row.level,
+      id: "level",
+      header: t.modal.level,
+      size: 50,
+      cell: (info) => (info.row.original.method === "level-up" ? `${locale === "es" ? "Nv." : "Lv."} ${info.getValue()}` : "-"),
+    },
+  ];
+}
+
+function natureEffectText(nature: Nature | null, locale: Locale = getCurrentLocale()): string {
+  const t = getTranslations(locale);
+  if (!nature) return locale === "es" ? "Elegí una naturaleza para ver su efecto." : "Choose a nature to see its effect.";
+  if (!nature.increasedStat || !nature.decreasedStat) return t.modal.neutralNature;
+  const statMap = NATURE_STAT_DISPLAY[locale] ?? NATURE_STAT_DISPLAY.en;
+  const up = statMap[nature.increasedStat] ?? nature.increasedStat;
+  const down = statMap[nature.decreasedStat] ?? nature.decreasedStat;
+  if (locale === "es") {
+    return `Sube ${up} y baja ${down}.`;
+  }
+  return `Increases ${up} and decreases ${down}.`;
+}
+
+function evolutionConditionText(node: EvolutionNode, locale: Locale): string {
   if (node.evolvesFromSpecies === null) return "";
   const parts: string[] = [];
-  if (node.minLevel) parts.push(`Nivel ${node.minLevel}`);
-  if (node.item) parts.push(node.itemDisplay ?? formatLabel(node.item));
-  if (node.trigger && node.trigger !== "level-up" && !node.item) parts.push(TRIGGER_ES[node.trigger] ?? formatLabel(node.trigger));
-  return parts.length ? parts.join(" · ") : "Condición especial";
+  if (node.minLevel) parts.push(locale === "es" ? `Nivel ${node.minLevel}` : `Level ${node.minLevel}`);
+  if (node.item) parts.push(locale === "es" ? (node.itemDisplay ?? formatLabel(node.item)) : formatLabel(node.item));
+  if (node.trigger && node.trigger !== "level-up" && !node.item) {
+    parts.push(getEvolutionTriggerName(node.trigger, locale));
+  }
+  return parts.length ? parts.join(" · ") : (locale === "es" ? "Condición especial" : "Special condition");
 }
 
 function renderEvolutionsContent(chain: EvolutionChain | null, currentPokemonId: number, allById: Map<number, Pokemon>): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   if (!chain || chain.nodes.length <= 1) {
-    return `<p class="detail-empty">Este Pokémon no evoluciona.</p>`;
+    return `<p class="detail-empty">${t.modal.noEvolutions}</p>`;
   }
 
   const cards = chain.nodes.map((node, i) => {
@@ -166,7 +195,7 @@ function renderEvolutionsContent(chain: EvolutionChain | null, currentPokemonId:
     if (!p) return "";
 
     const isCurrent = node.speciesId === currentPokemonId;
-    const condition = evolutionConditionText(node);
+    const condition = evolutionConditionText(node, locale);
     const card = `
       <div class="detail-evolution-card${isCurrent ? " current" : ""}"${
         isCurrent ? "" : ` data-evolution-pick data-pokemon-id="${node.speciesId}"`
@@ -198,15 +227,23 @@ const SECTION_CONTENT: Record<string, (ctx: RenderContext) => string> = {
 };
 
 function renderSection(id: string, index: number, total: number, ctx: RenderContext): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  const titles: Record<string, string> = {
+    location: t.modal.acquisition,
+    moves: t.modal.moves,
+    evolutions: t.modal.evolutions,
+  };
+
   return `
     <section class="detail-section" data-section-id="${id}">
       <div class="detail-section__header">
-        <h4 class="detail-section__title">${SECTION_TITLES[id]}</h4>
+        <h4 class="detail-section__title">${titles[id] ?? capitalize(id)}</h4>
         <div class="detail-section__reorder">
-          <button type="button" data-move-up data-section-id="${id}" ${index === 0 ? "disabled" : ""} aria-label="Subir sección">
+          <button type="button" data-move-up data-section-id="${id}" ${index === 0 ? "disabled" : ""} aria-label="${locale === "es" ? "Subir sección" : "Move section up"}">
             <i data-lucide="chevron-up"></i>
           </button>
-          <button type="button" data-move-down data-section-id="${id}" ${index === total - 1 ? "disabled" : ""} aria-label="Bajar sección">
+          <button type="button" data-move-down data-section-id="${id}" ${index === total - 1 ? "disabled" : ""} aria-label="${locale === "es" ? "Bajar sección" : "Move section down"}">
             <i data-lucide="chevron-down"></i>
           </button>
         </div>
@@ -218,6 +255,8 @@ function renderSection(id: string, index: number, total: number, ctx: RenderCont
 
 function renderHeader(ctx: RenderContext): string {
   const { pokemon, detail } = ctx;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   const captured = isCaptured(pokemon.id);
   const overrides = getPokemonOverrides(pokemon.id) ?? { stats: {}, nature: null };
   const userStats = overrides.stats ?? {};
@@ -233,10 +272,10 @@ function renderHeader(ctx: RenderContext): string {
     let modClass = "";
 
     if (modifier === "up") {
-      modBadge = `<span class="detail-stat__mod detail-stat__mod--up" title="+10% por naturaleza">▲ +10%</span>`;
+      modBadge = `<span class="detail-stat__mod detail-stat__mod--up" title="${locale === "es" ? "+10% por naturaleza" : "+10% from nature"}">▲ +10%</span>`;
       modClass = "is-nature-up";
     } else if (modifier === "down") {
-      modBadge = `<span class="detail-stat__mod detail-stat__mod--down" title="-10% por naturaleza">▼ -10%</span>`;
+      modBadge = `<span class="detail-stat__mod detail-stat__mod--down" title="${locale === "es" ? "-10% por naturaleza" : "-10% from nature"}">▼ -10%</span>`;
       modClass = "is-nature-down";
     }
 
@@ -279,7 +318,7 @@ function renderHeader(ctx: RenderContext): string {
         <img src="${sprite}" alt="${pokemon.name}" />
         <div class="detail-capture-medal" data-capture-medal ${captured ? "" : "hidden"}>
           <img src="/Medal-Black.png" alt="" class="detail-capture-medal__medal" data-medal-img />
-          <img src="/Text.png" alt="Capturado" class="detail-capture-medal__stamp" data-stamp-img />
+          <img src="/Text.png" alt="${captured ? t.pokedex.caught : t.pokedex.catch}" class="detail-capture-medal__stamp" data-stamp-img />
         </div>
       </div>
       <div class="detail-header__info">
@@ -288,9 +327,9 @@ function renderHeader(ctx: RenderContext): string {
             <h3 class="detail-header__name">${pokemon.name}</h3>
             <span class="detail-header__id">${dexNumber(pokemon.id)}</span>
           </div>
-          <button class="btn btn--compact detail-chart-toggle-btn ${showHexagonChart ? "btn--primary" : ""}" type="button" data-toggle-chart-view title="Alternar entre lista de estadísticas y gráfico hexágono estilo Juez Pokémon">
+          <button class="btn btn--compact detail-chart-toggle-btn ${showHexagonChart ? "btn--primary" : ""}" type="button" data-toggle-chart-view title="${t.modal.chartToggle}">
             <i data-lucide="${showHexagonChart ? "bar-chart-2" : "hexagon"}"></i>
-            <span data-chart-toggle-label>${showHexagonChart ? "Ocultar Juez" : "Gráfico Juez"}</span>
+            <span data-chart-toggle-label>${showHexagonChart ? (locale === "es" ? "Ocultar Juez" : "Hide Judge") : (locale === "es" ? "Gráfico Juez" : "Judge Chart")}</span>
           </button>
         </div>
         <div class="detail-header__types">${typeBadgesHtml(pokemon.types)}</div>
@@ -304,22 +343,22 @@ function renderHeader(ctx: RenderContext): string {
           <div class="detail-footer-row__nature">
             <div class="detail-nature">
               <div class="detail-nature__select-row">
-                <span class="detail-nature__label">Naturaleza</span>
+                <span class="detail-nature__label">${t.modal.nature}</span>
                 <select data-nature-select ${captured ? "" : "disabled"}>
-                  <option value="">Sin definir</option>
+                  <option value="">${locale === "es" ? "Sin definir" : "Undefined"}</option>
                   ${natureOptionsHtml}
                 </select>
-                <i data-lucide="info" class="detail-nature__tooltip" data-nature-tooltip title="${natureEffectText(selectedNature)}"></i>
+                <i data-lucide="info" class="detail-nature__tooltip" data-nature-tooltip title="${natureEffectText(selectedNature, locale)}"></i>
               </div>
               <div class="detail-nature__effects" data-nature-effects-container>
-                ${renderNatureEffectBadges(selectedNature)}
+                ${renderNatureEffectBadges(selectedNature, locale)}
               </div>
             </div>
-            ${captured ? "" : '<p class="detail-hint" data-capture-hint>Capturá este Pokémon para personalizar sus stats y naturaleza.</p>'}
+            ${captured ? "" : `<p class="detail-hint" data-capture-hint>${t.modal.captureHint}</p>`}
           </div>
           <button class="btn ${captured ? "" : "btn--primary"}" type="button" data-modal-capture-btn>
             <i data-lucide="${captured ? "check" : "circle-dot"}"></i>
-            ${captured ? "Capturado" : "Capturar"}
+            ${captured ? t.pokedex.caught : t.pokedex.catch}
           </button>
         </div>
       </div>
@@ -342,17 +381,17 @@ function getNatureModifier(nature: Nature | null, key: keyof PokemonStats): "up"
   return null;
 }
 
-function renderNatureEffectBadges(nature: Nature | null): string {
-  if (!nature) return `<span class="detail-nature-hint">Elegí una naturaleza para ver su efecto.</span>`;
+function renderNatureEffectBadges(nature: Nature | null, locale: Locale = getCurrentLocale()): string {
+  if (!nature) return `<span class="detail-nature-hint">${locale === "es" ? "Elegí una naturaleza para ver su efecto." : "Choose a nature to see its effect."}</span>`;
   if (!nature.increasedStat || !nature.decreasedStat || nature.increasedStat === nature.decreasedStat) {
-    return `<span class="detail-nature-tag detail-nature-tag--neutral">Naturaleza neutra (sin cambios)</span>`;
+    return `<span class="detail-nature-tag detail-nature-tag--neutral">${locale === "es" ? "Naturaleza neutra (sin cambios)" : "Neutral nature (no changes)"}</span>`;
   }
-  const upLabel = NATURE_STAT_DISPLAY[nature.increasedStat] ?? nature.increasedStat;
-  const downLabel = NATURE_STAT_DISPLAY[nature.decreasedStat] ?? nature.decreasedStat;
-
+  const statMap = NATURE_STAT_DISPLAY[locale] ?? NATURE_STAT_DISPLAY.en;
+  const upLabel = statMap[nature.increasedStat] ?? nature.increasedStat;
+  const downLabel = statMap[nature.decreasedStat] ?? nature.decreasedStat;
   return `
-    <span class="detail-nature-tag detail-nature-tag--up">▲ ${upLabel} (+10%)</span>
-    <span class="detail-nature-tag detail-nature-tag--down">▼ ${downLabel} (-10%)</span>
+    <span class="detail-nature-tag detail-nature-tag--up">+10% ${upLabel}</span>
+    <span class="detail-nature-tag detail-nature-tag--down">-10% ${downLabel}</span>
   `;
 }
 
@@ -516,14 +555,25 @@ function render(ctx: RenderContext): void {
   bodyEl.innerHTML = renderHeader(ctx) + sectionsHtml;
   refreshIcons();
 
+  const locale = getCurrentLocale();
   const locationMount = bodyEl.querySelector<HTMLElement>('[data-table-mount="location"]');
   if (locationMount) {
-    renderDataTable(locationMount, LOCATION_COLUMNS, ctx.detail.acquisitions, "No disponible en los juegos con datos de ubicación.");
+    renderDataTable(
+      locationMount,
+      getLocationColumns(locale),
+      ctx.detail.acquisitions,
+      locale === "es" ? "No disponible en los juegos con datos de ubicación." : "Not available in games with location data."
+    );
   }
 
   const movesMount = bodyEl.querySelector<HTMLElement>('[data-table-mount="moves"]');
   if (movesMount) {
-    renderDataTable(movesMount, MOVE_COLUMNS, buildMoveTableRows(ctx.detail.moveDetails), "Sin datos de movimientos.");
+    renderDataTable(
+      movesMount,
+      getMoveColumns(locale),
+      buildMoveTableRows(ctx.detail.moveDetails, locale),
+      locale === "es" ? "Sin datos de movimientos." : "No move data available."
+    );
   }
 }
 
@@ -552,10 +602,12 @@ function updateHeaderCapturedState(captured: boolean): void {
   const { bodyEl } = getModalElements();
   if (!bodyEl) return;
 
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   const captureBtn = bodyEl.querySelector<HTMLButtonElement>("[data-modal-capture-btn]");
   if (captureBtn) {
     captureBtn.classList.toggle("btn--primary", !captured);
-    captureBtn.innerHTML = `<i data-lucide="${captured ? "check" : "circle-dot"}"></i> ${captured ? "Capturado" : "Capturar"}`;
+    captureBtn.innerHTML = `<i data-lucide="${captured ? "check" : "circle-dot"}"></i> ${captured ? t.pokedex.caught : t.pokedex.catch}`;
   }
   bodyEl.querySelectorAll<HTMLInputElement>("[data-stat-input]").forEach((input) => {
     input.disabled = !captured;
@@ -684,8 +736,9 @@ function bindModalEvents(): void {
         hexView.hidden = !showHexagonChart;
         updateHexagonChartIfVisible();
       }
+      const locale = getCurrentLocale();
       if (labelEl) {
-        labelEl.textContent = showHexagonChart ? "Ocultar Juez" : "Gráfico Juez";
+        labelEl.textContent = showHexagonChart ? (locale === "es" ? "Ocultar Juez" : "Hide Judge") : (locale === "es" ? "Gráfico Juez" : "Judge Chart");
       }
       toggleBtn.classList.toggle("btn--primary", showHexagonChart);
       refreshIcons();
@@ -703,14 +756,15 @@ function bindModalEvents(): void {
       const stampImg = bodyEl.querySelector<HTMLElement>("[data-stamp-img]");
 
       const name = capitalize(lastContext.pokemon.name);
+      const locale = getCurrentLocale();
       if (nowCaptured) {
-        toast.success(`¡${name} capturado!`);
+        toast.success(locale === "es" ? `¡${name} capturado!` : `${name} caught!`);
         if (medal && medalImg && stampImg) {
           medal.hidden = false;
           animateMedalReveal(medalImg, stampImg);
         }
       } else {
-        toast.info(`${name} liberado de tu Pokédex.`);
+        toast.info(locale === "es" ? `${name} liberado de tu Pokédex.` : `${name} released from your Pokédex.`);
         if (medal) medal.hidden = true;
       }
       return;

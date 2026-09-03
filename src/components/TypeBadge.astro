@@ -1,11 +1,14 @@
 ---
 import { typeColor } from "../lib/typeColors";
+import { getTypeName, type Locale } from "../lib/i18n/translations";
 
 interface Props {
   type: string;
 }
 
 const { type } = Astro.props;
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const displayName = getTypeName(type, currentLocale);
 ---
 
-<span class="type-badge" style={`--badge-bg: ${typeColor(type)}`}>{type}</span>
+<span class="type-badge" data-type={type} style={`--badge-bg: ${typeColor(type)}`}>{displayName}</span>

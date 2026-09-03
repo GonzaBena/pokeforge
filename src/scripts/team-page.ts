@@ -8,6 +8,7 @@ import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
+import { getCurrentLocale, getTranslations, getTypeName, type Locale } from "../lib/i18n/translations";
 import type { GenerationInfo, MoveData, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
@@ -64,12 +65,21 @@ let currentMoveRows: MovePickerRow[] = [];
 
 const pickerState = { search: "", types: new Set<string>(), generations: new Set<string>(), move: "", game: "" };
 
-const METHOD_LABELS: Record<string, string> = {
-  "level-up": "Nivel",
-  machine: "MT/MO",
-  tutor: "Tutor",
-  train: "Tutor",
-  egg: "Huevo",
+const METHOD_LABELS: Record<Locale, Record<string, string>> = {
+  es: {
+    "level-up": "Nivel",
+    machine: "MT/MO",
+    tutor: "Tutor",
+    train: "Tutor",
+    egg: "Huevo",
+  },
+  en: {
+    "level-up": "Level",
+    machine: "TM/HM",
+    tutor: "Tutor",
+    train: "Tutor",
+    egg: "Egg",
+  },
 };
 
 function capitalize(s: string): string {
@@ -80,21 +90,25 @@ function formatLabel(s: string): string {
   return s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function categoryLabel(cat: string): string {
-  if (cat === "physical") return "Físico";
-  if (cat === "special") return "Especial";
-  if (cat === "status") return "Estado";
+function categoryLabel(cat: string, locale: Locale = getCurrentLocale()): string {
+  const t = getTranslations(locale);
+  if (cat === "physical") return t.team.physical;
+  if (cat === "special") return t.team.special;
+  if (cat === "status") return t.team.status;
   return cat;
 }
 
 // Mirrors src/components/TeamSlot.astro — keep both in sync when the markup changes.
 function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
   if (!pokemon) {
     return `
       <div class="team-slot-column" data-slot-column="${index}">
         <div class="team-slot" data-team-slot data-slot-index="${index}">
           <i data-lucide="plus-circle"></i>
-          <span>Elegir Pokémon</span>
+          <span>${t.team.choosePokemon}</span>
         </div>
       </div>
     `;
@@ -105,7 +119,7 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
 
   const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
   const typesHtml = pokemon.types
-    .map((t) => `<span class="type-badge" style="--badge-bg:${typeColor(t)}">${t}</span>`)
+    .map((type) => `<span class="type-badge" data-type="${type}" style="--badge-bg:${typeColor(type)}">${getTypeName(type, locale)}</span>`)
     .join("");
 
   const movesHtml = slotMoves
@@ -113,17 +127,17 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
       if (!moveName) {
         return `
           <button class="move-slot-btn empty" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
-            <i data-lucide="plus"></i> <span>Ataque ${mIdx + 1}</span>
+            <i data-lucide="plus"></i> <span>${locale === "es" ? `Ataque ${mIdx + 1}` : `Move ${mIdx + 1}`}</span>
           </button>
         `;
       }
 
       const meta = moveDetailsMap[moveName];
       const typeBadgeHtml = meta
-        ? `<span class="type-badge type-badge--sm" style="--badge-bg:${typeColor(meta.type)}">${meta.type}</span>`
+        ? `<span class="type-badge type-badge--sm" data-type="${meta.type}" style="--badge-bg:${typeColor(meta.type)}">${getTypeName(meta.type, locale)}</span>`
         : "";
       const categoryBadgeHtml = meta
-        ? `<span class="move-category-badge move-category-badge--${meta.category}">${categoryLabel(meta.category)}</span>`
+        ? `<span class="move-category-badge move-category-badge--${meta.category}">${categoryLabel(meta.category, locale)}</span>`
         : "";
       const powerText = meta?.power !== null && meta?.power !== undefined ? meta.power : "-";
       const ppText = meta?.pp !== null && meta?.pp !== undefined ? meta.pp : "-";
@@ -135,15 +149,15 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
               <i data-lucide="swords"></i>
               <span class="move-slot-card__title">${formatLabel(moveName)}</span>
             </button>
-            <button class="move-slot-card__clear" type="button" data-clear-move data-slot-index="${index}" data-move-index="${mIdx}" aria-label="Quitar movimiento">
+            <button class="move-slot-card__clear" type="button" data-clear-move data-slot-index="${index}" data-move-index="${mIdx}" aria-label="${locale === "es" ? "Quitar movimiento" : "Remove move"}">
               <i data-lucide="x"></i>
             </button>
           </div>
           <div class="move-slot-card__meta">
             ${typeBadgeHtml}
             ${categoryBadgeHtml}
-            <span class="move-stat-pill" title="Potencia"><span class="move-stat-label">POT</span> ${powerText}</span>
-            <span class="move-stat-pill" title="Puntos de Poder"><span class="move-stat-label">PP</span> ${ppText}</span>
+            <span class="move-stat-pill" title="${locale === "es" ? "Potencia" : "Power"}"><span class="move-stat-label">${locale === "es" ? "POT" : "PWR"}</span> ${powerText}</span>
+            <span class="move-stat-pill" title="${locale === "es" ? "Puntos de Poder" : "Power Points"}"><span class="move-stat-label">PP</span> ${ppText}</span>
           </div>
         </div>
       `;
@@ -153,7 +167,7 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
   return `
     <div class="team-slot-column" data-slot-column="${index}">
       <div class="team-slot filled" data-team-slot data-slot-index="${index}">
-        <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index="${index}" aria-label="Quitar Pokémon">
+        <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index="${index}" aria-label="${locale === "es" ? "Quitar Pokémon" : "Remove Pokémon"}">
           <i data-lucide="x"></i>
         </button>
         <div class="team-slot__card-content">
@@ -169,7 +183,7 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
       </div>
 
       <div class="team-slot-moves">
-        <span class="team-slot-moves__title">Ataques</span>
+        <span class="team-slot-moves__title">${locale === "es" ? "Ataques" : "Moves"}</span>
         <div class="team-slot-moves__list">
           ${movesHtml}
         </div>
@@ -224,7 +238,12 @@ function changeTeamSize(newSize: number): void {
     renderSizeSelector();
 
     if (losing.length) {
-      toast.info(`Se ${losing.length === 1 ? "quitó" : "quitaron"} ${losing.length} Pokémon del equipo al reducir el tamaño.`);
+      const locale = getCurrentLocale();
+      toast.info(
+        locale === "es"
+          ? `Se ${losing.length === 1 ? "quitó" : "quitaron"} ${losing.length} Pokémon del equipo al reducir el tamaño.`
+          : `${losing.length} Pokémon ${losing.length === 1 ? "was" : "were"} removed from the team due to size reduction.`
+      );
     }
 
     teamSizeTransition({
@@ -248,6 +267,7 @@ function changeTeamSize(newSize: number): void {
 }
 
 function renderBarHTML(entry: TeamDefenseEntry): string {
+  const locale = getCurrentLocale();
   const isWeakness = entry.averageMultiplier > 1;
   const isImmunity = entry.averageMultiplier <= 0.001;
 
@@ -259,7 +279,7 @@ function renderBarHTML(entry: TeamDefenseEntry): string {
 
   return `
     <div class="type-bar">
-      <span class="type-bar__type">${entry.type}</span>
+      <span class="type-bar__type">${getTypeName(entry.type, locale)}</span>
       <div class="type-bar__track">
         <div class="type-bar__fill" data-target-width="${pct}%" style="--badge-bg:${typeColor(entry.type)}"></div>
       </div>
@@ -269,6 +289,7 @@ function renderBarHTML(entry: TeamDefenseEntry): string {
 }
 
 function renderStrengthsPanel(): void {
+  const locale = getCurrentLocale();
   const activePokemon = team.slots
     .map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) ?? null : null))
     .filter((p): p is Pokemon => p !== null);
@@ -287,16 +308,16 @@ function renderStrengthsPanel(): void {
 
   weaknessesListEl.innerHTML = weaknesses.length
     ? weaknesses.map(renderBarHTML).join("")
-    : `<p class="side-panel__empty">Sin debilidades destacadas.</p>`;
+    : `<p class="side-panel__empty">${locale === "es" ? "Sin debilidades destacadas." : "No significant weaknesses."}</p>`;
 
   resistancesListEl.innerHTML = resistances.length
     ? resistances.map(renderBarHTML).join("")
-    : `<p class="side-panel__empty">Sin resistencias destacadas.</p>`;
+    : `<p class="side-panel__empty">${locale === "es" ? "Sin resistencias destacadas." : "No significant resistances."}</p>`;
 
   if (immunitiesListEl) {
     immunitiesListEl.innerHTML = immunities.length
       ? immunities.map(renderBarHTML).join("")
-      : `<p class="side-panel__empty">Sin inmunidades.</p>`;
+      : `<p class="side-panel__empty">${locale === "es" ? "Sin inmunidades." : "No immunities."}</p>`;
   }
 
   const fills = panelContentEl.querySelectorAll<HTMLElement>(".type-bar__fill");
@@ -324,6 +345,8 @@ function dexNumber(id: number): string {
 }
 
 function renderPickerResults(): void {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   const results = computePickerFiltered();
   const countEl = overlayEl.querySelector<HTMLElement>("[data-picker-count]");
   if (countEl) {
@@ -331,7 +354,7 @@ function renderPickerResults(): void {
   }
 
   if (!results.length) {
-    pickerResultsEl.innerHTML = `<p class="pokedex-empty">No se encontraron Pokémon con esos filtros.</p>`;
+    pickerResultsEl.innerHTML = `<p class="pokedex-empty">${t.pokedex.empty}</p>`;
     return;
   }
   pickerResultsEl.innerHTML = results
@@ -370,10 +393,12 @@ function closePicker(): void {
 }
 
 function populatePickerFilters(): void {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   const typeChips = typeChart!.types
     .map(
-      (t) =>
-        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
+      (type) =>
+        `<button class="filter-chip" type="button" data-type="${type}" aria-pressed="false" style="--badge-bg:${typeColor(type)}">${getTypeName(type, locale)}</button>`,
     )
     .join("");
 
@@ -381,7 +406,7 @@ function populatePickerFilters(): void {
 
   const genChips = generations
     .map((g) => {
-      const label = g.displayName.replace(/^Generación\s*/i, "");
+      const label = g.displayName.replace(/^(Generación|Generation)\s*/i, "");
       return `<button class="filter-chip" type="button" data-generation="${g.name}" aria-pressed="false">${label}</button>`;
     })
     .join("");
@@ -391,10 +416,11 @@ function populatePickerFilters(): void {
 
   if (pickerGameFilterEl) {
     gameToGenMap.clear();
-    let html = `<option value="">Todos los juegos</option>`;
+    let html = `<option value="">${t.pokedex.allGames}</option>`;
     for (const g of generations) {
       const regionLabel = g.region ? ` (${capitalize(g.region)})` : "";
-      html += `<optgroup label="${g.displayName}${regionLabel}">`;
+      const genName = locale === "es" ? g.displayName : g.displayName.replace("Generación", "Generation");
+      html += `<optgroup label="${genName}${regionLabel}">`;
       for (const vg of g.versionGroups) {
         gameToGenMap.set(vg.name, g);
         html += `<option value="${vg.name}">${vg.displayName}</option>`;
@@ -405,11 +431,11 @@ function populatePickerFilters(): void {
   }
 
   if (moveTypeFilterEl && typeChart) {
-    const allBtn = `<button class="filter-chip" type="button" data-move-type="all" aria-pressed="true">Todos</button>`;
+    const allBtn = `<button class="filter-chip" type="button" data-move-type="all" aria-pressed="true">${locale === "es" ? "Todos" : "All"}</button>`;
     const typeBtns = typeChart.types
       .map(
-        (t) =>
-          `<button class="filter-chip" type="button" data-move-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
+        (type) =>
+          `<button class="filter-chip" type="button" data-move-type="${type}" aria-pressed="false" style="--badge-bg:${typeColor(type)}">${getTypeName(type, locale)}</button>`,
       )
       .join("");
     moveTypeFilterEl.innerHTML = allBtn + typeBtns;
@@ -430,8 +456,9 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
   activeCategoryFilter = "all";
   activeMoveTypeFilter = "all";
 
+  const locale = getCurrentLocale();
   if (movePickerTitleEl) {
-    movePickerTitleEl.textContent = `Ataque ${moveIndex + 1} - ${capitalize(pokemon.name)}`;
+    movePickerTitleEl.textContent = locale === "es" ? `Ataque ${moveIndex + 1} - ${capitalize(pokemon.name)}` : `Move ${moveIndex + 1} - ${capitalize(pokemon.name)}`;
   }
   movePickerSearchEl.value = "";
   movePickerOverlayEl.hidden = false;
@@ -445,7 +472,7 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
   const typeChips = moveTypeFilterEl?.querySelectorAll<HTMLButtonElement>("[data-move-type]");
   typeChips?.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.moveType === "all")));
 
-  movePickerResultsEl.innerHTML = `<div class="pokedex-loading"><i data-lucide="loader-2" class="spin"></i> Cargando movimientos de ${capitalize(pokemon.name)}...</div>`;
+  movePickerResultsEl.innerHTML = `<div class="pokedex-loading"><i data-lucide="loader-2" class="spin"></i> ${locale === "es" ? `Cargando movimientos de ${capitalize(pokemon.name)}...` : `Loading moves for ${capitalize(pokemon.name)}...`}</div>`;
   refreshIcons();
 
   const detail = await getPokemonDetail(pokemon.id);
@@ -455,10 +482,11 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
     ? detail.moveDetails
     : pokemon.moves.map((m) => ({ name: m, method: "level-up", level: 0 }));
 
+  const methodMap = METHOD_LABELS[locale] ?? METHOD_LABELS.en;
   currentMoveRows = rawDetails.map((m) => ({
     name: m.name,
     method: m.method === "train" ? "tutor" : m.method,
-    methodLabel: METHOD_LABELS[m.method] ?? formatLabel(m.method),
+    methodLabel: methodMap[m.method] ?? formatLabel(m.method),
     level: m.level,
   }));
 
@@ -474,6 +502,8 @@ function closeMovePicker(): void {
 }
 
 function renderMovePickerTable(): void {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   const search = movePickerSearchEl.value.trim().toLowerCase();
 
   const filtered = currentMoveRows.filter((r) => {
@@ -506,42 +536,42 @@ function renderMovePickerTable(): void {
 
   const countEl = document.querySelector<HTMLElement>("[data-move-picker-count]");
   if (countEl) {
-    countEl.textContent = `${filtered.length} ataques`;
+    countEl.textContent = `${filtered.length} ${locale === "es" ? "ataques" : "moves"}`;
   }
 
   if (!filtered.length) {
-    movePickerResultsEl.innerHTML = `<p class="pokedex-empty">No se encontraron movimientos con los filtros seleccionados.</p>`;
+    movePickerResultsEl.innerHTML = `<p class="pokedex-empty">${locale === "es" ? "No se encontraron movimientos con los filtros seleccionados." : "No moves found matching the selected filters."}</p>`;
     return;
   }
 
   const rowsHtml = filtered
     .map((r) => {
       const meta = moveDetailsMap[r.name];
-      const typeBadgeHtml = meta ? `<span class="type-badge type-badge--sm" style="--badge-bg:${typeColor(meta.type)}">${meta.type}</span>` : "-";
-      const categoryBadgeHtml = meta ? `<span class="move-category-badge move-category-badge--${meta.category}">${categoryLabel(meta.category)}</span>` : "-";
+      const typeBadgeHtml = meta ? `<span class="type-badge type-badge--sm" data-type="${meta.type}" style="--badge-bg:${typeColor(meta.type)}">${getTypeName(meta.type, locale)}</span>` : "-";
+      const categoryBadgeHtml = meta ? `<span class="move-category-badge move-category-badge--${meta.category}">${categoryLabel(meta.category, locale)}</span>` : "-";
       const powerText = meta?.power !== null && meta?.power !== undefined ? meta.power : "-";
       const ppText = meta?.pp !== null && meta?.pp !== undefined ? meta.pp : "-";
       const accuracyText = meta?.accuracy !== null && meta?.accuracy !== undefined ? `${meta.accuracy}%` : "-";
-      const levelText = r.method === "level-up" ? `Nv. ${r.level}` : "-";
+      const levelText = r.method === "level-up" ? `${locale === "es" ? "Nv." : "Lv."} ${r.level}` : "-";
       const methodBadgeClass = `move-method-badge move-method-badge--${r.method}`;
 
       return `
         <tr>
-          <td class="move-table__cell-name" data-label="Movimiento">
+          <td class="move-table__cell-name" data-label="${t.modal.move}">
             <span class="move-table__name">${formatLabel(r.name)}</span>
           </td>
-          <td class="move-table__cell-type" data-label="Tipo">${typeBadgeHtml}</td>
-          <td class="move-table__cell-category" data-label="Categoría">${categoryBadgeHtml}</td>
-          <td class="move-table__cell-stat" data-label="POT">${powerText}</td>
+          <td class="move-table__cell-type" data-label="${locale === "es" ? "Tipo" : "Type"}">${typeBadgeHtml}</td>
+          <td class="move-table__cell-category" data-label="${locale === "es" ? "Categoría" : "Category"}">${categoryBadgeHtml}</td>
+          <td class="move-table__cell-stat" data-label="${locale === "es" ? "POT" : "PWR"}">${powerText}</td>
           <td class="move-table__cell-stat" data-label="PP">${ppText}</td>
-          <td class="move-table__cell-stat" data-label="Prec.">${accuracyText}</td>
-          <td class="move-table__cell-method" data-label="Método">
+          <td class="move-table__cell-stat" data-label="${locale === "es" ? "Prec." : "Acc."}">${accuracyText}</td>
+          <td class="move-table__cell-method" data-label="${t.modal.method}">
             <span class="${methodBadgeClass}">${r.methodLabel}</span>
           </td>
-          <td class="move-table__cell-level" data-label="Nivel">${levelText}</td>
-          <td class="move-table__cell-action" data-label="Acción">
+          <td class="move-table__cell-level" data-label="${t.modal.level}">${levelText}</td>
+          <td class="move-table__cell-action" data-label="${locale === "es" ? "Acción" : "Action"}">
             <button class="btn btn--sm btn--primary" type="button" data-pick-move="${r.name}">
-              Elegir
+              ${locale === "es" ? "Elegir" : "Choose"}
             </button>
           </td>
         </tr>
@@ -552,21 +582,21 @@ function renderMovePickerTable(): void {
   movePickerResultsEl.innerHTML = `
     <div class="move-table-wrapper">
       <div class="table-scroll-hint" aria-hidden="true">
-        <span>← Deslizá horizontalmente para ver todos los detalles →</span>
+        <span>${locale === "es" ? "← Deslizá horizontalmente para ver todos los detalles →" : "← Scroll horizontally to see all details →"}</span>
       </div>
       <div class="move-table-container">
         <table class="move-table">
           <thead>
             <tr>
-              <th class="move-table__head-name">Movimiento</th>
-              <th>Tipo</th>
-              <th>Categoría</th>
-              <th>POT</th>
+              <th class="move-table__head-name">${t.modal.move}</th>
+              <th>${locale === "es" ? "Tipo" : "Type"}</th>
+              <th>${locale === "es" ? "Categoría" : "Category"}</th>
+              <th>${locale === "es" ? "POT" : "PWR"}</th>
               <th>PP</th>
-              <th>Prec.</th>
-              <th>Método</th>
-              <th>Nivel</th>
-              <th class="move-table__head-action" style="text-align: right;">Acción</th>
+              <th>${locale === "es" ? "Prec." : "Acc."}</th>
+              <th>${t.modal.method}</th>
+              <th>${t.modal.level}</th>
+              <th class="move-table__head-action" style="text-align: right;">${locale === "es" ? "Acción" : "Action"}</th>
             </tr>
           </thead>
           <tbody>
@@ -686,12 +716,13 @@ downloadPngBtn?.addEventListener("click", () => {
 copyShowdownBtn?.addEventListener("click", () => {
   const pokemonMap = new Map(allPokemon.map((p) => [p.id, p]));
   const text = generateShowdownText(team, pokemonMap);
+  const locale = getCurrentLocale();
   if (!text) {
-    toast.info("Tu equipo está vacío.");
+    toast.info(locale === "es" ? "Tu equipo está vacío." : "Your team is empty.");
     return;
   }
   navigator.clipboard.writeText(text).then(() => {
-    toast.success("¡Formato Showdown copiado al portapapeles!");
+    toast.success(locale === "es" ? "¡Formato Showdown copiado al portapapeles!" : "Showdown format copied to clipboard!");
   });
 });
 
@@ -754,7 +785,12 @@ movePickerResultsEl.addEventListener("click", (e) => {
   renderSingleSlot(activeMoveSlotIndex);
   closeMovePicker();
   if (pokemon) {
-    toast.success(`Ataque "${formatLabel(moveName)}" asignado a ${capitalize(pokemon.name)}.`);
+    const locale = getCurrentLocale();
+    toast.success(
+      locale === "es"
+        ? `Ataque "${formatLabel(moveName)}" asignado a ${capitalize(pokemon.name)}.`
+        : `Move "${formatLabel(moveName)}" assigned to ${capitalize(pokemon.name)}.`
+    );
   }
 });
 
@@ -800,7 +836,14 @@ pickerResultsEl.addEventListener("click", (e) => {
   team = setTeamSlot(activeSlotIndex, id);
   renderSingleSlot(activeSlotIndex, true);
   renderStrengthsPanel();
-  if (pokemon) toast.success(`${capitalize(pokemon.name)} agregado al equipo.`);
+  if (pokemon) {
+    const locale = getCurrentLocale();
+    toast.success(
+      locale === "es"
+        ? `${capitalize(pokemon.name)} agregado al equipo.`
+        : `${capitalize(pokemon.name)} added to the team.`
+    );
+  }
   closePicker();
 });
 

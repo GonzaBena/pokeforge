@@ -1,6 +1,7 @@
 import { getManifest, getChunk, getAllPokemon, getGenerations, getTypeChart } from "../lib/pokedexData";
 import { getCapturedIds, setCaptured, CAPTURED_CHANGED_EVENT, getSelectedGame, setSelectedGame, GAME_CHANGED_EVENT, DATA_RESET_EVENT } from "../lib/storage";
 import { staggerCardsIn, cardHoverTilt, animateCaptureReveal } from "../lib/animations";
+import { getCurrentLocale, getTranslations, getTypeName } from "../lib/i18n/translations";
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
@@ -43,9 +44,11 @@ function dexNumber(id: number): string {
 
 // Mirrors src/components/PokemonCard.astro — keep both in sync when the markup changes.
 function renderCardHTML(p: Pokemon, captured: boolean): string {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   const sprite = p.sprites.officialArtwork ?? p.sprites.default ?? "";
   const typesHtml = p.types
-    .map((t) => `<span class="type-badge" style="--badge-bg:${typeColor(t)}">${t}</span>`)
+    .map((type) => `<span class="type-badge" data-type="${type}" style="--badge-bg:${typeColor(type)}">${getTypeName(type, locale)}</span>`)
     .join("");
 
   const primaryType = p.types[0] ?? "normal";
@@ -62,7 +65,7 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
       <div class="pokemon-card__types">${typesHtml}</div>
       <button class="pokemon-card__capture-btn" type="button" data-capture-btn data-pokemon-id="${p.id}">
         <i data-lucide="${captured ? "check" : "circle-dot"}"></i>
-        ${captured ? "Capturado" : "Capturar"}
+        ${captured ? t.pokedex.caught : t.pokedex.catch}
       </button>
     </article>
   `;
@@ -102,13 +105,13 @@ const animatingIds = new Set<number>();
 // without this, capturing from the modal left the card behind it stale
 // until a full page reload.
 function syncCardCapturedState(id: number, captured: boolean): void {
-  const card = grid.querySelector<HTMLElement>(`.pokemon-card[data-pokemon-id="${id}"]`);
+  const card = document.querySelector<HTMLElement>(`.pokemon-card[data-pokemon-id="${id}"]`);
   if (!card) return;
-
   card.classList.toggle("captured", captured);
   const btn = card.querySelector<HTMLButtonElement>("[data-capture-btn]");
   if (btn) {
-    btn.innerHTML = `<i data-lucide="${captured ? "check" : "circle-dot"}"></i> ${captured ? "Capturado" : "Capturar"}`;
+    const t = getTranslations(getCurrentLocale());
+    btn.innerHTML = `<i data-lucide="${captured ? "check" : "circle-dot"}"></i> ${captured ? t.pokedex.caught : t.pokedex.catch}`;
     refreshIcons();
   }
 
@@ -160,10 +163,11 @@ async function applyFilters(): Promise<void> {
 }
 
 function populateTypeChips(types: string[]): void {
+  const locale = getCurrentLocale();
   const chips = types
     .map(
       (t) =>
-        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${t}</button>`,
+        `<button class="filter-chip" type="button" data-type="${t}" aria-pressed="false" style="--badge-bg:${typeColor(t)}">${getTypeName(t, locale)}</button>`,
     )
     .join("");
 
@@ -173,7 +177,7 @@ function populateTypeChips(types: string[]): void {
 function populateGenerationChips(generations: GenerationInfo[]): void {
   const chips = generations
     .map((g) => {
-      const label = g.displayName.replace(/^Generación\s*/i, "");
+      const label = g.displayName.replace(/^(Generación|Generation)\s*/i, "");
       return `<button class="filter-chip" type="button" data-generation="${g.name}" aria-pressed="false">${label}</button>`;
     })
     .join("");
@@ -182,12 +186,15 @@ function populateGenerationChips(generations: GenerationInfo[]): void {
 }
 
 function populateGameSelect(generations: GenerationInfo[]): void {
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
   gameToGenMap.clear();
-  let html = `<option value="">Todos los juegos</option>`;
+  let html = `<option value="">${t.pokedex.allGames}</option>`;
 
   for (const g of generations) {
     const regionLabel = g.region ? ` (${capitalize(g.region)})` : "";
-    html += `<optgroup label="${g.displayName}${regionLabel}">`;
+    const genName = locale === "es" ? g.displayName : g.displayName.replace("Generación", "Generation");
+    html += `<optgroup label="${genName}${regionLabel}">`;
     for (const vg of g.versionGroups) {
       gameToGenMap.set(vg.name, g);
       html += `<option value="${vg.name}">${vg.displayName}</option>`;
@@ -217,10 +224,12 @@ grid.addEventListener("click", (e) => {
   const id = Number(btn.dataset.pokemonId);
   const name = card.querySelector(".pokemon-card__name")?.textContent ?? "";
   const nowCaptured = !card.classList.contains("captured");
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
 
   animatingIds.add(id);
   setCaptured(id, nowCaptured);
-  btn.innerHTML = `<i data-lucide="${nowCaptured ? "check" : "circle-dot"}"></i> ${nowCaptured ? "Capturado" : "Capturar"}`;
+  btn.innerHTML = `<i data-lucide="${nowCaptured ? "check" : "circle-dot"}"></i> ${nowCaptured ? t.pokedex.caught : t.pokedex.catch}`;
   refreshIcons();
 
   if (nowCaptured) {
@@ -228,11 +237,11 @@ grid.addEventListener("click", (e) => {
       refreshIcons();
       animatingIds.delete(id);
     });
-    toast.success(`¡${capitalize(name)} capturado!`);
+    toast.success(locale === "es" ? `¡${capitalize(name)} capturado!` : `${capitalize(name)} caught!`);
   } else {
     card.classList.remove("captured");
     animatingIds.delete(id);
-    toast.info(`${capitalize(name)} liberado de tu Pokédex.`);
+    toast.info(locale === "es" ? `${capitalize(name)} liberado de tu Pokédex.` : `${capitalize(name)} released from your Pokédex.`);
     if (view === "captured") applyFilters();
   }
 });

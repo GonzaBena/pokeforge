@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CapturedCounter from "../components/CapturedCounter.astro";
+import LoadMoreButton from "../components/LoadMoreButton.astro";
+import PokemonDetailModal from "../components/PokemonDetailModal.astro";
+import { getTranslations, type Locale } from "../lib/i18n/translations";
+
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
+---
+
+<BaseLayout title={t.pokedex.title}>
+  <div class="page">
+    <div class="page__header">
+      <div>
+        <h1 class="page__title"><i data-lucide="book-open"></i> {t.pokedex.title}</h1>
+        <p class="page__subtitle">{t.pokedex.subtitle}</p>
+      </div>
+      <CapturedCounter />
+    </div>
+
+    <div class="filters-bar">
+      <div class="view-toggle" data-view-toggle>
+        <button class="view-toggle__btn" type="button" data-view="all" aria-pressed="true">{t.pokedex.all}</button>
+        <button class="view-toggle__btn" type="button" data-view="captured" aria-pressed="false">{t.pokedex.captured}</button>
+      </div>
+      <input class="search-input" type="search" placeholder={t.pokedex.searchPlaceholder} data-search-input />
+      <div class="select-wrapper">
+        <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+        <select class="game-select" data-game-filter aria-label={t.pokedex.allGames}>
+          <option value="">{t.pokedex.allGames}</option>
+        </select>
+        <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+      </div>
+    </div>
+
+    <div class="filter-stacks">
+      <div class="filter-group" data-type-filter aria-label={t.pokedex.filterByType}></div>
+      <div class="filter-group" data-generation-filter aria-label={t.pokedex.filterByGen}></div>
+    </div>
+
+    <div class="pokedex-grid" data-pokedex-grid></div>
+    <p class="pokedex-empty" data-pokedex-empty hidden>{t.pokedex.empty}</p>
+    <LoadMoreButton />
+  </div>
+
+  <PokemonDetailModal />
+
+  <script>
+    import "../scripts/pokedex-page";
+  </script>
+</BaseLayout>

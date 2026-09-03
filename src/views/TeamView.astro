@@ -1,0 +1,161 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.astro";
+import PokemonDetailModal from "../components/PokemonDetailModal.astro";
+import { getTranslations, type Locale } from "../lib/i18n/translations";
+
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
+---
+
+<BaseLayout title={t.team.title}>
+  <div class="page">
+    <div class="page__header">
+      <div>
+        <h1 class="page__title"><i data-lucide="users"></i> {t.team.title}</h1>
+        <p class="page__subtitle">{t.team.subtitle}</p>
+      </div>
+      <div class="page__header-actions">
+        <button class="btn btn--primary" type="button" data-open-team-card title={t.team.teamCardTitle}>
+          <i data-lucide="share-2"></i>
+          <span>{t.team.teamCard}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="team-layout">
+      <div class="team-slots" data-team-slots></div>
+      <StrengthsWeaknessesPanel />
+    </div>
+  </div>
+
+  <div class="modal-overlay" data-team-card-overlay hidden>
+    <div class="modal-panel team-card-modal-panel">
+      <div class="modal-panel__header">
+        <div class="picker-panel__header-info">
+          <h2><i data-lucide="image"></i> {t.team.teamCard}</h2>
+        </div>
+        <button class="modal-panel__close" type="button" data-team-card-close aria-label={t.modal.close}>
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="team-card-modal__body">
+        <div class="team-card-preview-wrap" data-team-card-preview></div>
+        <div class="team-card-modal__actions">
+          <button class="btn btn--primary" type="button" data-download-card-png>
+            <i data-lucide="download"></i>
+            <span>{t.team.downloadPng}</span>
+          </button>
+          <button class="btn" type="button" data-copy-showdown>
+            <i data-lucide="copy"></i>
+            <span>{t.team.copyShowdown}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" data-picker-overlay hidden>
+    <div class="modal-panel picker-modal-panel">
+      <div class="modal-panel__header">
+        <div class="picker-panel__header-info">
+          <h2><i data-lucide="sparkles"></i> {t.team.choosePokemon}</h2>
+          <span class="picker-panel__count" data-picker-count></span>
+        </div>
+        <button class="modal-panel__close" type="button" data-picker-close aria-label={t.modal.close}>
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="picker-panel__filters">
+        <div class="picker-panel__inputs-row">
+          <div class="picker-input-wrap">
+            <i data-lucide="search" class="picker-input-icon"></i>
+            <input class="picker-input" type="search" placeholder={t.team.searchByNameOrNum} data-picker-search />
+          </div>
+          <div class="picker-input-wrap">
+            <i data-lucide="swords" class="picker-input-icon"></i>
+            <input
+              class="picker-input"
+              type="text"
+              list="picker-move-options"
+              placeholder={t.team.filterByMove}
+              data-picker-move-filter
+            />
+            <datalist id="picker-move-options" data-picker-move-options></datalist>
+          </div>
+        </div>
+        <div class="picker-panel__filter-section">
+          <span class="picker-panel__section-title">{t.team.typesSection}</span>
+          <div class="filter-group filter-group--compact" data-picker-type-filter aria-label={t.team.typesSection}></div>
+        </div>
+        <div class="picker-panel__filter-section">
+          <span class="picker-panel__section-title">{t.team.gensSection}</span>
+          <div class="filter-group filter-group--compact" data-picker-generation-filter aria-label={t.team.gensSection}></div>
+        </div>
+        <div class="picker-panel__filter-section">
+          <span class="picker-panel__section-title">{t.team.gameSection}</span>
+          <div class="select-wrapper select-wrapper--compact">
+            <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+            <select class="game-select" data-picker-game-filter aria-label={t.team.gameSection}>
+              <option value="">{t.pokedex.allGames}</option>
+            </select>
+            <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+          </div>
+        </div>
+      </div>
+      <div class="picker-panel__results" data-picker-results></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" data-move-picker-overlay hidden>
+    <div class="modal-panel move-picker-modal-panel">
+      <div class="modal-panel__header">
+        <div class="picker-panel__header-info">
+          <h2><i data-lucide="swords"></i> <span data-move-picker-title>{t.team.selectMove}</span></h2>
+          <span class="picker-panel__count" data-move-picker-count></span>
+        </div>
+        <button class="modal-panel__close" type="button" data-move-picker-close aria-label={t.modal.close}>
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="picker-panel__filters">
+        <div class="picker-input-wrap">
+          <i data-lucide="search" class="picker-input-icon"></i>
+          <input class="picker-input" type="search" placeholder={t.team.filterByMove} data-move-picker-search />
+        </div>
+        <div class="picker-panel__container">
+          <div class="picker-panel__filter-section">
+            <span class="picker-panel__section-title">{t.team.category}</span>
+            <div class="filter-group filter-group--compact" data-move-category-filter aria-label={t.team.category}>
+              <button class="filter-chip" type="button" data-category="all" aria-pressed="true">{t.team.allCategories}</button>
+              <button class="filter-chip" type="button" data-category="physical" aria-pressed="false">{t.team.physical}</button>
+              <button class="filter-chip" type="button" data-category="special" aria-pressed="false">{t.team.special}</button>
+              <button class="filter-chip" type="button" data-category="status" aria-pressed="false">{t.team.status}</button>
+            </div>
+          </div>
+          <div class="picker-panel__filter-section">
+            <span class="picker-panel__section-title">{t.team.learnMethod}</span>
+            <div class="filter-group filter-group--compact" data-move-method-filter aria-label={t.team.learnMethod}>
+              <button class="filter-chip" type="button" data-method="all" aria-pressed="true">{t.team.allMethods}</button>
+              <button class="filter-chip" type="button" data-method="level-up" aria-pressed="false">{t.team.levelUp}</button>
+              <button class="filter-chip" type="button" data-method="machine" aria-pressed="false">{t.team.machine}</button>
+              <button class="filter-chip" type="button" data-method="tutor" aria-pressed="false">{t.team.tutor}</button>
+              <button class="filter-chip" type="button" data-method="egg" aria-pressed="false">{t.team.egg}</button>
+            </div>
+          </div>
+        </div>
+        <div class="picker-panel__filter-section">
+          <span class="picker-panel__section-title">{t.team.attackType}</span>
+          <div class="filter-group filter-group--compact" data-move-type-filter aria-label={t.team.attackType}></div>
+        </div>
+      </div>
+      <div class="move-picker__results" data-move-picker-results></div>
+    </div>
+  </div>
+
+  <PokemonDetailModal />
+
+  <script>
+    import "../scripts/team-page";
+  </script>
+</BaseLayout>
