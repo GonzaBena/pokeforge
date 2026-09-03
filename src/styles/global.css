@@ -1115,14 +1115,27 @@ svg.lucide {
   }
 }
 
-/* Prevenir auto-zoom forzado en Safari iOS en pantallas táctiles */
-@media (max-width: 768px) {
+/* Prevenir auto-zoom forzado en Safari iOS / WebKit en celulares y pantallas táctiles (requiere font-size >= 16px) */
+@media (hover: none) and (pointer: coarse), (max-width: 860px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="file"]),
+  select,
+  textarea,
   .search-input,
   .picker-input,
   .game-select,
+  .cloud-code-input,
+  .cloud-readonly-input,
   .detail-nature select,
   .detail-stat__input {
     font-size: 16px !important;
+  }
+
+  .picker-input {
+    height: 40px;
+  }
+
+  .detail-stat__input {
+    width: 60px;
   }
 }
 
@@ -2871,6 +2884,13 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   font-family: var(--font-mono);
   font-size: 12px;
   text-align: right;
+  -moz-appearance: textfield;
+}
+
+.detail-stat__input::-webkit-outer-spin-button,
+.detail-stat__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .detail-stat__input:disabled {
