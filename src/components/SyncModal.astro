@@ -48,11 +48,11 @@
             <i data-lucide="download"></i>
             <span>Exportar JSON</span>
           </button>
-          <label class="btn btn--secondary sync-modal__action-btn sync-modal__file-label">
+          <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-import-btn>
             <i data-lucide="upload"></i>
             <span>Importar JSON</span>
-            <input type="file" accept=".json" class="visually-hidden" data-sync-file-input />
-          </label>
+          </button>
+          <input type="file" accept=".json" class="visually-hidden" data-sync-file-input hidden aria-hidden="true" />
         </div>
       </div>
     </div>
@@ -75,6 +75,7 @@
     const statsEl = overlay.querySelector<HTMLDivElement>("[data-sync-stats]");
     const copyBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-copy-link]");
     const exportBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-export-btn]");
+    const importBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-import-btn]");
     const fileInput = overlay.querySelector<HTMLInputElement>("[data-sync-file-input]");
 
     let currentSyncUrl = "";
@@ -155,6 +156,10 @@
       } catch {
         toast.error("Error al exportar el respaldo");
       }
+    });
+
+    importBtn?.addEventListener("click", () => {
+      fileInput?.click();
     });
 
     fileInput?.addEventListener("change", async () => {
