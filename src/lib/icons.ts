@@ -1,5 +1,6 @@
 import {
   createIcons,
+  AlertTriangle,
   ArrowRight,
   BarChart2,
   BookOpen,
@@ -25,6 +26,7 @@ import {
   Smartphone,
   Sparkles,
   Swords,
+  Trash2,
   Upload,
   Users,
   Volume2,
@@ -35,6 +37,7 @@ import {
 export function refreshIcons(): void {
   createIcons({
     icons: {
+      AlertTriangle,
       ArrowRight,
       BarChart2,
       BookOpen,
@@ -60,6 +63,7 @@ export function refreshIcons(): void {
       Smartphone,
       Sparkles,
       Swords,
+      Trash2,
       Upload,
       Users,
       Volume2,

@@ -1,6 +1,6 @@
 import { getAllPokemon, getGenerations, getMoveDetailsMap, getMoveIndex, getTypeChart } from "../lib/pokedexData";
 import { getPokemonDetail } from "../lib/pokemonDetail";
-import { getTeam, setTeam, setTeamSlot, setTeamSlotMove, getSelectedGame, setSelectedGame } from "../lib/storage";
+import { getTeam, setTeam, setTeamSlot, setTeamSlotMove, getSelectedGame, setSelectedGame, DATA_RESET_EVENT } from "../lib/storage";
 import { computeTeamDefense, splitWeaknessesAndResistances, type TeamDefenseEntry } from "../lib/typeChart";
 import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../lib/animations";
 import { toast } from "../lib/toast";
@@ -639,6 +639,14 @@ overlayEl.addEventListener("click", (e) => {
 movePickerCloseBtn.addEventListener("click", closeMovePicker);
 movePickerOverlayEl.addEventListener("click", (e) => {
   if (e.target === movePickerOverlayEl) closeMovePicker();
+});
+
+window.addEventListener(DATA_RESET_EVENT, () => {
+  team = getTeam();
+  for (let i = 0; i < team.slots.length; i++) {
+    renderSingleSlot(i);
+  }
+  renderStrengthsPanel();
 });
 
 const openTeamCardBtn = document.querySelector<HTMLButtonElement>("[data-open-team-card]");

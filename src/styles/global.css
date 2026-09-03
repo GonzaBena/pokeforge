@@ -3163,6 +3163,89 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   }
 }
 
+/* --- Danger / Reset Section --- */
+
+.sync-modal__danger-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sync-modal__reset-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.sync-modal__reset-trigger {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(239, 68, 68, 0.4);
+  background: transparent;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sync-modal__reset-trigger:hover {
+  border-style: solid;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.sync-modal__confirm-box {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sync-modal__confirm-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ef4444;
+  font-size: 14px;
+}
+
+.sync-modal__confirm-header svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sync-modal__confirm-text {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.sync-modal__confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.btn--danger {
+  background: #ef4444 !important;
+  color: white !important;
+  border: none !important;
+}
+
+.btn--danger:hover {
+  background: #dc2626 !important;
+  color: white !important;
+}
+
 /* ------------------------------------------------------------- sync-page */
 
 .sync-page {

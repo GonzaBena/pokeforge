@@ -55,13 +55,46 @@
           <input type="file" accept=".json" class="visually-hidden" data-sync-file-input hidden aria-hidden="true" />
         </div>
       </div>
+
+      <!-- Sección Gestión de Datos / Reinicio -->
+      <div class="sync-modal__danger-section">
+        <div class="sync-modal__divider">
+          <span>gestión de datos</span>
+        </div>
+
+        <div class="sync-modal__reset-wrapper" data-sync-reset-default>
+          <button class="btn btn--danger-outline sync-modal__reset-trigger" type="button" data-sync-reset-trigger>
+            <i data-lucide="trash-2"></i>
+            <span>Reiniciar todos mis datos</span>
+          </button>
+        </div>
+
+        <div class="sync-modal__confirm-box" data-sync-reset-confirm hidden>
+          <div class="sync-modal__confirm-header">
+            <i data-lucide="alert-triangle"></i>
+            <strong>¿Reiniciar y borrar todo?</strong>
+          </div>
+          <p class="sync-modal__confirm-text" data-sync-confirm-msg>
+            Se borrarán tus Pokémon capturados y tu equipo actual. Esta acción es permanente.
+          </p>
+          <div class="sync-modal__confirm-actions">
+            <button class="btn btn--danger btn--sm" type="button" data-sync-confirm-delete>
+              <i data-lucide="trash-2"></i>
+              <span>Sí, borrar todo</span>
+            </button>
+            <button class="btn btn--secondary btn--sm" type="button" data-sync-cancel-delete>
+              <span>Cancelar</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
   import { generateSyncUrl, renderQrCode, exportBackupFile, importBackupFile } from "../lib/sync";
-  import { getCapturedIds, getTeam } from "../lib/storage";
+  import { getCapturedIds, getTeam, resetAllData } from "../lib/storage";
   import { toast } from "../lib/toast";
   import { refreshIcons } from "../lib/icons";
 
@@ -78,11 +111,36 @@
     const importBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-import-btn]");
     const fileInput = overlay.querySelector<HTMLInputElement>("[data-sync-file-input]");
 
+    const resetTrigger = overlay.querySelector<HTMLButtonElement>("[data-sync-reset-trigger]");
+    const resetDefault = overlay.querySelector<HTMLDivElement>("[data-sync-reset-default]");
+    const resetConfirm = overlay.querySelector<HTMLDivElement>("[data-sync-reset-confirm]");
+    const confirmMsg = overlay.querySelector<HTMLParagraphElement>("[data-sync-confirm-msg]");
+    const confirmDeleteBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-confirm-delete]");
+    const cancelDeleteBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-cancel-delete]");
+
     let currentSyncUrl = "";
+
+    function hideResetConfirmation() {
+      if (resetConfirm) resetConfirm.hidden = true;
+      if (resetDefault) resetDefault.hidden = false;
+    }
+
+    function showResetConfirmation() {
+      const capturedCount = getCapturedIds().size;
+      const team = getTeam();
+      const activeMembers = team.slots.filter((s) => s.pokemonId !== null).length;
+      if (confirmMsg) {
+        confirmMsg.textContent = `Se borrarán tus ${capturedCount} Pokémon capturados y tu equipo actual (${activeMembers} miembros). Esta acción no se puede deshacer.`;
+      }
+      if (resetDefault) resetDefault.hidden = true;
+      if (resetConfirm) resetConfirm.hidden = false;
+      refreshIcons();
+    }
 
     async function openModal() {
       overlay!.hidden = false;
       document.body.style.overflow = "hidden";
+      hideResetConfirmation();
       refreshIcons();
 
       // Estadísticas actuales
@@ -120,6 +178,7 @@
     function closeModal() {
       overlay!.hidden = true;
       document.body.style.overflow = "";
+      hideResetConfirmation();
     }
 
     // Escuchar triggers globales con [data-sync-open]
@@ -174,6 +233,16 @@
       } finally {
         fileInput.value = "";
       }
+    });
+
+    resetTrigger?.addEventListener("click", showResetConfirmation);
+    cancelDeleteBtn?.addEventListener("click", hideResetConfirmation);
+
+    confirmDeleteBtn?.addEventListener("click", () => {
+      resetAllData();
+      hideResetConfirmation();
+      closeModal();
+      toast.success("Todos tus datos han sido reiniciados a cero.");
     });
   }
 

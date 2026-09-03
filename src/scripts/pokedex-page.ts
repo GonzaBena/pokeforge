@@ -1,5 +1,5 @@
 import { getManifest, getChunk, getAllPokemon, getGenerations, getTypeChart } from "../lib/pokedexData";
-import { getCapturedIds, setCaptured, CAPTURED_CHANGED_EVENT, getSelectedGame, setSelectedGame, GAME_CHANGED_EVENT } from "../lib/storage";
+import { getCapturedIds, setCaptured, CAPTURED_CHANGED_EVENT, getSelectedGame, setSelectedGame, GAME_CHANGED_EVENT, DATA_RESET_EVENT } from "../lib/storage";
 import { staggerCardsIn, cardHoverTilt, animateCaptureReveal } from "../lib/animations";
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
@@ -307,6 +307,18 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
     if (gameFilterEl) gameFilterEl.value = newGame;
     updateCapturedCounter();
     applyFilters();
+  }
+});
+
+window.addEventListener(DATA_RESET_EVENT, () => {
+  updateCapturedCounter();
+  for (const card of grid.querySelectorAll<HTMLElement>(".pokemon-card")) {
+    card.classList.remove("pokemon-card--captured");
+    const btn = card.querySelector<HTMLButtonElement>("[data-capture-btn]");
+    if (btn) {
+      btn.setAttribute("aria-pressed", "false");
+      btn.title = "Marcar como capturado";
+    }
   }
 });
 

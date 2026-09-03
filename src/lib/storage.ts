@@ -155,3 +155,28 @@ export function setSelectedGame(game: string): string {
   window.dispatchEvent(new CustomEvent(GAME_CHANGED_EVENT, { detail: { game } }));
   return game;
 }
+
+// --- Reset all data ----------------------------------------------------
+
+export const DATA_RESET_EVENT = "poketeam:data-reset";
+
+export function resetAllData(): void {
+  if (typeof localStorage === "undefined") return;
+  try {
+    const toRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("poketeam:")) {
+        toRemove.push(key);
+      }
+    }
+    for (const key of toRemove) {
+      localStorage.removeItem(key);
+    }
+  } catch {}
+
+  window.dispatchEvent(new CustomEvent(DATA_RESET_EVENT));
+  window.dispatchEvent(new CustomEvent(CAPTURED_CHANGED_EVENT, { detail: { ids: new Set(), reset: true } }));
+  window.dispatchEvent(new CustomEvent(TEAM_CHANGED_EVENT, { detail: { team: DEFAULT_TEAM } }));
+  window.dispatchEvent(new CustomEvent(GAME_CHANGED_EVENT, { detail: { game: "" } }));
+}
