@@ -2942,3 +2942,436 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   color: var(--text-muted);
   margin: 0;
 }
+
+/* ------------------------------------------------------------- sync-nav */
+
+.nav__sync-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav__sync-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav__sync-btn:hover {
+  background: var(--bg-card);
+  color: var(--accent);
+  border-color: var(--border-hover);
+}
+
+@media (max-width: 600px) {
+  .nav__sync-btn span {
+    display: none;
+  }
+  .nav__sync-btn {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* ------------------------------------------------------------ sync-modal */
+
+.sync-modal-panel {
+  width: min(480px, 95vw);
+}
+
+.sync-modal__title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sync-modal__title-group svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+.sync-modal__body {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+}
+
+.sync-modal__instructions {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.sync-modal__qr-wrapper {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: 0 auto 16px;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sync-modal__canvas {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: var(--radius-md);
+  image-rendering: pixelated;
+}
+
+.sync-modal__qr-loading {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #101014;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.sync-modal__stats {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.sync-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.sync-stat-chip svg {
+  width: 14px;
+  height: 14px;
+  color: var(--accent);
+}
+
+.sync-modal__copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sync-modal__copy-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sync-modal__divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 4px 0 14px;
+}
+
+.sync-modal__divider::before,
+.sync-modal__divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.sync-modal__divider span {
+  padding: 0 10px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sync-modal__actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.sync-modal__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.sync-modal__file-label {
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------- sync-page */
+
+.sync-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 180px);
+  padding: 32px 16px 80px;
+}
+
+.sync-card {
+  width: 100%;
+  max-width: 540px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.sync-card__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.sync-card__icon-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+.sync-card__icon-badge svg {
+  width: 28px;
+  height: 28px;
+}
+
+.sync-card__icon-badge--success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.sync-card__title {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+.sync-card__subtitle,
+.sync-card__description {
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0 0 24px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.sync-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sync-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.sync-step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sync-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sync-preview {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.sync-preview__section h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+.sync-preview__team-slots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.sync-team-preview-slot {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sync-team-preview-slot img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.sync-empty-slot {
+  color: var(--text-muted);
+  font-size: 20px;
+}
+
+.sync-preview__comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sync-compare-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.sync-compare-box__label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.sync-compare-box__value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.sync-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.sync-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.sync-option:hover {
+  border-color: var(--border-hover);
+}
+
+.sync-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.sync-option input {
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+
+.sync-option__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sync-option__content strong {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.sync-option__content span {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}

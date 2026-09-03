@@ -1,6 +1,7 @@
 ---
 import Nav from "../components/Nav.astro";
 import ToastContainer from "../components/ToastContainer.astro";
+import SyncModal from "../components/SyncModal.astro";
 import "../styles/global.css";
 
 interface Props {
@@ -30,6 +31,7 @@ const { title } = Astro.props;
   <body>
     <Nav />
     <slot />
+    <SyncModal />
     <ToastContainer />
     <script>
       import { refreshIcons } from "../lib/icons";

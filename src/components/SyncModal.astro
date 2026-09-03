@@ -1,0 +1,177 @@
+---
+---
+
+<div class="modal-overlay" data-sync-overlay hidden>
+  <div class="modal-panel sync-modal-panel">
+    <div class="modal-panel__header">
+      <div class="sync-modal__title-group">
+        <i data-lucide="qr-code"></i>
+        <h2>Sincronizar Dispositivos</h2>
+      </div>
+      <button class="modal-panel__close" type="button" data-sync-close aria-label="Cerrar">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <div class="sync-modal__body">
+      <!-- Sección QR -->
+      <div class="sync-modal__qr-section">
+        <p class="sync-modal__instructions">
+          Escaneá este código con la <strong>cámara de tu celular</strong> para transferir tu equipo y capturas en 1 segundo:
+        </p>
+
+        <div class="sync-modal__qr-wrapper">
+          <canvas id="sync-qr-canvas" class="sync-modal__canvas" width="240" height="240"></canvas>
+          <div class="sync-modal__qr-loading" data-sync-loading>
+            <i data-lucide="loader-2" class="spin"></i>
+            <span>Generando código QR...</span>
+          </div>
+        </div>
+
+        <div class="sync-modal__stats" data-sync-stats>
+          <!-- Estadísticas dinámicas -->
+        </div>
+
+        <button class="sync-modal__copy-btn" type="button" data-sync-copy-link>
+          <i data-lucide="copy"></i>
+          <span>Copiar enlace de sincronización</span>
+        </button>
+      </div>
+
+      <!-- Sección Respaldo Manual -->
+      <div class="sync-modal__manual-section">
+        <div class="sync-modal__divider">
+          <span>o mediante archivo de respaldo</span>
+        </div>
+        <div class="sync-modal__actions-row">
+          <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-export-btn>
+            <i data-lucide="download"></i>
+            <span>Exportar JSON</span>
+          </button>
+          <label class="btn btn--secondary sync-modal__action-btn sync-modal__file-label">
+            <i data-lucide="upload"></i>
+            <span>Importar JSON</span>
+            <input type="file" accept=".json" class="visually-hidden" data-sync-file-input />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { generateSyncUrl, renderQrCode, exportBackupFile, importBackupFile } from "../lib/sync";
+  import { getCapturedIds, getTeam } from "../lib/storage";
+  import { toast } from "../lib/toast";
+  import { refreshIcons } from "../lib/icons";
+
+  function initSyncModal() {
+    const overlay = document.querySelector<HTMLDivElement>("[data-sync-overlay]");
+    if (!overlay) return;
+
+    const closeBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-close]");
+    const canvas = overlay.querySelector<HTMLCanvasElement>("#sync-qr-canvas");
+    const loading = overlay.querySelector<HTMLDivElement>("[data-sync-loading]");
+    const statsEl = overlay.querySelector<HTMLDivElement>("[data-sync-stats]");
+    const copyBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-copy-link]");
+    const exportBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-export-btn]");
+    const fileInput = overlay.querySelector<HTMLInputElement>("[data-sync-file-input]");
+
+    let currentSyncUrl = "";
+
+    async function openModal() {
+      overlay!.hidden = false;
+      document.body.style.overflow = "hidden";
+      refreshIcons();
+
+      // Estadísticas actuales
+      const capturedCount = getCapturedIds().size;
+      const team = getTeam();
+      const activeMembers = team.slots.filter((s) => s.pokemonId !== null).length;
+      if (statsEl) {
+        statsEl.innerHTML = `
+          <div class="sync-stat-chip">
+            <i data-lucide="users"></i>
+            <span>${activeMembers} en equipo</span>
+          </div>
+          <div class="sync-stat-chip">
+            <i data-lucide="check"></i>
+            <span>${capturedCount} capturados</span>
+          </div>
+        `;
+        refreshIcons();
+      }
+
+      // Generación del código QR
+      if (canvas && loading) {
+        loading.style.display = "flex";
+        try {
+          currentSyncUrl = await generateSyncUrl();
+          await renderQrCode(canvas, currentSyncUrl);
+          loading.style.display = "none";
+        } catch (err) {
+          console.error("Error al generar QR:", err);
+          loading.innerHTML = "<span>Error al generar código QR</span>";
+        }
+      }
+    }
+
+    function closeModal() {
+      overlay!.hidden = true;
+      document.body.style.overflow = "";
+    }
+
+    // Escuchar triggers globales con [data-sync-open]
+    document.addEventListener("click", (e) => {
+      const target = (e.target as HTMLElement).closest("[data-sync-open]");
+      if (target) {
+        e.preventDefault();
+        openModal();
+      }
+    });
+
+    closeBtn?.addEventListener("click", closeModal);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !overlay.hidden) closeModal();
+    });
+
+    copyBtn?.addEventListener("click", async () => {
+      if (!currentSyncUrl) currentSyncUrl = await generateSyncUrl();
+      try {
+        await navigator.clipboard.writeText(currentSyncUrl);
+        toast.success("¡Enlace de sincronización copiado!");
+      } catch {
+        toast.info("Copia el enlace manualmente desde la barra");
+      }
+    });
+
+    exportBtn?.addEventListener("click", () => {
+      try {
+        exportBackupFile();
+        toast.success("Archivo de respaldo descargado");
+      } catch {
+        toast.error("Error al exportar el respaldo");
+      }
+    });
+
+    fileInput?.addEventListener("change", async () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      try {
+        const result = await importBackupFile(file, "merge");
+        toast.success(`¡Sincronizado! Se añadieron ${result.addedCaptures} nuevas capturas.`);
+        closeModal();
+      } catch {
+        toast.error("El archivo no tiene un formato válido");
+      } finally {
+        fileInput.value = "";
+      }
+    });
+  }
+
+  initSyncModal();
+  document.addEventListener("astro:after-swap", initSyncModal);
+</script>

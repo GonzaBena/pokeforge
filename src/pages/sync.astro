@@ -1,0 +1,194 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Sincronizar Dispositivos">
+  <main class="page sync-page">
+    <div class="sync-card" data-sync-card>
+      <!-- Loading state -->
+      <div class="sync-card__loading" data-sync-state="loading">
+        <i data-lucide="loader-2" class="spin"></i>
+        <p>Leyendo datos de sincronización...</p>
+      </div>
+
+      <!-- No data / Guide state -->
+      <div class="sync-card__empty" data-sync-state="empty" hidden>
+        <div class="sync-card__icon-badge">
+          <i data-lucide="smartphone"></i>
+        </div>
+        <h1 class="sync-card__title">Sincronizá tu PC con tu celular</h1>
+        <p class="sync-card__description">
+          Para transferir tus capturas y tu equipo entre dispositivos de forma instantánea:
+        </p>
+        <ol class="sync-steps">
+          <li>
+            <span class="sync-step-number">1</span>
+            <div>En tu computadora, hacé clic en el botón <strong>Sincronizar</strong> en la barra de navegación.</div>
+          </li>
+          <li>
+            <span class="sync-step-number">2</span>
+            <div>Abrí la <strong>cámara de tu celular</strong> y apuntá al código QR que aparece en pantalla.</div>
+          </li>
+          <li>
+            <span class="sync-step-number">3</span>
+            <div>Tocá el enlace y tus datos se transferirán al instante.</div>
+          </li>
+        </ol>
+        <div class="sync-card__actions">
+          <a href="/pokedex/" class="btn btn--primary" data-astro-prefetch>
+            <i data-lucide="book-open"></i>
+            <span>Ir a la Pokédex</span>
+          </a>
+          <button type="button" class="btn btn--secondary" data-sync-open>
+            <i data-lucide="qr-code"></i>
+            <span>Generar código QR aquí</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ready to Sync state -->
+      <div class="sync-card__ready" data-sync-state="ready" hidden>
+        <div class="sync-card__icon-badge sync-card__icon-badge--success">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <h1 class="sync-card__title">¡Datos listos para sincronizar!</h1>
+        <p class="sync-card__subtitle">
+          Recibiste un equipo y registro de capturas de tu otro dispositivo.
+        </p>
+
+        <!-- Preview recibido -->
+        <div class="sync-preview">
+          <div class="sync-preview__section">
+            <h3>Equipo Recibido</h3>
+            <div class="sync-preview__team-slots" data-preview-team>
+              <!-- Rellenado dinámicamente con sprites -->
+            </div>
+          </div>
+
+          <div class="sync-preview__comparison">
+            <div class="sync-compare-box">
+              <span class="sync-compare-box__label">Capturas en paquete</span>
+              <strong class="sync-compare-box__value" data-incoming-captures>0</strong>
+            </div>
+            <div class="sync-compare-box">
+              <span class="sync-compare-box__label">Capturas en este celular</span>
+              <strong class="sync-compare-box__value" data-current-captures>0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opciones de sincronización -->
+        <div class="sync-options">
+          <label class="sync-option">
+            <input type="radio" name="syncMode" value="merge" checked />
+            <div class="sync-option__content">
+              <strong>Combinar datos (Recomendado)</strong>
+              <span>Suma las capturas recibidas a las que ya tengas en este celular y activa el equipo recibido.</span>
+            </div>
+          </label>
+          <label class="sync-option">
+            <input type="radio" name="syncMode" value="replace" />
+            <div class="sync-option__content">
+              <strong>Reemplazar todo</strong>
+              <span>Sustituye por completo las capturas y el equipo de este celular por los datos recibidos.</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="sync-card__actions">
+          <button type="button" class="btn btn--primary btn--lg" data-confirm-sync>
+            <i data-lucide="check"></i>
+            <span>Confirmar y Guardar</span>
+          </button>
+          <a href="/" class="btn btn--ghost" data-astro-prefetch>Cancelar</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { parseSyncFromHash, applySyncPayload, decodeCapturedIds, type SyncPayload } from "../lib/sync";
+  import { getCapturedIds } from "../lib/storage";
+  import { toast } from "../lib/toast";
+  import { refreshIcons } from "../lib/icons";
+
+  async function initSyncPage() {
+    const card = document.querySelector<HTMLDivElement>("[data-sync-card]");
+    if (!card) return;
+
+    const loadingState = card.querySelector<HTMLDivElement>('[data-sync-state="loading"]');
+    const emptyState = card.querySelector<HTMLDivElement>('[data-sync-state="empty"]');
+    const readyState = card.querySelector<HTMLDivElement>('[data-sync-state="ready"]');
+
+    const previewTeam = card.querySelector<HTMLDivElement>("[data-preview-team]");
+    const incomingCapturesEl = card.querySelector<HTMLElement>("[data-incoming-captures]");
+    const currentCapturesEl = card.querySelector<HTMLElement>("[data-current-captures]");
+    const confirmBtn = card.querySelector<HTMLButtonElement>("[data-confirm-sync]");
+
+    let currentPayload: SyncPayload | null = null;
+
+    try {
+      currentPayload = await parseSyncFromHash();
+    } catch (err) {
+      console.error("Error parsing hash:", err);
+    }
+
+    if (loadingState) loadingState.hidden = true;
+
+    if (!currentPayload) {
+      if (emptyState) emptyState.hidden = false;
+      refreshIcons();
+      return;
+    }
+
+    // Datos válidos detectados
+    if (readyState) readyState.hidden = false;
+
+    const incomingCaptures = decodeCapturedIds(currentPayload.capturedBitset);
+    const localCaptures = getCapturedIds();
+
+    if (incomingCapturesEl) incomingCapturesEl.textContent = String(incomingCaptures.size);
+    if (currentCapturesEl) currentCapturesEl.textContent = String(localCaptures.size);
+
+    // Render team preview
+    if (previewTeam) {
+      previewTeam.innerHTML = "";
+      const slots = currentPayload.team?.slots || [];
+      for (const slot of slots) {
+        const slotEl = document.createElement("div");
+        slotEl.className = "sync-team-preview-slot";
+        if (slot.pokemonId) {
+          slotEl.innerHTML = `
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${slot.pokemonId}.png" alt="Pokémon #${slot.pokemonId}" loading="lazy" />
+          `;
+        } else {
+          slotEl.innerHTML = `<span class="sync-empty-slot">·</span>`;
+        }
+        previewTeam.appendChild(slotEl);
+      }
+    }
+
+    refreshIcons();
+
+    confirmBtn?.addEventListener("click", () => {
+      if (!currentPayload) return;
+      const selectedMode = (card.querySelector<HTMLInputElement>('input[name="syncMode"]:checked')?.value || "merge") as "merge" | "replace";
+
+      const result = applySyncPayload(currentPayload, selectedMode);
+      toast.success(`¡Sincronización exitosa! (${result.totalCaptures} capturados en total)`);
+
+      // Limpiar hash de la URL
+      if (window.history.replaceState) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+
+      setTimeout(() => {
+        window.location.href = "/equipo/";
+      }, 800);
+    });
+  }
+
+  initSyncPage();
+  document.addEventListener("astro:after-swap", initSyncPage);
+</script>
