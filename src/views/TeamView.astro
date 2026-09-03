@@ -31,6 +31,20 @@ const t = getTranslations(currentLocale);
       <div class="team-slots" data-team-slots></div>
       <StrengthsWeaknessesPanel />
     </div>
+
+    <!-- Sección de Sinergia y Pokémon Aconsejados a ancho completo -->
+    <section class="team-synergy-section" id="synergy-section" data-team-synergy-section hidden>
+      <div class="team-synergy-section__header">
+        <div class="team-synergy-section__title-wrap">
+          <h2 class="team-synergy-section__title">
+            <i data-lucide="sparkles"></i>
+            <span>{t.strengthsWeaknesses.synergyTitle}</span>
+          </h2>
+          <p class="team-synergy-section__subtitle">{t.strengthsWeaknesses.synergySubtitle}</p>
+        </div>
+      </div>
+      <div class="team-synergy-section__body" data-synergy-panel-content></div>
+    </section>
   </div>
 
   <div class="modal-overlay" data-type-matrix-overlay hidden>

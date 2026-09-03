@@ -22,10 +22,6 @@ const t = getTranslations(currentLocale);
         <i data-lucide="swords"></i>
         <span>{t.strengthsWeaknesses.tabOffense}</span>
       </button>
-      <button class="panel-tab-btn" type="button" data-panel-tab="synergy" aria-pressed="false">
-        <i data-lucide="sparkles"></i>
-        <span>{t.strengthsWeaknesses.tabSynergy}</span>
-      </button>
     </div>
   </div>
 
@@ -116,9 +112,15 @@ const t = getTranslations(currentLocale);
       </div>
     </div>
 
-    <!-- TAB 3: SYNERGY -->
-    <div data-tab-content-synergy hidden>
-      <div class="synergy-panel" data-synergy-panel-content></div>
+    <!-- QUICK CALLOUT TO FULL SYNERGY SECTION -->
+    <div class="side-panel__synergy-callout" data-synergy-sidebar-callout>
+      <a href="#synergy-section" class="side-panel__synergy-btn">
+        <div class="side-panel__synergy-btn-left">
+          <i data-lucide="sparkles"></i>
+          <span>{t.strengthsWeaknesses.synergyTitle}</span>
+        </div>
+        <i data-lucide="chevron-down" class="side-panel__synergy-btn-arrow"></i>
+      </a>
     </div>
   </div>
 </aside>

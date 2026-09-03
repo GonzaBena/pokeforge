@@ -2852,27 +2852,81 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   border-color: var(--border-strong);
 }
 
-/* --- Synergy Tab --- */
+/* --- Full-width Synergy Section & Recommendations --- */
 
-.synergy-panel {
+.team-synergy-section {
+  margin-top: 36px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 10px;
+  gap: 22px;
+  box-shadow: var(--shadow-card);
 }
 
-.synergy-diagnosis {
+.team-synergy-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.team-synergy-section__title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.team-synergy-section__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.team-synergy-section__title svg {
+  width: 20px;
+  height: 20px;
+  color: #f59e0b;
+}
+
+.team-synergy-section__subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.team-synergy-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.synergy-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.synergy-overview-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.synergy-diagnosis__title {
-  font-size: 11px;
+.synergy-overview-card__title {
+  font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -2882,98 +2936,57 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   gap: 6px;
 }
 
-.synergy-diagnosis__title svg {
-  width: 13px;
-  height: 13px;
+.synergy-overview-card__title svg {
+  width: 14px;
+  height: 14px;
 }
 
-.synergy-diagnosis__section {
+.synergy-overview-card__types {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
-.synergy-diagnosis__subtitle {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.synergy-diagnosis__types {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.synergy-types-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.synergy-types-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.synergy-type-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 8px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-}
-
-.synergy-type-row__badges {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.synergy-pokemon-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.synergy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 16px;
 }
 
 .synergy-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 10px 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  gap: 12px;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .synergy-card:hover {
   border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .synergy-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
 }
 
 .synergy-card__info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   min-width: 0;
 }
 
 .synergy-card__sprite {
-  width: 38px;
-  height: 38px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -2981,12 +2994,12 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 .synergy-card__meta {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
 .synergy-card__name {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text);
   white-space: nowrap;
@@ -2996,31 +3009,31 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 
 .synergy-card__types {
   display: flex;
-  gap: 3px;
+  gap: 4px;
 }
 
 .synergy-card__reasons {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .synergy-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10.5px;
+  gap: 5px;
+  font-size: 11px;
   font-weight: 500;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: var(--radius-pill);
   line-height: 1.2;
 }
 
 .synergy-tag svg {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
 }
 
 .synergy-tag--immune {
@@ -3045,6 +3058,57 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   background: rgba(251, 191, 36, 0.14);
   color: #fde047;
   border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+/* Callout in sidebar */
+.side-panel__synergy-callout {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.side-panel__synergy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(245, 158, 11, 0.04) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-radius: var(--radius-md);
+  color: #fbbf24;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.side-panel__synergy-btn:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.08) 100%);
+  border-color: rgba(245, 158, 11, 0.55);
+  color: #fde68a;
+  transform: translateY(-1px);
+}
+
+.side-panel__synergy-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.side-panel__synergy-btn-left svg {
+  width: 14px;
+  height: 14px;
+}
+
+.side-panel__synergy-btn-arrow {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+
+.side-panel__synergy-btn:hover .side-panel__synergy-btn-arrow {
+  transform: translateY(2px);
 }
 
 .team-card-graphic {

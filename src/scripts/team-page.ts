@@ -41,8 +41,10 @@ const panelContentEl = document.querySelector<HTMLElement>("[data-panel-content]
 const panelTabToggleEl = document.querySelector<HTMLElement>("[data-panel-tab-toggle]");
 const tabContentDefenseEl = document.querySelector<HTMLElement>("[data-tab-content-defense]");
 const tabContentOffenseEl = document.querySelector<HTMLElement>("[data-tab-content-offense]");
-const tabContentSynergyEl = document.querySelector<HTMLElement>("[data-tab-content-synergy]");
+
+const teamSynergySectionEl = document.querySelector<HTMLElement>("[data-team-synergy-section]");
 const synergyPanelContentEl = document.querySelector<HTMLElement>("[data-synergy-panel-content]");
+const synergySidebarCalloutEl = document.querySelector<HTMLElement>("[data-synergy-sidebar-callout]");
 
 const weaknessesListEl = document.querySelector<HTMLElement>("[data-weaknesses-list]")!;
 const resistancesListEl = document.querySelector<HTMLElement>("[data-resistances-list]")!;
@@ -60,7 +62,7 @@ const offenseBlindspotsCountEl = document.querySelector<HTMLElement>("[data-offe
 const offenseCoveredListEl = document.querySelector<HTMLElement>("[data-offense-covered-list]");
 const offenseBlindspotsListEl = document.querySelector<HTMLElement>("[data-offense-blindspots-list]");
 
-let activePanelTab: "defense" | "offense" | "synergy" = "defense";
+let activePanelTab: "defense" | "offense" = "defense";
 let activeOffenseMode: "moves" | "stab" = "moves";
 
 const overlayEl = document.querySelector<HTMLElement>("[data-picker-overlay]")!;
@@ -719,7 +721,7 @@ function renderOffensePanel(): void {
 }
 
 function renderSynergyPanel(): void {
-  if (!typeChart || !tabContentSynergyEl || !synergyPanelContentEl || !allPokemon.length) return;
+  if (!typeChart || !synergyPanelContentEl || !allPokemon.length) return;
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
 
@@ -728,96 +730,99 @@ function renderSynergyPanel(): void {
     .filter((p): p is Pokemon => p !== null);
 
   if (!activePokemon.length) {
-    synergyPanelContentEl.innerHTML = `<p class="side-panel__empty">${t.strengthsWeaknesses.noTeam}</p>`;
+    if (teamSynergySectionEl) teamSynergySectionEl.hidden = true;
+    if (synergySidebarCalloutEl) synergySidebarCalloutEl.hidden = true;
     return;
   }
+
+  if (teamSynergySectionEl) teamSynergySectionEl.hidden = false;
+  if (synergySidebarCalloutEl) synergySidebarCalloutEl.hidden = false;
 
   const currentSet = pickerState.game ? gameSpeciesSets.get(pickerState.game)?.[pickerState.dexMode] : undefined;
   const report = computeTeamSynergy(typeChart, activePokemon, allPokemon, { gameSpeciesSet: currentSet });
 
   const hasEmptySlot = team.slots.some((s) => s.pokemonId === null);
 
-  // 1. Diagnosis
+  // 1. Overview Grid (Debilidades, Puntos ciegos, Tipos clave)
   const weaknessesToCover = [...report.criticalWeaknesses, ...report.exposedWeaknesses];
   const weaknessesHtml = weaknessesToCover.length
     ? weaknessesToCover
         .map(
           (ty) => `
-        <span class="type-badge type-badge--sm" data-type="${ty}" style="--badge-bg:${typeColor(ty)}">
+        <span class="type-badge" data-type="${ty}" style="--badge-bg:${typeColor(ty)}">
           ${getTypeName(ty, locale)}
         </span>
       `
         )
         .join("")
-    : `<span style="color: #86efac; font-size: 11px;">✓ ${locale === "es" ? "Sin debilidades desprotegidas" : "No unprotected weaknesses"}</span>`;
+    : `<span style="color: #86efac; font-size: 13px; font-weight: 500;">✓ ${locale === "es" ? "Sin debilidades desprotegidas" : "No unprotected weaknesses"}</span>`;
 
   const blindSpotsHtml = report.blindSpots.length
     ? report.blindSpots
         .map(
           (ty) => `
-        <span class="type-badge type-badge--sm" data-type="${ty}" style="--badge-bg:${typeColor(ty)}">
+        <span class="type-badge" data-type="${ty}" style="--badge-bg:${typeColor(ty)}">
           ${getTypeName(ty, locale)}
         </span>
       `
         )
         .join("")
-    : `<span style="color: #86efac; font-size: 11px;">✓ ${locale === "es" ? "Cobertura ofensiva completa" : "Full offensive coverage"}</span>`;
+    : `<span style="color: #86efac; font-size: 13px; font-weight: 500;">✓ ${locale === "es" ? "Cobertura ofensiva completa" : "Full offensive coverage"}</span>`;
 
-  const diagnosisHtml = `
-    <div class="synergy-diagnosis">
-      <div class="synergy-diagnosis__title">
-        <i data-lucide="sparkles"></i> <span>${t.strengthsWeaknesses.synergyTitle}</span>
+  const recommendedTypesHtml = report.recommendedTypes.length
+    ? report.recommendedTypes
+        .map((rt) => {
+          const tooltipParts: string[] = [];
+          if (rt.resistsTeamWeaknesses.length) {
+            tooltipParts.push(
+              (locale === "es" ? "Resiste: " : "Resists: ") +
+                rt.resistsTeamWeaknesses.map((w) => getTypeName(w, locale)).join(", ")
+            );
+          }
+          if (rt.coversBlindSpots.length) {
+            tooltipParts.push(
+              (locale === "es" ? "Cubre: " : "Covers: ") +
+                rt.coversBlindSpots.map((b) => getTypeName(b, locale)).join(", ")
+            );
+          }
+          return `
+            <span class="type-badge" data-type="${rt.type}" style="--badge-bg:${typeColor(rt.type)}" title="${tooltipParts.join(" | ")}">
+              ${getTypeName(rt.type, locale)}
+            </span>
+          `;
+        })
+        .join("")
+    : `<span style="color: var(--text-muted); font-size: 13px;">-</span>`;
+
+  const overviewHtml = `
+    <div class="synergy-overview-grid">
+      <div class="synergy-overview-card">
+        <div class="synergy-overview-card__title">
+          <i data-lucide="shield-alert"></i>
+          <span>${locale === "es" ? "Debilidades a mitigar" : "Weaknesses to mitigate"}</span>
+        </div>
+        <div class="synergy-overview-card__types">${weaknessesHtml}</div>
       </div>
-      <div class="synergy-diagnosis__section">
-        <span class="synergy-diagnosis__subtitle">${locale === "es" ? "Debilidades a mitigar:" : "Weaknesses to mitigate:"}</span>
-        <div class="synergy-diagnosis__types">${weaknessesHtml}</div>
+
+      <div class="synergy-overview-card">
+        <div class="synergy-overview-card__title">
+          <i data-lucide="circle-dot"></i>
+          <span>${locale === "es" ? "Puntos ciegos ofensivos" : "Offensive blind spots"}</span>
+        </div>
+        <div class="synergy-overview-card__types">${blindSpotsHtml}</div>
       </div>
-      <div class="synergy-diagnosis__section">
-        <span class="synergy-diagnosis__subtitle">${locale === "es" ? "Puntos ciegos a cubrir:" : "Blind spots to cover:"}</span>
-        <div class="synergy-diagnosis__types">${blindSpotsHtml}</div>
+
+      <div class="synergy-overview-card">
+        <div class="synergy-overview-card__title">
+          <i data-lucide="sparkles"></i>
+          <span>${locale === "es" ? "Tipos elementales clave" : "Key recommended types"}</span>
+        </div>
+        <div class="synergy-overview-card__types">${recommendedTypesHtml}</div>
       </div>
     </div>
   `;
 
-  // 2. Recommended types
-  let typesHtml = "";
-  if (report.recommendedTypes.length) {
-    const typeItems = report.recommendedTypes
-      .map((rt) => {
-        const badges: string[] = [];
-        if (rt.resistsTeamWeaknesses.length) {
-          const names = rt.resistsTeamWeaknesses.map((w) => getTypeName(w, locale)).join(", ");
-          badges.push(
-            `<span class="synergy-tag synergy-tag--resist"><i data-lucide="shield"></i> ${t.strengthsWeaknesses.resistsVulnerability.replace("{types}", names)}</span>`
-          );
-        }
-        if (rt.coversBlindSpots.length) {
-          const names = rt.coversBlindSpots.map((b) => getTypeName(b, locale)).join(", ");
-          badges.push(
-            `<span class="synergy-tag synergy-tag--offense"><i data-lucide="swords"></i> ${t.strengthsWeaknesses.coversBlindSpotBadge.replace("{types}", names)}</span>`
-          );
-        }
-
-        return `
-          <div class="synergy-type-row">
-            <span class="type-badge type-badge--sm" data-type="${rt.type}" style="--badge-bg:${typeColor(rt.type)}">
-              ${getTypeName(rt.type, locale)}
-            </span>
-            <div class="synergy-type-row__badges">${badges.join("")}</div>
-          </div>
-        `;
-      })
-      .join("");
-
-    typesHtml = `
-      <div class="synergy-types-section">
-        <span class="defense-group__label" style="margin-bottom: 4px;">${t.strengthsWeaknesses.recommendedTypesTitle}</span>
-        <div class="synergy-types-list">${typeItems}</div>
-      </div>
-    `;
-  }
-
-  // 3. Recommended Pokémon cards
+  // 2. Suggested Pokémon cards in spacious grid
   let pokemonCardsHtml = "";
   if (report.suggestions.length) {
     const cards = report.suggestions
@@ -866,12 +871,12 @@ function renderSynergyPanel(): void {
 
         const actionBtn = hasEmptySlot
           ? `
-            <button class="btn btn--xs btn--primary" type="button" data-synergy-add="${p.id}">
+            <button class="btn btn--sm btn--primary" type="button" data-synergy-add="${p.id}">
               <i data-lucide="plus"></i> <span>${t.strengthsWeaknesses.addToTeam}</span>
             </button>
           `
           : `
-            <button class="btn btn--xs btn--subtle" type="button" disabled title="${t.strengthsWeaknesses.teamFull.replace("{max}", String(team.size))}">
+            <button class="btn btn--sm btn--subtle" type="button" disabled title="${t.strengthsWeaknesses.teamFull.replace("{max}", String(team.size))}">
               <i data-lucide="check"></i> <span>${team.size}/${team.size}</span>
             </button>
           `;
@@ -898,8 +903,10 @@ function renderSynergyPanel(): void {
 
     pokemonCardsHtml = `
       <div class="synergy-pokemon-section">
-        <span class="defense-group__label" style="margin-bottom: 4px;">${t.strengthsWeaknesses.suggestedPokemonTitle}</span>
-        <div class="synergy-list">${cards}</div>
+        <span class="defense-group__label" style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">
+          ${t.strengthsWeaknesses.suggestedPokemonTitle} (${report.suggestions.length})
+        </span>
+        <div class="synergy-grid">${cards}</div>
       </div>
     `;
   } else {
@@ -909,8 +916,7 @@ function renderSynergyPanel(): void {
   }
 
   synergyPanelContentEl.innerHTML = `
-    ${diagnosisHtml}
-    ${typesHtml}
+    ${overviewHtml}
     ${pokemonCardsHtml}
   `;
 }
@@ -1300,7 +1306,7 @@ function renderMovePickerTable(): void {
 panelTabToggleEl?.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-panel-tab]");
   if (!btn) return;
-  const tab = btn.dataset.panelTab as "defense" | "offense" | "synergy";
+  const tab = btn.dataset.panelTab as "defense" | "offense";
   if (!tab || tab === activePanelTab) return;
 
   activePanelTab = tab;
@@ -1310,8 +1316,14 @@ panelTabToggleEl?.addEventListener("click", (e) => {
 
   if (tabContentDefenseEl) tabContentDefenseEl.hidden = activePanelTab !== "defense";
   if (tabContentOffenseEl) tabContentOffenseEl.hidden = activePanelTab !== "offense";
-  if (tabContentSynergyEl) tabContentSynergyEl.hidden = activePanelTab !== "synergy";
   refreshIcons();
+});
+
+synergySidebarCalloutEl?.addEventListener("click", (e) => {
+  const link = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[href='#synergy-section']");
+  if (!link) return;
+  e.preventDefault();
+  teamSynergySectionEl?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 synergyPanelContentEl?.addEventListener("click", (e) => {
