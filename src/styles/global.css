@@ -2,27 +2,46 @@
 
 * {
   box-sizing: border-box;
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
 }
 
-*::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+/* Scrollbars sutiles para desktop con ratón */
+@media (hover: hover) and (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-pill);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
 }
 
-html,
-body {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
+/* Ocultar barra en táctiles donde la inercia nativa es estándar */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 body {
@@ -60,7 +79,7 @@ svg.lucide {
 .page {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 32px 24px max(80px, calc(env(safe-area-inset-bottom, 0px) + 80px));
 }
 
 .page__header {
@@ -96,7 +115,9 @@ svg.lucide {
   width: 100%;
   background: rgba(16, 16, 20, 0.85);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .nav__inner {
@@ -183,16 +204,91 @@ svg.lucide {
 
 @media (max-width: 768px) {
   .nav__inner {
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: row;
+    justify-content: space-between;
     gap: 10px;
-    padding: 12px 16px;
+    padding: 10px 16px;
+  }
+
+  .nav__brand {
+    font-size: 16px;
   }
 
   .nav__right {
-    flex-wrap: wrap;
-    justify-content: center;
     gap: 8px;
+  }
+
+  .nav__right .nav__link {
+    display: none;
+  }
+
+  .nav__pwa-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .page {
+    padding: 20px 16px max(96px, calc(env(safe-area-inset-bottom, 0px) + 86px));
+  }
+}
+
+/* ----------------------------------------------------------- bottom-nav */
+
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 45;
+    background: rgba(16, 16, 20, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    padding: 6px 12px max(8px, env(safe-area-inset-bottom, 8px));
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .bottom-nav__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    padding: 6px 8px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    transition: color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bottom-nav__link svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.15s ease;
+  }
+
+  .bottom-nav__link:active {
+    transform: scale(0.94);
+  }
+
+  .bottom-nav__link[aria-current="page"] {
+    color: var(--accent);
+  }
+
+  .bottom-nav__link[aria-current="page"] svg {
+    transform: translateY(-1px);
   }
 }
 
@@ -589,15 +685,27 @@ svg.lucide {
 
   .filter-group__row {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 10px 5px;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px 6px;
     width: 100%;
   }
 
   .filter-chip {
-    padding: 6px 2px;
-    font-size: 11px;
+    padding: 8px 6px;
+    font-size: 12px;
+    min-height: 38px;
     width: 100%;
+  }
+}
+
+/* Prevenir auto-zoom forzado en Safari iOS en pantallas táctiles */
+@media (max-width: 768px) {
+  .search-input,
+  .picker-input,
+  .game-select,
+  .detail-nature select,
+  .detail-stat__input {
+    font-size: 16px !important;
   }
 }
 
@@ -624,6 +732,8 @@ svg.lucide {
 /* --------------------------------------------------------------- card */
 
 .pokemon-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
   position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -796,14 +906,18 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 }
 
 .team-size-selector__btn {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: none;
   background: transparent;
   color: var(--text-muted);
   font-weight: 700;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .team-size-selector__btn[aria-pressed="true"] {
@@ -1334,8 +1448,8 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   position: absolute;
   top: 8px;
   right: 8px;
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: none;
   background: var(--bg-elevated);
@@ -1344,11 +1458,23 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.team-slot__remove-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.team-slot__remove-btn::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
 }
 
 .team-slot__remove-btn svg {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
 }
 
 /* ---------------------------------------------------------- side panel */
@@ -1479,6 +1605,27 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
   flex-direction: column;
   overflow: hidden;
   box-shadow: var(--shadow-pop);
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-panel,
+  .picker-modal-panel,
+  .move-picker-modal-panel,
+  .detail-modal-panel,
+  .team-card-modal-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 92vh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  }
 }
 
 /* --- Team Card Graphic Modal --- */

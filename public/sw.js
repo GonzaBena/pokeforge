@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pokeforge-v3';
+const CACHE_NAME = 'pokeforge-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -44,45 +44,61 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network First for data API requests (/data/*.json)
+  // Skip Vite HMR / dev server internal requests and optimize dep hashes
+  if (
+    url.pathname.startsWith('/@') ||
+    url.pathname.includes('/node_modules/') ||
+    url.searchParams.has('t') ||
+    url.searchParams.has('v')
+  ) {
+    return;
+  }
+
+  // Stale-While-Revalidate for static data (/data/*.json)
   if (url.pathname.startsWith('/data/')) {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(event.request))
+      caches.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const clone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            }
+            return networkResponse;
+          })
+          .catch(() => cachedResponse);
+
+        return cachedResponse || fetchPromise;
+      })
     );
     return;
   }
 
-  // Navigation requests (HTML pages)
+  // Navigation requests (HTML pages) with Stale-While-Revalidate
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const clone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+      caches.match(event.request).then((cached) => {
+        const fetchPromise = fetch(event.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const clone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            }
             return networkResponse;
-          }
-          return caches.match(event.request).then((cached) => cached || caches.match('/index.html') || networkResponse);
-        })
-        .catch(async () => {
-          const cached = await caches.match(event.request);
-          if (cached) return cached;
-          if (url.pathname.includes('/pokedex')) {
-            return (await caches.match('/pokedex/index.html')) || (await caches.match('/'));
-          }
-          if (url.pathname.includes('/equipo')) {
-            return (await caches.match('/equipo/index.html')) || (await caches.match('/'));
-          }
-          return (await caches.match('/index.html')) || (await caches.match('/'));
-        })
+          })
+          .catch(async () => {
+            if (cached) return cached;
+            if (url.pathname.includes('/pokedex')) {
+              return (await caches.match('/pokedex/index.html')) || (await caches.match('/'));
+            }
+            if (url.pathname.includes('/equipo')) {
+              return (await caches.match('/equipo/index.html')) || (await caches.match('/'));
+            }
+            return (await caches.match('/index.html')) || (await caches.match('/'));
+          });
+
+        return cached || fetchPromise;
+      })
     );
     return;
   }
@@ -93,7 +109,13 @@ self.addEventListener('fetch', (event) => {
       if (cachedResponse) {
         fetch(event.request)
           .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
+            if (!networkResponse) return;
+            const isBasic = networkResponse.status === 200 && networkResponse.type === 'basic';
+            const isAllowedCrossOrigin =
+              (url.hostname.includes('pokeapi.co') || url.hostname.includes('raw.githubusercontent.com')) &&
+              (networkResponse.status === 200 || networkResponse.type === 'opaque' || networkResponse.type === 'cors');
+
+            if (isBasic || isAllowedCrossOrigin) {
               caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
             }
           })
@@ -102,13 +124,19 @@ self.addEventListener('fetch', (event) => {
       }
 
       return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+        if (!networkResponse) return networkResponse;
+
+        const isBasic = networkResponse.status === 200 && networkResponse.type === 'basic';
+        const isAllowedCrossOrigin =
+          (url.hostname.includes('pokeapi.co') || url.hostname.includes('raw.githubusercontent.com')) &&
+          (networkResponse.status === 200 || networkResponse.type === 'opaque' || networkResponse.type === 'cors');
+
+        if (isBasic || isAllowedCrossOrigin) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
         return networkResponse;
       });
     })

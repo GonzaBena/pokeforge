@@ -31,6 +31,21 @@ const path = Astro.url.pathname;
   </div>
 </nav>
 
+<nav class="bottom-nav" aria-label="Navegación móvil">
+  <a class="bottom-nav__link" href="/" data-astro-prefetch aria-current={path === "/" ? "page" : undefined}>
+    <i data-lucide="sparkles"></i>
+    <span>Inicio</span>
+  </a>
+  <a class="bottom-nav__link" href="/pokedex/" data-astro-prefetch aria-current={path.startsWith("/pokedex") ? "page" : undefined}>
+    <i data-lucide="book-open"></i>
+    <span>Pokédex</span>
+  </a>
+  <a class="bottom-nav__link" href="/equipo/" data-astro-prefetch aria-current={path.startsWith("/equipo") ? "page" : undefined}>
+    <i data-lucide="users"></i>
+    <span>Equipo</span>
+  </a>
+</nav>
+
 <script>
   import { isSoundEnabled, setSoundEnabled } from "../lib/sound";
   import { toast } from "../lib/toast";

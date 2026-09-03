@@ -322,7 +322,14 @@ async function init(): Promise<void> {
   renderNextBatch();
 
   cardHoverTilt(grid);
-  getAllPokemon(); // warm cache in background for filters/load-more
+  const warmCache = () => {
+    if ("requestIdleCallback" in window) {
+      (window as Window).requestIdleCallback(() => getAllPokemon(), { timeout: 3000 });
+    } else {
+      setTimeout(() => getAllPokemon(), 1500);
+    }
+  };
+  warmCache();
   getTypeChart().then((chart) => populateTypeChips(chart.types));
   getGenerations().then((gens) => {
     populateGenerationChips(gens);

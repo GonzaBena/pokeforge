@@ -15,6 +15,9 @@ export function staggerCardsIn(targets: Element[] | NodeListOf<Element>): void {
 }
 
 export function cardHoverTilt(gridEl: HTMLElement): void {
+  if (typeof window !== "undefined" && !window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    return;
+  }
   const MAX_DEG = 10;
 
   gridEl.addEventListener("mousemove", (e) => {
