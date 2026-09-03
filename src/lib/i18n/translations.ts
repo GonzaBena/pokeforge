@@ -169,6 +169,10 @@ export interface Translations {
     confirmSave: string;
     cancel: string;
     successToast: string;
+    cloudLinkTitle: string;
+    cloudLinkSubtitleRW: string;
+    cloudLinkSubtitleRO: string;
+    cloudLinkSuccessToast: string;
   };
   syncModal: {
     modalTitle: string;
@@ -192,6 +196,16 @@ export interface Translations {
     cloudDeleteConfirmTitle: string;
     cloudDeleteConfirmDesc: string;
     cloudDeleteConfirmBtn: string;
+    cloudStatusReadOnly: string;
+    cloudStatusReadWrite: string;
+    cloudQrTitle: string;
+    cloudQrDesc: string;
+    cloudCopyPairingLink: string;
+    cloudPairingLinkCopied: string;
+    cloudReadOnlyWarning: string;
+    cloudUpgradeKeyPlaceholder: string;
+    cloudUpgradeKeyBtn: string;
+    cloudUpgradeSuccess: string;
     cancel: string;
     qrInstructions: string;
     qrGenerating: string;
@@ -340,6 +354,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       confirmSave: "Confirm and Save",
       cancel: "Cancel",
       successToast: "Sync successful! ({total} caught in total)",
+      cloudLinkTitle: "Link Cloud Vault",
+      cloudLinkSubtitleRW: "Cloud vault {code} detected. This device will be linked with full sync permissions (read & write).",
+      cloudLinkSubtitleRO: "Cloud vault {code} detected. This device will be linked in read-only mode.",
+      cloudLinkSuccessToast: "Device linked successfully with read & write permissions!",
     },
     syncModal: {
       modalTitle: "Data & Synchronization",
@@ -353,7 +371,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudOrJoin: "or join with existing code",
       cloudCodePlaceholder: "Code (e.g. PK-8492)",
       cloudJoin: "Link",
-      cloudConnected: "Connected to Turso",
+      cloudConnected: "Connected to DB",
       cloudSynced: "Synced",
       cloudCodeLabel: "Linking code:",
       cloudCopyTitle: "Copy code",
@@ -362,10 +380,22 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudSyncNow: "Sync now",
       cloudUnlink: "Unlink",
       cloudDeleteVault: "Delete vault from cloud",
-      cloudDeleteConfirmTitle: "Delete vault from Turso?",
+      cloudDeleteConfirmTitle: "Delete vault from DB?",
       cloudDeleteConfirmDesc:
         "The cloud copy of your data will be permanently deleted. Your local data on this device will remain intact.",
       cloudDeleteConfirmBtn: "Yes, delete from cloud",
+      cloudStatusReadOnly: "Connected (Read Only)",
+      cloudStatusReadWrite: "Connected (Read & Write)",
+      cloudQrTitle: "Link Mobile Phone via QR Code",
+      cloudQrDesc:
+        "Scan this code with your phone camera to link it automatically with full sync permissions (read & write).",
+      cloudCopyPairingLink: "Copy full pairing link",
+      cloudPairingLinkCopied: "Full pairing link copied to clipboard!",
+      cloudReadOnlyWarning:
+        "This device is currently in Read-Only mode. To enable write permissions, scan the pairing QR code shown on your PC, or enter your secret key below.",
+      cloudUpgradeKeyPlaceholder: "Paste secret key (UUID)...",
+      cloudUpgradeKeyBtn: "Enable write permissions",
+      cloudUpgradeSuccess: "Write permissions enabled successfully!",
       cancel: "Cancel",
       qrInstructions:
         "Scan this code with your phone camera to transfer your team and captures in 1 second:",
@@ -520,6 +550,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       confirmSave: "Confirmar y Guardar",
       cancel: "Cancelar",
       successToast: "¡Sincronización exitosa! ({total} capturados en total)",
+      cloudLinkTitle: "Vincular Bóveda en la Nube",
+      cloudLinkSubtitleRW: "Bóveda {code} detectada. Se vinculará este dispositivo con permisos completos (lectura y escritura).",
+      cloudLinkSubtitleRO: "Bóveda {code} detectada. Se vinculará este dispositivo en modo solo lectura.",
+      cloudLinkSuccessToast: "¡Dispositivo vinculado con éxito con permisos de lectura y escritura!",
     },
     syncModal: {
       modalTitle: "Sincronización y Datos",
@@ -533,7 +567,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudOrJoin: "o unirse con código existente",
       cloudCodePlaceholder: "Código (ej. PK-8492)",
       cloudJoin: "Vincular",
-      cloudConnected: "Conectado a Turso",
+      cloudConnected: "Conectado a la DB",
       cloudSynced: "Sincronizado",
       cloudCodeLabel: "Código de vinculación:",
       cloudCopyTitle: "Copiar código",
@@ -542,10 +576,22 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudSyncNow: "Sincronizar ahora",
       cloudUnlink: "Desvincular",
       cloudDeleteVault: "Eliminar bóveda de la nube",
-      cloudDeleteConfirmTitle: "¿Eliminar bóveda de Turso?",
+      cloudDeleteConfirmTitle: "¿Eliminar bóveda de la DB?",
       cloudDeleteConfirmDesc:
         "Se borrará permanentemente la copia de tus datos en la nube. Tus datos locales en este dispositivo se mantendrán intactos.",
       cloudDeleteConfirmBtn: "Sí, borrar de la nube",
+      cloudStatusReadOnly: "Conectado (Solo Lectura)",
+      cloudStatusReadWrite: "Conectado (Lectura y Escritura)",
+      cloudQrTitle: "Vincular Celular con Código QR",
+      cloudQrDesc:
+        "Escaneá este código con la cámara de tu celular para vincularlo automáticamente con permisos completos de sincronización (lectura y escritura).",
+      cloudCopyPairingLink: "Copiar enlace de vinculación completa",
+      cloudPairingLinkCopied: "¡Enlace de vinculación copiado al portapapeles!",
+      cloudReadOnlyWarning:
+        "Este celular está en modo Solo Lectura (no puede subir cambios a la nube). Escaneá el código QR que se muestra en tu PC para habilitar permisos de escritura o ingresá tu clave secreta.",
+      cloudUpgradeKeyPlaceholder: "Pegar clave secreta (UUID)...",
+      cloudUpgradeKeyBtn: "Activar permisos de escritura",
+      cloudUpgradeSuccess: "¡Permisos de escritura activados con éxito!",
       cancel: "Cancelar",
       qrInstructions:
         "Escaneá este código con la cámara de tu celular para transferir tu equipo y capturas en 1 segundo:",

@@ -27,7 +27,7 @@ function jsonResponse(data: unknown, status = 200): Response {
 export const GET: APIRoute = async ({ url }) => {
   if (!isTursoConfigured()) {
     return jsonResponse(
-      { success: false, error: "TURSO_NOT_CONFIGURED", message: "Turso no está configurado en las variables de entorno." },
+      { success: false, error: "DB_NOT_CONFIGURED", message: "La base de datos no está configurada en las variables de entorno." },
       503
     );
   }
@@ -39,7 +39,7 @@ export const GET: APIRoute = async ({ url }) => {
 
   const client = getTursoClient();
   if (!client) {
-    return jsonResponse({ success: false, error: "TURSO_CLIENT_ERROR", message: "Error al conectar con Turso." }, 500);
+    return jsonResponse({ success: false, error: "DB_CLIENT_ERROR", message: "Error al conectar con la base de datos." }, 500);
   }
 
   try {
@@ -60,7 +60,7 @@ export const GET: APIRoute = async ({ url }) => {
       updatedAt: row.updated_at,
     });
   } catch (err) {
-    console.error("Error al consultar bóveda en Turso:", err);
+    console.error("Error al consultar bóveda en la base de datos:", err);
     return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al consultar la base de datos." }, 500);
   }
 };
@@ -69,14 +69,14 @@ export const GET: APIRoute = async ({ url }) => {
 export const POST: APIRoute = async ({ request }) => {
   if (!isTursoConfigured()) {
     return jsonResponse(
-      { success: false, error: "TURSO_NOT_CONFIGURED", message: "Turso no está configurado en las variables de entorno." },
+      { success: false, error: "DB_NOT_CONFIGURED", message: "La base de datos no está configurada en las variables de entorno." },
       503
     );
   }
 
   const client = getTursoClient();
   if (!client) {
-    return jsonResponse({ success: false, error: "TURSO_CLIENT_ERROR", message: "Error al conectar con Turso." }, 500);
+    return jsonResponse({ success: false, error: "DB_CLIENT_ERROR", message: "Error al conectar con la base de datos." }, 500);
   }
 
   let body: { payload?: string } = {};
@@ -113,8 +113,8 @@ export const POST: APIRoute = async ({ request }) => {
       if (errStr.includes("UNIQUE") || errStr.includes("PRIMARY KEY")) {
         continue;
       }
-      console.error("Error al insertar bóveda en Turso:", err);
-      return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al guardar en Turso." }, 500);
+      console.error("Error al insertar bóveda en la base de datos:", err);
+      return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al guardar en la base de datos." }, 500);
     }
   }
 
@@ -125,14 +125,14 @@ export const POST: APIRoute = async ({ request }) => {
 export const PUT: APIRoute = async ({ request }) => {
   if (!isTursoConfigured()) {
     return jsonResponse(
-      { success: false, error: "TURSO_NOT_CONFIGURED", message: "Turso no está configurado en las variables de entorno." },
+      { success: false, error: "DB_NOT_CONFIGURED", message: "La base de datos no está configurada en las variables de entorno." },
       503
     );
   }
 
   const client = getTursoClient();
   if (!client) {
-    return jsonResponse({ success: false, error: "TURSO_CLIENT_ERROR", message: "Error al conectar con Turso." }, 500);
+    return jsonResponse({ success: false, error: "DB_CLIENT_ERROR", message: "Error al conectar con la base de datos." }, 500);
   }
 
   let body: { code?: string; secretKey?: string; payload?: string } = {};
@@ -167,23 +167,23 @@ export const PUT: APIRoute = async ({ request }) => {
 
     return jsonResponse({ success: true, code, updatedAt: now });
   } catch (err) {
-    console.error("Error al actualizar bóveda en Turso:", err);
-    return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al actualizar en Turso." }, 500);
+    console.error("Error al actualizar bóveda en la base de datos:", err);
+    return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al actualizar en la base de datos." }, 500);
   }
 };
 
-// DELETE: Eliminar permanentemente una bóveda de Turso
+// DELETE: Eliminar permanentemente una bóveda de la DB
 export const DELETE: APIRoute = async ({ request }) => {
   if (!isTursoConfigured()) {
     return jsonResponse(
-      { success: false, error: "TURSO_NOT_CONFIGURED", message: "Turso no está configurado en las variables de entorno." },
+      { success: false, error: "DB_NOT_CONFIGURED", message: "La base de datos no está configurada en las variables de entorno." },
       503
     );
   }
 
   const client = getTursoClient();
   if (!client) {
-    return jsonResponse({ success: false, error: "TURSO_CLIENT_ERROR", message: "Error al conectar con Turso." }, 500);
+    return jsonResponse({ success: false, error: "DB_CLIENT_ERROR", message: "Error al conectar con la base de datos." }, 500);
   }
 
   let body: { code?: string; secretKey?: string } = {};
@@ -215,10 +215,10 @@ export const DELETE: APIRoute = async ({ request }) => {
 
     return jsonResponse({
       success: true,
-      message: "Bóveda eliminada permanentemente de Turso.",
+      message: "Bóveda eliminada permanentemente de la DB.",
     });
   } catch (err) {
-    console.error("Error al eliminar bóveda en Turso:", err);
-    return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al eliminar en Turso." }, 500);
+    console.error("Error al eliminar bóveda en la base de datos:", err);
+    return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al eliminar en la base de datos." }, 500);
   }
 };

@@ -38,13 +38,48 @@ export function getCloudState(): CloudState {
   };
 }
 
-function notifyStatusChange() {
+export function notifyStatusChange() {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(CLOUD_STATUS_EVENT, { detail: getCloudState() }));
 }
 
 /**
- * Crea una nueva bóveda en Turso con el estado local actual.
+ * Consulta la bóveda en la DB y decodifica su payload sin aplicarlo localmente.
+ */
+export async function fetchCloudVault(
+  code: string
+): Promise<{ success: boolean; payload?: SyncPayload; updatedAt?: number; error?: string }> {
+  const cleanCode = code.toUpperCase().trim();
+  if (!cleanCode) return { success: false, error: "Código requerido" };
+
+  try {
+    const res = await fetch(`/api/vault?code=${encodeURIComponent(cleanCode)}`);
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      return { success: false, error: data.message || "Bóveda no encontrada" };
+    }
+
+    const payload = await decodeSyncPayload(data.payload);
+    return { success: true, payload, updatedAt: data.updatedAt };
+  } catch {
+    return { success: false, error: "Error de conexión con el servidor" };
+  }
+}
+
+/**
+ * Asigna o actualiza la clave secreta en el dispositivo local para habilitar permisos de escritura.
+ */
+export function setCloudSecretKey(secretKey: string): boolean {
+  const cleanKey = secretKey.trim();
+  if (!cleanKey) return false;
+  localStorage.setItem(CLOUD_SECRET_KEY, cleanKey);
+  notifyStatusChange();
+  return true;
+}
+
+/**
+ * Crea una nueva bóveda en la DB con el estado local actual.
  */
 export async function createCloudVault(): Promise<{ success: boolean; code?: string; error?: string }> {
   try {
@@ -83,7 +118,8 @@ export async function createCloudVault(): Promise<{ success: boolean; code?: str
  */
 export async function joinCloudVault(
   code: string,
-  secretKey?: string
+  secretKey?: string,
+  mode: "merge" | "replace" = "merge"
 ): Promise<{ success: boolean; payload?: SyncPayload; error?: string }> {
   const cleanCode = code.toUpperCase().trim();
   if (!cleanCode) return { success: false, error: "Código requerido" };
@@ -100,11 +136,11 @@ export async function joinCloudVault(
     }
 
     const payload = await decodeSyncPayload(data.payload);
-    applySyncPayload(payload, "merge");
+    applySyncPayload(payload, mode);
 
     localStorage.setItem(CLOUD_CODE_KEY, cleanCode);
     if (secretKey) {
-      localStorage.setItem(CLOUD_SECRET_KEY, secretKey);
+      localStorage.setItem(CLOUD_SECRET_KEY, secretKey.trim());
     }
     localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt));
 
@@ -118,12 +154,18 @@ export async function joinCloudVault(
 }
 
 /**
- * Envía los cambios locales a la bóveda en Turso.
+ * Envía los cambios locales a la bóveda en la DB.
  */
 export async function syncToCloudNow(): Promise<{ success: boolean; error?: string }> {
   const state = getCloudState();
-  if (!state.isLinked || !state.code || !state.secretKey) {
-    return { success: false, error: "Dispositivo no vinculado con permisos de escritura" };
+  if (!state.isLinked || !state.code) {
+    return { success: false, error: "Dispositivo no vinculado a la nube" };
+  }
+  if (!state.secretKey) {
+    return {
+      success: false,
+      error: "Dispositivo en modo Solo Lectura. Escaneá el código QR desde tu PC para habilitar permisos de escritura.",
+    };
   }
 
   try {
@@ -202,7 +244,7 @@ export function scheduleAutoSync(): void {
 }
 
 /**
- * Desvincula el dispositivo local sin borrar los datos en Turso.
+ * Desvincula el dispositivo local sin borrar los datos en la DB.
  */
 export function unlinkCloudVault(): void {
   localStorage.removeItem(CLOUD_CODE_KEY);
@@ -212,7 +254,7 @@ export function unlinkCloudVault(): void {
 }
 
 /**
- * Elimina la bóveda de Turso permanentemente (DELETE).
+ * Elimina la bóveda de la DB permanentemente (DELETE).
  */
 export async function deleteCloudVault(): Promise<{ success: boolean; error?: string }> {
   const state = getCloudState();
@@ -242,7 +284,7 @@ export async function deleteCloudVault(): Promise<{ success: boolean; error?: st
     unlinkCloudVault();
     return { success: true };
   } catch {
-    return { success: false, error: "Error al comunicar con Turso" };
+    return { success: false, error: "Error al comunicar con la DB" };
   } finally {
     isSyncing = false;
     notifyStatusChange();

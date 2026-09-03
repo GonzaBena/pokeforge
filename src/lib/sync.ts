@@ -169,6 +169,46 @@ export async function generateSyncUrl(origin?: string): Promise<string> {
   return `${base}/sync/#d=${token}`;
 }
 
+export interface CloudPairingInfo {
+  code: string;
+  secretKey?: string;
+}
+
+/**
+ * Parses cloud vault pairing credentials from URL hash or raw string: #vault=PK-XXXX&key=YYYY
+ */
+export function parseCloudPairingFromHash(hashStr?: string): CloudPairingInfo | null {
+  const hash = hashStr || (typeof window !== "undefined" ? window.location.hash : "");
+  if (!hash) return null;
+
+  const codeMatch = hash.match(/[#&]vault=([^&]+)/i);
+  if (!codeMatch || !codeMatch[1]) return null;
+
+  const keyMatch = hash.match(/[#&]key=([^&]+)/i);
+  return {
+    code: decodeURIComponent(codeMatch[1]).toUpperCase().trim(),
+    secretKey: keyMatch ? decodeURIComponent(keyMatch[1]).trim() : undefined,
+  };
+}
+
+/**
+ * Generates a full pairing URL for cloud sync: https://.../sync/#vault=CODE&key=SECRET
+ */
+export function generateCloudPairingUrl(
+  code: string,
+  secretKey?: string,
+  origin?: string,
+  locale?: string
+): string {
+  const base = origin || (typeof window !== "undefined" ? window.location.origin : "");
+  const pathPrefix = locale && locale !== "en" ? `/${locale}` : "";
+  let url = `${base}${pathPrefix}/sync/#vault=${encodeURIComponent(code)}`;
+  if (secretKey) {
+    url += `&key=${encodeURIComponent(secretKey)}`;
+  }
+  return url;
+}
+
 /**
  * Parses the sync token from location.hash or a raw string.
  */

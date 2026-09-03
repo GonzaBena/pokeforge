@@ -30,7 +30,7 @@ const t = getTranslations(currentLocale);
     </div>
 
     <div class="sync-modal__body">
-      <!-- PANEL 1: NUBE TURSO -->
+      <!-- PANEL 1: NUBE DB -->
       <div class="sync-tab-panel" data-tab-panel="cloud">
         <!-- Estado NO vinculado -->
         <div class="cloud-unlinked-state" data-cloud-unlinked>
@@ -56,7 +56,7 @@ const t = getTranslations(currentLocale);
               type="text"
               class="cloud-code-input"
               placeholder={t.syncModal.cloudCodePlaceholder}
-              maxlength="7"
+              maxlength="300"
               data-cloud-join-input
               autocomplete="off"
               spellcheck="false"
@@ -72,9 +72,9 @@ const t = getTranslations(currentLocale);
         <div class="cloud-linked-state" data-cloud-linked hidden>
           <div class="cloud-status-card">
             <div class="cloud-status-header">
-              <span class="cloud-status-pill">
-                <span class="cloud-status-dot"></span>
-                <span>{t.syncModal.cloudConnected}</span>
+              <span class="cloud-status-pill" data-cloud-status-pill>
+                <span class="cloud-status-dot" data-cloud-status-dot></span>
+                <span data-cloud-status-text>{t.syncModal.cloudConnected}</span>
               </span>
               <span class="cloud-last-sync" data-cloud-last-sync>{t.syncModal.cloudSynced}</span>
             </div>
@@ -92,6 +92,55 @@ const t = getTranslations(currentLocale);
             <p class="cloud-code-help">
               {t.syncModal.cloudHelp}
             </p>
+          </div>
+
+          <!-- Sección QR de Vinculación para Celular (con permisos de lectura y escritura) -->
+          <div class="cloud-pairing-card" data-cloud-pairing-card hidden>
+            <div class="cloud-pairing-card__header">
+              <i data-lucide="smartphone"></i>
+              <div class="cloud-pairing-card__text">
+                <strong>{t.syncModal.cloudQrTitle}</strong>
+                <p>{t.syncModal.cloudQrDesc}</p>
+              </div>
+            </div>
+
+            <div class="sync-modal__qr-wrapper cloud-pairing-qr-wrap">
+              <canvas id="cloud-pairing-qr-canvas" class="sync-modal__canvas" width="180" height="180"></canvas>
+              <div class="sync-modal__qr-loading" data-cloud-pairing-loading>
+                <i data-lucide="loader-2" class="spin"></i>
+                <span>{t.syncModal.qrGenerating}</span>
+              </div>
+            </div>
+
+            <button class="btn btn--secondary btn--sm cloud-copy-pairing-btn" type="button" data-cloud-copy-pairing-link>
+              <i data-lucide="copy"></i>
+              <span>{t.syncModal.cloudCopyPairingLink}</span>
+            </button>
+          </div>
+
+          <!-- Aviso Modo Solo Lectura (Si el dispositivo no tiene secretKey) -->
+          <div class="cloud-readonly-box" data-cloud-readonly-box hidden>
+            <div class="cloud-readonly-header">
+              <i data-lucide="alert-circle"></i>
+              <strong>{t.syncModal.cloudStatusReadOnly}</strong>
+            </div>
+            <p class="cloud-readonly-desc">
+              {t.syncModal.cloudReadOnlyWarning}
+            </p>
+            <div class="cloud-readonly-form">
+              <input
+                type="text"
+                class="cloud-code-input cloud-readonly-input"
+                placeholder={t.syncModal.cloudUpgradeKeyPlaceholder}
+                data-cloud-upgrade-key-input
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button class="btn btn--secondary btn--sm" type="button" data-cloud-upgrade-key-btn>
+                <i data-lucide="key"></i>
+                <span>{t.syncModal.cloudUpgradeKeyBtn}</span>
+              </button>
+            </div>
           </div>
 
           <div class="cloud-actions-grid">
@@ -215,7 +264,13 @@ const t = getTranslations(currentLocale);
 </div>
 
 <script>
-  import { generateSyncUrl, renderQrCode, exportBackupFile, importBackupFile } from "../lib/sync";
+  import {
+    generateSyncUrl,
+    renderQrCode,
+    exportBackupFile,
+    importBackupFile,
+    generateCloudPairingUrl,
+  } from "../lib/sync";
   import { getCapturedIds, getTeam, resetAllData } from "../lib/storage";
   import {
     getCloudState,
@@ -224,13 +279,14 @@ const t = getTranslations(currentLocale);
     syncToCloudNow,
     unlinkCloudVault,
     deleteCloudVault,
+    setCloudSecretKey,
     initCloudSyncClient,
     CLOUD_STATUS_EVENT,
     type CloudState,
   } from "../lib/cloudSync";
   import { toast } from "../lib/toast";
   import { refreshIcons } from "../lib/icons";
-  import { getCurrentLocale } from "../lib/i18n/translations";
+  import { getCurrentLocale, getTranslations } from "../lib/i18n/translations";
 
   function initSyncModal() {
     const overlay = document.querySelector<HTMLDivElement>("[data-sync-overlay]");
@@ -261,6 +317,15 @@ const t = getTranslations(currentLocale);
     const cloudCodeValue = overlay.querySelector<HTMLElement>("[data-cloud-code-value]");
     const cloudCopyCode = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-code]");
     const cloudLastSyncEl = overlay.querySelector<HTMLElement>("[data-cloud-last-sync]");
+    const cloudStatusDot = overlay.querySelector<HTMLElement>("[data-cloud-status-dot]");
+    const cloudStatusText = overlay.querySelector<HTMLElement>("[data-cloud-status-text]");
+    const cloudPairingCard = overlay.querySelector<HTMLDivElement>("[data-cloud-pairing-card]");
+    const cloudPairingCanvas = overlay.querySelector<HTMLCanvasElement>("#cloud-pairing-qr-canvas");
+    const cloudPairingLoading = overlay.querySelector<HTMLDivElement>("[data-cloud-pairing-loading]");
+    const cloudCopyPairingBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-pairing-link]");
+    const cloudReadOnlyBox = overlay.querySelector<HTMLDivElement>("[data-cloud-readonly-box]");
+    const cloudUpgradeKeyInput = overlay.querySelector<HTMLInputElement>("[data-cloud-upgrade-key-input]");
+    const cloudUpgradeKeyBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-upgrade-key-btn]");
     const cloudSyncNowBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-sync-now]");
     const cloudUnlinkBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-unlink-btn]");
     const cloudDeleteTrigger = overlay.querySelector<HTMLButtonElement>("[data-cloud-delete-trigger]");
@@ -277,6 +342,7 @@ const t = getTranslations(currentLocale);
     const cancelDeleteBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-cancel-delete]");
 
     let currentSyncUrl = "";
+    let currentPairingUrl = "";
 
     // Pestañas
     tabBtns.forEach((btn) => {
@@ -300,17 +366,47 @@ const t = getTranslations(currentLocale);
       return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
+    async function renderCloudPairingQr(code: string, secretKey: string) {
+      if (!cloudPairingCanvas || !cloudPairingLoading) return;
+      cloudPairingLoading.style.display = "flex";
+      try {
+        currentPairingUrl = generateCloudPairingUrl(code, secretKey, window.location.origin, getCurrentLocale());
+        await renderQrCode(cloudPairingCanvas, currentPairingUrl);
+        cloudPairingLoading.style.display = "none";
+      } catch (err) {
+        console.error("Error al generar QR de vinculación:", err);
+        cloudPairingLoading.innerHTML = `<span>Error QR</span>`;
+      }
+    }
+
     function renderCloudUI(state: CloudState) {
       if (!cloudUnlinked || !cloudLinked) return;
+      const locale = getCurrentLocale();
+      const t = getTranslations(locale);
 
       if (state.isLinked) {
         cloudUnlinked.hidden = true;
         cloudLinked.hidden = false;
         if (cloudCodeValue) cloudCodeValue.textContent = state.code || "------";
         if (cloudLastSyncEl) cloudLastSyncEl.textContent = formatTime(state.lastSync);
+
+        if (state.secretKey && state.code) {
+          if (cloudStatusDot) cloudStatusDot.classList.remove("cloud-status-dot--readonly");
+          if (cloudStatusText) cloudStatusText.textContent = t.syncModal.cloudStatusReadWrite;
+          if (cloudPairingCard) cloudPairingCard.hidden = false;
+          if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = true;
+          renderCloudPairingQr(state.code, state.secretKey);
+        } else {
+          if (cloudStatusDot) cloudStatusDot.classList.add("cloud-status-dot--readonly");
+          if (cloudStatusText) cloudStatusText.textContent = t.syncModal.cloudStatusReadOnly;
+          if (cloudPairingCard) cloudPairingCard.hidden = true;
+          if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = false;
+        }
       } else {
         cloudUnlinked.hidden = false;
         cloudLinked.hidden = true;
+        if (cloudPairingCard) cloudPairingCard.hidden = true;
+        if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = true;
       }
 
       if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = true;
@@ -407,7 +503,7 @@ const t = getTranslations(currentLocale);
     cloudCreateBtn?.addEventListener("click", async () => {
       const locale = getCurrentLocale();
       cloudCreateBtn.disabled = true;
-      toast.info(locale === "es" ? "Creando bóveda en Turso..." : "Creating vault in Turso...");
+      toast.info(locale === "es" ? "Creando bóveda en la DB..." : "Creating vault in DB...");
       const res = await createCloudVault();
       cloudCreateBtn.disabled = false;
       if (res.success) {
@@ -419,21 +515,67 @@ const t = getTranslations(currentLocale);
 
     cloudJoinBtn?.addEventListener("click", async () => {
       const locale = getCurrentLocale();
-      const code = cloudJoinInput?.value?.trim();
-      if (!code) {
-        toast.info(locale === "es" ? "Ingresa un código de 6 caracteres" : "Enter a 6-character code");
+      const rawInput = cloudJoinInput?.value?.trim();
+      if (!rawInput) {
+        toast.info(locale === "es" ? "Ingresa un código de 6 caracteres o enlace" : "Enter a 6-character code or link");
         return;
       }
+
+      let code = rawInput;
+      let secretKey: string | undefined;
+
+      const vaultMatch = rawInput.match(/vault=([^&]+)/i);
+      if (vaultMatch) {
+        code = decodeURIComponent(vaultMatch[1]).toUpperCase().trim();
+        const keyMatch = rawInput.match(/key=([^&]+)/i);
+        if (keyMatch) {
+          secretKey = decodeURIComponent(keyMatch[1]).trim();
+        }
+      }
+
       cloudJoinBtn.disabled = true;
-      toast.info(locale === "es" ? "Conectando con Turso..." : "Connecting to Turso...");
-      const res = await joinCloudVault(code);
+      toast.info(locale === "es" ? "Conectando con la DB..." : "Connecting to DB...");
+      const res = await joinCloudVault(code, secretKey);
       cloudJoinBtn.disabled = false;
       if (res.success) {
-        toast.success(locale === "es" ? "¡Dispositivo vinculado con éxito!" : "Device linked successfully!");
+        toast.success(
+          secretKey
+            ? (locale === "es" ? "¡Dispositivo vinculado con permisos de escritura!" : "Device linked with write permissions!")
+            : (locale === "es" ? "¡Dispositivo vinculado con éxito!" : "Device linked successfully!")
+        );
         if (cloudJoinInput) cloudJoinInput.value = "";
       } else {
         toast.error(res.error || (locale === "es" ? "Código no válido o no encontrado" : "Invalid or not found code"));
       }
+    });
+
+    cloudCopyPairingBtn?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
+      const t = getTranslations(locale);
+      const state = getCloudState();
+      if (!state.code || !state.secretKey) return;
+      if (!currentPairingUrl) {
+        currentPairingUrl = generateCloudPairingUrl(state.code, state.secretKey, window.location.origin, locale);
+      }
+      try {
+        await navigator.clipboard.writeText(currentPairingUrl);
+        toast.success(t.syncModal.cloudPairingLinkCopied);
+      } catch {
+        toast.info(t.syncModal.cloudCopyTitle + ": " + currentPairingUrl);
+      }
+    });
+
+    cloudUpgradeKeyBtn?.addEventListener("click", () => {
+      const locale = getCurrentLocale();
+      const t = getTranslations(locale);
+      const keyVal = cloudUpgradeKeyInput?.value?.trim();
+      if (!keyVal) {
+        toast.info(locale === "es" ? "Ingresá tu clave secreta" : "Enter your secret key");
+        return;
+      }
+      setCloudSecretKey(keyVal);
+      if (cloudUpgradeKeyInput) cloudUpgradeKeyInput.value = "";
+      toast.success(t.syncModal.cloudUpgradeSuccess);
     });
 
     cloudCopyCode?.addEventListener("click", async () => {
@@ -455,7 +597,7 @@ const t = getTranslations(currentLocale);
       const res = await syncToCloudNow();
       cloudSyncNowBtn.disabled = false;
       if (res.success) {
-        toast.success(locale === "es" ? "¡Datos sincronizados con Turso!" : "Data synced with Turso!");
+        toast.success(locale === "es" ? "¡Datos sincronizados con la DB!" : "Data synced with DB!");
       } else {
         toast.error(res.error || (locale === "es" ? "Error al sincronizar" : "Error syncing"));
       }
@@ -464,7 +606,10 @@ const t = getTranslations(currentLocale);
     cloudUnlinkBtn?.addEventListener("click", () => {
       const locale = getCurrentLocale();
       unlinkCloudVault();
-      toast.info(locale === "es" ? "Dispositivo desvinculado de la nube." : "Device unlinked from cloud.");
+      toast.info(locale === "es" ? "Dispositivo desvinculado. Recargando..." : "Device unlinked. Reloading...");
+      setTimeout(() => {
+        window.location.reload();
+      }, 400);
     });
 
     cloudDeleteTrigger?.addEventListener("click", () => {
@@ -484,7 +629,10 @@ const t = getTranslations(currentLocale);
       const res = await deleteCloudVault();
       cloudConfirmDelete.disabled = false;
       if (res.success) {
-        toast.success(locale === "es" ? "Bóveda eliminada permanentemente de Turso." : "Vault permanently deleted from Turso.");
+        toast.success(locale === "es" ? "Bóveda eliminada permanentemente de la DB." : "Vault permanently deleted from DB.");
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       } else {
         toast.error(res.error || (locale === "es" ? "Error al eliminar la bóveda" : "Error deleting vault"));
       }

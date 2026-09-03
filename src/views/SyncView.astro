@@ -55,11 +55,11 @@ const teamHref = getLocalizedPath("/equipo/", currentLocale);
 
       <!-- Ready to Sync state -->
       <div class="sync-card__ready" data-sync-state="ready" hidden>
-        <div class="sync-card__icon-badge sync-card__icon-badge--success">
+        <div class="sync-card__icon-badge sync-card__icon-badge--success" data-ready-badge>
           <i data-lucide="sparkles"></i>
         </div>
-        <h1 class="sync-card__title">{t.sync.readyTitle}</h1>
-        <p class="sync-card__subtitle">
+        <h1 class="sync-card__title" data-ready-title>{t.sync.readyTitle}</h1>
+        <p class="sync-card__subtitle" data-ready-subtitle>
           {t.sync.readySubtitle}
         </p>
 
@@ -105,7 +105,7 @@ const teamHref = getLocalizedPath("/equipo/", currentLocale);
         <div class="sync-card__actions">
           <button type="button" class="btn btn--primary btn--lg" data-confirm-sync>
             <i data-lucide="check"></i>
-            <span>{t.sync.confirmSave}</span>
+            <span data-confirm-text>{t.sync.confirmSave}</span>
           </button>
           <a href={homeHref} class="btn btn--ghost" data-astro-prefetch>{t.sync.cancel}</a>
         </div>
@@ -115,7 +115,18 @@ const teamHref = getLocalizedPath("/equipo/", currentLocale);
 </BaseLayout>
 
 <script>
-  import { parseSyncFromHash, applySyncPayload, decodeCapturedIds, type SyncPayload } from "../lib/sync";
+  import {
+    parseSyncFromHash,
+    parseCloudPairingFromHash,
+    applySyncPayload,
+    decodeCapturedIds,
+    type SyncPayload,
+    type CloudPairingInfo,
+  } from "../lib/sync";
+  import {
+    fetchCloudVault,
+    notifyStatusChange,
+  } from "../lib/cloudSync";
   import { getCapturedIds } from "../lib/storage";
   import { toast } from "../lib/toast";
   import { refreshIcons } from "../lib/icons";
@@ -131,18 +142,45 @@ const teamHref = getLocalizedPath("/equipo/", currentLocale);
     const loadingState = card.querySelector<HTMLDivElement>('[data-sync-state="loading"]');
     const emptyState = card.querySelector<HTMLDivElement>('[data-sync-state="empty"]');
     const readyState = card.querySelector<HTMLDivElement>('[data-sync-state="ready"]');
+    const readyBadge = card.querySelector<HTMLDivElement>("[data-ready-badge]");
+    const readyTitle = card.querySelector<HTMLHeadingElement>("[data-ready-title]");
+    const readySubtitle = card.querySelector<HTMLParagraphElement>("[data-ready-subtitle]");
+    const confirmBtn = card.querySelector<HTMLButtonElement>("[data-confirm-sync]");
+    const confirmText = card.querySelector<HTMLElement>("[data-confirm-text]");
 
     const previewTeam = card.querySelector<HTMLDivElement>("[data-preview-team]");
     const incomingCapturesEl = card.querySelector<HTMLElement>("[data-incoming-captures]");
     const currentCapturesEl = card.querySelector<HTMLElement>("[data-current-captures]");
-    const confirmBtn = card.querySelector<HTMLButtonElement>("[data-confirm-sync]");
 
     let currentPayload: SyncPayload | null = null;
+    let cloudPairing: CloudPairingInfo | null = null;
+    let cloudUpdatedAt: number | undefined;
 
+    const t = getTranslations(getCurrentLocale());
+
+    // 1. Intentar leer credenciales de emparejamiento con la DB (#vault=PK-XXXX&key=...)
     try {
-      currentPayload = await parseSyncFromHash();
+      cloudPairing = parseCloudPairingFromHash();
+      if (cloudPairing) {
+        const vaultRes = await fetchCloudVault(cloudPairing.code);
+        if (vaultRes.success && vaultRes.payload) {
+          currentPayload = vaultRes.payload;
+          cloudUpdatedAt = vaultRes.updatedAt;
+        } else {
+          toast.error(vaultRes.error || "No se pudo conectar a la bóveda en la nube");
+        }
+      }
     } catch (err) {
-      console.error("Error parsing hash:", err);
+      console.error("Error parsing cloud pairing hash:", err);
+    }
+
+    // 2. Si no es bóveda en la nube, probar payload directo P2P (#d=...)
+    if (!currentPayload) {
+      try {
+        currentPayload = await parseSyncFromHash();
+      } catch (err) {
+        console.error("Error parsing hash:", err);
+      }
     }
 
     if (loadingState) loadingState.hidden = true;
@@ -155,6 +193,24 @@ const teamHref = getLocalizedPath("/equipo/", currentLocale);
 
     // Datos válidos detectados
     if (readyState) readyState.hidden = false;
+
+    // Adaptar textos si es vinculación de bóveda en la nube
+    if (cloudPairing) {
+      if (readyBadge) {
+        readyBadge.innerHTML = `<i data-lucide="cloud"></i>`;
+      }
+      if (readyTitle) {
+        readyTitle.textContent = t.sync.cloudLinkTitle;
+      }
+      if (readySubtitle) {
+        readySubtitle.textContent = cloudPairing.secretKey
+          ? t.sync.cloudLinkSubtitleRW.replace("{code}", cloudPairing.code)
+          : t.sync.cloudLinkSubtitleRO.replace("{code}", cloudPairing.code);
+      }
+      if (confirmText) {
+        confirmText.textContent = t.sync.cloudLinkConfirmBtn;
+      }
+    }
 
     const incomingCaptures = decodeCapturedIds(currentPayload.capturedBitset);
     const localCaptures = getCapturedIds();
@@ -187,8 +243,25 @@ const teamHref = getLocalizedPath("/equipo/", currentLocale);
       const selectedMode = (card.querySelector<HTMLInputElement>('input[name="syncMode"]:checked')?.value || "merge") as "merge" | "replace";
 
       const result = applySyncPayload(currentPayload, selectedMode);
-      const t = getTranslations(getCurrentLocale());
-      toast.success(t.sync.successToast.replace("{total}", String(result.totalCaptures)));
+
+      // Si es vinculación con la DB en la nube, guardar credenciales
+      if (cloudPairing) {
+        localStorage.setItem("poketeam:cloud_code", cloudPairing.code);
+        if (cloudPairing.secretKey) {
+          localStorage.setItem("poketeam:cloud_secret", cloudPairing.secretKey);
+        }
+        if (cloudUpdatedAt) {
+          localStorage.setItem("poketeam:cloud_last_sync", String(cloudUpdatedAt));
+        }
+        notifyStatusChange();
+        toast.success(
+          cloudPairing.secretKey
+            ? t.sync.cloudLinkSuccessToast
+            : t.sync.successToast.replace("{total}", String(result.totalCaptures))
+        );
+      } else {
+        toast.success(t.sync.successToast.replace("{total}", String(result.totalCaptures)));
+      }
 
       // Limpiar hash de la URL
       if (window.history.replaceState) {
