@@ -14,7 +14,7 @@ import { refreshIcons } from "./icons";
 import { typeColor } from "./typeColors";
 import { renderDataTable } from "./dataTable";
 import { toast } from "./toast";
-import { getCurrentLocale, getTranslations, getTypeName, getEvolutionTriggerName, type Locale } from "./i18n/translations";
+import { getCurrentLocale, getTranslations, getTypeName, getEvolutionTriggerName, getGameTitle, type Locale } from "./i18n/translations";
 import type { AcquisitionRow, EvolutionChain, EvolutionNode, MoveDetail, Nature, Pokemon, PokemonDetail, PokemonStats } from "./types";
 
 function getModalElements() {
@@ -129,7 +129,12 @@ function getLocationColumns(locale: Locale): ColumnDef<AcquisitionRow, unknown>[
       size: 40,
       cell: (info) => formatGeneration(info.getValue()),
     },
-    { accessorKey: "game", header: t.modal.game, size: 190 },
+    {
+      accessorKey: "game",
+      header: t.modal.game,
+      size: 190,
+      cell: (info) => getGameTitle(String(info.getValue()), locale),
+    },
     { accessorKey: "location", header: t.modal.location, size: 160 },
     {
       accessorKey: "method",

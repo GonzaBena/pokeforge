@@ -21,7 +21,7 @@ import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
-import { getCurrentLocale, getTranslations, getTypeName, type Locale } from "../lib/i18n/translations";
+import { getCurrentLocale, getTranslations, getTypeName, getGameTitle, getRegionName, type Locale } from "../lib/i18n/translations";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
@@ -536,12 +536,14 @@ function populatePickerFilters(): void {
     gameToGenMap.clear();
     let html = `<option value="">${t.pokedex.allGames}</option>`;
     for (const g of generations) {
-      const regionLabel = g.region ? ` (${capitalize(g.region)})` : "";
+      const regionName = g.region ? getRegionName(g.region, locale) : "";
+      const regionLabel = regionName ? ` (${regionName})` : "";
       const genName = locale === "es" ? g.displayName : g.displayName.replace("Generación", "Generation");
       html += `<optgroup label="${genName}${regionLabel}">`;
       for (const vg of g.versionGroups) {
         gameToGenMap.set(vg.name, g);
-        html += `<option value="${vg.name}">${vg.displayName}</option>`;
+        const title = getGameTitle(vg.name, locale, vg.displayName);
+        html += `<option value="${vg.name}">${title}</option>`;
       }
       html += `</optgroup>`;
     }

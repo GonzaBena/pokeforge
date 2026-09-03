@@ -728,3 +728,88 @@ export function getLocalizedPath(
   if (cleanPath === "/") return "/es/";
   return `/es${cleanPath}`;
 }
+
+export const GAME_NAMES: Record<string, { es: string; en: string }> = {
+  "red-blue": { es: "Rojo - Azul", en: "Red - Blue" },
+  "yellow": { es: "Amarillo", en: "Yellow" },
+  "red-green-japan": { es: "Rojo - Verde (Japón)", en: "Red - Green (Japan)" },
+  "blue-japan": { es: "Azul (Japón)", en: "Blue (Japan)" },
+  "gold-silver": { es: "Oro - Plata", en: "Gold - Silver" },
+  "crystal": { es: "Cristal", en: "Crystal" },
+  "ruby-sapphire": { es: "Rubí - Zafiro", en: "Ruby - Sapphire" },
+  "emerald": { es: "Esmeralda", en: "Emerald" },
+  "firered-leafgreen": { es: "Rojo Fuego - Verde Hoja", en: "FireRed - LeafGreen" },
+  "colosseum": { es: "Colosseum", en: "Colosseum" },
+  "xd": { es: "XD: Tempestad Oscura", en: "XD: Gale of Darkness" },
+  "diamond-pearl": { es: "Diamante - Perla", en: "Diamond - Pearl" },
+  "platinum": { es: "Platino", en: "Platinum" },
+  "heartgold-soulsilver": { es: "HeartGold - SoulSilver", en: "HeartGold - SoulSilver" },
+  "black-white": { es: "Negro - Blanco", en: "Black - White" },
+  "black-2-white-2": { es: "Negro 2 - Blanco 2", en: "Black 2 - White 2" },
+  "x-y": { es: "X - Y", en: "X - Y" },
+  "omega-ruby-alpha-sapphire": { es: "Rubí Omega - Zafiro Alfa", en: "Omega Ruby - Alpha Sapphire" },
+  "sun-moon": { es: "Sol - Luna", en: "Sun - Moon" },
+  "ultra-sun-ultra-moon": { es: "Ultra Sol - Ultra Luna", en: "Ultra Sun - Ultra Moon" },
+  "lets-go-pikachu-lets-go-eevee": { es: "Let's Go, Pikachu! - Let's Go, Eevee!", en: "Let's Go, Pikachu! - Let's Go, Eevee!" },
+  "sword-shield": { es: "Espada - Escudo", en: "Sword - Shield" },
+  "the-isle-of-armor": { es: "La Isla de la Armadura", en: "The Isle of Armor" },
+  "the-crown-tundra": { es: "Las Nieves de la Corona", en: "The Crown Tundra" },
+  "brilliant-diamond-shining-pearl": { es: "Diamante Brillante - Perla Reluciente", en: "Brilliant Diamond - Shining Pearl" },
+  "legends-arceus": { es: "Leyendas: Arceus", en: "Legends: Arceus" },
+  "scarlet-violet": { es: "Escarlata - Púrpura", en: "Scarlet - Violet" },
+  "the-teal-mask": { es: "La Máscara Turquesa", en: "The Teal Mask" },
+  "the-indigo-disk": { es: "El Disco Índigo", en: "The Indigo Disk" },
+  "legends-za": { es: "Leyendas: Z-A", en: "Legends: Z-A" },
+  "mega-dimension": { es: "Mega Dimensión", en: "Mega Dimension" },
+  "champions": { es: "Champions", en: "Champions" },
+};
+
+export const GAME_NAMES_BY_DISPLAY: Record<string, string> = {
+  "Red - Blue": "red-blue",
+  "Yellow": "yellow",
+  "Red Japan - Green Japan": "red-green-japan",
+  "Blue Japan": "blue-japan",
+  "Gold - Silver": "gold-silver",
+  "Crystal": "crystal",
+  "Ruby - Sapphire": "ruby-sapphire",
+  "Emerald": "emerald",
+  "Firered - Leafgreen": "firered-leafgreen",
+  "Colosseum": "colosseum",
+  "Xd": "xd",
+  "Diamond - Pearl": "diamond-pearl",
+  "Platinum": "platinum",
+  "Heartgold - Soulsilver": "heartgold-soulsilver",
+  "Black - White": "black-white",
+  "Black 2 - White 2": "black-2-white-2",
+  "X - Y": "x-y",
+  "Omega Ruby - Alpha Sapphire": "omega-ruby-alpha-sapphire",
+  "Sun - Moon": "sun-moon",
+  "Ultra Sun - Ultra Moon": "ultra-sun-ultra-moon",
+  "Lets Go Pikachu - Lets Go Eevee": "lets-go-pikachu-lets-go-eevee",
+  "Sword - Shield": "sword-shield",
+  "The Isle Of Armor Sword - The Isle Of Armor Shield": "the-isle-of-armor",
+  "The Crown Tundra Sword - The Crown Tundra Shield": "the-crown-tundra",
+  "Brilliant Diamond - Shining Pearl": "brilliant-diamond-shining-pearl",
+  "Legends Arceus": "legends-arceus",
+  "Scarlet - Violet": "scarlet-violet",
+  "The Teal Mask Scarlet - The Teal Mask Violet": "the-teal-mask",
+  "The Indigo Disk Scarlet - The Indigo Disk Violet": "the-indigo-disk",
+  "Legends Za": "legends-za",
+  "Mega Dimension": "mega-dimension",
+  "Champions": "champions",
+};
+
+export function getGameTitle(gameKey: string, locale: Locale = "es", fallback?: string): string {
+  const match = GAME_NAMES[gameKey] ?? (GAME_NAMES_BY_DISPLAY[gameKey] ? GAME_NAMES[GAME_NAMES_BY_DISPLAY[gameKey]] : undefined);
+  if (match) {
+    return locale === "es" ? match.es : match.en;
+  }
+  return fallback ?? gameKey;
+}
+
+export function getRegionName(region: string, locale: Locale = "es"): string {
+  if (!region) return "";
+  const lower = region.toLowerCase();
+  if (locale === "es" && lower === "unova") return "Teselia";
+  return region.charAt(0).toUpperCase() + region.slice(1);
+}
