@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 /* Scrollbars sutiles para desktop con ratón */
 @media (hover: hover) and (pointer: fine) {
   * {
@@ -3354,6 +3358,11 @@ img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
 .cloud-copy-pairing-btn {
   width: 100%;
   justify-content: center;
+}
+
+.cloud-pairing-card[hidden],
+.cloud-readonly-box[hidden] {
+  display: none !important;
 }
 
 .cloud-readonly-box {
