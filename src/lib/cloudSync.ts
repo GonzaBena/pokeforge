@@ -132,7 +132,7 @@ function initSyncWorker(): void {
               try {
                 isApplyingRemoteUpdate = true;
                 const payload = await decodeSyncPayload(data.payload);
-                applySyncPayload(payload, "merge");
+                applySyncPayload(payload, "replace");
                 localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdatedAt));
                 toast.info(getSyncRemoteUpdatedText());
               } catch (err) {
@@ -285,7 +285,7 @@ export async function createCloudVault(): Promise<{ success: boolean; code?: str
 export async function joinCloudVault(
   code: string,
   secretKey?: string,
-  mode: "merge" | "replace" = "merge"
+  mode: "merge" | "replace" = "replace"
 ): Promise<{ success: boolean; payload?: SyncPayload; error?: string }> {
   const cleanCode = code.toUpperCase().trim();
   if (!cleanCode) return { success: false, error: "Código requerido" };
@@ -405,7 +405,7 @@ export async function fetchFromCloud(): Promise<void> {
       isApplyingRemoteUpdate = true;
       try {
         const payload = await decodeSyncPayload(data.payload);
-        applySyncPayload(payload, "merge");
+        applySyncPayload(payload, "replace");
         localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt));
         lastSyncError = null;
         toast.info(getSyncRemoteUpdatedText());
@@ -506,6 +506,7 @@ export function initCloudSyncClient(): void {
 
   if (isInitialized) {
     initSyncWorker();
+    fetchFromCloud();
     return;
   }
   isInitialized = true;
@@ -531,4 +532,5 @@ export function initCloudSyncClient(): void {
   });
 
   initSyncWorker();
+  fetchFromCloud();
 }

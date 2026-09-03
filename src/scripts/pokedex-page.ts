@@ -118,6 +118,18 @@ function syncCardCapturedState(id: number, captured: boolean): void {
   if (!captured && view === "captured") applyFilters();
 }
 
+// Refreshes every rendered card's captured state at once — used when a bulk
+// change (cloud sync, backup import, "merge") replaces the captured set
+// rather than toggling a single id.
+function syncAllCardsCapturedState(): void {
+  const capturedIds = getCapturedIds();
+  for (const card of grid.querySelectorAll<HTMLElement>(".pokemon-card")) {
+    const id = Number(card.dataset.pokemonId);
+    if (!Number.isNaN(id)) syncCardCapturedState(id, capturedIds.has(id));
+  }
+  if (view === "captured") applyFilters();
+}
+
 function computeFiltered(source: Pokemon[]): Pokemon[] {
   const capturedIds = getCapturedIds();
   return source.filter((p) => {
@@ -303,9 +315,14 @@ loadMoreBtn.addEventListener("click", async () => {
 
 window.addEventListener(CAPTURED_CHANGED_EVENT, (e) => {
   updateCapturedCounter();
-  const detail = (e as CustomEvent<{ changedId: number; captured: boolean }>).detail;
-  if (detail && !animatingIds.has(detail.changedId)) {
-    syncCardCapturedState(detail.changedId, detail.captured);
+  const detail = (e as CustomEvent<{ changedId?: number; captured?: boolean }>).detail;
+  if (detail && detail.changedId !== undefined) {
+    if (!animatingIds.has(detail.changedId)) {
+      syncCardCapturedState(detail.changedId, Boolean(detail.captured));
+    }
+  } else {
+    // Bulk update (cloud sync / import / merge) — no single changedId.
+    syncAllCardsCapturedState();
   }
 });
 

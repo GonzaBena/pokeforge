@@ -64,6 +64,11 @@ function startPolling(code, intervalMs) {
     currentIntervalMs = intervalMs;
   }
 
+  // Comprobar inmediatamente al inicio para sincronizar de inmediato
+  if (currentCode) {
+    checkVault(currentCode);
+  }
+
   // Comprobación periódica cada intervalMs (~5 min)
   pollIntervalId = setInterval(() => {
     if (currentCode) {

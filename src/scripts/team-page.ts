@@ -1,6 +1,6 @@
 import { getAllPokemon, getGenerations, getMoveDetailsMap, getMoveIndex, getTypeChart } from "../lib/pokedexData";
 import { getPokemonDetail } from "../lib/pokemonDetail";
-import { getTeam, setTeam, setTeamSlot, setTeamSlotMove, getSelectedGame, setSelectedGame, DATA_RESET_EVENT } from "../lib/storage";
+import { getTeam, setTeam, setTeamSlot, setTeamSlotMove, getSelectedGame, setSelectedGame, TEAM_CHANGED_EVENT, DATA_RESET_EVENT } from "../lib/storage";
 import { computeTeamDefense, splitWeaknessesAndResistances, type TeamDefenseEntry } from "../lib/typeChart";
 import { badgeBounceIn, barsAnimateIn, slotPopIn, teamSizeTransition } from "../lib/animations";
 import { toast } from "../lib/toast";
@@ -676,6 +676,15 @@ window.addEventListener(DATA_RESET_EVENT, () => {
   for (let i = 0; i < team.slots.length; i++) {
     renderSingleSlot(i);
   }
+  renderStrengthsPanel();
+});
+
+// Cloud sync / import can replace the team from outside this tab's own
+// controls — re-render slots and size selector so it shows up without reload.
+window.addEventListener(TEAM_CHANGED_EVENT, () => {
+  team = getTeam();
+  renderSizeSelector();
+  renderAllSlots();
   renderStrengthsPanel();
 });
 
