@@ -8,12 +8,13 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    author: z.string().default('PokeForge Team'),
+    author: z.string().default('poketeam'),
     category: z.enum(['guias', 'curiosidades', 'competitivo', 'novedades']),
     tags: z.array(z.string()).default([]),
     coverImage: z.string().optional(),
     featured: z.boolean().default(false),
     readingTime: z.string().optional(),
+    translation: z.string().optional(),
   }),
 });
 

@@ -7,6 +7,8 @@ tags: ["Teambuilding", "Estrategia", "Tipos", "Guía"]
 coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png"
 featured: true
 readingTime: "6 min"
+author: "gonzo"
+translation: "type-coverage-guide"
 ---
 
 Construir un equipo Pokémon ganador va mucho más allá de elegir tus seis criaturas favoritas. El factor determinante que separa a un entrenador novato de uno experto es la **matriz de coberturas defensivas y ofensivas**.

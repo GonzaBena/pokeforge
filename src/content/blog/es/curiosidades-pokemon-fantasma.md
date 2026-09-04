@@ -7,6 +7,7 @@ tags: ["Fantasma", "Lore", "Kanto", "Curiosidades"]
 coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png"
 featured: true
 readingTime: "4 min"
+translation: "ghost-pokemon-trivia"
 ---
 
 Los Pokémon de **tipo Fantasma** han cautivado a los entrenadores desde la primera generación en las ediciones Roja y Azul. Envueltos en folclore, mitos urbanos y descripciones inquietantes en la Pokédex, son la categoría más enigmática del universo Pokémon.

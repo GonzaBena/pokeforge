@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { render, type CollectionEntry } from "astro:content";
 import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
+import { getAuthor } from "../lib/authors";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -10,9 +11,14 @@ interface Props {
 const { post } = Astro.props;
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
+const author = getAuthor(post.data.author);
 const blogPath = getLocalizedPath("/blog/", currentLocale);
+
+// Filtrar encabezados H2 y H3 para el índice de contenidos
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const hasToc = toc.length >= 2;
 
 const formattedDate = post.data.pubDate.toLocaleDateString(
   currentLocale === "es" ? "es-ES" : "en-US",
@@ -26,9 +32,27 @@ const formattedDate = post.data.pubDate.toLocaleDateString(
 const categoryName =
   t.blog.categories[post.data.category as keyof typeof t.blog.categories] ??
   post.data.category;
+
+// Calcular la URL equivalente en el otro idioma (o fallback al listado general del blog)
+const targetLocale: Locale = currentLocale === "es" ? "en" : "es";
+let alternatePostUrl: string;
+
+if (post.data.translation) {
+  alternatePostUrl =
+    targetLocale === "es"
+      ? `/es/blog/${post.data.translation}/`
+      : `/blog/${post.data.translation}/`;
+} else {
+  alternatePostUrl = getLocalizedPath("/blog/", targetLocale);
+}
+
+const alternateUrls: Partial<Record<Locale, string>> = {
+  [currentLocale]: Astro.url.pathname,
+  [targetLocale]: alternatePostUrl,
+};
 ---
 
-<BaseLayout title={`${post.data.title} · Blog`}>
+<BaseLayout title={`${post.data.title} · Blog`} alternateUrls={alternateUrls}>
   <div class="article-page">
     <div class="article-ambient-glow" aria-hidden="true"></div>
 
@@ -40,11 +64,20 @@ const categoryName =
         </a>
       </nav>
 
-      <header class="article-header">
+      <header class="article-header" id="article-top">
         <div class="article-header__meta">
           <span class={`blog-badge blog-badge--${post.data.category}`}>
             {categoryName}
           </span>
+          <div class="article-header__author-chip">
+            <img
+              src={author.avatar}
+              alt={author.name}
+              class="article-header__author-avatar"
+              loading="eager"
+            />
+            <span>{author.name}</span>
+          </div>
           <span class="article-date">
             <i data-lucide="calendar"></i>
             {formattedDate}
@@ -71,37 +104,201 @@ const categoryName =
         )}
       </header>
 
-      <div class="article-body">
-        <Content />
-      </div>
-
-      {post.data.tags && post.data.tags.length > 0 && (
-        <div class="article-tags">
-          {post.data.tags.map((tag) => (
-            <span class="article-tag">
-              <i data-lucide="tag"></i>
-              #{tag}
+      {hasToc && (
+        <details class="article-toc-mobile">
+          <summary class="article-toc-mobile__summary">
+            <span class="article-toc-mobile__title">
+              <i data-lucide="list"></i>
+              <span>{t.blog.tocMobileTitle}</span>
             </span>
-          ))}
-        </div>
+            <span class="article-toc-mobile__count">{toc.length}</span>
+            <i data-lucide="chevron-down" class="article-toc-mobile__chevron"></i>
+          </summary>
+          <nav class="article-toc-mobile__nav">
+            {toc.map((item) => (
+              <a
+                href={`#${item.slug}`}
+                class={`article-toc-link depth-${item.depth}`}
+              >
+                {item.text}
+              </a>
+            ))}
+          </nav>
+        </details>
       )}
 
-      <footer class="article-footer-box">
-        <div class="article-footer-author">
-          <div class="article-author-avatar">
-            <i data-lucide="sparkles"></i>
+      <!-- Layout: Contenido principal + Índice lateral Sticky en desktop -->
+      <div class={`article-layout ${hasToc ? "has-toc" : ""}`}>
+        <div class="article-main">
+          <div class="article-body">
+            <Content />
           </div>
-          <div>
-            <div class="article-author-name">{post.data.author}</div>
-            <div class="article-author-sub">{t.blog.badge}</div>
-          </div>
+
+          {post.data.tags && post.data.tags.length > 0 && (
+            <div class="article-tags">
+              {post.data.tags.map((tag) => (
+                <span class="article-tag">
+                  <i data-lucide="tag"></i>
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <footer class="article-footer-box">
+            <div class="article-footer-author">
+              <img
+                src={author.avatar}
+                alt={author.name}
+                class="article-author-avatar"
+                loading="lazy"
+              />
+              <div class="article-author-info">
+                <div class="article-author-name">{author.name}</div>
+                <div class="article-author-sub">{author.role[currentLocale] ?? author.role.es}</div>
+                {author.bio && (
+                  <p class="article-author-bio">{author.bio[currentLocale] ?? author.bio.es}</p>
+                )}
+              </div>
+            </div>
+
+            <a href={blogPath} class="article-back-btn" data-astro-prefetch>
+              <span>{t.blog.moreArticles}</span>
+              <i data-lucide="arrow-right"></i>
+            </a>
+          </footer>
         </div>
 
-        <a href={blogPath} class="article-back-btn" data-astro-prefetch>
-          <span>{t.blog.moreArticles}</span>
-          <i data-lucide="arrow-right"></i>
-        </a>
-      </footer>
+        {hasToc && (
+          <aside class="article-toc-aside" aria-label={t.blog.tocTitle}>
+            <div class="article-toc-sticky">
+              <div class="article-toc-header">
+                <i data-lucide="list"></i>
+                <span>{t.blog.tocTitle}</span>
+              </div>
+              <nav class="article-toc-nav" data-article-toc>
+                {toc.map((item) => (
+                  <a
+                    href={`#${item.slug}`}
+                    class={`article-toc-link depth-${item.depth}`}
+                    data-toc-slug={item.slug}
+                  >
+                    {item.text}
+                  </a>
+                ))}
+              </nav>
+
+              <div class="article-toc-actions">
+                <button type="button" class="article-toc-action-btn" id="toc-back-to-top">
+                  <i data-lucide="arrow-up"></i>
+                  <span>{t.blog.backToTop}</span>
+                </button>
+              </div>
+            </div>
+          </aside>
+        )}
+      </div>
     </article>
   </div>
+
+  <script>
+    function setupTocScrollspy() {
+      const tocLinks = document.querySelectorAll<HTMLAnchorElement>(
+        "[data-article-toc] a[data-toc-slug]"
+      );
+      if (tocLinks.length === 0) return;
+
+      const headingMap = new Map<string, HTMLElement>();
+      const slugs: string[] = [];
+
+      tocLinks.forEach((link) => {
+        const slug = link.dataset.tocSlug;
+        if (!slug) return;
+        const target = document.getElementById(slug);
+        if (target) {
+          headingMap.set(slug, target);
+          slugs.push(slug);
+        }
+      });
+
+      if (slugs.length === 0) return;
+
+      function updateActiveLink(activeSlug: string) {
+        tocLinks.forEach((link) => {
+          if (link.dataset.tocSlug === activeSlug) {
+            link.classList.add("active");
+            link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          } else {
+            link.classList.remove("active");
+          }
+        });
+      }
+
+      // Marcar el primer link activo por defecto
+      updateActiveLink(slugs[0]);
+
+      // Suave scroll al hacer click en enlaces del índice
+      tocLinks.forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const slug = link.dataset.tocSlug;
+          if (!slug) return;
+          const target = document.getElementById(slug);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: "smooth" });
+            history.pushState(null, "", `#${slug}`);
+            updateActiveLink(slug);
+          }
+        });
+      });
+
+      // Botón volver arriba
+      const backToTopBtn = document.getElementById("toc-back-to-top");
+      if (backToTopBtn) {
+        backToTopBtn.addEventListener("click", () => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+
+      // Intersection Observer para resaltar la sección activa
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              updateActiveLink(entry.target.id);
+            }
+          });
+        },
+        {
+          rootMargin: "0px 0px -70% 0px",
+          threshold: 0.1,
+        }
+      );
+
+      headingMap.forEach((el) => observer.observe(el));
+
+      // Si el usuario llega al fondo del artículo, activar el último encabezado
+      function handleScroll() {
+        const scrollBottom = window.innerHeight + window.scrollY;
+        const pageHeight = document.documentElement.scrollHeight;
+        if (pageHeight - scrollBottom < 120 && slugs.length > 0) {
+          updateActiveLink(slugs[slugs.length - 1]);
+        }
+      }
+      window.addEventListener("scroll", handleScroll, { passive: true });
+
+      // En móviles, cerrar el desplegable al tocar un enlace
+      const mobileDetails = document.querySelector<HTMLDetailsElement>(".article-toc-mobile");
+      if (mobileDetails) {
+        mobileDetails.querySelectorAll("a").forEach((a) => {
+          a.addEventListener("click", () => {
+            mobileDetails.open = false;
+          });
+        });
+      }
+    }
+
+    setupTocScrollspy();
+    document.addEventListener("astro:page-load", setupTocScrollspy);
+  </script>
 </BaseLayout>

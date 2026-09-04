@@ -7,6 +7,8 @@ tags: ["Teambuilding", "Strategy", "Types", "Guide"]
 coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png"
 featured: true
 readingTime: "6 min"
+author: "gonzo"
+translation: "guia-coberturas-de-tipos"
 ---
 
 Crafting a championship Pokémon team involves far more than picking your six favorite monsters. The defining trait separating novice players from seasoned strategists is **defensive and offensive type coverage**.

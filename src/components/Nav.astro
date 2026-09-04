@@ -1,6 +1,12 @@
 ---
 import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
 
+interface Props {
+  alternateUrls?: Partial<Record<Locale, string>>;
+}
+
+const { alternateUrls } = Astro.props;
+
 const path = Astro.url.pathname;
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
@@ -9,6 +15,9 @@ const homePath = getLocalizedPath("/", currentLocale);
 const pokedexPath = getLocalizedPath("/pokedex/", currentLocale);
 const equipoPath = getLocalizedPath("/equipo/", currentLocale);
 const blogPath = getLocalizedPath("/blog/", currentLocale);
+
+const enHref = alternateUrls?.en ?? getLocalizedPath(path, "en");
+const esHref = alternateUrls?.es ?? getLocalizedPath(path, "es");
 
 const isHome = currentLocale === "es" ? (path === "/es" || path === "/es/") : (path === "/" || path === "");
 const isPokedex = currentLocale === "es" ? path.startsWith("/es/pokedex") : path.startsWith("/pokedex");
@@ -36,9 +45,9 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
         {t.nav.blog}
       </a>
       <div class="nav__lang-toggle" aria-label="Language selector">
-        <a href={getLocalizedPath(path, "en")} class:list={["nav__lang-btn", { active: currentLocale === "en" }]} data-astro-prefetch>EN</a>
+        <a href={enHref} class:list={["nav__lang-btn", { active: currentLocale === "en" }]} data-astro-prefetch>EN</a>
         <span class="nav__lang-divider">/</span>
-        <a href={getLocalizedPath(path, "es")} class:list={["nav__lang-btn", { active: currentLocale === "es" }]} data-astro-prefetch>ES</a>
+        <a href={esHref} class:list={["nav__lang-btn", { active: currentLocale === "es" }]} data-astro-prefetch>ES</a>
       </div>
       <div class="nav__pwa-wrapper" data-pwa-row>
         <button class="nav__pwa-btn" type="button" data-pwa-install title={t.nav.installAppTitle} aria-label={t.nav.installAppTitle}>

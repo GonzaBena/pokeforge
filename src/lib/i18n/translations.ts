@@ -355,6 +355,9 @@ export interface Translations {
     writtenBy: string;
     shareArticle: string;
     moreArticles: string;
+    tocTitle: string;
+    tocMobileTitle: string;
+    backToTop: string;
   };
 }
 
@@ -696,6 +699,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       writtenBy: "By",
       shareArticle: "Share article",
       moreArticles: "More recommended articles",
+      tocTitle: "On this page",
+      tocMobileTitle: "Table of Contents",
+      backToTop: "Back to top",
     },
   },
   es: {
@@ -1045,6 +1051,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       writtenBy: "Por",
       shareArticle: "Compartir artículo",
       moreArticles: "Más artículos recomendados",
+      tocTitle: "En este artículo",
+      tocMobileTitle: "Índice de contenidos",
+      backToTop: "Volver arriba",
     },
   },
 };

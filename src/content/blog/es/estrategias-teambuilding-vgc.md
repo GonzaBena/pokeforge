@@ -7,6 +7,7 @@ tags: ["VGC", "Competitivo", "Estrategia", "Dobles"]
 coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
 featured: false
 readingTime: "5 min"
+translation: "vgc-teambuilding-strategies"
 ---
 
 El formato oficial de Combates Dobles (**VGC**) es trepidante y táctico. A diferencia de las batallas individuales donde los cambios de Pokémon predominan, en Dobles un solo turno puede definir la partida por completo.

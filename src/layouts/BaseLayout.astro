@@ -2,13 +2,15 @@
 import Nav from "../components/Nav.astro";
 import ToastContainer from "../components/ToastContainer.astro";
 import SyncModal from "../components/SyncModal.astro";
+import type { Locale } from "../lib/i18n/translations";
 import "../styles/global.css";
 
 interface Props {
   title: string;
+  alternateUrls?: Partial<Record<Locale, string>>;
 }
 
-const { title } = Astro.props;
+const { title, alternateUrls } = Astro.props;
 const currentLocale = Astro.currentLocale ?? "en";
 ---
 
@@ -30,7 +32,7 @@ const currentLocale = Astro.currentLocale ?? "en";
     <title>{title} · PokeForge</title>
   </head>
   <body>
-    <Nav />
+    <Nav alternateUrls={alternateUrls} />
     <slot />
     <SyncModal />
     <ToastContainer />

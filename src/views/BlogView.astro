@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
+import { getAuthor } from "../lib/authors";
 
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
@@ -70,53 +71,65 @@ function formatDate(date: Date): string {
     {heroPosts.length > 0 && (
       <section class="blog-carousel" data-blog-carousel>
         <div class="blog-carousel__track">
-          {heroPosts.map((post, index) => (
-            <div
-              class={`blog-carousel__slide ${index === 0 ? "active" : ""}`}
-              data-carousel-slide={index}
-            >
-              <a href={getPostUrl(post.id)} class="blog-featured-card" data-astro-prefetch>
-                <div class="blog-featured-card__media">
-                  <span class="blog-featured-card__flag">
-                    <i data-lucide="flame"></i>
-                    {t.blog.featuredBadge}
-                  </span>
-                  <img
-                    src={post.data.coverImage ?? "/favicon.png"}
-                    alt={post.data.title}
-                    loading={index === 0 ? "eager" : "lazy"}
-                  />
-                </div>
-                <div class="blog-featured-card__body">
-                  <div class="blog-featured-card__meta">
-                    <span class={`blog-badge blog-badge--${post.data.category}`}>
-                      {t.blog.categories[post.data.category as keyof typeof t.blog.categories] ?? post.data.category}
+          {heroPosts.map((post, index) => {
+            const heroAuthor = getAuthor(post.data.author);
+            return (
+              <div
+                class={`blog-carousel__slide ${index === 0 ? "active" : ""}`}
+                data-carousel-slide={index}
+              >
+                <a href={getPostUrl(post.id)} class="blog-featured-card" data-astro-prefetch>
+                  <div class="blog-featured-card__media">
+                    <span class="blog-featured-card__flag">
+                      <i data-lucide="flame"></i>
+                      {t.blog.featuredBadge}
                     </span>
-                    {post.data.readingTime && (
-                      <span class="blog-read-time">
-                        <i data-lucide="clock"></i>
-                        {post.data.readingTime} {t.blog.readingTimeSuffix}
+                    <img
+                      src={post.data.coverImage ?? "/favicon.png"}
+                      alt={post.data.title}
+                      loading={index === 0 ? "eager" : "lazy"}
+                    />
+                  </div>
+                  <div class="blog-featured-card__body">
+                    <div class="blog-featured-card__meta">
+                      <span class={`blog-badge blog-badge--${post.data.category}`}>
+                        {t.blog.categories[post.data.category as keyof typeof t.blog.categories] ?? post.data.category}
                       </span>
-                    )}
-                  </div>
+                      {post.data.readingTime && (
+                        <span class="blog-read-time">
+                          <i data-lucide="clock"></i>
+                          {post.data.readingTime} {t.blog.readingTimeSuffix}
+                        </span>
+                      )}
+                    </div>
 
-                  <h2 class="blog-featured-card__title">{post.data.title}</h2>
-                  <p class="blog-featured-card__desc">{post.data.description}</p>
+                    <h2 class="blog-featured-card__title">{post.data.title}</h2>
+                    <p class="blog-featured-card__desc">{post.data.description}</p>
 
-                  <div class="blog-featured-card__footer">
-                    <span class="blog-featured-card__date">
-                      <i data-lucide="calendar"></i>
-                      {formatDate(post.data.pubDate)}
-                    </span>
-                    <span class="blog-featured-card__action">
-                      <span>{t.blog.readArticle}</span>
-                      <i data-lucide="arrow-right"></i>
-                    </span>
+                    <div class="blog-featured-card__footer">
+                      <div class="blog-author-chip">
+                        <img
+                          src={heroAuthor.avatar}
+                          alt={heroAuthor.name}
+                          class="blog-author-avatar"
+                          loading="lazy"
+                        />
+                        <span class="blog-author-name">{heroAuthor.name}</span>
+                      </div>
+                      <span class="blog-featured-card__date">
+                        <i data-lucide="calendar"></i>
+                        {formatDate(post.data.pubDate)}
+                      </span>
+                      <span class="blog-featured-card__action">
+                        <span>{t.blog.readArticle}</span>
+                        <i data-lucide="arrow-right"></i>
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </a>
-            </div>
-          ))}
+                </a>
+              </div>
+            );
+          })}
         </div>
 
         {heroPosts.length > 1 && (
@@ -202,6 +215,7 @@ function formatDate(date: Date): string {
           t.blog.categories[post.data.category as keyof typeof t.blog.categories] ??
           post.data.category;
         const postTags = (post.data.tags ?? []).join(" ").toLowerCase();
+        const postAuthor = getAuthor(post.data.author);
 
         return (
           <article
@@ -247,7 +261,15 @@ function formatDate(date: Date): string {
                 <p class="post-card__desc">{post.data.description}</p>
 
                 <div class="post-card__footer">
-                  <span class="post-card__author">{post.data.author}</span>
+                  <div class="blog-author-chip">
+                    <img
+                      src={postAuthor.avatar}
+                      alt={postAuthor.name}
+                      class="blog-author-avatar"
+                      loading="lazy"
+                    />
+                    <span class="post-card__author">{postAuthor.name}</span>
+                  </div>
                   <span class="post-card__arrow">
                     <i data-lucide="arrow-right"></i>
                   </span>

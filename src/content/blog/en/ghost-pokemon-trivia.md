@@ -7,6 +7,7 @@ tags: ["Ghost", "Lore", "Kanto", "Trivia"]
 coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png"
 featured: true
 readingTime: "4 min"
+translation: "curiosidades-pokemon-fantasma"
 ---
 
 **Ghost-type Pokémon** have fascinated trainers ever since Generation I in Red & Blue. Cloaked in folklore, urban legends, and chilling Pokédex descriptions, they remain the most enigmatic creatures in the Pokémon universe.

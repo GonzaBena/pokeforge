@@ -7,6 +7,7 @@ tags: ["VGC", "Competitive", "Strategy", "Doubles"]
 coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
 featured: false
 readingTime: "5 min"
+translation: "estrategias-teambuilding-vgc"
 ---
 
 The official Pokémon Doubles format (**VGC**) is fast-paced and intensely tactical. Unlike singles matches where passive switches are frequent, every single turn in doubles can make or break the outcome.
