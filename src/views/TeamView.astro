@@ -113,11 +113,11 @@ const t = getTranslations(currentLocale);
       </div>
       <div class="picker-panel__filters">
         <div class="picker-panel__inputs-row">
-          <div class="picker-input-wrap">
+          <label class="picker-input-wrap">
             <i data-lucide="search" class="picker-input-icon"></i>
             <input class="picker-input" type="search" placeholder={t.team.searchByNameOrNum} data-picker-search />
-          </div>
-          <div class="picker-input-wrap">
+          </label>
+          <label class="picker-input-wrap">
             <i data-lucide="swords" class="picker-input-icon"></i>
             <input
               class="picker-input"
@@ -127,7 +127,7 @@ const t = getTranslations(currentLocale);
               data-picker-move-filter
             />
             <datalist id="picker-move-options" data-picker-move-options></datalist>
-          </div>
+          </label>
         </div>
         <div class="picker-panel__filter-section">
           <span class="picker-panel__section-title">{t.team.typesSection}</span>
@@ -171,10 +171,10 @@ const t = getTranslations(currentLocale);
         </button>
       </div>
       <div class="picker-panel__filters">
-        <div class="picker-input-wrap">
+        <label class="picker-input-wrap">
           <i data-lucide="search" class="picker-input-icon"></i>
           <input class="picker-input" type="search" placeholder={t.team.filterByMove} data-move-picker-search />
-        </div>
+        </label>
         <div class="picker-panel__container">
           <div class="picker-panel__filter-section">
             <span class="picker-panel__section-title">{t.team.category}</span>

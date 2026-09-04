@@ -76,3 +76,35 @@ svg.lucide {
   flex-shrink: 0;
 }
 
+/* Respuesta táctil inmediata sin retardo de 300ms en celulares */
+html,
+body,
+a,
+button,
+input,
+select,
+textarea,
+label,
+[role="button"],
+.pokemon-card,
+.team-slot,
+.filter-chip,
+.view-toggle__btn,
+.picker-item {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Reconocimiento interactivo nativo inmediato en WebKit (iOS Safari) */
+button,
+[role="button"],
+.pokemon-card,
+.team-slot,
+.filter-chip,
+.picker-item,
+[data-capture-btn],
+[data-sync-open],
+[data-picker-pick] {
+  cursor: pointer;
+}
+

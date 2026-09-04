@@ -40,3 +40,10 @@
 /* Features: Blog */
 @import "./features/blog/blog.css";
 @import "./features/blog/article.css";
+
+/* Transiciones entre páginas MPA fluidas */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}

@@ -1,5 +1,6 @@
 ---
 import Nav from "../components/Nav.astro";
+import NavProgress from "../components/NavProgress.astro";
 import ToastContainer from "../components/ToastContainer.astro";
 import SyncModal from "../components/SyncModal.astro";
 import type { Locale } from "../lib/i18n/translations";
@@ -32,6 +33,7 @@ const currentLocale = Astro.currentLocale ?? "en";
     <title>{title} · PokeForge</title>
   </head>
   <body>
+    <NavProgress locale={currentLocale as Locale} />
     <Nav alternateUrls={alternateUrls} />
     <slot />
     <SyncModal />

@@ -573,7 +573,7 @@ function renderNextBatch(): void {
   if (next.length) {
     const template = document.createElement("template");
     template.innerHTML = next.map((p) => renderCardHTML(p, capturedIds.has(p.id))).join("");
-    const newEls = Array.from(template.content.children);
+    const newEls = Array.from(template.content.children) as HTMLElement[];
     grid.append(...newEls);
     shown += next.length;
     refreshIcons();

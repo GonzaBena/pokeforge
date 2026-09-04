@@ -1165,21 +1165,23 @@ function dexNumber(id: number): string {
   return `#${String(id).padStart(4, "0")}`;
 }
 
-function renderPickerResults(): void {
+let currentPickerResults: Pokemon[] = [];
+
+function renderPickerBatch(append = false): void {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
-  const results = computePickerFiltered();
   const exclusivesMap = getPickerExclusiveMap();
-  const countEl = overlayEl.querySelector<HTMLElement>("[data-picker-count]");
-  if (countEl) {
-    countEl.textContent = `${results.length} Pokémon`;
-  }
 
-  if (!results.length) {
+  if (!currentPickerResults.length) {
     pickerResultsEl.innerHTML = `<p class="pokedex-empty">${t.pokedex.empty}</p>`;
     return;
   }
-  pickerResultsEl.innerHTML = results
+
+  const start = append ? pickerResultsEl.querySelectorAll(".picker-item").length : 0;
+  const batch = currentPickerResults.slice(start, start + 60);
+  if (!batch.length) return;
+
+  const html = batch
     .map((p) => {
       let dotHtml = "";
       if (exclusivesMap.has(p.id)) {
@@ -1197,7 +1199,29 @@ function renderPickerResults(): void {
     `;
     })
     .join("");
+
+  if (append) {
+    pickerResultsEl.insertAdjacentHTML("beforeend", html);
+  } else {
+    pickerResultsEl.innerHTML = html;
+  }
 }
+
+function renderPickerResults(): void {
+  currentPickerResults = computePickerFiltered();
+  const countEl = overlayEl.querySelector<HTMLElement>("[data-picker-count]");
+  if (countEl) {
+    countEl.textContent = `${currentPickerResults.length} Pokémon`;
+  }
+  pickerResultsEl.scrollTop = 0;
+  renderPickerBatch(false);
+}
+
+pickerResultsEl.addEventListener("scroll", () => {
+  if (pickerResultsEl.scrollTop + pickerResultsEl.clientHeight >= pickerResultsEl.scrollHeight - 300) {
+    renderPickerBatch(true);
+  }
+});
 
 function openPicker(index: number): void {
   activeSlotIndex = index;

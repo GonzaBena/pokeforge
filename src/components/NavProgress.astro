@@ -1,0 +1,240 @@
+---
+import { type Locale } from "../lib/i18n/translations";
+
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = "en" } = Astro.props;
+const loadingText = locale === "es" ? "Cargando..." : "Loading...";
+---
+
+<!-- Barra de progreso de navegación superior -->
+<div id="nav-progress-bar" class="nav-progress-bar" aria-hidden="true">
+  <div class="nav-progress-bar__line" id="nav-progress-line"></div>
+</div>
+
+<!-- Indicador flotante de carga (especialmente visible en PWA standalone y móvil) -->
+<div id="nav-loading-pill" class="nav-loading-pill" aria-hidden="true">
+  <i data-lucide="loader-2" class="spin"></i>
+  <span>{loadingText}</span>
+</div>
+
+<style>
+  .nav-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 3px;
+    z-index: 10001;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .nav-progress-bar.is-active {
+    opacity: 1;
+  }
+
+  .nav-progress-bar__line {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ef4444 0%, #f97316 60%, #eab308 100%);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.9), 0 0 4px rgba(249, 115, 22, 0.7);
+    border-radius: 0 2px 2px 0;
+    transition: width 0.2s cubic-bezier(0.1, 0.05, 0.2, 1);
+  }
+
+  .nav-loading-pill {
+    position: fixed;
+    top: max(16px, calc(env(safe-area-inset-top, 0px) + 12px));
+    left: 50%;
+    transform: translateX(-50%) translateY(-24px);
+    z-index: 10002;
+    pointer-events: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill, 999px);
+    background: rgba(22, 22, 28, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border, #2a2a35);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(239, 68, 68, 0.2);
+    color: var(--text, #f2f1f6);
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition:
+      transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.25s ease;
+  }
+
+  .nav-loading-pill.is-active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .nav-loading-pill :global(svg) {
+    width: 15px;
+    height: 15px;
+    color: var(--accent, #ef4444);
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  :global(.spin) {
+    animation: spin 0.8s linear infinite;
+  }
+</style>
+
+<script>
+  import { refreshIcons } from "../lib/icons";
+
+  function initNavProgress() {
+    const bar = document.getElementById("nav-progress-bar");
+    const line = document.getElementById("nav-progress-line");
+    const pill = document.getElementById("nav-loading-pill");
+    if (!bar || !line || !pill) return;
+
+    let timers: ReturnType<typeof setTimeout>[] = [];
+
+    function clearTimers() {
+      timers.forEach((t) => clearTimeout(t));
+      timers = [];
+    }
+
+    function startProgress(clickedEl?: HTMLElement | null) {
+      clearTimers();
+
+      // Destacar elemento clickeado si existe
+      if (clickedEl) {
+        clickedEl.classList.add("is-navigating");
+      }
+
+      // Activar barra de progreso
+      bar?.classList.add("is-active");
+      if (line) {
+        line.style.transition = "width 0.15s ease-out";
+        line.style.width = "25%";
+      }
+
+      timers.push(
+        setTimeout(() => {
+          if (line) {
+            line.style.transition = "width 0.4s ease-out";
+            line.style.width = "55%";
+          }
+        }, 120)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          if (line) {
+            line.style.transition = "width 0.8s ease-out";
+            line.style.width = "80%";
+          }
+        }, 400)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          if (line) {
+            line.style.transition = "width 2s ease-out";
+            line.style.width = "92%";
+          }
+        }, 1200)
+      );
+
+      // Mostrar pill flotante con retardo para dar feedback en cargas de PWA o red móvil
+      const isStandalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as any).standalone === true;
+      const pillDelay = isStandalone ? 120 : 250;
+
+      timers.push(
+        setTimeout(() => {
+          pill?.classList.add("is-active");
+          refreshIcons();
+        }, pillDelay)
+      );
+
+      // Timeout de seguridad si el usuario no llega a redirigir
+      timers.push(
+        setTimeout(() => {
+          stopProgress();
+        }, 9000)
+      );
+    }
+
+    function stopProgress() {
+      clearTimers();
+      if (line) {
+        line.style.transition = "width 0.15s ease-out";
+        line.style.width = "100%";
+      }
+
+      pill?.classList.remove("is-active");
+      document.querySelectorAll(".is-navigating").forEach((el) => el.classList.remove("is-navigating"));
+
+      timers.push(
+        setTimeout(() => {
+          bar?.classList.remove("is-active");
+          timers.push(
+            setTimeout(() => {
+              if (line) {
+                line.style.transition = "none";
+                line.style.width = "0%";
+              }
+            }, 250)
+          );
+        }, 200)
+      );
+    }
+
+    function isNavigableLink(el: Element | null): HTMLAnchorElement | null {
+      if (!el) return null;
+      const link = el.closest<HTMLAnchorElement>("a");
+      if (!link || !link.href) return null;
+      if (link.target && link.target !== "_self") return null;
+      if (link.hasAttribute("download")) return null;
+      if (link.getAttribute("href")?.startsWith("#")) return null;
+      if (link.getAttribute("href")?.startsWith("javascript:")) return null;
+
+      try {
+        const url = new URL(link.href, window.location.href);
+        if (url.origin !== window.location.origin) return null;
+        if (url.pathname === window.location.pathname && url.search === window.location.search) {
+          return null;
+        }
+        return link;
+      } catch {
+        return null;
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      if (e.defaultPrevented) return;
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const link = isNavigableLink(e.target as Element);
+      if (!link) return;
+
+      startProgress(link);
+    });
+
+    // Resetear al navegar desde bfcache
+    window.addEventListener("pageshow", () => {
+      stopProgress();
+    });
+  }
+
+  initNavProgress();
+</script>

@@ -32,6 +32,9 @@
   box-shadow: var(--shadow-card);
   perspective: 600px;
   transform-style: preserve-3d;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition:
     transform 0.2s ease,
     border-color 0.2s ease,
@@ -56,16 +59,22 @@
   transition: opacity 0.25s ease;
 }
 
-.pokemon-card:hover::before {
-  opacity: 0.4;
+@media (hover: hover) and (pointer: fine) {
+  .pokemon-card:hover::before {
+    opacity: 0.4;
+  }
+
+  .pokemon-card:hover {
+    border-color: var(--type-glow, var(--accent));
+    border-top-color: var(--type-glow, var(--accent));
+    box-shadow:
+      0 10px 30px -4px var(--type-glow, rgba(239, 68, 68, 0.4)),
+      var(--shadow-card);
+  }
 }
 
-.pokemon-card:hover {
-  border-color: var(--type-glow, var(--accent));
-  border-top-color: var(--type-glow, var(--accent));
-  box-shadow:
-    0 10px 30px -4px var(--type-glow, rgba(239, 68, 68, 0.4)),
-    var(--shadow-card);
+.pokemon-card:active {
+  transform: scale(0.98);
 }
 
 .pokemon-card__header {

@@ -49,7 +49,7 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
         <span class="nav__lang-divider">/</span>
         <a href={esHref} class:list={["nav__lang-btn", { active: currentLocale === "es" }]} data-astro-prefetch>ES</a>
       </div>
-      <div class="nav__pwa-wrapper" data-pwa-row>
+      <div class="nav__pwa-wrapper nav__pwa-wrapper--desktop" data-pwa-row hidden>
         <button class="nav__pwa-btn" type="button" data-pwa-install title={t.nav.installAppTitle} aria-label={t.nav.installAppTitle}>
           <i data-lucide="download"></i>
           <span>{t.nav.installApp}</span>
@@ -102,6 +102,14 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
       </button>
     </div>
   </div>
+
+  <!-- Fila exclusiva para botón de instalar en celulares (evita superposición con el logo) -->
+  <div class="nav__pwa-mobile-row" data-pwa-row hidden>
+    <button class="nav__pwa-mobile-btn" type="button" data-pwa-install title={t.nav.installAppTitle} aria-label={t.nav.installAppTitle}>
+      <i data-lucide="download"></i>
+      <span>{t.nav.installApp}</span>
+    </button>
+  </div>
 </nav>
 
 <nav class="bottom-nav" aria-label={t.nav.mobileNav}>
@@ -116,6 +124,10 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
   <a class="bottom-nav__link" href={equipoPath} data-astro-prefetch aria-current={isEquipo ? "page" : undefined}>
     <i data-lucide="users"></i>
     <span>{t.nav.team}</span>
+  </a>
+  <a class="bottom-nav__link" href={blogPath} data-astro-prefetch aria-current={isBlog ? "page" : undefined}>
+    <i data-lucide="book"></i>
+    <span>{t.nav.blog}</span>
   </a>
 </nav>
 
@@ -162,42 +174,58 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
   }
 
   function initPwaInstall() {
-    const pwaRow = document.querySelector<HTMLElement>("[data-pwa-row]");
-    const pwaBtn = document.querySelector<HTMLButtonElement>("[data-pwa-install]");
-    if (!pwaRow || !pwaBtn) return;
+    const pwaRows = document.querySelectorAll<HTMLElement>("[data-pwa-row]");
+    const pwaBtns = document.querySelectorAll<HTMLButtonElement>("[data-pwa-install]");
+    if (!pwaRows.length || !pwaBtns.length) return;
+
+    function hideAll() {
+      pwaRows.forEach((row) => (row.hidden = true));
+    }
+
+    function showAll() {
+      pwaRows.forEach((row) => (row.hidden = false));
+      refreshIcons();
+    }
 
     if (isAppInstalled()) {
-      pwaRow.hidden = true;
+      hideAll();
       return;
     }
 
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      if (!isAppInstalled()) pwaRow.hidden = false;
+      if (!isAppInstalled()) showAll();
     });
+
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    if (isIos && !isAppInstalled()) {
+      showAll();
+    }
 
     window.addEventListener("appinstalled", () => {
       localStorage.setItem("pokeforge_installed", "true");
-      pwaRow.hidden = true;
+      hideAll();
       const t = getTranslations(getCurrentLocale());
       toast.success(t.nav.installedSuccess);
     });
 
-    pwaBtn.addEventListener("click", async () => {
-      const t = getTranslations(getCurrentLocale());
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
-        if (choice.outcome === "accepted") {
-          localStorage.setItem("pokeforge_installed", "true");
-          pwaRow.hidden = true;
-          toast.success(t.nav.installedSuccess);
+    pwaBtns.forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const t = getTranslations(getCurrentLocale());
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          if (choice.outcome === "accepted") {
+            localStorage.setItem("pokeforge_installed", "true");
+            hideAll();
+            toast.success(t.nav.installedSuccess);
+          }
+          deferredPrompt = null;
+        } else {
+          toast.info(t.nav.pwaHint);
         }
-        deferredPrompt = null;
-      } else {
-        toast.info(t.nav.pwaHint);
-      }
+      });
     });
   }
 

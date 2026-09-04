@@ -2,14 +2,25 @@ import anime from "animejs";
 import { playCoinSound, playStampSound } from "./sound";
 
 export function staggerCardsIn(targets: Element[] | NodeListOf<Element>): void {
-  anime.set(targets, { opacity: 0, translateY: 16, scale: 0.96 });
+  const targetArray = Array.from(targets);
+  if (!targetArray.length) return;
+
+  // En celulares y lotes grandes, animar solo el lote inicial visible para no bloquear el hilo principal
+  const animated = targetArray.slice(0, 16);
+  const rest = targetArray.slice(16);
+
+  if (rest.length) {
+    anime.set(rest, { opacity: 1, translateY: 0, scale: 1 });
+  }
+
+  anime.set(animated, { opacity: 0, translateY: 14, scale: 0.97 });
   anime({
-    targets: Array.from(targets),
+    targets: animated,
     opacity: [0, 1],
-    translateY: [16, 0],
-    scale: [0.96, 1],
-    duration: 420,
-    delay: anime.stagger(40),
+    translateY: [14, 0],
+    scale: [0.97, 1],
+    duration: 300,
+    delay: anime.stagger(25),
     easing: "easeOutQuad",
   });
 }

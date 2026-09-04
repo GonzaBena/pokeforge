@@ -74,10 +74,10 @@
 
 .hero__actions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
   width: 100%;
-  max-width: 680px;
+  max-width: 960px;
   margin-bottom: 50px;
 }
 
@@ -147,6 +147,16 @@
 
 .hero__card:hover .hero__card-arrow {
   transform: translateX(4px);
+  color: var(--accent);
+}
+
+.hero__card.is-navigating {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.25) !important;
+}
+
+.hero__card.is-navigating .hero__card-arrow {
+  transform: translateX(6px);
   color: var(--accent);
 }
 

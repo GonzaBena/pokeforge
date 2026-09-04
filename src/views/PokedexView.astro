@@ -25,10 +25,10 @@ const t = getTranslations(currentLocale);
           <button class="view-toggle__btn" type="button" data-view="all" aria-pressed="true">{t.pokedex.all}</button>
           <button class="view-toggle__btn" type="button" data-view="captured" aria-pressed="false">{t.pokedex.captured}</button>
         </div>
-        <div class="search-input-wrap">
+        <label class="search-input-wrap">
           <i data-lucide="search" class="search-input-icon"></i>
           <input class="search-input" type="search" placeholder={t.pokedex.searchPlaceholder} data-search-input />
-        </div>
+        </label>
         <button
           class="filter-toggle-btn"
           type="button"

@@ -167,7 +167,7 @@ function formatDate(date: Date): string {
 
     <!-- Barra de Búsqueda y Filtros de Categorías -->
     <div class="blog-controls">
-      <div class="blog-search-box">
+      <label class="blog-search-box">
         <i data-lucide="search" class="blog-search-icon"></i>
         <input
           type="search"
@@ -176,7 +176,7 @@ function formatDate(date: Date): string {
           aria-label={t.blog.searchPlaceholder}
           data-blog-search
         />
-      </div>
+      </label>
 
       <nav class="blog-categories" aria-label="Categorías del blog">
         <button class="blog-tab-btn active" data-filter="all">

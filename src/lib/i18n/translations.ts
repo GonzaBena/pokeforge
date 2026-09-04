@@ -77,6 +77,8 @@ export interface Translations {
     pokedexDesc: string;
     buildTeam: string;
     teamDesc: string;
+    readBlog: string;
+    blogDesc: string;
     typeAnalysis: string;
     typeAnalysisDesc: string;
     offlineMode: string;
@@ -401,6 +403,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       pokedexDesc: "1025+ Pokémon with game and gen filters",
       buildTeam: "Build Team",
       teamDesc: "Tactical type and weakness analysis",
+      readBlog: "Blog & Guides",
+      blogDesc: "Guides, trivia, and competitive analysis",
       typeAnalysis: "Type Analysis",
       typeAnalysisDesc: "Calculate resistances and immunities instantly.",
       offlineMode: "Offline PWA Mode",
@@ -746,6 +750,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       pokedexDesc: "1025+ Pokémon con filtros por juego y gen",
       buildTeam: "Armar Equipo",
       teamDesc: "Análisis táctico de tipos y debilidades",
+      readBlog: "Blog y Guías",
+      blogDesc: "Estrategias, novedades y curiosidades",
       typeAnalysis: "Análisis de Tipos",
       typeAnalysisDesc: "Calculá resistencias e inmunidades al instante.",
       offlineMode: "Modo PWA Offline",

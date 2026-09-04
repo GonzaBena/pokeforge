@@ -74,6 +74,8 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   padding: 12px;
   text-align: center;
   color: var(--text-faint);
@@ -81,9 +83,15 @@
   transition: all 0.2s ease;
 }
 
-.team-slot:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+@media (hover: hover) and (pointer: fine) {
+  .team-slot:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.team-slot:active {
+  transform: scale(0.99);
 }
 
 .team-slot.filled {
@@ -96,7 +104,7 @@
   padding: 12px 14px;
   align-items: stretch;
   justify-content: center;
-  cursor: default;
+  cursor: pointer;
 }
 
 .team-slot__card-content {
