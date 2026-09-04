@@ -1019,6 +1019,10 @@ exclusiveToggleEl?.addEventListener("click", (e) => {
   const filter = btn.dataset.exclusiveFilter;
   if (!filter) return;
 
+  const nonAllButtons = Array.from(
+    exclusiveToggleEl.querySelectorAll<HTMLButtonElement>("[data-exclusive-filter]")
+  ).filter((b) => b.dataset.exclusiveFilter !== "all");
+
   if (filter === "all") {
     selectedExclusiveFilters = new Set(["all"]);
   } else {
@@ -1028,8 +1032,8 @@ exclusiveToggleEl?.addEventListener("click", (e) => {
     } else {
       selectedExclusiveFilters.add(filter);
     }
-    if (selectedExclusiveFilters.size === 0) {
-      selectedExclusiveFilters.add("all");
+    if (selectedExclusiveFilters.size === 0 || selectedExclusiveFilters.size >= nonAllButtons.length) {
+      selectedExclusiveFilters = new Set(["all"]);
     }
   }
 

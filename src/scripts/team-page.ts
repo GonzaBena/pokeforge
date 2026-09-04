@@ -2229,6 +2229,10 @@ pickerExclusiveToggleEl?.addEventListener("click", (e) => {
   const filter = btn.dataset.pickerExclusiveFilter;
   if (!filter) return;
 
+  const nonAllButtons = Array.from(
+    pickerExclusiveToggleEl.querySelectorAll<HTMLButtonElement>("[data-picker-exclusive-filter]")
+  ).filter((b) => b.dataset.pickerExclusiveFilter !== "all");
+
   if (filter === "all") {
     pickerState.exclusive = new Set(["all"]);
   } else {
@@ -2238,8 +2242,8 @@ pickerExclusiveToggleEl?.addEventListener("click", (e) => {
     } else {
       pickerState.exclusive.add(filter);
     }
-    if (pickerState.exclusive.size === 0) {
-      pickerState.exclusive.add("all");
+    if (pickerState.exclusive.size === 0 || pickerState.exclusive.size >= nonAllButtons.length) {
+      pickerState.exclusive = new Set(["all"]);
     }
   }
 
