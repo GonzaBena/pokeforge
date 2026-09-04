@@ -161,7 +161,9 @@
 .blog-featured-card:hover {
   transform: translateY(-3px);
   border-color: rgba(239, 68, 68, 0.4);
-  box-shadow: var(--shadow-pop), 0 0 25px rgba(239, 68, 68, 0.12);
+  box-shadow:
+    var(--shadow-pop),
+    0 0 25px rgba(239, 68, 68, 0.12);
 }
 
 .blog-featured-card__media {
@@ -344,6 +346,74 @@
   color: var(--text-faint);
 }
 
+/* Active Tag Filter Indicator */
+.blog-active-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+.blog-active-tag[hidden] {
+  display: none !important;
+}
+
+.blog-active-tag__label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.blog-active-tag__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.blog-active-tag__chip i,
+.blog-active-tag__chip svg {
+  width: 12px;
+  height: 12px;
+}
+
+.blog-active-tag__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  cursor: pointer;
+  color: #fff;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+  margin-left: 2px;
+}
+
+.blog-active-tag__clear:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: scale(1.1);
+}
+
+.blog-active-tag__clear i,
+.blog-active-tag__clear svg {
+  width: 10px;
+  height: 10px;
+}
+
 .blog-categories {
   display: flex;
   align-items: center;
@@ -376,6 +446,14 @@
   border-color: var(--border-strong);
 }
 
+.blog-tab-btn i,
+.blog-tab-btn svg {
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 !important;
+  flex-shrink: 0;
+}
+
 .blog-tab-btn.active {
   background: var(--accent-soft);
   color: #fff;
@@ -399,6 +477,15 @@
 .blog-tab-btn.active .blog-tab-btn__count {
   background: var(--accent);
   color: #fff;
+}
+
+.blog-tab-btn[data-empty="true"]:not(.active) {
+  opacity: 0.5;
+}
+
+.blog-tab-btn[data-empty="true"]:not(.active) .blog-tab-btn__count {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-faint);
 }
 
 /* --------------------------------------------------------------- Articles Grid */
@@ -434,7 +521,9 @@
 
 .post-card--featured:hover {
   border-color: rgba(239, 68, 68, 0.6);
-  box-shadow: var(--shadow-pop), 0 0 20px rgba(239, 68, 68, 0.15);
+  box-shadow:
+    var(--shadow-pop),
+    0 0 20px rgba(239, 68, 68, 0.15);
 }
 
 .post-card[data-hidden="true"] {

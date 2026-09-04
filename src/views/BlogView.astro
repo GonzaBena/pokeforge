@@ -181,31 +181,49 @@ function formatDate(date: Date): string {
       <nav class="blog-categories" aria-label="Categorías del blog">
         <button class="blog-tab-btn active" data-filter="all">
           <span>{t.blog.allCategories}</span>
-          <span class="blog-tab-btn__count">{counts.all}</span>
+          <span class="blog-tab-btn__count" data-filter-count="all">{counts.all}</span>
         </button>
         <button class="blog-tab-btn" data-filter="guias">
           <i data-lucide="swords"></i>
           <span>{t.blog.categories.guias}</span>
-          <span class="blog-tab-btn__count">{counts.guias}</span>
+          <span class="blog-tab-btn__count" data-filter-count="guias">{counts.guias}</span>
         </button>
         <button class="blog-tab-btn" data-filter="curiosidades">
           <i data-lucide="sparkles"></i>
           <span>{t.blog.categories.curiosidades}</span>
-          <span class="blog-tab-btn__count">{counts.curiosidades}</span>
+          <span class="blog-tab-btn__count" data-filter-count="curiosidades">{counts.curiosidades}</span>
         </button>
         <button class="blog-tab-btn" data-filter="competitivo">
           <i data-lucide="shield-check"></i>
           <span>{t.blog.categories.competitivo}</span>
-          <span class="blog-tab-btn__count">{counts.competitivo}</span>
+          <span class="blog-tab-btn__count" data-filter-count="competitivo">{counts.competitivo}</span>
         </button>
         {counts.novedades > 0 && (
           <button class="blog-tab-btn" data-filter="novedades">
             <i data-lucide="sparkles"></i>
             <span>{t.blog.categories.novedades}</span>
-            <span class="blog-tab-btn__count">{counts.novedades}</span>
+            <span class="blog-tab-btn__count" data-filter-count="novedades">{counts.novedades}</span>
           </button>
         )}
       </nav>
+
+      <!-- Banner de filtro activo por Tag -->
+      <div class="blog-active-tag" data-active-tag-banner hidden>
+        <span class="blog-active-tag__label">{t.blog.filteringByTag}</span>
+        <span class="blog-active-tag__chip">
+          <i data-lucide="tag"></i>
+          <span data-active-tag-text></span>
+          <button
+            type="button"
+            class="blog-active-tag__clear"
+            data-clear-tag
+            title={t.blog.clearTagFilter}
+            aria-label={t.blog.clearTagFilter}
+          >
+            <i data-lucide="x"></i>
+          </button>
+        </span>
+      </div>
     </div>
 
     <!-- Grilla de Artículos -->
@@ -221,6 +239,7 @@ function formatDate(date: Date): string {
           <article
             class={`post-card ${post.data.featured ? "post-card--featured" : ""}`}
             data-category={post.data.category}
+            data-tags={(post.data.tags ?? []).join(",").toLowerCase()}
             data-search-text={`${post.data.title.toLowerCase()} ${post.data.description.toLowerCase()} ${postTags}`}
           >
             <a href={getPostUrl(post.id)} class="post-card__link" data-astro-prefetch>
@@ -301,21 +320,56 @@ function formatDate(date: Date): string {
       const cards = document.querySelectorAll<HTMLElement>(".post-card");
       const emptyState = document.querySelector<HTMLElement>("[data-blog-empty]");
       const resetBtn = document.querySelector<HTMLButtonElement>("[data-reset-filters]");
+      const tagBanner = document.querySelector<HTMLElement>("[data-active-tag-banner]");
+      const tagText = document.querySelector<HTMLElement>("[data-active-tag-text]");
+      const clearTagBtn = document.querySelector<HTMLButtonElement>("[data-clear-tag]");
+      const countBadges = document.querySelectorAll<HTMLElement>("[data-filter-count]");
 
       let activeFilter = "all";
       let searchQuery = "";
+      let activeTag = "";
+
+      // Leer parámetro ?tag= de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialTag = urlParams.get("tag");
+      if (initialTag) {
+        activeTag = initialTag.trim().toLowerCase();
+        if (tagBanner && tagText) {
+          tagText.textContent = `#${initialTag.trim()}`;
+          tagBanner.hidden = false;
+        }
+      }
 
       function filterArticles() {
         let visibleCount = 0;
+        const dynamicCounts: Record<string, number> = {
+          all: 0,
+          guias: 0,
+          curiosidades: 0,
+          competitivo: 0,
+          novedades: 0,
+        };
 
         cards.forEach((card) => {
           const category = card.dataset.category ?? "";
           const searchText = card.dataset.searchText ?? "";
+          const cardTags = (card.dataset.tags ?? "").split(",").map((t) => t.trim().toLowerCase());
+
+          const matchesSearch = !searchQuery || searchText.includes(searchQuery);
+          const matchesTag =
+            !activeTag || cardTags.includes(activeTag) || searchText.includes(activeTag);
+
+          // Si coincide con búsqueda y tag actual, suma a su categoría correspondiente
+          if (matchesSearch && matchesTag) {
+            dynamicCounts.all = (dynamicCounts.all || 0) + 1;
+            if (category) {
+              dynamicCounts[category] = (dynamicCounts[category] || 0) + 1;
+            }
+          }
 
           const matchesCategory = activeFilter === "all" || category === activeFilter;
-          const matchesSearch = !searchQuery || searchText.includes(searchQuery);
 
-          if (matchesCategory && matchesSearch) {
+          if (matchesCategory && matchesSearch && matchesTag) {
             card.removeAttribute("data-hidden");
             visibleCount++;
           } else {
@@ -323,9 +377,42 @@ function formatDate(date: Date): string {
           }
         });
 
+        // Actualizar contadores de cada categoría en la barra de navegación
+        countBadges.forEach((badge) => {
+          const cat = badge.dataset.filterCount;
+          if (cat && dynamicCounts[cat] !== undefined) {
+            const count = dynamicCounts[cat];
+            badge.textContent = String(count);
+            const parentBtn = badge.closest<HTMLButtonElement>(".blog-tab-btn");
+            if (parentBtn) {
+              if (count === 0) {
+                parentBtn.setAttribute("data-empty", "true");
+              } else {
+                parentBtn.removeAttribute("data-empty");
+              }
+            }
+          }
+        });
+
         if (emptyState) {
           emptyState.hidden = visibleCount > 0;
         }
+      }
+
+      // Si se cargó con una etiqueta en la URL, ejecutar filtrado inicial
+      if (activeTag) {
+        filterArticles();
+      }
+
+      if (clearTagBtn) {
+        clearTagBtn.addEventListener("click", () => {
+          activeTag = "";
+          if (tagBanner) tagBanner.hidden = true;
+          const url = new URL(window.location.href);
+          url.searchParams.delete("tag");
+          history.replaceState(null, "", url.toString());
+          filterArticles();
+        });
       }
 
       filterBtns.forEach((btn) => {
@@ -348,7 +435,12 @@ function formatDate(date: Date): string {
         resetBtn.addEventListener("click", () => {
           activeFilter = "all";
           searchQuery = "";
+          activeTag = "";
           if (searchInput) searchInput.value = "";
+          if (tagBanner) tagBanner.hidden = true;
+          const url = new URL(window.location.href);
+          url.searchParams.delete("tag");
+          history.replaceState(null, "", url.toString());
           filterBtns.forEach((b) => {
             if (b.dataset.filter === "all") b.classList.add("active");
             else b.classList.remove("active");

@@ -137,10 +137,15 @@ const alternateUrls: Partial<Record<Locale, string>> = {
           {post.data.tags && post.data.tags.length > 0 && (
             <div class="article-tags">
               {post.data.tags.map((tag) => (
-                <span class="article-tag">
+                <a
+                  href={`${blogPath}?tag=${encodeURIComponent(tag)}`}
+                  class="article-tag"
+                  data-astro-prefetch
+                  title={`${t.blog.filteringByTag} #${tag}`}
+                >
                   <i data-lucide="tag"></i>
-                  #{tag}
-                </span>
+                  <span>#{tag}</span>
+                </a>
               ))}
             </div>
           )}

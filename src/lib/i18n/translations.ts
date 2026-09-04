@@ -358,6 +358,8 @@ export interface Translations {
     tocTitle: string;
     tocMobileTitle: string;
     backToTop: string;
+    filteringByTag: string;
+    clearTagFilter: string;
   };
 }
 
@@ -702,6 +704,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       tocTitle: "On this page",
       tocMobileTitle: "Table of Contents",
       backToTop: "Back to top",
+      filteringByTag: "Filtering by tag:",
+      clearTagFilter: "Clear tag filter",
     },
   },
   es: {
@@ -1054,6 +1058,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       tocTitle: "En este artículo",
       tocMobileTitle: "Índice de contenidos",
       backToTop: "Volver arriba",
+      filteringByTag: "Filtrando por etiqueta:",
+      clearTagFilter: "Quitar filtro de etiqueta",
     },
   },
 };
