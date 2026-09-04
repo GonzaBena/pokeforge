@@ -8,10 +8,12 @@ const t = getTranslations(currentLocale);
 const homePath = getLocalizedPath("/", currentLocale);
 const pokedexPath = getLocalizedPath("/pokedex/", currentLocale);
 const equipoPath = getLocalizedPath("/equipo/", currentLocale);
+const blogPath = getLocalizedPath("/blog/", currentLocale);
 
 const isHome = currentLocale === "es" ? (path === "/es" || path === "/es/") : (path === "/" || path === "");
 const isPokedex = currentLocale === "es" ? path.startsWith("/es/pokedex") : path.startsWith("/pokedex");
 const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : path.startsWith("/equipo");
+const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.startsWith("/blog");
 ---
 
 <nav class="nav">
@@ -28,6 +30,10 @@ const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : path.s
       <a class="nav__link" href={equipoPath} data-astro-prefetch aria-current={isEquipo ? "page" : undefined}>
         <i data-lucide="users"></i>
         {t.nav.team}
+      </a>
+      <a class="nav__link" href={blogPath} data-astro-prefetch aria-current={isBlog ? "page" : undefined}>
+        <i data-lucide="book"></i>
+        {t.nav.blog}
       </a>
       <div class="nav__lang-toggle" aria-label="Language selector">
         <a href={getLocalizedPath(path, "en")} class:list={["nav__lang-btn", { active: currentLocale === "en" }]} data-astro-prefetch>EN</a>

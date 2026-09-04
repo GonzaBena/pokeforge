@@ -1,0 +1,402 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
+
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
+
+// Obtener todas las entradas correspondientes al locale actual
+const allPosts = await getCollection("blog", ({ id }) => {
+  return id.startsWith(`${currentLocale}/`);
+});
+
+// Ordenar por fecha descendente
+const sortedPosts = allPosts.sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+
+const featuredPosts = sortedPosts.filter((p) => p.data.featured);
+const heroPosts =
+  featuredPosts.length > 0
+    ? featuredPosts
+    : sortedPosts.length > 0
+      ? [sortedPosts[0]]
+      : [];
+
+// Conteo por categorías
+const counts = {
+  all: sortedPosts.length,
+  guias: sortedPosts.filter((p) => p.data.category === "guias").length,
+  curiosidades: sortedPosts.filter((p) => p.data.category === "curiosidades").length,
+  competitivo: sortedPosts.filter((p) => p.data.category === "competitivo").length,
+  novedades: sortedPosts.filter((p) => p.data.category === "novedades").length,
+};
+
+function getPostUrl(id: string): string {
+  const cleanSlug = id.replace(`${currentLocale}/`, "").replace(/\.md$/, "");
+  return getLocalizedPath(`/blog/${cleanSlug}/`, currentLocale);
+}
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString(currentLocale === "es" ? "es-ES" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+---
+
+<BaseLayout title={currentLocale === "es" ? "Blog & Estrategia" : "Blog & Strategy"}>
+  <div class="hero-container">
+    <div class="hero-ambient-glow" aria-hidden="true"></div>
+    <section class="hero">
+      <div class="hero__badge">
+        <i data-lucide="sparkles"></i>
+        <span>{t.blog.badge}</span>
+      </div>
+
+      <h1 class="hero__title">
+        {t.blog.titlePrefix}<span class="hero__title-accent">{t.blog.titleAccent}</span>{t.blog.titleSuffix}
+      </h1>
+
+      <p class="hero__subtitle">
+        {t.blog.subtitle}
+      </p>
+    </section>
+  </div>
+
+  <main class="blog-container">
+    {heroPosts.length > 0 && (
+      <section class="blog-carousel" data-blog-carousel>
+        <div class="blog-carousel__track">
+          {heroPosts.map((post, index) => (
+            <div
+              class={`blog-carousel__slide ${index === 0 ? "active" : ""}`}
+              data-carousel-slide={index}
+            >
+              <a href={getPostUrl(post.id)} class="blog-featured-card" data-astro-prefetch>
+                <div class="blog-featured-card__media">
+                  <span class="blog-featured-card__flag">
+                    <i data-lucide="flame"></i>
+                    {t.blog.featuredBadge}
+                  </span>
+                  <img
+                    src={post.data.coverImage ?? "/favicon.png"}
+                    alt={post.data.title}
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
+                </div>
+                <div class="blog-featured-card__body">
+                  <div class="blog-featured-card__meta">
+                    <span class={`blog-badge blog-badge--${post.data.category}`}>
+                      {t.blog.categories[post.data.category as keyof typeof t.blog.categories] ?? post.data.category}
+                    </span>
+                    {post.data.readingTime && (
+                      <span class="blog-read-time">
+                        <i data-lucide="clock"></i>
+                        {post.data.readingTime} {t.blog.readingTimeSuffix}
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 class="blog-featured-card__title">{post.data.title}</h2>
+                  <p class="blog-featured-card__desc">{post.data.description}</p>
+
+                  <div class="blog-featured-card__footer">
+                    <span class="blog-featured-card__date">
+                      <i data-lucide="calendar"></i>
+                      {formatDate(post.data.pubDate)}
+                    </span>
+                    <span class="blog-featured-card__action">
+                      <span>{t.blog.readArticle}</span>
+                      <i data-lucide="arrow-right"></i>
+                    </span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          ))}
+        </div>
+
+        {heroPosts.length > 1 && (
+          <div class="blog-carousel__controls">
+            <button
+              class="blog-carousel__arrow"
+              type="button"
+              aria-label="Anterior"
+              data-carousel-prev
+            >
+              <i data-lucide="chevron-left"></i>
+            </button>
+            <div class="blog-carousel__dots" data-carousel-dots>
+              {heroPosts.map((_, index) => (
+                <button
+                  class={`blog-carousel__dot ${index === 0 ? "active" : ""}`}
+                  type="button"
+                  aria-label={`Slide ${index + 1}`}
+                  data-carousel-dot={index}
+                ></button>
+              ))}
+            </div>
+            <button
+              class="blog-carousel__arrow"
+              type="button"
+              aria-label="Siguiente"
+              data-carousel-next
+            >
+              <i data-lucide="chevron-right"></i>
+            </button>
+          </div>
+        )}
+      </section>
+    )}
+
+    <!-- Barra de Búsqueda y Filtros de Categorías -->
+    <div class="blog-controls">
+      <div class="blog-search-box">
+        <i data-lucide="search" class="blog-search-icon"></i>
+        <input
+          type="search"
+          class="blog-search-input"
+          placeholder={t.blog.searchPlaceholder}
+          aria-label={t.blog.searchPlaceholder}
+          data-blog-search
+        />
+      </div>
+
+      <nav class="blog-categories" aria-label="Categorías del blog">
+        <button class="blog-tab-btn active" data-filter="all">
+          <span>{t.blog.allCategories}</span>
+          <span class="blog-tab-btn__count">{counts.all}</span>
+        </button>
+        <button class="blog-tab-btn" data-filter="guias">
+          <i data-lucide="swords"></i>
+          <span>{t.blog.categories.guias}</span>
+          <span class="blog-tab-btn__count">{counts.guias}</span>
+        </button>
+        <button class="blog-tab-btn" data-filter="curiosidades">
+          <i data-lucide="sparkles"></i>
+          <span>{t.blog.categories.curiosidades}</span>
+          <span class="blog-tab-btn__count">{counts.curiosidades}</span>
+        </button>
+        <button class="blog-tab-btn" data-filter="competitivo">
+          <i data-lucide="shield-check"></i>
+          <span>{t.blog.categories.competitivo}</span>
+          <span class="blog-tab-btn__count">{counts.competitivo}</span>
+        </button>
+        {counts.novedades > 0 && (
+          <button class="blog-tab-btn" data-filter="novedades">
+            <i data-lucide="sparkles"></i>
+            <span>{t.blog.categories.novedades}</span>
+            <span class="blog-tab-btn__count">{counts.novedades}</span>
+          </button>
+        )}
+      </nav>
+    </div>
+
+    <!-- Grilla de Artículos -->
+    <section class="blog-grid" data-blog-grid>
+      {sortedPosts.map((post) => {
+        const categoryLabel =
+          t.blog.categories[post.data.category as keyof typeof t.blog.categories] ??
+          post.data.category;
+        const postTags = (post.data.tags ?? []).join(" ").toLowerCase();
+
+        return (
+          <article
+            class={`post-card ${post.data.featured ? "post-card--featured" : ""}`}
+            data-category={post.data.category}
+            data-search-text={`${post.data.title.toLowerCase()} ${post.data.description.toLowerCase()} ${postTags}`}
+          >
+            <a href={getPostUrl(post.id)} class="post-card__link" data-astro-prefetch>
+              <div class="post-card__media">
+                <div class="post-card__badge-wrap">
+                  <span class={`blog-badge blog-badge--${post.data.category}`}>
+                    {categoryLabel}
+                  </span>
+                  {post.data.featured && (
+                    <span class="blog-featured-pill">
+                      <i data-lucide="flame"></i>
+                      {t.blog.featuredBadge}
+                    </span>
+                  )}
+                </div>
+                <img
+                  src={post.data.coverImage ?? "/favicon.png"}
+                  alt={post.data.title}
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="post-card__body">
+                <div class="post-card__meta-top">
+                  <span class="article-date">
+                    <i data-lucide="calendar"></i>
+                    {formatDate(post.data.pubDate)}
+                  </span>
+                  {post.data.readingTime && (
+                    <span class="blog-read-time">
+                      <i data-lucide="clock"></i>
+                      {post.data.readingTime}
+                    </span>
+                  )}
+                </div>
+
+                <h3 class="post-card__title">{post.data.title}</h3>
+                <p class="post-card__desc">{post.data.description}</p>
+
+                <div class="post-card__footer">
+                  <span class="post-card__author">{post.data.author}</span>
+                  <span class="post-card__arrow">
+                    <i data-lucide="arrow-right"></i>
+                  </span>
+                </div>
+              </div>
+            </a>
+          </article>
+        );
+      })}
+    </section>
+
+    <!-- Estado vacío cuando la búsqueda o filtro no da resultados -->
+    <div class="blog-empty" data-blog-empty hidden>
+      <i data-lucide="search"></i>
+      <h3>{t.blog.noPosts}</h3>
+      <p>{t.blog.noPostsDesc}</p>
+      <button type="button" class="blog-tab-btn" data-reset-filters>
+        <i data-lucide="rotate-ccw"></i>
+        <span>{t.blog.allCategories}</span>
+      </button>
+    </div>
+  </main>
+
+  <script>
+    function setupBlogInteractions() {
+      // 1. Filtrado y Búsqueda
+      const searchInput = document.querySelector<HTMLInputElement>("[data-blog-search]");
+      const filterBtns = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
+      const cards = document.querySelectorAll<HTMLElement>(".post-card");
+      const emptyState = document.querySelector<HTMLElement>("[data-blog-empty]");
+      const resetBtn = document.querySelector<HTMLButtonElement>("[data-reset-filters]");
+
+      let activeFilter = "all";
+      let searchQuery = "";
+
+      function filterArticles() {
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+          const category = card.dataset.category ?? "";
+          const searchText = card.dataset.searchText ?? "";
+
+          const matchesCategory = activeFilter === "all" || category === activeFilter;
+          const matchesSearch = !searchQuery || searchText.includes(searchQuery);
+
+          if (matchesCategory && matchesSearch) {
+            card.removeAttribute("data-hidden");
+            visibleCount++;
+          } else {
+            card.setAttribute("data-hidden", "true");
+          }
+        });
+
+        if (emptyState) {
+          emptyState.hidden = visibleCount > 0;
+        }
+      }
+
+      filterBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          filterBtns.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          activeFilter = btn.dataset.filter ?? "all";
+          filterArticles();
+        });
+      });
+
+      if (searchInput) {
+        searchInput.addEventListener("input", () => {
+          searchQuery = searchInput.value.trim().toLowerCase();
+          filterArticles();
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          activeFilter = "all";
+          searchQuery = "";
+          if (searchInput) searchInput.value = "";
+          filterBtns.forEach((b) => {
+            if (b.dataset.filter === "all") b.classList.add("active");
+            else b.classList.remove("active");
+          });
+          filterArticles();
+        });
+      }
+
+      // 2. Carrusel de Artículos Destacados
+      const carousel = document.querySelector<HTMLElement>("[data-blog-carousel]");
+      if (carousel) {
+        const slides = carousel.querySelectorAll<HTMLElement>("[data-carousel-slide]");
+        const dots = carousel.querySelectorAll<HTMLButtonElement>("[data-carousel-dot]");
+        const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-carousel-prev]");
+        const nextBtn = carousel.querySelector<HTMLButtonElement>("[data-carousel-next]");
+
+        if (slides.length > 1) {
+          let currentIndex = 0;
+          let autoplayInterval: number | null = null;
+
+          function goToSlide(index: number) {
+            slides.forEach((slide) => slide.classList.remove("active"));
+            dots.forEach((dot) => dot.classList.remove("active"));
+
+            currentIndex = (index + slides.length) % slides.length;
+            slides[currentIndex]?.classList.add("active");
+            dots[currentIndex]?.classList.add("active");
+          }
+
+          function startAutoplay() {
+            stopAutoplay();
+            autoplayInterval = window.setInterval(() => {
+              goToSlide(currentIndex + 1);
+            }, 6000);
+          }
+
+          function stopAutoplay() {
+            if (autoplayInterval !== null) {
+              clearInterval(autoplayInterval);
+              autoplayInterval = null;
+            }
+          }
+
+          nextBtn?.addEventListener("click", () => {
+            goToSlide(currentIndex + 1);
+            startAutoplay();
+          });
+
+          prevBtn?.addEventListener("click", () => {
+            goToSlide(currentIndex - 1);
+            startAutoplay();
+          });
+
+          dots.forEach((dot, idx) => {
+            dot.addEventListener("click", () => {
+              goToSlide(idx);
+              startAutoplay();
+            });
+          });
+
+          carousel.addEventListener("mouseenter", stopAutoplay);
+          carousel.addEventListener("mouseleave", startAutoplay);
+
+          startAutoplay();
+        }
+      }
+    }
+
+    // Inicializar al cargar y en transiciones de página
+    setupBlogInteractions();
+    document.addEventListener("astro:page-load", setupBlogInteractions);
+  </script>
+</BaseLayout>

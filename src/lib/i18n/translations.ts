@@ -46,6 +46,7 @@ export interface Translations {
   nav: {
     pokedex: string;
     team: string;
+    blog: string;
     installApp: string;
     installAppTitle: string;
     sync: string;
@@ -330,6 +331,31 @@ export interface Translations {
     dangerResetDesc: string;
     dangerResetConfirm: string;
   };
+  blog: {
+    titlePrefix: string;
+    titleAccent: string;
+    titleSuffix: string;
+    subtitle: string;
+    badge: string;
+    searchPlaceholder: string;
+    allCategories: string;
+    categories: {
+      guias: string;
+      curiosidades: string;
+      competitivo: string;
+      novedades: string;
+    };
+    featuredBadge: string;
+    readArticle: string;
+    readingTimeSuffix: string;
+    noPosts: string;
+    noPostsDesc: string;
+    backToBlog: string;
+    publishedOn: string;
+    writtenBy: string;
+    shareArticle: string;
+    moreArticles: string;
+  };
 }
 
 export const UI_TRANSLATIONS: Record<Locale, Translations> = {
@@ -337,6 +363,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
     nav: {
       pokedex: "Pokédex",
       team: "Team",
+      blog: "Blog",
       installApp: "Install App",
       installAppTitle: "Install PokeForge application",
       sync: "Sync",
@@ -441,9 +468,11 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       gameSection: "Game",
       typeMatrix: "Type Matrix",
       typeMatrixTitle: "Team Type Matrix",
-      typeMatrixSubtitle: "Cross-table of weaknesses, resistances, and balances for all 18 elemental types",
+      typeMatrixSubtitle:
+        "Cross-table of weaknesses, resistances, and balances for all 18 elemental types",
       typeMatrixShort: "Matrix",
-      typeMatrixEmpty: "Add at least one Pokémon to your team to view the type matrix.",
+      typeMatrixEmpty:
+        "Add at least one Pokémon to your team to view the type matrix.",
       netBalance: "Net Balance",
       legend: "Legend",
       legend4x: "4× Double weakness",
@@ -488,24 +517,29 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       offenseModeMoves: "Equipped Moves",
       noBlindSpots: "Excellent! The team covers all 18 elemental types.",
       noOffenseCovered: "No super-effective coverage against any type.",
-      blindSpotHint: "No team member can hit this type with super-effective damage.",
+      blindSpotHint:
+        "No team member can hit this type with super-effective damage.",
       tabSynergy: "Synergy",
       synergyTitle: "Synergy Suggestions",
-      synergySubtitle: "Smart suggestions to cover weaknesses and complete your team",
+      synergySubtitle:
+        "Smart suggestions to cover weaknesses and complete your team",
       recommendedTypesTitle: "Key Recommended Types",
       suggestedPokemonTitle: "Suggested Pokémon",
       addToTeam: "Add to team",
       teamFull: "Team full ({max}/{max})",
       teamAddedSuccess: "{name} added to your team!",
-      synergyNoSuggestions: "Your team is well-balanced or no candidates were found.",
+      synergyNoSuggestions:
+        "Your team is well-balanced or no candidates were found.",
       whyRecommended: "Why recommended?",
       resistsVulnerability: "Resists {types}",
       immuneToVulnerability: "Immune to {types}",
       coversBlindSpotBadge: "Covers {types}",
       bringsNewTypeBadge: "New: {types}",
       synergyGameFilterLabel: "Game:",
-      synergyGameAllPrompt: "Select a game to see Pokémon available specifically in that version's Pokédex.",
-      synergyGameFilteredNotice: "Suggestions filtered for {game} ({count} Pokémon in {dex}).",
+      synergyGameAllPrompt:
+        "Select a game to see Pokémon available specifically in that version's Pokédex.",
+      synergyGameFilteredNotice:
+        "Suggestions filtered for {game} ({count} Pokémon in {dex}).",
     },
     modal: {
       stats: "Stats",
@@ -574,9 +608,12 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cancel: "Cancel",
       successToast: "Sync successful! ({total} caught in total)",
       cloudLinkTitle: "Link Cloud Vault",
-      cloudLinkSubtitleRW: "Cloud vault {code} detected. This device will be linked with full sync permissions (read & write).",
-      cloudLinkSubtitleRO: "Cloud vault {code} detected. This device will be linked in read-only mode.",
-      cloudLinkSuccessToast: "Device linked successfully with read & write permissions!",
+      cloudLinkSubtitleRW:
+        "Cloud vault {code} detected. This device will be linked with full sync permissions (read & write).",
+      cloudLinkSubtitleRO:
+        "Cloud vault {code} detected. This device will be linked in read-only mode.",
+      cloudLinkSuccessToast:
+        "Device linked successfully with read & write permissions!",
       cloudLinkConfirmBtn: "Link & Sync Now",
     },
     syncModal: {
@@ -598,7 +635,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudHelp:
         "Enter this code on your phone or another PC to keep them synced in real time.",
       cloudSyncNow: "Save to cloud now",
-      cloudAutosaveInfo: "Autosave active · Web Worker checks for updates every ~5 mins.",
+      cloudAutosaveInfo:
+        "Autosave active · Web Worker checks for updates every ~5 mins.",
       cloudCheckUpdates: "Check for updates",
       cloudUnlink: "Unlink",
       cloudDeleteVault: "Delete vault from cloud",
@@ -633,11 +671,38 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         "Your captured Pokémon and current team will be deleted. This action is permanent.",
       dangerResetConfirm: "Yes, delete everything",
     },
+    blog: {
+      titlePrefix: "Master strategy & ",
+      titleAccent: "discover",
+      titleSuffix: " secrets",
+      subtitle:
+        "Guides, teambuilding strategies, competitive breakdowns, and curiosities from the Pokémon universe.",
+      badge: "PokeForge Blog · Lore & Tactics",
+      searchPlaceholder: "Search articles by title, tag, or topic...",
+      allCategories: "All",
+      categories: {
+        guias: "Guides",
+        curiosidades: "Curiosities",
+        competitivo: "Competitive",
+        novedades: "News",
+      },
+      featuredBadge: "Featured",
+      readArticle: "Read article",
+      readingTimeSuffix: "min read",
+      noPosts: "No articles found",
+      noPostsDesc: "Try adjusting your search query or filter category.",
+      backToBlog: "Back to Blog",
+      publishedOn: "Published on",
+      writtenBy: "By",
+      shareArticle: "Share article",
+      moreArticles: "More recommended articles",
+    },
   },
   es: {
     nav: {
       pokedex: "Pokédex",
       team: "Equipo",
+      blog: "Blog",
       installApp: "Instalar App",
       installAppTitle: "Instalar aplicación PokeForge",
       sync: "Sincronizar",
@@ -655,7 +720,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudTooltipSynced: "Todos los cambios están guardados en la nube",
       cloudTooltipSyncing: "Guardando cambios en la base de datos...",
       cloudTooltipOffline: "Modo sin conexión. Se sincronizará al reconectar.",
-      cloudTooltipError: "Error al sincronizar con la nube. Clic para reintentar.",
+      cloudTooltipError:
+        "Error al sincronizar con la nube. Clic para reintentar.",
       cloudTooltipUnlinked: "Sincronizar con la nube y otros dispositivos",
       cloudRemoteUpdated: "Datos actualizados desde la nube",
     },
@@ -705,7 +771,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       clearFilters: "Limpiar filtros",
       filterByMoves: "Filtrar por movimientos",
       movesSearchPlaceholder: "Escribe un movimiento (ej. Ascuas, Surf)...",
-      movesHelper: "Los Pokémon deben aprender todos los movimientos seleccionados",
+      movesHelper:
+        "Los Pokémon deben aprender todos los movimientos seleccionados",
       noMovesFound: "No se encontraron movimientos",
       removeMove: "Quitar {move}",
       clearMoves: "Quitar todos",
@@ -743,9 +810,11 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       gameSection: "Juego",
       typeMatrix: "Matriz de Tipos",
       typeMatrixTitle: "Matriz de Tipos del Equipo",
-      typeMatrixSubtitle: "Tabla cruzada de debilidades, resistencias y balances para los 18 tipos elementales",
+      typeMatrixSubtitle:
+        "Tabla cruzada de debilidades, resistencias y balances para los 18 tipos elementales",
       typeMatrixShort: "Matriz",
-      typeMatrixEmpty: "Agregá al menos un Pokémon a tu equipo para ver la matriz de tipos.",
+      typeMatrixEmpty:
+        "Agregá al menos un Pokémon a tu equipo para ver la matriz de tipos.",
       netBalance: "Balance Neto",
       legend: "Leyenda",
       legend4x: "4× Doble debilidad",
@@ -790,24 +859,29 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       offenseModeMoves: "Ataques Equipados",
       noBlindSpots: "¡Excelente! El equipo cubre los 18 tipos elementales.",
       noOffenseCovered: "Sin tipos cubiertos con daño súper eficaz.",
-      blindSpotHint: "Ningún miembro del equipo puede golpear este tipo con súper eficacia.",
+      blindSpotHint:
+        "Ningún miembro del equipo puede golpear este tipo con súper eficacia.",
       tabSynergy: "Sinergia",
       synergyTitle: "Sugerencias de Sinergia",
-      synergySubtitle: "Recomendaciones inteligentes para completar o balancear tu equipo",
+      synergySubtitle:
+        "Recomendaciones inteligentes para completar o balancear tu equipo",
       recommendedTypesTitle: "Tipos Clave Recomendados",
       suggestedPokemonTitle: "Pokémon Sugeridos",
       addToTeam: "Agregar al equipo",
       teamFull: "Equipo lleno ({max}/{max})",
       teamAddedSuccess: "¡{name} fue agregado a tu equipo!",
-      synergyNoSuggestions: "Tu equipo está bien balanceado o no se encontraron candidatos.",
+      synergyNoSuggestions:
+        "Tu equipo está bien balanceado o no se encontraron candidatos.",
       whyRecommended: "¿Por qué se recomienda?",
       resistsVulnerability: "Resiste {types}",
       immuneToVulnerability: "Inmune a {types}",
       coversBlindSpotBadge: "Cubre {types}",
       bringsNewTypeBadge: "Nuevo: {types}",
       synergyGameFilterLabel: "Juego:",
-      synergyGameAllPrompt: "Seleccioná un juego para ver Pokémon disponibles específicamente en la Pokédex de esa versión.",
-      synergyGameFilteredNotice: "Sugerencias filtradas para {game} ({count} Pokémon en {dex}).",
+      synergyGameAllPrompt:
+        "Seleccioná un juego para ver Pokémon disponibles específicamente en la Pokédex de esa versión.",
+      synergyGameFilteredNotice:
+        "Sugerencias filtradas para {game} ({count} Pokémon en {dex}).",
     },
     modal: {
       stats: "Estadísticas",
@@ -849,8 +923,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       copyToPokedex: "Guardar en Pokédex",
       copiedFromPokedex: "Datos de la Pokédex copiados al slot del equipo.",
       savedToPokedex: "Datos del equipo guardados en la Pokédex.",
-      noPokedexData: "No hay estadísticas ni naturaleza personalizadas en la Pokédex.",
-      teamNatureNotice: "Personalizando stats y naturaleza para este miembro del equipo.",
+      noPokedexData:
+        "No hay estadísticas ni naturaleza personalizadas en la Pokédex.",
+      teamNatureNotice:
+        "Personalizando stats y naturaleza para este miembro del equipo.",
     },
     sync: {
       title: "Sincronizar Dispositivos",
@@ -881,9 +957,12 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cancel: "Cancelar",
       successToast: "¡Sincronización exitosa! ({total} capturados en total)",
       cloudLinkTitle: "Vincular Bóveda en la Nube",
-      cloudLinkSubtitleRW: "Bóveda {code} detectada. Se vinculará este dispositivo con permisos completos (lectura y escritura).",
-      cloudLinkSubtitleRO: "Bóveda {code} detectada. Se vinculará este dispositivo en modo solo lectura.",
-      cloudLinkSuccessToast: "¡Dispositivo vinculado con éxito con permisos de lectura y escritura!",
+      cloudLinkSubtitleRW:
+        "Bóveda {code} detectada. Se vinculará este dispositivo con permisos completos (lectura y escritura).",
+      cloudLinkSubtitleRO:
+        "Bóveda {code} detectada. Se vinculará este dispositivo en modo solo lectura.",
+      cloudLinkSuccessToast:
+        "¡Dispositivo vinculado con éxito con permisos de lectura y escritura!",
       cloudLinkConfirmBtn: "Vincular y Sincronizar",
     },
     syncModal: {
@@ -905,7 +984,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudHelp:
         "Ingresá este código en tu celular o en otra PC para mantenerlos sincronizados en tiempo real.",
       cloudSyncNow: "Guardar en la nube ahora",
-      cloudAutosaveInfo: "Guardado automático activo · El Web Worker revisa cambios cada ~5 min.",
+      cloudAutosaveInfo:
+        "Guardado automático activo · El Web Worker revisa cambios cada ~5 min.",
       cloudCheckUpdates: "Comprobar actualizaciones",
       cloudUnlink: "Desvincular",
       cloudDeleteVault: "Eliminar bóveda de la nube",
@@ -939,6 +1019,32 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       dangerResetDesc:
         "Se borrarán tus Pokémon capturados y tu equipo actual. Esta acción es permanente.",
       dangerResetConfirm: "Sí, borrar todo",
+    },
+    blog: {
+      titlePrefix: "Estrategia, guías y ",
+      titleAccent: "curiosidades",
+      titleSuffix: " Pokémon",
+      subtitle:
+        "Aprende teambuilding, coberturas de tipos, curiosidades de la franquicia y análisis competitivos.",
+      badge: "PokeForge Blog · Lore y Estrategia",
+      searchPlaceholder: "Buscar artículos por título, tag o temática...",
+      allCategories: "Todos",
+      categories: {
+        guias: "Guías",
+        curiosidades: "Curiosidades",
+        competitivo: "Competitivo",
+        novedades: "Novedades",
+      },
+      featuredBadge: "Destacado",
+      readArticle: "Leer artículo",
+      readingTimeSuffix: "min de lectura",
+      noPosts: "No se encontraron artículos",
+      noPostsDesc: "Prueba ajustando el término de búsqueda o la categoría seleccionada.",
+      backToBlog: "Volver al Blog",
+      publishedOn: "Publicado el",
+      writtenBy: "Por",
+      shareArticle: "Compartir artículo",
+      moreArticles: "Más artículos recomendados",
     },
   },
 };
@@ -1001,53 +1107,74 @@ export function getLocalizedPath(
 
 export const GAME_NAMES: Record<string, { es: string; en: string }> = {
   "red-blue": { es: "Rojo - Azul", en: "Red - Blue" },
-  "yellow": { es: "Amarillo", en: "Yellow" },
+  yellow: { es: "Amarillo", en: "Yellow" },
   "red-green-japan": { es: "Rojo - Verde (Japón)", en: "Red - Green (Japan)" },
   "blue-japan": { es: "Azul (Japón)", en: "Blue (Japan)" },
   "gold-silver": { es: "Oro - Plata", en: "Gold - Silver" },
-  "crystal": { es: "Cristal", en: "Crystal" },
+  crystal: { es: "Cristal", en: "Crystal" },
   "ruby-sapphire": { es: "Rubí - Zafiro", en: "Ruby - Sapphire" },
-  "emerald": { es: "Esmeralda", en: "Emerald" },
-  "firered-leafgreen": { es: "Rojo Fuego - Verde Hoja", en: "FireRed - LeafGreen" },
-  "colosseum": { es: "Colosseum", en: "Colosseum" },
-  "xd": { es: "XD: Tempestad Oscura", en: "XD: Gale of Darkness" },
+  emerald: { es: "Esmeralda", en: "Emerald" },
+  "firered-leafgreen": {
+    es: "Rojo Fuego - Verde Hoja",
+    en: "FireRed - LeafGreen",
+  },
+  colosseum: { es: "Colosseum", en: "Colosseum" },
+  xd: { es: "XD: Tempestad Oscura", en: "XD: Gale of Darkness" },
   "diamond-pearl": { es: "Diamante - Perla", en: "Diamond - Pearl" },
-  "platinum": { es: "Platino", en: "Platinum" },
-  "heartgold-soulsilver": { es: "HeartGold - SoulSilver", en: "HeartGold - SoulSilver" },
+  platinum: { es: "Platino", en: "Platinum" },
+  "heartgold-soulsilver": {
+    es: "HeartGold - SoulSilver",
+    en: "HeartGold - SoulSilver",
+  },
   "black-white": { es: "Negro - Blanco", en: "Black - White" },
   "black-2-white-2": { es: "Negro 2 - Blanco 2", en: "Black 2 - White 2" },
   "x-y": { es: "X - Y", en: "X - Y" },
-  "omega-ruby-alpha-sapphire": { es: "Rubí Omega - Zafiro Alfa", en: "Omega Ruby - Alpha Sapphire" },
+  "omega-ruby-alpha-sapphire": {
+    es: "Rubí Omega - Zafiro Alfa",
+    en: "Omega Ruby - Alpha Sapphire",
+  },
   "sun-moon": { es: "Sol - Luna", en: "Sun - Moon" },
-  "ultra-sun-ultra-moon": { es: "Ultra Sol - Ultra Luna", en: "Ultra Sun - Ultra Moon" },
-  "lets-go-pikachu-lets-go-eevee": { es: "Let's Go, Pikachu! - Let's Go, Eevee!", en: "Let's Go, Pikachu! - Let's Go, Eevee!" },
+  "ultra-sun-ultra-moon": {
+    es: "Ultra Sol - Ultra Luna",
+    en: "Ultra Sun - Ultra Moon",
+  },
+  "lets-go-pikachu-lets-go-eevee": {
+    es: "Let's Go, Pikachu! - Let's Go, Eevee!",
+    en: "Let's Go, Pikachu! - Let's Go, Eevee!",
+  },
   "sword-shield": { es: "Espada - Escudo", en: "Sword - Shield" },
-  "the-isle-of-armor": { es: "La Isla de la Armadura", en: "The Isle of Armor" },
+  "the-isle-of-armor": {
+    es: "La Isla de la Armadura",
+    en: "The Isle of Armor",
+  },
   "the-crown-tundra": { es: "Las Nieves de la Corona", en: "The Crown Tundra" },
-  "brilliant-diamond-shining-pearl": { es: "Diamante Brillante - Perla Reluciente", en: "Brilliant Diamond - Shining Pearl" },
+  "brilliant-diamond-shining-pearl": {
+    es: "Diamante Brillante - Perla Reluciente",
+    en: "Brilliant Diamond - Shining Pearl",
+  },
   "legends-arceus": { es: "Leyendas: Arceus", en: "Legends: Arceus" },
   "scarlet-violet": { es: "Escarlata - Púrpura", en: "Scarlet - Violet" },
   "the-teal-mask": { es: "La Máscara Turquesa", en: "The Teal Mask" },
   "the-indigo-disk": { es: "El Disco Índigo", en: "The Indigo Disk" },
   "legends-za": { es: "Leyendas: Z-A", en: "Legends: Z-A" },
   "mega-dimension": { es: "Mega Dimensión", en: "Mega Dimension" },
-  "champions": { es: "Champions", en: "Champions" },
+  champions: { es: "Champions", en: "Champions" },
 };
 
 export const GAME_NAMES_BY_DISPLAY: Record<string, string> = {
   "Red - Blue": "red-blue",
-  "Yellow": "yellow",
+  Yellow: "yellow",
   "Red Japan - Green Japan": "red-green-japan",
   "Blue Japan": "blue-japan",
   "Gold - Silver": "gold-silver",
-  "Crystal": "crystal",
+  Crystal: "crystal",
   "Ruby - Sapphire": "ruby-sapphire",
-  "Emerald": "emerald",
+  Emerald: "emerald",
   "Firered - Leafgreen": "firered-leafgreen",
-  "Colosseum": "colosseum",
-  "Xd": "xd",
+  Colosseum: "colosseum",
+  Xd: "xd",
   "Diamond - Pearl": "diamond-pearl",
-  "Platinum": "platinum",
+  Platinum: "platinum",
   "Heartgold - Soulsilver": "heartgold-soulsilver",
   "Black - White": "black-white",
   "Black 2 - White 2": "black-2-white-2",
@@ -1066,11 +1193,19 @@ export const GAME_NAMES_BY_DISPLAY: Record<string, string> = {
   "The Indigo Disk Scarlet - The Indigo Disk Violet": "the-indigo-disk",
   "Legends Za": "legends-za",
   "Mega Dimension": "mega-dimension",
-  "Champions": "champions",
+  Champions: "champions",
 };
 
-export function getGameTitle(gameKey: string, locale: Locale = "es", fallback?: string): string {
-  const match = GAME_NAMES[gameKey] ?? (GAME_NAMES_BY_DISPLAY[gameKey] ? GAME_NAMES[GAME_NAMES_BY_DISPLAY[gameKey]] : undefined);
+export function getGameTitle(
+  gameKey: string,
+  locale: Locale = "es",
+  fallback?: string,
+): string {
+  const match =
+    GAME_NAMES[gameKey] ??
+    (GAME_NAMES_BY_DISPLAY[gameKey]
+      ? GAME_NAMES[GAME_NAMES_BY_DISPLAY[gameKey]]
+      : undefined);
   if (match) {
     return locale === "es" ? match.es : match.en;
   }
@@ -1095,4 +1230,3 @@ export function getMoveName(
   }
   return moveKey.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
-

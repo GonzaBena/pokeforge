@@ -1,0 +1,23 @@
+/* --- Team Card Graphic Modal --- */
+
+.team-card-modal-panel {
+  width: min(980px, 95vw);
+}
+
+.team-card-modal__body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.team-card-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+

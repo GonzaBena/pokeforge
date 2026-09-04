@@ -1,0 +1,23 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import ArticleView from "../../../views/ArticleView.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ id }) => id.startsWith("es/"));
+  return posts.map((post) => {
+    const slug = post.id.replace(/^es\//, "").replace(/\.md$/, "");
+    return {
+      params: { slug },
+      props: { post },
+    };
+  });
+}
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+
+const { post } = Astro.props;
+---
+
+<ArticleView post={post} />

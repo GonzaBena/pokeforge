@@ -1,0 +1,228 @@
+/* --------------------------------------------------------------- grid */
+
+.pokedex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.pokedex-empty {
+  padding: 60px 0;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+/* --------------------------------------------------------------- card */
+
+.pokemon-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--type-glow, var(--accent));
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-card);
+  perspective: 600px;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.pokemon-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: radial-gradient(
+    ellipse at top,
+    var(--type-glow) 0%,
+    transparent 75%
+  );
+  opacity: 0.18;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.pokemon-card:hover::before {
+  opacity: 0.4;
+}
+
+.pokemon-card:hover {
+  border-color: var(--type-glow, var(--accent));
+  border-top-color: var(--type-glow, var(--accent));
+  box-shadow:
+    0 10px 30px -4px var(--type-glow, rgba(239, 68, 68, 0.4)),
+    var(--shadow-card);
+}
+
+.pokemon-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-right: 26px;
+  min-height: 20px;
+}
+
+.pokemon-card__id {
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.exclusive-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--version-color, var(--accent));
+  background: color-mix(
+    in srgb,
+    var(--version-color, var(--accent)) 16%,
+    transparent
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--version-color, var(--accent)) 35%, transparent);
+  line-height: 1.3;
+  white-space: nowrap;
+  max-width: 105px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exclusive-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--version-color, var(--accent));
+  box-shadow: 0 0 4px var(--version-color, var(--accent));
+  flex-shrink: 0;
+}
+
+.exclusive-badge__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pokemon-card__sprite-wrap {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.pokemon-card__sprite {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: filter 0.15s ease;
+}
+
+img[src*="/sprites/pokemon/"]:not([src*="official-artwork"]) {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.pokemon-card:not(.captured) .pokemon-card__sprite {
+  filter: brightness(0) opacity(0.55);
+}
+
+.pokemon-card.captured .pokemon-card__sprite {
+  filter: none;
+}
+
+.pokemon-card__name {
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: capitalize;
+  margin: 2px 0 8px;
+}
+
+.pokemon-card__types {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.pokemon-card__capture-btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pokemon-card__capture-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pokemon-card.captured .pokemon-card__capture-btn {
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.captured-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-pop);
+  opacity: 0;
+}
+
+.captured-badge svg {
+  width: 15px;
+  height: 15px;
+  color: var(--accent);
+}
+
+.pokemon-card:not(.captured) .captured-badge {
+  display: none;
+}
+
+/* Resting state for cards that are already captured when rendered (page
+   load, filtering, "load more") — the pop-in animation only plays for a
+   *live* capture click; without this, the badge stayed invisible (stuck at
+   the opacity:0 above) for every card whose reveal animation never ran in
+   this page load, e.g. right after a refresh. */
+.pokemon-card.captured .captured-badge {
+  opacity: 1;
+}
+

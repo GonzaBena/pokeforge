@@ -1,0 +1,107 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { render, type CollectionEntry } from "astro:content";
+import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+
+const { post } = Astro.props;
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
+const { Content } = await render(post);
+
+const blogPath = getLocalizedPath("/blog/", currentLocale);
+
+const formattedDate = post.data.pubDate.toLocaleDateString(
+  currentLocale === "es" ? "es-ES" : "en-US",
+  {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }
+);
+
+const categoryName =
+  t.blog.categories[post.data.category as keyof typeof t.blog.categories] ??
+  post.data.category;
+---
+
+<BaseLayout title={`${post.data.title} · Blog`}>
+  <div class="article-page">
+    <div class="article-ambient-glow" aria-hidden="true"></div>
+
+    <article class="article-container">
+      <nav class="article-nav" aria-label="Volver">
+        <a href={blogPath} class="article-back-btn" data-astro-prefetch>
+          <i data-lucide="chevron-left"></i>
+          <span>{t.blog.backToBlog}</span>
+        </a>
+      </nav>
+
+      <header class="article-header">
+        <div class="article-header__meta">
+          <span class={`blog-badge blog-badge--${post.data.category}`}>
+            {categoryName}
+          </span>
+          <span class="article-date">
+            <i data-lucide="calendar"></i>
+            {formattedDate}
+          </span>
+          {post.data.readingTime && (
+            <span class="blog-read-time">
+              <i data-lucide="clock"></i>
+              {post.data.readingTime}
+            </span>
+          )}
+        </div>
+
+        <h1 class="article-title">{post.data.title}</h1>
+        <p class="article-subtitle">{post.data.description}</p>
+
+        {post.data.coverImage && (
+          <div class="article-cover">
+            <img
+              src={post.data.coverImage}
+              alt={post.data.title}
+              loading="eager"
+            />
+          </div>
+        )}
+      </header>
+
+      <div class="article-body">
+        <Content />
+      </div>
+
+      {post.data.tags && post.data.tags.length > 0 && (
+        <div class="article-tags">
+          {post.data.tags.map((tag) => (
+            <span class="article-tag">
+              <i data-lucide="tag"></i>
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <footer class="article-footer-box">
+        <div class="article-footer-author">
+          <div class="article-author-avatar">
+            <i data-lucide="sparkles"></i>
+          </div>
+          <div>
+            <div class="article-author-name">{post.data.author}</div>
+            <div class="article-author-sub">{t.blog.badge}</div>
+          </div>
+        </div>
+
+        <a href={blogPath} class="article-back-btn" data-astro-prefetch>
+          <span>{t.blog.moreArticles}</span>
+          <i data-lucide="arrow-right"></i>
+        </a>
+      </footer>
+    </article>
+  </div>
+</BaseLayout>

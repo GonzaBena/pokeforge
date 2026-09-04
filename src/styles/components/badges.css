@@ -1,0 +1,21 @@
+/* --------------------------------------------------------------- badges */
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: white;
+  background: var(--badge-bg, var(--text-faint));
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.type-badge--sm {
+  padding: 1px 6px;
+  font-size: 7px;
+}
+
