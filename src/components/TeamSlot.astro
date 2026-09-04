@@ -6,9 +6,10 @@ import { getTranslations, type Locale } from "../lib/i18n/translations";
 interface Props {
   index: number;
   pokemon: Pokemon | null;
+  nature?: string | null;
 }
 
-const { index, pokemon } = Astro.props;
+const { index, pokemon, nature = null } = Astro.props;
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
 const sprite = pokemon ? pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "" : "";
@@ -31,6 +32,12 @@ const dexNumber = pokemon ? `#${String(pokemon.id).padStart(4, "0")}` : "";
           <div class="pokemon-card__types">
             {pokemon.types.map((t) => <TypeBadge type={t} />)}
           </div>
+          {nature && (
+            <div class="team-slot__nature-pill" title={currentLocale === "es" ? `Naturaleza: ${nature}` : `Nature: ${nature}`}>
+              <i data-lucide="sparkle"></i>
+              <span>{nature}</span>
+            </div>
+          )}
         </div>
       </div>
     </>

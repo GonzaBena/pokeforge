@@ -8,6 +8,12 @@ astro dev --background
 
 Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
 
+## Package Manager
+
+Always use `pnpm` instead of `npm`, and `pnpx` instead of `npx`.
+- `pnpm install`
+- `pnpm run <script>` (e.g. `pnpm run check`, `pnpm run build`)
+- `pnpx <command>`
 ## Documentation
 
 Full documentation: https://docs.astro.build

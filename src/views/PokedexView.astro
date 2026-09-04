@@ -75,6 +75,46 @@ const t = getTranslations(currentLocale);
             </div>
 
             <div class="filter-stacks">
+              <div class="filter-section filter-section--moves">
+                <div class="filter-section__header">
+                  <span class="filter-section__label">{t.pokedex.filterByMoves}</span>
+                  <span class="filter-section__hint">{t.pokedex.movesHelper}</span>
+                </div>
+                <div class="moves-filter-box" data-moves-filter-container>
+                  <div class="moves-filter-input-wrap">
+                    <i data-lucide="swords" class="moves-filter-input-icon"></i>
+                    <input
+                      class="moves-filter-input"
+                      type="text"
+                      placeholder={t.pokedex.movesSearchPlaceholder}
+                      data-moves-input
+                      autocomplete="off"
+                      spellcheck="false"
+                      aria-autocomplete="list"
+                      aria-expanded="false"
+                      aria-controls="moves-autocomplete-listbox"
+                    />
+                    <button
+                      class="moves-filter-clear-input"
+                      type="button"
+                      data-clear-moves-input
+                      aria-label={t.pokedex.clearFilters}
+                      hidden
+                    >
+                      <i data-lucide="x"></i>
+                    </button>
+                    <div
+                      id="moves-autocomplete-listbox"
+                      class="moves-autocomplete-dropdown"
+                      data-moves-dropdown
+                      role="listbox"
+                      hidden
+                    ></div>
+                  </div>
+                  <div class="moves-selected-tags" data-moves-tags hidden></div>
+                  <div class="moves-filter-summary" data-moves-summary hidden></div>
+                </div>
+              </div>
               <div class="filter-section">
                 <span class="filter-section__label">{t.pokedex.filterByType}</span>
                 <div class="filter-group" data-type-filter aria-label={t.pokedex.filterByType}></div>

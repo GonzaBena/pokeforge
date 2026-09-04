@@ -109,6 +109,14 @@ export interface Translations {
     showFilters: string;
     hideFilters: string;
     clearFilters: string;
+    filterByMoves: string;
+    movesSearchPlaceholder: string;
+    movesHelper: string;
+    noMovesFound: string;
+    removeMove: string;
+    clearMoves: string;
+    moveLearnedBy: string;
+    popularMovesHint: string;
   };
   team: {
     title: string;
@@ -236,6 +244,16 @@ export interface Translations {
     sectionIndex: string;
     top: string;
     collapsed: string;
+    loading: string;
+    loadError: string;
+    teamSlotBadge: string;
+    linkPokedex: string;
+    copyFromPokedex: string;
+    copyToPokedex: string;
+    copiedFromPokedex: string;
+    savedToPokedex: string;
+    noPokedexData: string;
+    teamNatureNotice: string;
   };
   sync: {
     title: string;
@@ -384,6 +402,14 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       showFilters: "Show filters",
       hideFilters: "Hide filters",
       clearFilters: "Clear filters",
+      filterByMoves: "Filter by moves",
+      movesSearchPlaceholder: "Type a move (e.g. Ember, Surf)...",
+      movesHelper: "Pokémon must learn all selected moves",
+      noMovesFound: "No moves found",
+      removeMove: "Remove {move}",
+      clearMoves: "Clear all moves",
+      moveLearnedBy: "{count} Pokémon",
+      popularMovesHint: "Suggested moves:",
     },
     team: {
       title: "Team Builder",
@@ -511,6 +537,16 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       sectionIndex: "Section Index",
       top: "Top",
       collapsed: "Collapsed",
+      loading: "Loading Pokémon data...",
+      loadError: "Could not load Pokémon details.",
+      teamSlotBadge: "Team · Slot {n}",
+      linkPokedex: "Sync with Pokédex",
+      copyFromPokedex: "Copy from Pokédex",
+      copyToPokedex: "Save to Pokédex",
+      copiedFromPokedex: "Pokédex data copied to team slot.",
+      savedToPokedex: "Team slot data saved to Pokédex.",
+      noPokedexData: "No custom stats or nature in Pokédex.",
+      teamNatureNotice: "Customizing stats and nature for this team member.",
     },
     sync: {
       title: "Sync Devices",
@@ -667,6 +703,14 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       showFilters: "Mostrar filtros",
       hideFilters: "Ocultar filtros",
       clearFilters: "Limpiar filtros",
+      filterByMoves: "Filtrar por movimientos",
+      movesSearchPlaceholder: "Escribe un movimiento (ej. Ascuas, Surf)...",
+      movesHelper: "Los Pokémon deben aprender todos los movimientos seleccionados",
+      noMovesFound: "No se encontraron movimientos",
+      removeMove: "Quitar {move}",
+      clearMoves: "Quitar todos",
+      moveLearnedBy: "{count} Pokémon",
+      popularMovesHint: "Movimientos sugeridos:",
     },
     team: {
       title: "Armar equipo",
@@ -797,6 +841,16 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       sectionIndex: "Índice de secciones",
       top: "Inicio (Datos)",
       collapsed: "Colapsada",
+      loading: "Cargando datos del Pokémon...",
+      loadError: "No se pudieron cargar los detalles del Pokémon.",
+      teamSlotBadge: "Equipo · Slot {n}",
+      linkPokedex: "Sincronizar con Pokédex",
+      copyFromPokedex: "Copiar de Pokédex",
+      copyToPokedex: "Guardar en Pokédex",
+      copiedFromPokedex: "Datos de la Pokédex copiados al slot del equipo.",
+      savedToPokedex: "Datos del equipo guardados en la Pokédex.",
+      noPokedexData: "No hay estadísticas ni naturaleza personalizadas en la Pokédex.",
+      teamNatureNotice: "Personalizando stats y naturaleza para este miembro del equipo.",
     },
     sync: {
       title: "Sincronizar Dispositivos",
@@ -1029,3 +1083,16 @@ export function getRegionName(region: string, locale: Locale = "es"): string {
   if (locale === "es" && lower === "unova") return "Teselia";
   return region.charAt(0).toUpperCase() + region.slice(1);
 }
+
+export function getMoveName(
+  moveKey: string,
+  locale: Locale = "es",
+  meta?: { nameEs?: string; nameEn?: string },
+): string {
+  if (meta) {
+    if (locale === "es" && meta.nameEs) return meta.nameEs;
+    if (locale === "en" && meta.nameEn) return meta.nameEn;
+  }
+  return moveKey.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+

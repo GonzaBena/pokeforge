@@ -86,6 +86,8 @@ export interface MoveData {
   power: number | null;
   pp: number | null;
   accuracy: number | null;
+  nameEs?: string;
+  nameEn?: string;
 }
 
 export type MovesDetailsMap = Record<string, MoveData>;
@@ -93,6 +95,9 @@ export type MovesDetailsMap = Record<string, MoveData>;
 export interface TeamSlotState {
   pokemonId: number | null;
   moves?: (string | null)[];
+  nature?: string | null;
+  stats?: Partial<PokemonStats>;
+  usePokedexData?: boolean;
 }
 
 export interface TeamState {

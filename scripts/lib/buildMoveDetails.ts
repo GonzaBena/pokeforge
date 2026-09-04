@@ -9,6 +9,7 @@ const OUT_DIR = path.resolve(import.meta.dirname, "..", "..", "public", "data", 
 
 interface RawMoveDetail {
   name: string;
+  names?: { name: string; language: { name: string } }[];
   type: { name: string };
   damage_class: { name: string };
   power: number | null;
@@ -23,6 +24,8 @@ export interface MoveData {
   power: number | null;
   pp: number | null;
   accuracy: number | null;
+  nameEs?: string;
+  nameEn?: string;
 }
 
 export type MovesDetailsMap = Record<string, MoveData>;
@@ -49,6 +52,9 @@ export async function buildMoveDetails(force = false): Promise<MovesDetailsMap> 
             force,
           );
 
+          const nameEs = raw.names?.find((n) => n.language?.name === "es")?.name;
+          const nameEn = raw.names?.find((n) => n.language?.name === "en")?.name;
+
           movesMap[name] = {
             name: raw.name,
             type: raw.type?.name ?? "normal",
@@ -56,6 +62,8 @@ export async function buildMoveDetails(force = false): Promise<MovesDetailsMap> 
             power: raw.power ?? null,
             pp: raw.pp ?? null,
             accuracy: raw.accuracy ?? null,
+            ...(nameEs ? { nameEs } : {}),
+            ...(nameEn ? { nameEn } : {}),
           };
         } catch (err) {
           console.warn(`Failed to fetch move detail for ${name}:`, err);

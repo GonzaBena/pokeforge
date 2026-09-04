@@ -1,4 +1,4 @@
-import { getManifest, getChunk, getAllPokemon, getGenerations, getTypeChart, getGameDexData } from "../lib/pokedexData";
+import { getManifest, getChunk, getAllPokemon, getGenerations, getTypeChart, getGameDexData, getMoveDetailsMap } from "../lib/pokedexData";
 import {
   getCapturedIds,
   setCaptured,
@@ -12,12 +12,12 @@ import {
   DATA_RESET_EVENT,
 } from "../lib/storage";
 import { staggerCardsIn, cardHoverTilt, animateCaptureReveal } from "../lib/animations";
-import { getCurrentLocale, getTranslations, getTypeName, getGameTitle, getRegionName } from "../lib/i18n/translations";
+import { getCurrentLocale, getTranslations, getTypeName, getGameTitle, getRegionName, getMoveName } from "../lib/i18n/translations";
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
-import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, Pokemon } from "../lib/types";
+import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, Pokemon } from "../lib/types";
 
 const PAGE_SIZE = 100;
 
@@ -40,6 +40,13 @@ const filterActiveCountEl = document.querySelector<HTMLElement>("[data-filter-ac
 const clearFiltersBtn = document.querySelector<HTMLButtonElement>("[data-clear-filters]");
 const closeFiltersBtn = document.querySelector<HTMLButtonElement>("[data-close-filters]");
 
+const movesInputEl = document.querySelector<HTMLInputElement>("[data-moves-input]");
+const clearMovesInputBtn = document.querySelector<HTMLButtonElement>("[data-clear-moves-input]");
+const movesDropdownEl = document.querySelector<HTMLElement>("[data-moves-dropdown]");
+const movesTagsEl = document.querySelector<HTMLElement>("[data-moves-tags]");
+const movesSummaryEl = document.querySelector<HTMLElement>("[data-moves-summary]");
+const movesFilterContainer = document.querySelector<HTMLElement>("[data-moves-filter-container]");
+
 let allPokemon: Pokemon[] = [];
 let allPokemonReady = false;
 let filtered: Pokemon[] = [];
@@ -49,12 +56,17 @@ let view: "all" | "captured" = "all";
 let search = "";
 let selectedGame = getSelectedGame();
 let selectedGameMode: GameDexMode = getGameDexMode();
-let selectedExclusiveFilter: string = "all";
+let selectedExclusiveFilters = new Set<string>(["all"]);
 let gameDexData: GameDexData | null = null;
 let activeExclusivesMap = new Map<number, GameVersionMeta>();
 const gameSpeciesSets = new Map<string, { regional: Set<number>; obtainable: Set<number> }>();
 const selectedTypes = new Set<string>();
 const selectedGenerations = new Set<string>();
+const selectedMoves = new Set<string>();
+let moveDetailsMap: Record<string, MoveData> = {};
+const moveCountMap = new Map<string, number>();
+let highlightedMoveIndex = -1;
+let currentMoveMatches: MoveData[] = [];
 const gameToGenMap = new Map<string, GenerationInfo>();
 
 function capitalize(s: string): string {
@@ -136,7 +148,7 @@ function updateExclusiveToggleUI(): void {
   if (!hasExclusives) {
     exclusiveToggleEl.hidden = true;
     exclusiveToggleEl.innerHTML = "";
-    selectedExclusiveFilter = "all";
+    selectedExclusiveFilters = new Set(["all"]);
     return;
   }
 
@@ -148,18 +160,18 @@ function updateExclusiveToggleUI(): void {
   const nameB = locale === "es" ? vB.nameEs : vB.name;
 
   exclusiveToggleEl.innerHTML = `
-    <button class="view-toggle__btn" type="button" data-exclusive-filter="all" aria-pressed="${String(selectedExclusiveFilter === "all")}">
+    <button class="view-toggle__btn" type="button" data-exclusive-filter="all" aria-pressed="${String(selectedExclusiveFilters.has("all"))}">
       ${t.pokedex.exclusiveAll}
     </button>
-    <button class="view-toggle__btn" type="button" data-exclusive-filter="${vA.id}" aria-pressed="${String(selectedExclusiveFilter === vA.id)}" style="--btn-color:${vA.color};">
+    <button class="view-toggle__btn" type="button" data-exclusive-filter="${vA.id}" aria-pressed="${String(selectedExclusiveFilters.has(vA.id))}" style="--btn-color:${vA.color};">
       <span class="exclusive-dot" style="--btn-color:${vA.color};"></span>
       ${t.pokedex.exclusiveOnly.replace("{version}", nameA)}
     </button>
-    <button class="view-toggle__btn" type="button" data-exclusive-filter="${vB.id}" aria-pressed="${String(selectedExclusiveFilter === vB.id)}" style="--btn-color:${vB.color};">
+    <button class="view-toggle__btn" type="button" data-exclusive-filter="${vB.id}" aria-pressed="${String(selectedExclusiveFilters.has(vB.id))}" style="--btn-color:${vB.color};">
       <span class="exclusive-dot" style="--btn-color:${vB.color};"></span>
       ${t.pokedex.exclusiveOnly.replace("{version}", nameB)}
     </button>
-    <button class="view-toggle__btn" type="button" data-exclusive-filter="both" aria-pressed="${String(selectedExclusiveFilter === "both")}">
+    <button class="view-toggle__btn" type="button" data-exclusive-filter="both" aria-pressed="${String(selectedExclusiveFilters.has("both"))}">
       ${t.pokedex.exclusiveBoth}
     </button>
   `;
@@ -197,12 +209,12 @@ function updateCapturedCounter(): void {
     const fullGameList = getActiveGamePokemonList(selectedGame)!;
     let targetList = fullGameList;
 
-    if (selectedExclusiveFilter !== "all" && activeExclusivesMap.size > 0) {
-      if (selectedExclusiveFilter === "both") {
-        targetList = fullGameList.filter((id) => !activeExclusivesMap.has(id));
-      } else {
-        targetList = fullGameList.filter((id) => activeExclusivesMap.get(id)?.id === selectedExclusiveFilter);
-      }
+    if (!selectedExclusiveFilters.has("all") && activeExclusivesMap.size > 0) {
+      targetList = fullGameList.filter((id) => {
+        const meta = activeExclusivesMap.get(id);
+        const category = meta ? meta.id : "both";
+        return selectedExclusiveFilters.has(category);
+      });
     }
 
     let countInGame = 0;
@@ -257,6 +269,276 @@ function syncAllCardsCapturedState(): void {
   if (view === "captured") applyFilters();
 }
 
+function categoryLabel(cat: string, locale: "en" | "es"): string {
+  const t = getTranslations(locale);
+  if (cat === "physical") return t.team.physical;
+  if (cat === "special") return t.team.special;
+  if (cat === "status") return t.team.status;
+  return cat;
+}
+
+function normalize(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function updateMoveCountMap(): void {
+  moveCountMap.clear();
+  for (const p of allPokemon) {
+    if (p.moves) {
+      for (const m of p.moves) {
+        moveCountMap.set(m, (moveCountMap.get(m) ?? 0) + 1);
+      }
+    }
+  }
+}
+
+function filterMoves(query: string): MoveData[] {
+  const q = normalize(query);
+  if (!q) return [];
+  const allMoves = Object.values(moveDetailsMap);
+  const locale = getCurrentLocale();
+
+  interface ScoredMove {
+    move: MoveData;
+    score: number;
+  }
+
+  const scored: ScoredMove[] = [];
+
+  for (const move of allMoves) {
+    const nameEsNorm = move.nameEs ? normalize(move.nameEs) : "";
+    const nameEnNorm = move.nameEn ? normalize(move.nameEn) : "";
+    const slugNorm = normalize(move.name.replace(/-/g, " "));
+
+    const primaryNorm = locale === "es" ? nameEsNorm : nameEnNorm;
+    const secondaryNorm = locale === "es" ? nameEnNorm : nameEsNorm;
+
+    let score = -1;
+
+    if (primaryNorm === q) score = 0;
+    else if (secondaryNorm === q || slugNorm === q) score = 1;
+    else if (primaryNorm.startsWith(q)) score = 2;
+    else if (secondaryNorm.startsWith(q) || slugNorm.startsWith(q)) score = 3;
+    else if (primaryNorm.includes(q)) score = 4;
+    else if (secondaryNorm.includes(q) || slugNorm.includes(q)) score = 5;
+
+    if (score >= 0) {
+      scored.push({ move, score });
+    }
+  }
+
+  scored.sort((a, b) => {
+    if (a.score !== b.score) return a.score - b.score;
+    const countA = moveCountMap.get(a.move.name) ?? 0;
+    const countB = moveCountMap.get(b.move.name) ?? 0;
+    if (countB !== countA) return countB - countA;
+    return a.move.name.localeCompare(b.move.name);
+  });
+
+  return scored.slice(0, 15).map((s) => s.move);
+}
+
+function adjustDropdownPosition(): void {
+  if (!movesDropdownEl || !movesInputEl) return;
+  const inputRect = movesInputEl.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - inputRect.bottom;
+  const spaceAbove = inputRect.top;
+
+  if (spaceBelow < 220 && spaceAbove > spaceBelow) {
+    movesDropdownEl.classList.add("is-open-up");
+    const maxHeight = Math.max(140, Math.min(300, Math.floor(spaceAbove - 24)));
+    movesDropdownEl.style.maxHeight = `${maxHeight}px`;
+  } else {
+    movesDropdownEl.classList.remove("is-open-up");
+    const maxHeight = Math.max(140, Math.min(300, Math.floor(spaceBelow - 24)));
+    movesDropdownEl.style.maxHeight = `${maxHeight}px`;
+  }
+}
+
+function renderMoveDropdown(moves: MoveData[]): void {
+  if (!movesDropdownEl) return;
+  currentMoveMatches = moves;
+  highlightedMoveIndex = -1;
+
+  if (moves.length === 0) {
+    const t = getTranslations(getCurrentLocale());
+    movesDropdownEl.innerHTML = `<div class="moves-autocomplete__empty">${t.pokedex.noMovesFound}</div>`;
+    movesDropdownEl.hidden = false;
+    movesInputEl?.setAttribute("aria-expanded", "true");
+    adjustDropdownPosition();
+    return;
+  }
+
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  let html = moves
+    .map((move, idx) => {
+      const isSelected = selectedMoves.has(move.name);
+      const displayName = getMoveName(move.name, locale, move);
+      const secondaryName =
+        locale === "es"
+          ? move.nameEn && move.nameEn.toLowerCase() !== displayName.toLowerCase()
+            ? move.nameEn
+            : ""
+          : move.nameEs && move.nameEs.toLowerCase() !== displayName.toLowerCase()
+            ? move.nameEs
+            : "";
+
+      const pCount = moveCountMap.get(move.name) ?? 0;
+      const countLabel = t.pokedex.moveLearnedBy.replace("{count}", String(pCount));
+      const powerLabel = move.power !== null ? `${locale === "es" ? "Pot" : "Pwr"}: ${move.power}` : "";
+      const accLabel = move.accuracy !== null ? `${locale === "es" ? "Prec" : "Acc"}: ${move.accuracy}%` : "";
+      const catLabel = categoryLabel(move.category, locale);
+
+      const statsParts = [powerLabel, accLabel].filter(Boolean).join(" • ");
+
+      return `
+        <div
+          class="moves-autocomplete-item${isSelected ? " is-selected" : ""}"
+          data-move-slug="${move.name}"
+          data-index="${idx}"
+          role="option"
+          aria-selected="false"
+        >
+          <div class="moves-autocomplete-item__left">
+            <span class="moves-sugg__type" style="background-color:${typeColor(move.type)}">
+              ${getTypeName(move.type, locale)}
+            </span>
+            <div class="moves-autocomplete-item__info">
+              <div class="moves-autocomplete-item__name-row">
+                <span class="moves-autocomplete-item__title">${displayName}</span>
+                ${secondaryName ? `<span class="moves-autocomplete-item__subtitle">(${secondaryName})</span>` : ""}
+              </div>
+              <div class="moves-autocomplete-item__meta-row">
+                <span class="move-category-badge move-category-badge--${move.category}">${catLabel}</span>
+                ${statsParts ? `<span class="moves-autocomplete-item__meta-sep">•</span><span>${statsParts}</span>` : ""}
+              </div>
+            </div>
+          </div>
+          <div class="moves-autocomplete-item__right">
+            <span class="moves-sugg__count">${countLabel}</span>
+            ${isSelected ? `<span class="moves-sugg__check"><i data-lucide="check"></i></span>` : ""}
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  movesDropdownEl.innerHTML = html;
+  movesDropdownEl.hidden = false;
+  movesInputEl?.setAttribute("aria-expanded", "true");
+  adjustDropdownPosition();
+  refreshIcons();
+}
+
+function closeMovesDropdown(): void {
+  if (!movesDropdownEl) return;
+  movesDropdownEl.hidden = true;
+  movesDropdownEl.classList.remove("is-open-up");
+  movesDropdownEl.style.maxHeight = "";
+  movesInputEl?.setAttribute("aria-expanded", "false");
+  highlightedMoveIndex = -1;
+  currentMoveMatches = [];
+}
+
+function updateHighlightedOption(): void {
+  if (!movesDropdownEl) return;
+  const items = movesDropdownEl.querySelectorAll<HTMLElement>(".moves-autocomplete-item");
+  items.forEach((item, idx) => {
+    const isHigh = idx === highlightedMoveIndex;
+    item.classList.toggle("is-highlighted", isHigh);
+    item.setAttribute("aria-selected", String(isHigh));
+    if (isHigh) {
+      item.scrollIntoView({ block: "nearest" });
+    }
+  });
+}
+
+function renderSelectedMoveTags(): void {
+  if (!movesTagsEl || !movesSummaryEl) return;
+
+  if (selectedMoves.size === 0) {
+    movesTagsEl.hidden = true;
+    movesTagsEl.innerHTML = "";
+    movesSummaryEl.hidden = true;
+    movesSummaryEl.innerHTML = "";
+    return;
+  }
+
+  movesTagsEl.hidden = false;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  let tagsHtml = Array.from(selectedMoves)
+    .map((slug) => {
+      const meta = moveDetailsMap[slug];
+      const displayName = getMoveName(slug, locale, meta);
+      const tColor = meta ? typeColor(meta.type) : "var(--accent)";
+      const removeAria = t.pokedex.removeMove.replace("{move}", displayName);
+      return `
+        <span class="moves-tag" style="--tag-border:${tColor};">
+          <span class="moves-tag__dot" style="background:${tColor};"></span>
+          <span class="moves-tag__name">${displayName}</span>
+          <button class="moves-tag__remove" type="button" data-remove-move="${slug}" aria-label="${removeAria}" title="${removeAria}">
+            <i data-lucide="x"></i>
+          </button>
+        </span>
+      `;
+    })
+    .join("");
+
+  if (selectedMoves.size > 1) {
+    tagsHtml += `
+      <button class="moves-tags__clear-all" type="button" data-clear-all-moves>
+        <i data-lucide="trash-2"></i> ${t.pokedex.clearMoves}
+      </button>
+    `;
+  }
+
+  movesTagsEl.innerHTML = tagsHtml;
+  refreshIcons();
+
+  movesSummaryEl.hidden = false;
+  const moveNamesList = Array.from(selectedMoves).map((s) => getMoveName(s, locale, moveDetailsMap[s]));
+  const formattedNames = moveNamesList.join(locale === "es" ? " Y " : " & ");
+  const matchesCount = filtered.length;
+
+  if (matchesCount === 0) {
+    movesSummaryEl.className = "moves-filter-summary moves-filter-summary--empty";
+    movesSummaryEl.innerHTML = `<i data-lucide="info"></i> ${
+      locale === "es"
+        ? `Ningún Pokémon aprende simultáneamente: <strong>${formattedNames}</strong>`
+        : `No Pokémon learns simultaneously: <strong>${formattedNames}</strong>`
+    }`;
+  } else {
+    movesSummaryEl.className = "moves-filter-summary moves-filter-summary--active";
+    movesSummaryEl.innerHTML = `<i data-lucide="check-circle-2"></i> ${
+      locale === "es"
+        ? `${matchesCount} Pokémon ${matchesCount === 1 ? "aprende" : "aprenden"} <strong>${formattedNames}</strong>`
+        : `${matchesCount} Pokémon ${matchesCount === 1 ? "learns" : "learn"} <strong>${formattedNames}</strong>`
+    }`;
+  }
+  refreshIcons();
+}
+
+function toggleSelectedMove(slug: string): void {
+  if (selectedMoves.has(slug)) {
+    selectedMoves.delete(slug);
+  } else {
+    selectedMoves.add(slug);
+  }
+  if (movesInputEl) movesInputEl.value = "";
+  if (clearMovesInputBtn) clearMovesInputBtn.hidden = true;
+  closeMovesDropdown();
+  updateActiveFilterBadge();
+  applyFilters();
+}
+
 function computeFiltered(source: Pokemon[]): Pokemon[] {
   const capturedIds = getCapturedIds();
   const gameSpeciesSet = getActiveGameSpeciesSet(selectedGame);
@@ -268,12 +550,15 @@ function computeFiltered(source: Pokemon[]): Pokemon[] {
     if (selectedGenerations.size && !selectedGenerations.has(p.generation)) return false;
     if (gameSpeciesSet && !gameSpeciesSet.has(p.id)) return false;
 
-    if (selectedExclusiveFilter !== "all" && activeExclusivesMap.size > 0) {
-      if (selectedExclusiveFilter === "both") {
-        if (activeExclusivesMap.has(p.id)) return false;
-      } else {
-        const meta = activeExclusivesMap.get(p.id);
-        if (!meta || meta.id !== selectedExclusiveFilter) return false;
+    if (!selectedExclusiveFilters.has("all") && activeExclusivesMap.size > 0) {
+      const meta = activeExclusivesMap.get(p.id);
+      const category = meta ? meta.id : "both";
+      if (!selectedExclusiveFilters.has(category)) return false;
+    }
+
+    if (selectedMoves.size > 0) {
+      for (const m of selectedMoves) {
+        if (!p.moves || !p.moves.includes(m)) return false;
       }
     }
 
@@ -303,11 +588,13 @@ async function applyFilters(): Promise<void> {
   if (!allPokemonReady) {
     allPokemon = await getAllPokemon();
     allPokemonReady = true;
+    updateMoveCountMap();
   }
   filtered = computeFiltered(allPokemon);
   shown = 0;
   grid.innerHTML = "";
   renderNextBatch();
+  renderSelectedMoveTags();
 }
 
 function populateTypeChips(types: string[]): void {
@@ -405,9 +692,12 @@ function toggleFilters(): void {
 function updateActiveFilterBadge(): void {
   let count = 0;
   if (selectedGame) count++;
-  if (selectedExclusiveFilter !== "all") count++;
+  if (!selectedExclusiveFilters.has("all")) {
+    count += selectedExclusiveFilters.size;
+  }
   count += selectedTypes.size;
   count += selectedGenerations.size;
+  count += selectedMoves.size;
 
   if (filterActiveCountEl) {
     if (count > 0) {
@@ -435,8 +725,12 @@ function clearAllFilters(): void {
     setSelectedGame("");
     if (gameFilterEl) gameFilterEl.value = "";
     activeExclusivesMap.clear();
-    selectedExclusiveFilter = "all";
+    selectedExclusiveFilters = new Set(["all"]);
     updateGameModeToggleUI();
+    updateExclusiveToggleUI();
+    changed = true;
+  } else if (!selectedExclusiveFilters.has("all")) {
+    selectedExclusiveFilters = new Set(["all"]);
     updateExclusiveToggleUI();
     changed = true;
   }
@@ -454,6 +748,15 @@ function clearAllFilters(): void {
     genFilterEl.querySelectorAll<HTMLButtonElement>("[data-generation]").forEach((btn) => {
       btn.setAttribute("aria-pressed", "false");
     });
+    changed = true;
+  }
+
+  if (selectedMoves.size > 0) {
+    selectedMoves.clear();
+    if (movesInputEl) movesInputEl.value = "";
+    if (clearMovesInputBtn) clearMovesInputBtn.hidden = true;
+    closeMovesDropdown();
+    renderSelectedMoveTags();
     changed = true;
   }
 
@@ -543,11 +846,153 @@ genFilterEl.addEventListener("click", (e) => {
   applyFilters();
 });
 
+let movesInputDebounce: number | undefined;
+
+movesInputEl?.addEventListener("input", () => {
+  window.clearTimeout(movesInputDebounce);
+  const q = movesInputEl.value.trim();
+  if (clearMovesInputBtn) clearMovesInputBtn.hidden = !q;
+
+  if (!q) {
+    closeMovesDropdown();
+    return;
+  }
+
+  movesInputDebounce = window.setTimeout(() => {
+    const currentQ = movesInputEl?.value.trim() ?? "";
+    if (!currentQ) {
+      closeMovesDropdown();
+      return;
+    }
+    if (!allPokemonReady) {
+      getAllPokemon().then((pokemon) => {
+        allPokemon = pokemon;
+        allPokemonReady = true;
+        updateMoveCountMap();
+        const curVal = movesInputEl?.value.trim() ?? "";
+        if (curVal) {
+          renderMoveDropdown(filterMoves(curVal));
+        } else {
+          closeMovesDropdown();
+        }
+      });
+    } else {
+      renderMoveDropdown(filterMoves(currentQ));
+    }
+  }, 100);
+});
+
+movesInputEl?.addEventListener("focus", () => {
+  const q = movesInputEl.value.trim();
+  if (!q) {
+    closeMovesDropdown();
+    return;
+  }
+  if (!allPokemonReady) {
+    getAllPokemon().then((pokemon) => {
+      allPokemon = pokemon;
+      allPokemonReady = true;
+      updateMoveCountMap();
+      const curVal = movesInputEl?.value.trim() ?? "";
+      if (curVal) {
+        renderMoveDropdown(filterMoves(curVal));
+      } else {
+        closeMovesDropdown();
+      }
+    });
+  } else {
+    renderMoveDropdown(filterMoves(q));
+  }
+});
+
+movesInputEl?.addEventListener("keydown", (e) => {
+  if (movesDropdownEl && !movesDropdownEl.hidden && currentMoveMatches.length > 0) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      highlightedMoveIndex = (highlightedMoveIndex + 1) % currentMoveMatches.length;
+      updateHighlightedOption();
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      highlightedMoveIndex = (highlightedMoveIndex - 1 + currentMoveMatches.length) % currentMoveMatches.length;
+      updateHighlightedOption();
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const targetIdx = highlightedMoveIndex >= 0 ? highlightedMoveIndex : 0;
+      const move = currentMoveMatches[targetIdx];
+      if (move) {
+        toggleSelectedMove(move.name);
+      }
+      return;
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeMovesDropdown();
+      return;
+    }
+  } else if (e.key === "Escape") {
+    closeMovesDropdown();
+  }
+});
+
+clearMovesInputBtn?.addEventListener("click", () => {
+  if (movesInputEl) {
+    movesInputEl.value = "";
+    movesInputEl.focus();
+  }
+  clearMovesInputBtn.hidden = true;
+  closeMovesDropdown();
+});
+
+window.addEventListener("resize", () => {
+  if (movesDropdownEl && !movesDropdownEl.hidden) {
+    adjustDropdownPosition();
+  }
+});
+
+movesDropdownEl?.addEventListener("click", (e) => {
+  const item = (e.target as HTMLElement).closest<HTMLElement>(".moves-autocomplete-item");
+  if (!item) return;
+  const slug = item.dataset.moveSlug;
+  if (slug) {
+    toggleSelectedMove(slug);
+  }
+});
+
+movesTagsEl?.addEventListener("click", (e) => {
+  const target = e.target as HTMLElement;
+  const removeBtn = target.closest<HTMLButtonElement>("[data-remove-move]");
+  if (removeBtn) {
+    const slug = removeBtn.dataset.removeMove;
+    if (slug) toggleSelectedMove(slug);
+    return;
+  }
+  const clearAllBtn = target.closest<HTMLButtonElement>("[data-clear-all-moves]");
+  if (clearAllBtn) {
+    selectedMoves.clear();
+    if (movesInputEl) movesInputEl.value = "";
+    if (clearMovesInputBtn) clearMovesInputBtn.hidden = true;
+    closeMovesDropdown();
+    renderSelectedMoveTags();
+    updateActiveFilterBadge();
+    applyFilters();
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (!movesFilterContainer?.contains(e.target as Node)) {
+    closeMovesDropdown();
+  }
+});
+
 gameFilterEl?.addEventListener("change", () => {
   selectedGame = gameFilterEl.value;
   setSelectedGame(selectedGame);
   activeExclusivesMap = getExclusiveMapForGame(selectedGame);
-  selectedExclusiveFilter = "all";
+  selectedExclusiveFilters = new Set(["all"]);
   updateGameModeToggleUI();
   updateExclusiveToggleUI();
   updateCapturedCounter();
@@ -571,16 +1016,29 @@ gameModeToggleEl?.addEventListener("click", (e) => {
 exclusiveToggleEl?.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-exclusive-filter]");
   if (!btn) return;
-  const filter = btn.dataset.exclusiveFilter!;
-  if (filter && filter !== selectedExclusiveFilter) {
-    selectedExclusiveFilter = filter;
-    exclusiveToggleEl.querySelectorAll<HTMLButtonElement>("[data-exclusive-filter]").forEach((b) => {
-      b.setAttribute("aria-pressed", String(b.dataset.exclusiveFilter === selectedExclusiveFilter));
-    });
-    updateCapturedCounter();
-    updateActiveFilterBadge();
-    applyFilters();
+  const filter = btn.dataset.exclusiveFilter;
+  if (!filter) return;
+
+  if (filter === "all") {
+    selectedExclusiveFilters = new Set(["all"]);
+  } else {
+    selectedExclusiveFilters.delete("all");
+    if (selectedExclusiveFilters.has(filter)) {
+      selectedExclusiveFilters.delete(filter);
+    } else {
+      selectedExclusiveFilters.add(filter);
+    }
+    if (selectedExclusiveFilters.size === 0) {
+      selectedExclusiveFilters.add("all");
+    }
   }
+
+  exclusiveToggleEl.querySelectorAll<HTMLButtonElement>("[data-exclusive-filter]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(selectedExclusiveFilters.has(b.dataset.exclusiveFilter!)));
+  });
+  updateCapturedCounter();
+  updateActiveFilterBadge();
+  applyFilters();
 });
 
 loadMoreBtn.addEventListener("click", async () => {
@@ -611,7 +1069,7 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
     selectedGame = newGame;
     if (gameFilterEl) gameFilterEl.value = newGame;
     activeExclusivesMap = getExclusiveMapForGame(selectedGame);
-    selectedExclusiveFilter = "all";
+    selectedExclusiveFilters = new Set(["all"]);
     updateGameModeToggleUI();
     updateExclusiveToggleUI();
     updateCapturedCounter();
@@ -711,13 +1169,21 @@ async function init(): Promise<void> {
 
   cardHoverTilt(grid);
   const warmCache = () => {
+    const onReady = (pokemon: Pokemon[]) => {
+      allPokemon = pokemon;
+      allPokemonReady = true;
+      updateMoveCountMap();
+    };
     if ("requestIdleCallback" in window) {
-      (window as Window).requestIdleCallback(() => getAllPokemon(), { timeout: 3000 });
+      (window as Window).requestIdleCallback(() => getAllPokemon().then(onReady), { timeout: 3000 });
     } else {
-      setTimeout(() => getAllPokemon(), 1500);
+      setTimeout(() => getAllPokemon().then(onReady), 1500);
     }
   };
   warmCache();
+  getMoveDetailsMap().then((m) => {
+    moveDetailsMap = m;
+  });
   getTypeChart().then((chart) => populateTypeChips(chart.types));
   getGenerations().then((gens) => {
     populateGenerationChips(gens);

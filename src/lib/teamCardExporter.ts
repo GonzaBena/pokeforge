@@ -22,6 +22,9 @@ export function generateShowdownText(team: TeamState, pokemonMap: Map<number, Po
     const lines: string[] = [];
     lines.push(`${capitalize(p.name)}`);
     lines.push(`Types: ${p.types.map(capitalize).join(" / ")}`);
+    if (slot.nature) {
+      lines.push(`Nature: ${capitalize(slot.nature)}`);
+    }
 
     if (slot.moves && slot.moves.some(Boolean)) {
       for (const m of slot.moves) {
@@ -74,6 +77,10 @@ export function renderTeamCardHTML(team: TeamState, pokemonMap: Map<number, Poke
         .map((m) => `<span class="team-card-item__move-tag">${m!.split("-").map(capitalize).join(" ")}</span>`)
         .join("");
 
+      const natureTag = slot.nature
+        ? `<div class="team-card-item__nature-tag"><i data-lucide="sparkle"></i> ${capitalize(slot.nature)}</div>`
+        : "";
+
       return `
         <div class="team-card-item" style="--item-glow:${glowColor};">
           <div class="team-card-item__header">
@@ -84,6 +91,7 @@ export function renderTeamCardHTML(team: TeamState, pokemonMap: Map<number, Poke
             <img src="${sprite}" alt="${p.name}" loading="lazy" />
           </div>
           <h4 class="team-card-item__name">${p.name}</h4>
+          ${natureTag}
           <div class="team-card-item__moves">${movesList || '<span class="team-card-item__no-moves">Sin ataques</span>'}</div>
         </div>
       `;

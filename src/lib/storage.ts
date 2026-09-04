@@ -1,4 +1,4 @@
-import type { PokemonStats, TeamState } from "./types";
+import type { PokemonStats, TeamSlotState, TeamState } from "./types";
 
 const CAPTURED_KEY = "poketeam:captured";
 const TEAM_KEY = "poketeam:team";
@@ -45,15 +45,32 @@ export function setCaptured(id: number, captured: boolean): Set<number> {
 // --- Active team --------------------------------------------------------
 
 const TEAM_FIXED_SIZE = 5;
-const DEFAULT_SLOTS = Array.from({ length: TEAM_FIXED_SIZE }, () => ({ pokemonId: null, moves: [null, null, null, null] }));
+const DEFAULT_SLOTS: TeamSlotState[] = Array.from({ length: TEAM_FIXED_SIZE }, () => ({
+  pokemonId: null,
+  moves: [null, null, null, null],
+  nature: null,
+  stats: {},
+  usePokedexData: false,
+}));
 const DEFAULT_TEAM: TeamState = { size: TEAM_FIXED_SIZE, slots: DEFAULT_SLOTS };
 
 function normalizeTeam(team: TeamState): TeamState {
   const slots = Array.from({ length: TEAM_FIXED_SIZE }, (_, i) => {
     const raw = team?.slots?.[i];
-    if (!raw || raw.pokemonId === null) return { pokemonId: null, moves: [null, null, null, null] };
+    if (!raw || raw.pokemonId === null) {
+      return {
+        pokemonId: null,
+        moves: [null, null, null, null],
+        nature: null,
+        stats: {},
+        usePokedexData: false,
+      };
+    }
     const moves = Array.from({ length: 4 }, (_, mIdx) => raw.moves?.[mIdx] ?? null);
-    return { pokemonId: raw.pokemonId, moves };
+    const nature = typeof raw.nature === "string" ? raw.nature : null;
+    const stats = raw.stats && typeof raw.stats === "object" ? { ...raw.stats } : {};
+    const usePokedexData = Boolean(raw.usePokedexData);
+    return { pokemonId: raw.pokemonId, moves, nature, stats, usePokedexData };
   });
   return { size: TEAM_FIXED_SIZE, slots };
 }
@@ -73,11 +90,32 @@ export function setTeamSize(size: number): TeamState {
   return getTeam();
 }
 
-export function setTeamSlot(index: number, pokemonId: number | null): TeamState {
+export function setTeamSlot(
+  index: number,
+  pokemonId: number | null,
+  initialStats?: Partial<PokemonStats>,
+  initialNature?: string | null
+): TeamState {
   const current = getTeam();
   const slots = [...current.slots];
   if (index >= 0 && index < TEAM_FIXED_SIZE) {
-    slots[index] = { pokemonId, moves: [null, null, null, null] };
+    if (pokemonId === null) {
+      slots[index] = {
+        pokemonId: null,
+        moves: [null, null, null, null],
+        nature: null,
+        stats: {},
+        usePokedexData: false,
+      };
+    } else {
+      slots[index] = {
+        pokemonId,
+        moves: [null, null, null, null],
+        nature: initialNature ?? null,
+        stats: initialStats ? { ...initialStats } : {},
+        usePokedexData: false,
+      };
+    }
   }
   return setTeam({ ...current, slots });
 }
@@ -116,6 +154,87 @@ export function swapTeamSlotMoves(slotIndex: number, fromMoveIndex: number, toMo
   };
 
   return setTeam({ ...current, slots });
+}
+
+export function setTeamSlotNature(slotIndex: number, nature: string | null): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  const targetSlot = slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return current;
+
+  slots[slotIndex] = {
+    ...targetSlot,
+    nature,
+  };
+  return setTeam({ ...current, slots });
+}
+
+export function setTeamSlotStats(slotIndex: number, stats: Partial<PokemonStats>): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  const targetSlot = slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return current;
+
+  slots[slotIndex] = {
+    ...targetSlot,
+    stats: { ...stats },
+  };
+  return setTeam({ ...current, slots });
+}
+
+export function setTeamSlotUsePokedexData(slotIndex: number, usePokedexData: boolean): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  const targetSlot = slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return current;
+
+  slots[slotIndex] = {
+    ...targetSlot,
+    usePokedexData,
+  };
+  return setTeam({ ...current, slots });
+}
+
+export function copyPokedexToSlot(slotIndex: number): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  const targetSlot = slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return current;
+
+  const pokedexOverrides = getPokemonOverrides(targetSlot.pokemonId);
+  slots[slotIndex] = {
+    ...targetSlot,
+    nature: pokedexOverrides.nature,
+    stats: { ...pokedexOverrides.stats },
+    usePokedexData: false,
+  };
+  return setTeam({ ...current, slots });
+}
+
+export function copySlotToPokedex(slotIndex: number): void {
+  const current = getTeam();
+  const targetSlot = current.slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return;
+
+  setPokemonOverrides(targetSlot.pokemonId, {
+    nature: targetSlot.nature ?? null,
+    stats: targetSlot.stats ? { ...targetSlot.stats } : {},
+  });
+}
+
+export function getTeamSlotEffectiveOverrides(slot: TeamSlotState, baseStats?: PokemonStats): PokemonOverrides {
+  if (slot.usePokedexData && slot.pokemonId !== null) {
+    const pOverrides = getPokemonOverrides(slot.pokemonId);
+    return {
+      nature: pOverrides.nature ?? null,
+      stats: { ...(baseStats ?? {}), ...(pOverrides.stats ?? {}) },
+    };
+  }
+
+  return {
+    nature: slot.nature ?? null,
+    stats: { ...(baseStats ?? {}), ...(slot.stats ?? {}) },
+  };
 }
 
 // --- Per-pokemon detail overrides (stats/nature, informational only) ----

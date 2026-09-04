@@ -3,14 +3,22 @@ import { getAllPokemon, getTypeChart } from "./pokedexData";
 import { getEvolutionChain, getNatures, getPokemonDetail } from "./pokemonDetail";
 import { getTypeMultiplier } from "./typeChart";
 import {
+  copyPokedexToSlot,
+  copySlotToPokedex,
   getPokemonOverrides,
   getSectionOrder,
+  getTeam,
+  getTeamSlotEffectiveOverrides,
   isCaptured,
   isSectionCollapsed,
   setCaptured,
   setPokemonOverrides,
   setSectionCollapsed,
   setSectionOrder,
+  setTeamSlotNature,
+  setTeamSlotStats,
+  setTeamSlotUsePokedexData,
+  type PokemonOverrides,
 } from "./storage";
 import { animateMedalReveal, modalIn, modalOut, sectionSwap } from "./animations";
 import { refreshIcons } from "./icons";
@@ -83,7 +91,12 @@ interface RenderContext {
   typeChart: TypeChart;
 }
 
+export interface PokemonModalOptions {
+  slotIndex?: number;
+}
+
 let currentId: number | null = null;
+let currentSlotIndex: number | null = null;
 let lastContext: RenderContext | null = null;
 let showHexagonChart = false;
 
@@ -363,12 +376,32 @@ function renderSection(id: string, index: number, total: number, ctx: RenderCont
   `;
 }
 
+function getCurrentEffectiveOverrides(): PokemonOverrides {
+  if (currentSlotIndex !== null && lastContext) {
+    const team = getTeam();
+    const slot = team.slots[currentSlotIndex];
+    if (slot) {
+      return getTeamSlotEffectiveOverrides(slot, lastContext.detail.stats);
+    }
+  }
+  if (currentId !== null) {
+    return getPokemonOverrides(currentId) ?? { stats: {}, nature: null };
+  }
+  return { stats: {}, nature: null };
+}
+
 function renderHeader(ctx: RenderContext): string {
   const { pokemon, detail } = ctx;
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
+  const isTeamMode = currentSlotIndex !== null;
   const captured = isCaptured(pokemon.id);
-  const overrides = getPokemonOverrides(pokemon.id) ?? { stats: {}, nature: null };
+  const canEdit = isTeamMode ? true : captured;
+
+  const team = isTeamMode ? getTeam() : null;
+  const currentSlot = isTeamMode && team ? (team.slots[currentSlotIndex!] ?? null) : null;
+  const overrides = getCurrentEffectiveOverrides();
+
   const userStats = overrides.stats ?? {};
   const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
   const naturesList = ctx.natures ?? [];
@@ -402,7 +435,7 @@ function renderHeader(ctx: RenderContext): string {
           value="${value}"
           data-stat-input
           data-stat-key="${key}"
-          ${captured ? "" : "disabled"}
+          ${canEdit ? "" : "disabled"}
         />
       </div>
     `;
@@ -422,20 +455,61 @@ function renderHeader(ctx: RenderContext): string {
   };
   const primaryTypeColor = typeColor(pokemon.types[0] ?? "normal");
 
+  const badgeTeamHtml = isTeamMode
+    ? `<span class="badge badge--team"><i data-lucide="users"></i> ${t.modal.teamSlotBadge.replace("{n}", String(currentSlotIndex! + 1))}</span>`
+    : "";
+
+  let footerActionsHtml = "";
+  if (isTeamMode) {
+    const isSynced = Boolean(currentSlot?.usePokedexData);
+    footerActionsHtml = `
+      <div class="detail-team-toolbar" data-team-toolbar>
+        <div class="detail-team-toolbar__actions">
+          <button class="btn btn--compact btn--outline" type="button" data-copy-from-pokedex title="${t.modal.copyFromPokedex}">
+            <i data-lucide="download"></i>
+            <span>${t.modal.copyFromPokedex}</span>
+          </button>
+          <button class="btn btn--compact btn--outline" type="button" data-copy-to-pokedex title="${t.modal.copyToPokedex}">
+            <i data-lucide="upload"></i>
+            <span>${t.modal.copyToPokedex}</span>
+          </button>
+        </div>
+        <label class="detail-team-link-label" title="${t.modal.linkPokedex}">
+          <input type="checkbox" data-link-pokedex ${isSynced ? "checked" : ""} />
+          <span>${t.modal.linkPokedex}</span>
+        </label>
+      </div>
+    `;
+  } else {
+    footerActionsHtml = `
+      <button class="btn ${captured ? "" : "btn--primary"}" type="button" data-modal-capture-btn>
+        <i data-lucide="${captured ? "check" : "circle-dot"}"></i>
+        ${captured ? t.pokedex.caught : t.pokedex.catch}
+      </button>
+    `;
+  }
+
+  const medalHtml = isTeamMode
+    ? `<div class="detail-team-slot-badge"><i data-lucide="users"></i> ${t.modal.teamSlotBadge.replace("{n}", String(currentSlotIndex! + 1))}</div>`
+    : `
+      <div class="detail-capture-medal" data-capture-medal ${captured ? "" : "hidden"}>
+        <img src="/Medal-Black.png" alt="" class="detail-capture-medal__medal" data-medal-img />
+        <img src="/Text.png" alt="${captured ? t.pokedex.caught : t.pokedex.catch}" class="detail-capture-medal__stamp" data-stamp-img />
+      </div>
+    `;
+
   return `
-    <div class="detail-header">
+    <div class="detail-header ${isTeamMode ? "is-team-mode" : ""}">
       <div class="detail-header__sprite">
         <img src="${sprite}" alt="${pokemon.name}" />
-        <div class="detail-capture-medal" data-capture-medal ${captured ? "" : "hidden"}>
-          <img src="/Medal-Black.png" alt="" class="detail-capture-medal__medal" data-medal-img />
-          <img src="/Text.png" alt="${captured ? t.pokedex.caught : t.pokedex.catch}" class="detail-capture-medal__stamp" data-stamp-img />
-        </div>
+        ${medalHtml}
       </div>
       <div class="detail-header__info">
         <div class="detail-header__name-row">
           <div class="detail-header__title-group">
             <h3 class="detail-header__name">${pokemon.name}</h3>
             <span class="detail-header__id">${dexNumber(pokemon.id)}</span>
+            ${badgeTeamHtml}
           </div>
           <button class="btn btn--compact detail-chart-toggle-btn ${showHexagonChart ? "btn--primary" : ""}" type="button" data-toggle-chart-view title="${t.modal.chartToggle}">
             <i data-lucide="${showHexagonChart ? "bar-chart-2" : "hexagon"}"></i>
@@ -454,7 +528,7 @@ function renderHeader(ctx: RenderContext): string {
             <div class="detail-nature">
               <div class="detail-nature__select-row">
                 <span class="detail-nature__label">${t.modal.nature}</span>
-                <select data-nature-select ${captured ? "" : "disabled"}>
+                <select data-nature-select ${canEdit ? "" : "disabled"}>
                   <option value="">${locale === "es" ? "Sin definir" : "Undefined"}</option>
                   ${natureOptionsHtml}
                 </select>
@@ -464,12 +538,9 @@ function renderHeader(ctx: RenderContext): string {
                 ${renderNatureEffectBadges(selectedNature, locale)}
               </div>
             </div>
-            ${captured ? "" : `<p class="detail-hint" data-capture-hint>${t.modal.captureHint}</p>`}
+            ${isTeamMode ? `<p class="detail-nature-hint">${t.modal.teamNatureNotice}</p>` : (!captured ? `<p class="detail-hint" data-capture-hint>${t.modal.captureHint}</p>` : "")}
           </div>
-          <button class="btn ${captured ? "" : "btn--primary"}" type="button" data-modal-capture-btn>
-            <i data-lucide="${captured ? "check" : "circle-dot"}"></i>
-            ${captured ? t.pokedex.caught : t.pokedex.catch}
-          </button>
+          ${footerActionsHtml}
         </div>
       </div>
     </div>
@@ -639,7 +710,7 @@ function updateHexagonChartIfVisible(): void {
   const hexView = bodyEl.querySelector<HTMLElement>("[data-stats-hexagon-view]");
   if (!hexView) return;
 
-  const overrides = getPokemonOverrides(currentId) ?? { stats: {}, nature: null };
+  const overrides = getCurrentEffectiveOverrides();
   const userStats = overrides.stats ?? {};
   const currentStats: PokemonStats = {
     hp: userStats.hp ?? lastContext.detail.stats.hp,
@@ -852,8 +923,25 @@ function updateHeaderCapturedState(captured: boolean): void {
   refreshIcons();
 }
 
+function reRenderHeader(): void {
+  const { bodyEl } = getModalElements();
+  if (!bodyEl || !lastContext) return;
+  const currentHeader = bodyEl.querySelector<HTMLElement>(".detail-header");
+  if (!currentHeader) return;
+
+  const temp = document.createElement("div");
+  temp.innerHTML = renderHeader(lastContext);
+  const newHeader = temp.firstElementChild;
+  if (newHeader) {
+    currentHeader.replaceWith(newHeader);
+    refreshIcons();
+    updateHexagonChartIfVisible();
+  }
+}
+
 function closeModal(): void {
   currentId = null;
+  currentSlotIndex = null;
   closeTocMenu();
   const { overlayEl, panelEl, fabContainer } = getModalElements();
   if (fabContainer) fabContainer.hidden = true;
@@ -880,30 +968,77 @@ function bindModalEvents(): void {
       target.value = String(base);
     }
 
-    const overrides = getPokemonOverrides(currentId);
-    overrides.stats = { ...overrides.stats, [key]: value };
-    setPokemonOverrides(currentId, overrides);
+    if (currentSlotIndex !== null) {
+      const team = getTeam();
+      const slot = team.slots[currentSlotIndex];
+      if (slot) {
+        const nextStats = { ...lastContext.detail.stats, ...(slot.stats ?? {}), [key]: value };
+        if (slot.usePokedexData) {
+          const overrides = getPokemonOverrides(currentId);
+          overrides.stats = { ...overrides.stats, [key]: value };
+          setPokemonOverrides(currentId, overrides);
+        }
+        setTeamSlotStats(currentSlotIndex, nextStats);
+      }
+    } else {
+      const overrides = getPokemonOverrides(currentId);
+      overrides.stats = { ...overrides.stats, [key]: value };
+      setPokemonOverrides(currentId, overrides);
+    }
     updateHexagonChartIfVisible();
   });
 
   document.addEventListener("change", (e) => {
     const target = e.target as HTMLElement;
+
+    if (target.matches("[data-link-pokedex]") && currentSlotIndex !== null && currentId !== null && lastContext) {
+      const isChecked = (target as HTMLInputElement).checked;
+      if (isChecked) {
+        const pOverrides = getPokemonOverrides(currentId);
+        const hasPokedexData = pOverrides.nature !== null || Object.keys(pOverrides.stats).length > 0;
+        if (hasPokedexData) {
+          copyPokedexToSlot(currentSlotIndex);
+        } else {
+          copySlotToPokedex(currentSlotIndex);
+        }
+        setTeamSlotUsePokedexData(currentSlotIndex, true);
+      } else {
+        setTeamSlotUsePokedexData(currentSlotIndex, false);
+      }
+      reRenderHeader();
+      return;
+    }
+
     if (!target.matches("[data-nature-select]") || currentId === null) return;
 
     const value = (target as HTMLSelectElement).value || null;
-    const overrides = getPokemonOverrides(currentId);
-    overrides.nature = value;
-    setPokemonOverrides(currentId, overrides);
+    if (currentSlotIndex !== null) {
+      const team = getTeam();
+      const slot = team.slots[currentSlotIndex];
+      if (slot) {
+        if (slot.usePokedexData) {
+          const overrides = getPokemonOverrides(currentId);
+          overrides.nature = value;
+          setPokemonOverrides(currentId, overrides);
+        }
+        setTeamSlotNature(currentSlotIndex, value);
+      }
+    } else {
+      const overrides = getPokemonOverrides(currentId);
+      overrides.nature = value;
+      setPokemonOverrides(currentId, overrides);
+    }
 
     const nature = lastContext?.natures.find((n) => n.name === value) ?? null;
     const { bodyEl } = getModalElements();
+    const locale = getCurrentLocale();
 
     if (bodyEl && lastContext) {
       const tooltipEl = bodyEl.querySelector<HTMLElement>("[data-nature-tooltip]");
-      if (tooltipEl) tooltipEl.setAttribute("title", natureEffectText(nature));
+      if (tooltipEl) tooltipEl.setAttribute("title", natureEffectText(nature, locale));
 
       const effectsEl = bodyEl.querySelector<HTMLElement>("[data-nature-effects-container]");
-      if (effectsEl) effectsEl.innerHTML = renderNatureEffectBadges(nature);
+      if (effectsEl) effectsEl.innerHTML = renderNatureEffectBadges(nature, locale);
 
       STAT_KEYS.forEach((key) => {
         const inputEl = bodyEl.querySelector<HTMLInputElement>(`[data-stat-input][data-stat-key="${key}"]`);
@@ -923,7 +1058,7 @@ function bindModalEvents(): void {
             }
             modBadge.className = "detail-stat__mod detail-stat__mod--up";
             modBadge.textContent = "▲ +10%";
-            modBadge.title = "+10% por naturaleza";
+            modBadge.title = locale === "es" ? "+10% por naturaleza" : "+10% from nature";
           } else if (mod === "down") {
             if (!modBadge) {
               modBadge = document.createElement("span");
@@ -931,7 +1066,7 @@ function bindModalEvents(): void {
             }
             modBadge.className = "detail-stat__mod detail-stat__mod--down";
             modBadge.textContent = "▼ -10%";
-            modBadge.title = "-10% por naturaleza";
+            modBadge.title = locale === "es" ? "-10% por naturaleza" : "-10% from nature";
           } else if (modBadge) {
             modBadge.remove();
           }
@@ -977,6 +1112,31 @@ function bindModalEvents(): void {
       }
       toggleBtn.classList.toggle("btn--primary", showHexagonChart);
       refreshIcons();
+      return;
+    }
+
+    const copyFromBtn = target.closest<HTMLButtonElement>("[data-copy-from-pokedex]");
+    if (copyFromBtn && currentSlotIndex !== null && currentId !== null && lastContext) {
+      const pOverrides = getPokemonOverrides(currentId);
+      const hasData = pOverrides.nature !== null || (pOverrides.stats && Object.keys(pOverrides.stats).length > 0);
+      const locale = getCurrentLocale();
+      const t = getTranslations(locale);
+      if (!hasData) {
+        toast.info(t.modal.noPokedexData);
+        return;
+      }
+      copyPokedexToSlot(currentSlotIndex);
+      toast.success(t.modal.copiedFromPokedex);
+      reRenderHeader();
+      return;
+    }
+
+    const copyToBtn = target.closest<HTMLButtonElement>("[data-copy-to-pokedex]");
+    if (copyToBtn && currentSlotIndex !== null && currentId !== null && lastContext) {
+      copySlotToPokedex(currentSlotIndex);
+      const locale = getCurrentLocale();
+      const t = getTranslations(locale);
+      toast.success(t.modal.savedToPokedex);
       return;
     }
 
@@ -1089,21 +1249,26 @@ bindModalEvents();
 
 // --- public API -------------------------------------------------------
 
-export async function openPokemonModal(id: number): Promise<void> {
+export async function openPokemonModal(id: number, options?: PokemonModalOptions): Promise<void> {
   currentId = id;
+  currentSlotIndex = options?.slotIndex ?? null;
   const { overlayEl, panelEl, bodyEl, fabContainer } = getModalElements();
   if (!overlayEl || !panelEl || !bodyEl) return;
 
   if (fabContainer) fabContainer.hidden = true;
   closeTocMenu();
 
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  const loadingHtml = `<div class="detail-loading"><div class="spinner"></div><p>${t.modal.loading}</p></div>`;
+
   if (overlayEl.hidden) {
-    bodyEl.innerHTML = `<div class="detail-loading"><div class="spinner"></div><p>Cargando datos del Pokémon...</p></div>`;
+    bodyEl.innerHTML = loadingHtml;
     overlayEl.hidden = false;
     document.body.style.overflow = "hidden";
     modalIn(overlayEl, panelEl);
   } else {
-    bodyEl.innerHTML = `<div class="detail-loading"><div class="spinner"></div><p>Cargando datos del Pokémon...</p></div>`;
+    bodyEl.innerHTML = loadingHtml;
   }
 
   try {
@@ -1129,7 +1294,7 @@ export async function openPokemonModal(id: number): Promise<void> {
     bodyEl.scrollTop = 0;
   } catch (err) {
     console.error("Error cargando detalles del Pokémon:", err);
-    toast.error("No se pudieron cargar los detalles del Pokémon.");
+    toast.error(t.modal.loadError);
     closeModal();
   }
 }

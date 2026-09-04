@@ -124,7 +124,7 @@ const pickerState = {
   move: "",
   game: getSelectedGame(),
   dexMode: getGameDexMode(),
-  exclusive: "all",
+  exclusive: new Set<string>(["all"]),
 };
 
 const METHOD_LABELS: Record<Locale, Record<string, string>> = {
@@ -243,6 +243,14 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
             <span class="team-slot__id">${dexNumber(pokemon.id)}</span>
             <div class="team-slot__name">${pokemon.name}</div>
             <div class="pokemon-card__types">${typesHtml}</div>
+            ${
+              slotData?.nature
+                ? `<div class="team-slot__nature-pill" title="${locale === "es" ? `Naturaleza: ${capitalize(slotData.nature)}` : `Nature: ${capitalize(slotData.nature)}`}">
+                    <i data-lucide="sparkle"></i>
+                    <span>${capitalize(slotData.nature)}</span>
+                  </div>`
+                : ""
+            }
           </div>
         </div>
       </div>
@@ -1088,7 +1096,7 @@ function updatePickerExclusiveToggleUI(): void {
   if (!hasExclusives) {
     pickerExclusiveToggleEl.hidden = true;
     pickerExclusiveToggleEl.innerHTML = "";
-    pickerState.exclusive = "all";
+    pickerState.exclusive = new Set(["all"]);
     return;
   }
 
@@ -1100,18 +1108,18 @@ function updatePickerExclusiveToggleUI(): void {
   const nameB = locale === "es" ? vB.nameEs : vB.name;
 
   pickerExclusiveToggleEl.innerHTML = `
-    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="all" aria-pressed="${String(pickerState.exclusive === "all")}">
+    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="all" aria-pressed="${String(pickerState.exclusive.has("all"))}">
       ${t.pokedex.exclusiveAll}
     </button>
-    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="${vA.id}" aria-pressed="${String(pickerState.exclusive === vA.id)}" style="--btn-color:${vA.color};">
+    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="${vA.id}" aria-pressed="${String(pickerState.exclusive.has(vA.id))}" style="--btn-color:${vA.color};">
       <span class="exclusive-dot" style="--btn-color:${vA.color};"></span>
       ${t.pokedex.exclusiveOnly.replace("{version}", nameA)}
     </button>
-    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="${vB.id}" aria-pressed="${String(pickerState.exclusive === vB.id)}" style="--btn-color:${vB.color};">
+    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="${vB.id}" aria-pressed="${String(pickerState.exclusive.has(vB.id))}" style="--btn-color:${vB.color};">
       <span class="exclusive-dot" style="--btn-color:${vB.color};"></span>
       ${t.pokedex.exclusiveOnly.replace("{version}", nameB)}
     </button>
-    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="both" aria-pressed="${String(pickerState.exclusive === "both")}">
+    <button class="view-toggle__btn" type="button" data-picker-exclusive-filter="both" aria-pressed="${String(pickerState.exclusive.has("both"))}">
       ${t.pokedex.exclusiveBoth}
     </button>
   `;
@@ -1131,13 +1139,10 @@ function computePickerFiltered(): Pokemon[] {
     if (pickerState.move && !p.moves.includes(pickerState.move)) return false;
     if (gameSpeciesSet && !gameSpeciesSet.has(p.id)) return false;
 
-    if (pickerState.exclusive !== "all" && exclusivesMap.size > 0) {
-      if (pickerState.exclusive === "both") {
-        if (exclusivesMap.has(p.id)) return false;
-      } else {
-        const meta = exclusivesMap.get(p.id);
-        if (!meta || meta.id !== pickerState.exclusive) return false;
-      }
+    if (!pickerState.exclusive.has("all") && exclusivesMap.size > 0) {
+      const meta = exclusivesMap.get(p.id);
+      const category = meta ? meta.id : "both";
+      if (!pickerState.exclusive.has(category)) return false;
     }
 
     return true;
@@ -1203,7 +1208,7 @@ function openPicker(index: number): void {
   pickerState.move = "";
   pickerState.game = getSelectedGame();
   pickerState.dexMode = getGameDexMode();
-  pickerState.exclusive = "all";
+  pickerState.exclusive = new Set(["all"]);
   pickerSearchEl.value = "";
   pickerMoveFilterEl.value = "";
   if (pickerGameFilterEl) pickerGameFilterEl.value = pickerState.game;
@@ -1530,7 +1535,7 @@ slotsEl.addEventListener("click", (e) => {
     if (!slot || slot.pokemonId === null) {
       openPicker(idx);
     } else {
-      openPokemonModal(slot.pokemonId);
+      openPokemonModal(slot.pokemonId, { slotIndex: idx });
     }
   }
 });
@@ -2187,7 +2192,7 @@ pickerGameFilterEl?.addEventListener("change", () => {
   pickerState.game = pickerGameFilterEl.value;
   setSelectedGame(pickerState.game);
   if (teamHeaderGameSelectEl) teamHeaderGameSelectEl.value = pickerState.game;
-  pickerState.exclusive = "all";
+  pickerState.exclusive = new Set(["all"]);
   updatePickerGameModeToggleUI();
   updatePickerExclusiveToggleUI();
   renderStrengthsPanel();
@@ -2198,7 +2203,7 @@ teamHeaderGameSelectEl?.addEventListener("change", () => {
   pickerState.game = teamHeaderGameSelectEl.value;
   setSelectedGame(pickerState.game);
   if (pickerGameFilterEl) pickerGameFilterEl.value = pickerState.game;
-  pickerState.exclusive = "all";
+  pickerState.exclusive = new Set(["all"]);
   updatePickerGameModeToggleUI();
   updatePickerExclusiveToggleUI();
   renderStrengthsPanel();
@@ -2221,14 +2226,27 @@ pickerGameModeToggleEl?.addEventListener("click", (e) => {
 pickerExclusiveToggleEl?.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-picker-exclusive-filter]");
   if (!btn) return;
-  const filter = btn.dataset.pickerExclusiveFilter!;
-  if (filter && filter !== pickerState.exclusive) {
-    pickerState.exclusive = filter;
-    pickerExclusiveToggleEl.querySelectorAll<HTMLButtonElement>("[data-picker-exclusive-filter]").forEach((b) => {
-      b.setAttribute("aria-pressed", String(b.dataset.pickerExclusiveFilter === pickerState.exclusive));
-    });
-    renderPickerResults();
+  const filter = btn.dataset.pickerExclusiveFilter;
+  if (!filter) return;
+
+  if (filter === "all") {
+    pickerState.exclusive = new Set(["all"]);
+  } else {
+    pickerState.exclusive.delete("all");
+    if (pickerState.exclusive.has(filter)) {
+      pickerState.exclusive.delete(filter);
+    } else {
+      pickerState.exclusive.add(filter);
+    }
+    if (pickerState.exclusive.size === 0) {
+      pickerState.exclusive.add("all");
+    }
   }
+
+  pickerExclusiveToggleEl.querySelectorAll<HTMLButtonElement>("[data-picker-exclusive-filter]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(pickerState.exclusive.has(b.dataset.pickerExclusiveFilter!)));
+  });
+  renderPickerResults();
 });
 
 window.addEventListener(GAME_CHANGED_EVENT, (e) => {
@@ -2237,7 +2255,7 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
     pickerState.game = newGame;
     if (pickerGameFilterEl) pickerGameFilterEl.value = newGame;
     if (teamHeaderGameSelectEl) teamHeaderGameSelectEl.value = newGame;
-    pickerState.exclusive = "all";
+    pickerState.exclusive = new Set(["all"]);
     updatePickerGameModeToggleUI();
     updatePickerExclusiveToggleUI();
     renderStrengthsPanel();
@@ -2254,13 +2272,16 @@ window.addEventListener(GAME_DEX_MODE_CHANGED_EVENT, (e) => {
   }
 });
 
-pickerResultsEl.addEventListener("click", (e) => {
+pickerResultsEl.addEventListener("click", async (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-picker-pick]");
   if (!btn || activeSlotIndex === null) return;
   const id = Number(btn.dataset.pokemonId);
   const pokemon = pokemonById.get(id);
 
-  team = setTeamSlot(activeSlotIndex, id);
+  const detail = await getPokemonDetail(id).catch(() => null);
+  const baseStats = detail ? { ...detail.stats } : {};
+
+  team = setTeamSlot(activeSlotIndex, id, baseStats);
   renderSingleSlot(activeSlotIndex, true);
   renderStrengthsPanel();
   if (pokemon) {
