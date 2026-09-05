@@ -8,7 +8,7 @@ import { getLocalizedPath, type Locale } from "./i18n/translations";
 export function getPostSlug(id: string, locale: Locale): string {
   return id
     .replace(new RegExp(`^${locale}/`), "")
-    .replace(/\/index\.md$/, "")
+    .replace(/\/index(\.md)?$/, "")
     .replace(/\.md$/, "");
 }
 

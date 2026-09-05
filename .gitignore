@@ -29,3 +29,7 @@ pnpm-debug.log*
 
 # notes & plans
 MEJORAS.md
+
+# Obsidian
+.obsidian/
+.trash/

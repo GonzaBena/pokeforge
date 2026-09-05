@@ -10,7 +10,6 @@ readingTime: "12 min"
 author: "gonzo"
 isGuideHub: true
 ---
-
 ¡Bienvenido a la región de **Kanto**! Esta guía completa te acompañará a lo largo de toda tu travesía, desde tus humildes comienzos en Pueblo Paleta hasta la cima del Alto Mando en la Meseta Añil.
 
 A lo largo de los distintos capítulos exploraremos cada pueblo, ciudad, ruta y cueva, detallando los Pokémon disponibles, objetos ocultos y estrategias recomendadas para superar a cada líder de gimnasio.
