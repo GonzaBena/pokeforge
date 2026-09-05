@@ -1,9 +1,16 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getCollection } from "astro:content";
+import type { Page } from "astro";
+import { getCollection, type CollectionEntry } from "astro:content";
 import { getTranslations, type Locale } from "../lib/i18n/translations";
 import { getAuthor } from "../lib/authors";
 import { getPostUrl } from "../lib/guides";
+
+interface Props {
+  page?: Page<CollectionEntry<"blog">>;
+}
+
+const { page } = Astro.props;
 
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
@@ -18,15 +25,24 @@ const sortedPosts = allPosts.sort(
   (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
 );
 
+const POSTS_PER_PAGE = 12;
+
+const currentPage = page ? page.currentPage : 1;
+const totalPages = page ? page.lastPage : Math.max(1, Math.ceil(sortedPosts.length / POSTS_PER_PAGE));
+const displayPosts = page ? page.data : sortedPosts.slice(0, POSTS_PER_PAGE);
+
+// El carrusel hero solo se muestra en la página 1
 const featuredPosts = sortedPosts.filter((p) => p.data.featured);
 const heroPosts =
-  featuredPosts.length > 0
-    ? featuredPosts
-    : sortedPosts.length > 0
-      ? [sortedPosts[0]]
-      : [];
+  currentPage === 1
+    ? featuredPosts.length > 0
+      ? featuredPosts
+      : sortedPosts.length > 0
+        ? [sortedPosts[0]]
+        : []
+    : [];
 
-// Conteo por categorías
+// Conteo por categorías sobre todo el catálogo
 const counts = {
   all: sortedPosts.length,
   guias: sortedPosts.filter((p) => p.data.category === "guias").length,
@@ -42,9 +58,70 @@ function formatDate(date: Date): string {
     day: "numeric",
   });
 }
+
+function getPageUrl(pageNum: number, locale: Locale): string {
+  if (pageNum === 1) {
+    return locale === "es" ? "/es/blog/" : "/blog/";
+  }
+  return locale === "es" ? `/es/blog/page/${pageNum}/` : `/blog/page/${pageNum}/`;
+}
+
+function getPageRange(current: number, total: number): (number | string)[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  if (current <= 4) {
+    return [1, 2, 3, 4, 5, "...", total];
+  }
+  if (current >= total - 3) {
+    return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
+  }
+  return [1, "...", current - 1, current, current + 1, "...", total];
+}
+
+const pageRange = getPageRange(currentPage, totalPages);
+const prevUrl = currentPage > 1 ? getPageUrl(currentPage - 1, currentLocale) : undefined;
+const nextUrl = currentPage < totalPages ? getPageUrl(currentPage + 1, currentLocale) : undefined;
+
+const pageTitle =
+  currentPage > 1
+    ? currentLocale === "es"
+      ? `Blog & Estrategia · ${t.blog.paginationPage} ${currentPage}`
+      : `Blog & Strategy · ${t.blog.paginationPage} ${currentPage}`
+    : currentLocale === "es"
+      ? "Blog & Estrategia"
+      : "Blog & Strategy";
+
+const alternateUrls = {
+  en: getPageUrl(currentPage, "en"),
+  es: getPageUrl(currentPage, "es"),
+};
+
+// Preparar índice liviano para búsqueda global instantánea
+const searchManifest = sortedPosts.map((p) => {
+  const author = getAuthor(p.data.author);
+  return {
+    id: p.id,
+    url: getPostUrl(p.id, currentLocale),
+    title: p.data.title,
+    description: p.data.description,
+    category: p.data.category,
+    categoryLabel:
+      t.blog.categories[p.data.category as keyof typeof t.blog.categories] ?? p.data.category,
+    tags: p.data.tags ?? [],
+    coverImage: p.data.coverImage ?? "/favicon.png",
+    featured: p.data.featured ?? false,
+    isGuideHub: p.data.isGuideHub ?? false,
+    readingTime: p.data.readingTime ?? "",
+    pubDateStr: formatDate(p.data.pubDate),
+    authorName: author.name,
+    authorAvatar: author.avatar,
+    searchText: `${p.data.title.toLowerCase()} ${p.data.description.toLowerCase()} ${(p.data.tags ?? []).join(" ").toLowerCase()}`,
+  };
+});
 ---
 
-<BaseLayout title={currentLocale === "es" ? "Blog & Estrategia" : "Blog & Strategy"}>
+<BaseLayout title={pageTitle} alternateUrls={alternateUrls}>
   <div class="hero-container">
     <div class="hero-ambient-glow" aria-hidden="true"></div>
     <section class="hero">
@@ -229,9 +306,14 @@ function formatDate(date: Date): string {
       </div>
     </div>
 
-    <!-- Grilla de Artículos -->
-    <section class="blog-grid" data-blog-grid>
-      {sortedPosts.map((post) => {
+    <!-- Grilla de Artículos Estáticos -->
+    <section
+      class="blog-grid"
+      data-blog-grid
+      data-guide-badge={t.blog.guideHubBadge}
+      data-featured-badge={t.blog.featuredBadge}
+    >
+      {displayPosts.map((post) => {
         const categoryLabel =
           t.blog.categories[post.data.category as keyof typeof t.blog.categories] ??
           post.data.category;
@@ -309,6 +391,94 @@ function formatDate(date: Date): string {
       })}
     </section>
 
+    <!-- Paginación Estática con enlaces reales <a> -->
+    <nav
+      class="blog-pagination"
+      data-blog-pagination
+      data-prev-label={t.blog.paginationPrev}
+      data-next-label={t.blog.paginationNext}
+      aria-label={t.blog.paginationPage}
+      hidden={totalPages <= 1 ? true : undefined}
+    >
+      {totalPages > 1 && (
+        <>
+          {currentPage > 1 && prevUrl ? (
+            <a
+              href={prevUrl}
+              class="blog-pagination__btn blog-pagination__btn--prev"
+              aria-label={t.blog.paginationPrev}
+              data-astro-prefetch
+            >
+              <i data-lucide="chevron-left"></i>
+              <span>{t.blog.paginationPrev}</span>
+            </a>
+          ) : (
+            <span
+              class="blog-pagination__btn blog-pagination__btn--disabled"
+              aria-disabled="true"
+            >
+              <i data-lucide="chevron-left"></i>
+              <span>{t.blog.paginationPrev}</span>
+            </span>
+          )}
+
+          <div class="blog-pagination__numbers">
+            {pageRange.map((item) => {
+              if (typeof item === "number") {
+                const isCurrent = item === currentPage;
+                return isCurrent ? (
+                  <span class="blog-pagination__page active" aria-current="page">
+                    {item}
+                  </span>
+                ) : (
+                  <a
+                    href={getPageUrl(item, currentLocale)}
+                    class="blog-pagination__page"
+                    data-astro-prefetch
+                  >
+                    {item}
+                  </a>
+                );
+              }
+              return (
+                <span class="blog-pagination__page ellipsis" aria-hidden="true">
+                  …
+                </span>
+              );
+            })}
+          </div>
+
+          {currentPage < totalPages && nextUrl ? (
+            <a
+              href={nextUrl}
+              class="blog-pagination__btn blog-pagination__btn--next"
+              aria-label={t.blog.paginationNext}
+              data-astro-prefetch
+            >
+              <span>{t.blog.paginationNext}</span>
+              <i data-lucide="chevron-right"></i>
+            </a>
+          ) : (
+            <span
+              class="blog-pagination__btn blog-pagination__btn--disabled"
+              aria-disabled="true"
+            >
+              <span>{t.blog.paginationNext}</span>
+              <i data-lucide="chevron-right"></i>
+            </span>
+          )}
+        </>
+      )}
+    </nav>
+
+    <!-- Script con índice de búsqueda global -->
+    <script
+      id="blog-search-manifest"
+      type="application/json"
+      is:inline
+      set:html={JSON.stringify(searchManifest)}
+    />
+
     <!-- Estado vacío cuando la búsqueda o filtro no da resultados -->
     <div class="blog-empty" data-blog-empty hidden>
       <i data-lucide="search"></i>
@@ -322,17 +492,205 @@ function formatDate(date: Date): string {
   </main>
 
   <script>
+    import { refreshIcons } from "../lib/icons";
+
+    interface SearchManifestItem {
+      id: string;
+      url: string;
+      title: string;
+      description: string;
+      category: string;
+      categoryLabel: string;
+      tags: string[];
+      coverImage: string;
+      featured: boolean;
+      isGuideHub: boolean;
+      readingTime: string;
+      pubDateStr: string;
+      authorName: string;
+      authorAvatar: string;
+      searchText: string;
+    }
+
+    function escapeHtml(str: string): string {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function setupBlogInteractions() {
-      // 1. Filtrado y Búsqueda
       const searchInput = document.querySelector<HTMLInputElement>("[data-blog-search]");
       const filterBtns = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
-      const cards = document.querySelectorAll<HTMLElement>(".post-card");
+      const grid = document.querySelector<HTMLElement>("[data-blog-grid]");
       const emptyState = document.querySelector<HTMLElement>("[data-blog-empty]");
       const resetBtn = document.querySelector<HTMLButtonElement>("[data-reset-filters]");
       const tagBanner = document.querySelector<HTMLElement>("[data-active-tag-banner]");
       const tagText = document.querySelector<HTMLElement>("[data-active-tag-text]");
       const clearTagBtn = document.querySelector<HTMLButtonElement>("[data-clear-tag]");
       const countBadges = document.querySelectorAll<HTMLElement>("[data-filter-count]");
+      const paginationNav = document.querySelector<HTMLElement>("[data-blog-pagination]");
+
+      if (!grid) return;
+      const blogGrid: HTMLElement = grid;
+
+      const guideHubBadge = blogGrid.dataset.guideBadge || "Guía";
+      const featuredBadge = blogGrid.dataset.featuredBadge || "Destacado";
+
+      // Guardar el HTML original estático de la cuadrícula y de la paginación
+      const initialGridHtml = blogGrid.innerHTML;
+      const initialPaginationHtml = paginationNav ? paginationNav.innerHTML : "";
+      const initialPaginationHidden = paginationNav ? paginationNav.hidden : true;
+
+      const PAGE_SIZE = 12;
+      let filteredCurrentPage = 1;
+      let currentFilteredPosts: SearchManifestItem[] = [];
+
+      function getPageRange(current: number, total: number): (number | string)[] {
+        if (total <= 7) {
+          return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        if (current <= 4) {
+          return [1, 2, 3, 4, 5, "...", total];
+        }
+        if (current >= total - 3) {
+          return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
+        }
+        return [1, "...", current - 1, current, current + 1, "...", total];
+      }
+
+      function scrollToGridTop() {
+        const controls = document.querySelector<HTMLElement>(".blog-controls");
+        if (controls) {
+          const targetY = controls.getBoundingClientRect().top + window.scrollY - 80;
+          if (window.scrollY > targetY) {
+            window.scrollTo({ top: targetY, behavior: "smooth" });
+          }
+        }
+      }
+
+      function renderFilteredPage(pageNum: number) {
+        filteredCurrentPage = pageNum;
+        const totalFilteredPages = Math.ceil(currentFilteredPosts.length / PAGE_SIZE);
+
+        const start = (filteredCurrentPage - 1) * PAGE_SIZE;
+        const end = start + PAGE_SIZE;
+        const pageItems = currentFilteredPosts.slice(start, end);
+
+        // Renderizar las tarjetas de la página actual filtrada
+        blogGrid.innerHTML = pageItems
+          .map((post) => `
+            <article class="post-card ${post.featured ? "post-card--featured" : ""}" data-category="${post.category}">
+              <a href="${post.url}" class="post-card__link" data-astro-prefetch>
+                <div class="post-card__media">
+                  <div class="post-card__badge-wrap">
+                    <span class="blog-badge blog-badge--${post.category}">${escapeHtml(post.categoryLabel)}</span>
+                    ${post.isGuideHub ? `<span class="blog-featured-pill blog-featured-pill--guide"><i data-lucide="book-open"></i>${escapeHtml(guideHubBadge)}</span>` : ""}
+                    ${post.featured && !post.isGuideHub ? `<span class="blog-featured-pill"><i data-lucide="flame"></i>${escapeHtml(featuredBadge)}</span>` : ""}
+                  </div>
+                  <img src="${post.coverImage}" alt="${escapeHtml(post.title)}" loading="lazy" />
+                </div>
+                <div class="post-card__body">
+                  <div class="post-card__meta-top">
+                    <span class="article-date"><i data-lucide="calendar"></i>${escapeHtml(post.pubDateStr)}</span>
+                    ${post.readingTime ? `<span class="blog-read-time"><i data-lucide="clock"></i>${escapeHtml(post.readingTime)}</span>` : ""}
+                  </div>
+                  <h3 class="post-card__title">${escapeHtml(post.title)}</h3>
+                  <p class="post-card__desc">${escapeHtml(post.description)}</p>
+                  <div class="post-card__footer">
+                    <div class="blog-author-chip">
+                      <img src="${post.authorAvatar}" alt="${escapeHtml(post.authorName)}" class="blog-author-avatar" loading="lazy" />
+                      <span class="post-card__author">${escapeHtml(post.authorName)}</span>
+                    </div>
+                    <span class="post-card__arrow"><i data-lucide="arrow-right"></i></span>
+                  </div>
+                </div>
+              </a>
+            </article>
+          `)
+          .join("");
+
+        // Renderizar controles de paginación interactivos para resultados filtrados
+        if (paginationNav) {
+          if (totalFilteredPages <= 1) {
+            paginationNav.hidden = true;
+          } else {
+            paginationNav.hidden = false;
+            const prevLabel = paginationNav.dataset.prevLabel || "Previous";
+            const nextLabel = paginationNav.dataset.nextLabel || "Next";
+            const range = getPageRange(filteredCurrentPage, totalFilteredPages);
+
+            paginationNav.innerHTML = `
+              <button
+                type="button"
+                class="blog-pagination__btn blog-pagination__btn--prev"
+                data-filtered-btn="prev"
+                ${filteredCurrentPage === 1 ? "disabled" : ""}
+                aria-label="${escapeHtml(prevLabel)}"
+              >
+                <i data-lucide="chevron-left"></i>
+                <span>${escapeHtml(prevLabel)}</span>
+              </button>
+
+              <div class="blog-pagination__numbers">
+                ${range.map((item) => {
+                  if (typeof item === "number") {
+                    const isCurrent = item === filteredCurrentPage;
+                    return isCurrent
+                      ? `<span class="blog-pagination__page active" aria-current="page">${item}</span>`
+                      : `<button type="button" class="blog-pagination__page" data-filtered-page="${item}">${item}</button>`;
+                  }
+                  return `<span class="blog-pagination__page ellipsis" aria-hidden="true">…</span>`;
+                }).join("")}
+              </div>
+
+              <button
+                type="button"
+                class="blog-pagination__btn blog-pagination__btn--next"
+                data-filtered-btn="next"
+                ${filteredCurrentPage === totalFilteredPages ? "disabled" : ""}
+                aria-label="${escapeHtml(nextLabel)}"
+              >
+                <span>${escapeHtml(nextLabel)}</span>
+                <i data-lucide="chevron-right"></i>
+              </button>
+            `;
+
+            // Escuchadores de eventos para los botones dinámicos de paginación
+            paginationNav.querySelector('[data-filtered-btn="prev"]')?.addEventListener("click", () => {
+              if (filteredCurrentPage > 1) {
+                renderFilteredPage(filteredCurrentPage - 1);
+                scrollToGridTop();
+              }
+            });
+
+            paginationNav.querySelector('[data-filtered-btn="next"]')?.addEventListener("click", () => {
+              if (filteredCurrentPage < totalFilteredPages) {
+                renderFilteredPage(filteredCurrentPage + 1);
+                scrollToGridTop();
+              }
+            });
+
+            paginationNav.querySelectorAll<HTMLButtonElement>("[data-filtered-page]").forEach((btn) => {
+              btn.addEventListener("click", () => {
+                const targetPage = parseInt(btn.dataset.filteredPage || "1", 10);
+                if (targetPage !== filteredCurrentPage) {
+                  renderFilteredPage(targetPage);
+                  scrollToGridTop();
+                }
+              });
+            });
+          }
+        }
+
+        refreshIcons();
+      }
+
+      // Leer índice global de búsqueda
+      const manifestEl = document.getElementById("blog-search-manifest");
+      const allPosts: SearchManifestItem[] = manifestEl ? JSON.parse(manifestEl.textContent || "[]") : [];
 
       let activeFilter = "all";
       let searchQuery = "";
@@ -350,7 +708,9 @@ function formatDate(date: Date): string {
       }
 
       function filterArticles() {
-        let visibleCount = 0;
+        const isFiltering = Boolean(searchQuery || activeTag || activeFilter !== "all");
+
+        // Actualizar contadores de categorías sobre todo el catálogo
         const dynamicCounts: Record<string, number> = {
           all: 0,
           guias: 0,
@@ -359,34 +719,21 @@ function formatDate(date: Date): string {
           novedades: 0,
         };
 
-        cards.forEach((card) => {
-          const category = card.dataset.category ?? "";
-          const searchText = card.dataset.searchText ?? "";
-          const cardTags = (card.dataset.tags ?? "").split(",").map((t) => t.trim().toLowerCase());
-
-          const matchesSearch = !searchQuery || searchText.includes(searchQuery);
+        allPosts.forEach((post) => {
+          const matchesSearch = !searchQuery || post.searchText.includes(searchQuery);
           const matchesTag =
-            !activeTag || cardTags.includes(activeTag) || searchText.includes(activeTag);
+            !activeTag ||
+            post.tags.some((t) => t.toLowerCase() === activeTag) ||
+            post.searchText.includes(activeTag);
 
-          // Si coincide con búsqueda y tag actual, suma a su categoría correspondiente
           if (matchesSearch && matchesTag) {
-            dynamicCounts.all = (dynamicCounts.all || 0) + 1;
-            if (category) {
-              dynamicCounts[category] = (dynamicCounts[category] || 0) + 1;
+            dynamicCounts.all++;
+            if (dynamicCounts[post.category] !== undefined) {
+              dynamicCounts[post.category]++;
             }
-          }
-
-          const matchesCategory = activeFilter === "all" || category === activeFilter;
-
-          if (matchesCategory && matchesSearch && matchesTag) {
-            card.removeAttribute("data-hidden");
-            visibleCount++;
-          } else {
-            card.setAttribute("data-hidden", "true");
           }
         });
 
-        // Actualizar contadores de cada categoría en la barra de navegación
         countBadges.forEach((badge) => {
           const cat = badge.dataset.filterCount;
           if (cat && dynamicCounts[cat] !== undefined) {
@@ -403,12 +750,41 @@ function formatDate(date: Date): string {
           }
         });
 
-        if (emptyState) {
-          emptyState.hidden = visibleCount > 0;
+        if (!isFiltering) {
+          // Estado por defecto: restaurar los artículos estáticos de esta página y la paginación original
+          blogGrid.innerHTML = initialGridHtml;
+          if (paginationNav) {
+            paginationNav.innerHTML = initialPaginationHtml;
+            paginationNav.hidden = initialPaginationHidden;
+          }
+          if (emptyState) emptyState.hidden = true;
+          refreshIcons();
+          return;
         }
+
+        // Modo búsqueda / filtro activo: paginar los resultados que coincidan
+        currentFilteredPosts = allPosts.filter((post) => {
+          const matchesSearch = !searchQuery || post.searchText.includes(searchQuery);
+          const matchesTag =
+            !activeTag ||
+            post.tags.some((t) => t.toLowerCase() === activeTag) ||
+            post.searchText.includes(activeTag);
+          const matchesCategory = activeFilter === "all" || post.category === activeFilter;
+          return matchesSearch && matchesTag && matchesCategory;
+        });
+
+        if (currentFilteredPosts.length === 0) {
+          blogGrid.innerHTML = "";
+          if (paginationNav) paginationNav.hidden = true;
+          if (emptyState) emptyState.hidden = false;
+          return;
+        }
+
+        if (emptyState) emptyState.hidden = true;
+        renderFilteredPage(1);
       }
 
-      // Si se cargó con una etiqueta en la URL, ejecutar filtrado inicial
+      // Si se cargó con etiqueta en la URL
       if (activeTag) {
         filterArticles();
       }
@@ -458,7 +834,7 @@ function formatDate(date: Date): string {
         });
       }
 
-      // 2. Carrusel de Artículos Destacados
+      // 2. Carrusel de Artículos Destacados (solo activo si hay slides)
       const carousel = document.querySelector<HTMLElement>("[data-blog-carousel]");
       if (carousel) {
         const slides = carousel.querySelectorAll<HTMLElement>("[data-carousel-slide]");
@@ -518,7 +894,6 @@ function formatDate(date: Date): string {
       }
     }
 
-    // Inicializar al cargar y en transiciones de página
     setupBlogInteractions();
     document.addEventListener("astro:page-load", setupBlogInteractions);
   </script>

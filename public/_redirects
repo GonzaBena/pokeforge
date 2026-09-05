@@ -3,3 +3,9 @@
 /pokedex/   /pokedex/index.html    200
 /equipo     /equipo/index.html     200
 /equipo/    /equipo/index.html     200
+
+# Canonical redirects for blog page 1
+/blog/page/1     /blog/     301!
+/blog/page/1/    /blog/     301!
+/es/blog/page/1  /es/blog/  301!
+/es/blog/page/1/ /es/blog/  301!

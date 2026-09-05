@@ -1,0 +1,27 @@
+---
+import type { GetStaticPaths, Page } from "astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+import BlogView from "../../../views/BlogView.astro";
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+  const posts = await getCollection("blog", ({ id, data }) => {
+    return id.startsWith("en/") && !data.parentGuide;
+  });
+
+  const sorted = posts.sort(
+    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+  );
+
+  const paginated = paginate(sorted, { pageSize: 12 });
+  // Omitimos la página 1 porque se sirve como /blog/
+  return paginated.filter((p) => String(p.params.page) !== "1");
+};
+
+interface Props {
+  page: Page<CollectionEntry<"blog">>;
+}
+
+const { page } = Astro.props;
+---
+
+<BlogView page={page} />

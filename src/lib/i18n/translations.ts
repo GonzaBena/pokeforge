@@ -81,8 +81,8 @@ export interface Translations {
     blogDesc: string;
     typeAnalysis: string;
     typeAnalysisDesc: string;
-    offlineMode: string;
-    offlineModeDesc: string;
+    adFree: string;
+    adFreeDesc: string;
     gameFilters: string;
     gameFiltersDesc: string;
   };
@@ -373,6 +373,10 @@ export interface Translations {
     guideAllChapters: string;
     guideQuickNav: string;
     guideIndexShort: string;
+    paginationPrev: string;
+    paginationNext: string;
+    paginationPage: string;
+    paginationOf: string;
   };
 }
 
@@ -418,8 +422,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       blogDesc: "Guides, trivia, and competitive analysis",
       typeAnalysis: "Type Analysis",
       typeAnalysisDesc: "Calculate resistances and immunities instantly.",
-      offlineMode: "Offline PWA Mode",
-      offlineModeDesc: "Install and use the app without internet connection.",
+      adFree: "100% Ad-Free",
+      adFreeDesc: "Clean, fast experience with zero ads or interruptions.",
       gameFilters: "Game Filters",
       gameFiltersDesc: "Official data by version and location.",
     },
@@ -733,6 +737,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       guideAllChapters: "All chapters",
       guideQuickNav: "Chapters",
       guideIndexShort: "Index",
+      paginationPrev: "Previous",
+      paginationNext: "Next",
+      paginationPage: "Page",
+      paginationOf: "of",
     },
   },
   es: {
@@ -777,8 +785,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       blogDesc: "Estrategias, novedades y curiosidades",
       typeAnalysis: "Análisis de Tipos",
       typeAnalysisDesc: "Calculá resistencias e inmunidades al instante.",
-      offlineMode: "Modo PWA Offline",
-      offlineModeDesc: "Instalá y usá la app sin conexión.",
+      adFree: "100% Ad-Free",
+      adFreeDesc: "Experiencia limpia y rápida, totalmente libre de anuncios.",
       gameFilters: "Filtros por Juego",
       gameFiltersDesc: "Datos oficiales por versión y ubicación.",
     },
@@ -1102,6 +1110,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       guideAllChapters: "Capítulos",
       guideQuickNav: "Capítulos",
       guideIndexShort: "Índice",
+      paginationPrev: "Anterior",
+      paginationNext: "Siguiente",
+      paginationPage: "Página",
+      paginationOf: "de",
     },
   },
 };
