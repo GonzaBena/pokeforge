@@ -362,6 +362,17 @@ export interface Translations {
     backToTop: string;
     filteringByTag: string;
     clearTagFilter: string;
+    guideHubBadge: string;
+    guideChapter: string;
+    guideChapterProgress: string;
+    guideIndexTitle: string;
+    guideIndexSubtitle: string;
+    guidePrevChapter: string;
+    guideNextChapter: string;
+    guideBackToHub: string;
+    guideAllChapters: string;
+    guideQuickNav: string;
+    guideIndexShort: string;
   };
 }
 
@@ -710,6 +721,18 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       backToTop: "Back to top",
       filteringByTag: "Filtering by tag:",
       clearTagFilter: "Clear tag filter",
+      guideHubBadge: "Multi-part Guide",
+      guideChapter: "Chapter",
+      guideChapterProgress: "Chapter {current} of {total}",
+      guideIndexTitle: "Guide Chapters & Sections",
+      guideIndexSubtitle:
+        "Explore all sections and stops of this comprehensive guide.",
+      guidePrevChapter: "Previous chapter",
+      guideNextChapter: "Next chapter",
+      guideBackToHub: "Guide Overview",
+      guideAllChapters: "All chapters",
+      guideQuickNav: "Chapters",
+      guideIndexShort: "Index",
     },
   },
   es: {
@@ -1055,7 +1078,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       readArticle: "Leer artículo",
       readingTimeSuffix: "min de lectura",
       noPosts: "No se encontraron artículos",
-      noPostsDesc: "Prueba ajustando el término de búsqueda o la categoría seleccionada.",
+      noPostsDesc:
+        "Prueba ajustando el término de búsqueda o la categoría seleccionada.",
       backToBlog: "Volver al Blog",
       publishedOn: "Publicado el",
       writtenBy: "Por",
@@ -1066,6 +1090,18 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       backToTop: "Volver arriba",
       filteringByTag: "Filtrando por etiqueta:",
       clearTagFilter: "Quitar filtro de etiqueta",
+      guideHubBadge: "Guía",
+      guideChapter: "Capítulo",
+      guideChapterProgress: "Capítulo {current} de {total}",
+      guideIndexTitle: "Capítulos e Índice de la Guía",
+      guideIndexSubtitle:
+        "Explora todas las secciones y paradas de esta guía detallada.",
+      guidePrevChapter: "Capítulo anterior",
+      guideNextChapter: "Siguiente capítulo",
+      guideBackToHub: "Volver al índice general",
+      guideAllChapters: "Capítulos",
+      guideQuickNav: "Capítulos",
+      guideIndexShort: "Índice",
     },
   },
 };

@@ -15,6 +15,10 @@ const blog = defineCollection({
     featured: z.boolean().default(false),
     readingTime: z.string().optional(),
     translation: z.string().optional(),
+    parentGuide: z.string().optional(),
+    order: z.number().optional(),
+    guideId: z.string().optional(),
+    isGuideHub: z.boolean().default(false),
   }),
 });
 

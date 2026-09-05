@@ -1,6 +1,7 @@
 import {
   createIcons,
   AlertTriangle,
+  ArrowLeft,
   ArrowRight,
   ArrowUp,
   BarChart2,
@@ -26,6 +27,7 @@ import {
   Grid,
   GripVertical,
   Hexagon,
+  Home,
   Image,
   Info,
   Link,
@@ -60,6 +62,7 @@ export function refreshIcons(): void {
   createIcons({
     icons: {
       AlertTriangle,
+      ArrowLeft,
       ArrowRight,
       ArrowUp,
       BarChart2,
@@ -85,6 +88,7 @@ export function refreshIcons(): void {
       Grid,
       GripVertical,
       Hexagon,
+      Home,
       Image,
       Info,
       Link,

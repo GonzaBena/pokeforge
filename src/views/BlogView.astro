@@ -1,15 +1,16 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
+import { getTranslations, type Locale } from "../lib/i18n/translations";
 import { getAuthor } from "../lib/authors";
+import { getPostUrl } from "../lib/guides";
 
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
 
-// Obtener todas las entradas correspondientes al locale actual
-const allPosts = await getCollection("blog", ({ id }) => {
-  return id.startsWith(`${currentLocale}/`);
+// Obtener todas las entradas correspondientes al locale actual (excluyendo capítulos secundarios de guías)
+const allPosts = await getCollection("blog", ({ id, data }) => {
+  return id.startsWith(`${currentLocale}/`) && !data.parentGuide;
 });
 
 // Ordenar por fecha descendente
@@ -33,11 +34,6 @@ const counts = {
   competitivo: sortedPosts.filter((p) => p.data.category === "competitivo").length,
   novedades: sortedPosts.filter((p) => p.data.category === "novedades").length,
 };
-
-function getPostUrl(id: string): string {
-  const cleanSlug = id.replace(`${currentLocale}/`, "").replace(/\.md$/, "");
-  return getLocalizedPath(`/blog/${cleanSlug}/`, currentLocale);
-}
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString(currentLocale === "es" ? "es-ES" : "en-US", {
@@ -78,12 +74,19 @@ function formatDate(date: Date): string {
                 class={`blog-carousel__slide ${index === 0 ? "active" : ""}`}
                 data-carousel-slide={index}
               >
-                <a href={getPostUrl(post.id)} class="blog-featured-card" data-astro-prefetch>
+                <a href={getPostUrl(post.id, currentLocale)} class="blog-featured-card" data-astro-prefetch>
                   <div class="blog-featured-card__media">
-                    <span class="blog-featured-card__flag">
-                      <i data-lucide="flame"></i>
-                      {t.blog.featuredBadge}
-                    </span>
+                    {post.data.isGuideHub ? (
+                      <span class="blog-featured-card__flag blog-featured-card__flag--guide">
+                        <i data-lucide="book-open"></i>
+                        {t.blog.guideHubBadge}
+                      </span>
+                    ) : (
+                      <span class="blog-featured-card__flag">
+                        <i data-lucide="flame"></i>
+                        {t.blog.featuredBadge}
+                      </span>
+                    )}
                     <img
                       src={post.data.coverImage ?? "/favicon.png"}
                       alt={post.data.title}
@@ -242,13 +245,19 @@ function formatDate(date: Date): string {
             data-tags={(post.data.tags ?? []).join(",").toLowerCase()}
             data-search-text={`${post.data.title.toLowerCase()} ${post.data.description.toLowerCase()} ${postTags}`}
           >
-            <a href={getPostUrl(post.id)} class="post-card__link" data-astro-prefetch>
+            <a href={getPostUrl(post.id, currentLocale)} class="post-card__link" data-astro-prefetch>
               <div class="post-card__media">
                 <div class="post-card__badge-wrap">
                   <span class={`blog-badge blog-badge--${post.data.category}`}>
                     {categoryLabel}
                   </span>
-                  {post.data.featured && (
+                  {post.data.isGuideHub && (
+                    <span class="blog-featured-pill blog-featured-pill--guide">
+                      <i data-lucide="book-open"></i>
+                      {t.blog.guideHubBadge}
+                    </span>
+                  )}
+                  {post.data.featured && !post.data.isGuideHub && (
                     <span class="blog-featured-pill">
                       <i data-lucide="flame"></i>
                       {t.blog.featuredBadge}

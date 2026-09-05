@@ -1,8 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { render, type CollectionEntry } from "astro:content";
+import { getCollection, render, type CollectionEntry } from "astro:content";
 import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
 import { getAuthor } from "../lib/authors";
+import { getGuideHierarchy, getPostUrl } from "../lib/guides";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -12,6 +13,12 @@ const { post } = Astro.props;
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
 const { Content, headings } = await render(post);
+
+// Obtener todas las entradas de este idioma para resolver relaciones de guías
+const allLocalePosts = await getCollection("blog", ({ id }) =>
+  id.startsWith(`${currentLocale}/`)
+);
+const guide = getGuideHierarchy(post, allLocalePosts, currentLocale);
 
 const author = getAuthor(post.data.author);
 const blogPath = getLocalizedPath("/blog/", currentLocale);
@@ -57,18 +64,102 @@ const alternateUrls: Partial<Record<Locale, string>> = {
     <div class="article-ambient-glow" aria-hidden="true"></div>
 
     <article class="article-container">
-      <nav class="article-nav" aria-label="Volver">
-        <a href={blogPath} class="article-back-btn" data-astro-prefetch>
-          <i data-lucide="chevron-left"></i>
-          <span>{t.blog.backToBlog}</span>
-        </a>
-      </nav>
+      {guide.isChapter ? (
+        <nav class="article-nav article-nav--guide" aria-label="Navegación de guía">
+          <ol class="guide-breadcrumbs">
+            <li>
+              <a href={blogPath} class="guide-breadcrumb-link" data-astro-prefetch>
+                <i data-lucide="newspaper"></i>
+                <span>{t.nav.blog}</span>
+              </a>
+            </li>
+            <li class="guide-breadcrumb-separator" aria-hidden="true">
+              <i data-lucide="chevron-right"></i>
+            </li>
+            {guide.parentPost && guide.parentUrl && (
+              <li>
+                <a href={guide.parentUrl} class="guide-breadcrumb-link" data-astro-prefetch>
+                  <i data-lucide="book-open"></i>
+                  <span>{guide.parentPost.data.title}</span>
+                </a>
+              </li>
+              <li class="guide-breadcrumb-separator" aria-hidden="true">
+                <i data-lucide="chevron-right"></i>
+              </li>
+            )}
+            <li class="guide-breadcrumb-current" aria-current="page">
+              <span>{t.blog.guideChapter} {guide.currentNumber}</span>
+            </li>
+          </ol>
+
+          {guide.chapters.length > 1 && (
+            <div class="guide-quick-nav">
+              <details class="guide-quick-dropdown">
+                <summary class="guide-quick-btn">
+                  <i data-lucide="list-ordered"></i>
+                  <span>{t.blog.guideQuickNav} ({guide.currentNumber}/{guide.totalChapters})</span>
+                  <i data-lucide="chevron-down" class="guide-quick-chevron"></i>
+                </summary>
+                <div class="guide-quick-menu">
+                  <div class="guide-quick-menu__header">
+                    <span class="guide-quick-menu__title">
+                      {guide.parentPost?.data.title ?? t.blog.guideIndexTitle}
+                    </span>
+                  </div>
+                  <ul class="guide-quick-menu__list">
+                    {guide.chapters.map((ch, idx) => {
+                      const chOrder = ch.data.order ?? (idx + 1);
+                      const isCurrent = ch.id === post.id;
+                      return (
+                        <li>
+                          <a
+                            href={getPostUrl(ch.id, currentLocale)}
+                            class={`guide-quick-item ${isCurrent ? "active" : ""}`}
+                            data-astro-prefetch
+                          >
+                            <span class="guide-quick-item__num">{chOrder}</span>
+                            <span class="guide-quick-item__title">{ch.data.title}</span>
+                            {isCurrent && (
+                              <i data-lucide="check" class="guide-quick-item__check"></i>
+                            )}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </details>
+            </div>
+          )}
+        </nav>
+      ) : (
+        <nav class="article-nav" aria-label="Volver">
+          <a href={blogPath} class="article-back-btn" data-astro-prefetch>
+            <i data-lucide="chevron-left"></i>
+            <span>{t.blog.backToBlog}</span>
+          </a>
+        </nav>
+      )}
 
       <header class="article-header" id="article-top">
         <div class="article-header__meta">
           <span class={`blog-badge blog-badge--${post.data.category}`}>
             {categoryName}
           </span>
+          {guide.isChapter && (
+            <span class="guide-chapter-pill">
+              <i data-lucide="map-pin"></i>
+              {t.blog.guideChapterProgress
+                .replace("{current}", String(guide.currentNumber))
+                .replace("{total}", String(guide.totalChapters))}
+            </span>
+          )}
+          {guide.isHub && (
+            <span class="blog-featured-pill blog-featured-pill--guide">
+              <i data-lucide="book-open"></i>
+              {t.blog.guideHubBadge} ({guide.totalChapters} {t.blog.guideAllChapters.toLowerCase()})
+            </span>
+          )}
           <div class="article-header__author-chip">
             <img
               src={author.avatar}
@@ -133,6 +224,133 @@ const alternateUrls: Partial<Record<Locale, string>> = {
           <div class="article-body">
             <Content />
           </div>
+
+          {guide.isHub && guide.chapters.length > 0 && (
+            <section class="guide-hub-section" id="capitulos">
+              <div class="guide-hub-section__header">
+                <div class="guide-hub-section__badge">
+                  <i data-lucide="compass"></i>
+                  <span>{t.blog.guideIndexTitle}</span>
+                </div>
+                <h2 class="guide-hub-section__title">{t.blog.guideIndexTitle}</h2>
+                <p class="guide-hub-section__subtitle">{t.blog.guideIndexSubtitle}</p>
+              </div>
+
+              <div class="guide-chapters-grid">
+                {guide.chapters.map((ch, idx) => {
+                  const chOrder = ch.data.order ?? (idx + 1);
+                  const chUrl = getPostUrl(ch.id, currentLocale);
+                  return (
+                    <a href={chUrl} class="guide-chapter-card" data-astro-prefetch>
+                      <div class="guide-chapter-card__number">
+                        <span>{String(chOrder).padStart(2, "0")}</span>
+                      </div>
+                      <div class="guide-chapter-card__content">
+                        <div class="guide-chapter-card__meta">
+                          <span class="guide-chapter-card__tag">
+                            {t.blog.guideChapter} {chOrder}
+                          </span>
+                          {ch.data.readingTime && (
+                            <span class="guide-chapter-card__time">
+                              <i data-lucide="clock"></i>
+                              {ch.data.readingTime}
+                            </span>
+                          )}
+                        </div>
+                        <h3 class="guide-chapter-card__title">{ch.data.title}</h3>
+                        <p class="guide-chapter-card__desc">{ch.data.description}</p>
+                      </div>
+                      <div class="guide-chapter-card__action">
+                        <i data-lucide="arrow-right"></i>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {guide.isChapter && (
+            <nav class="guide-stepper" aria-label="Navegación entre capítulos">
+              <div class="guide-stepper__col guide-stepper__col--prev">
+                {guide.prevChapter && guide.prevUrl ? (
+                  <a
+                    href={guide.prevUrl}
+                    class="guide-stepper__card guide-stepper__card--prev"
+                    data-astro-prefetch
+                  >
+                    <span class="guide-stepper__sub">
+                      <i data-lucide="arrow-left"></i>
+                      <span>{t.blog.guidePrevChapter}</span>
+                    </span>
+                    <span class="guide-stepper__title">{guide.prevChapter.data.title}</span>
+                  </a>
+                ) : guide.parentPost && guide.parentUrl ? (
+                  <a
+                    href={guide.parentUrl}
+                    class="guide-stepper__card guide-stepper__card--overview"
+                    data-astro-prefetch
+                  >
+                    <span class="guide-stepper__sub">
+                      <i data-lucide="arrow-left"></i>
+                      <span>{t.blog.guideBackToHub}</span>
+                    </span>
+                    <span class="guide-stepper__title">{guide.parentPost.data.title}</span>
+                  </a>
+                ) : null}
+              </div>
+
+              {guide.parentPost && guide.parentUrl && (
+                <div class="guide-stepper__col guide-stepper__col--center">
+                  <a
+                    href={guide.parentUrl}
+                    class="guide-stepper__center-btn"
+                    title={t.blog.guideBackToHub}
+                    data-astro-prefetch
+                  >
+                    <i data-lucide="home"></i>
+                    <span>{t.blog.guideIndexShort}</span>
+                  </a>
+                </div>
+              )}
+
+              <div class="guide-stepper__col guide-stepper__col--next">
+                {guide.nextChapter && guide.nextUrl ? (
+                  <a
+                    href={guide.nextUrl}
+                    class="guide-stepper__card guide-stepper__card--next"
+                    data-astro-prefetch
+                  >
+                    <span class="guide-stepper__sub">
+                      <span>{t.blog.guideNextChapter}</span>
+                      <i data-lucide="arrow-right"></i>
+                    </span>
+                    <span class="guide-stepper__title">{guide.nextChapter.data.title}</span>
+                  </a>
+                ) : guide.parentPost && guide.parentUrl ? (
+                  <a
+                    href={guide.parentUrl}
+                    class="guide-stepper__card guide-stepper__card--next guide-stepper__card--overview"
+                    data-astro-prefetch
+                  >
+                    <span class="guide-stepper__sub">
+                      <span>{t.blog.guideBackToHub}</span>
+                      <i data-lucide="arrow-right"></i>
+                    </span>
+                    <span class="guide-stepper__title">{guide.parentPost.data.title}</span>
+                  </a>
+                ) : (
+                  <div class="guide-stepper__card guide-stepper__card--end">
+                    <span class="guide-stepper__sub">
+                      <i data-lucide="check-circle-2"></i>
+                      <span>{currentLocale === "es" ? "Fin de la guía" : "End of guide"}</span>
+                    </span>
+                    <span class="guide-stepper__title">{t.blog.moreArticles}</span>
+                  </div>
+                )}
+              </div>
+            </nav>
+          )}
 
           {post.data.tags && post.data.tags.length > 0 && (
             <div class="article-tags">
@@ -303,7 +521,18 @@ const alternateUrls: Partial<Record<Locale, string>> = {
       }
     }
 
+    function setupGuideInteractions() {
+      document.addEventListener("click", (e) => {
+        const dropdown = document.querySelector<HTMLDetailsElement>(".guide-quick-dropdown[open]");
+        if (dropdown && !dropdown.contains(e.target as Node)) {
+          dropdown.open = false;
+        }
+      });
+    }
+
     setupTocScrollspy();
+    setupGuideInteractions();
     document.addEventListener("astro:page-load", setupTocScrollspy);
+    document.addEventListener("astro:page-load", setupGuideInteractions);
   </script>
 </BaseLayout>

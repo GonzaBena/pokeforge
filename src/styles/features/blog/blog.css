@@ -207,6 +207,16 @@
   z-index: 2;
 }
 
+.blog-featured-card__flag--guide {
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #38bdf8;
+}
+
+.blog-featured-card__flag--guide i,
+.blog-featured-card__flag--guide svg {
+  color: #38bdf8;
+}
+
 .blog-featured-card__body {
   display: flex;
   flex-direction: column;
@@ -593,6 +603,17 @@
   width: 12px;
   height: 12px;
   color: #ef4444;
+}
+
+.blog-featured-pill--guide {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #7dd3fc;
+}
+
+.blog-featured-pill--guide i,
+.blog-featured-pill--guide svg {
+  color: #38bdf8;
 }
 
 .post-card__body {
