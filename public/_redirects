@@ -9,3 +9,8 @@
 /blog/page/1/    /blog/     301!
 /es/blog/page/1  /es/blog/  301!
 /es/blog/page/1/ /es/blog/  301!
+
+# Fallback redirects for out-of-bounds blog pages (applied only when static page does not exist)
+/blog/page/*     /blog/     302
+/es/blog/page/*  /es/blog/  302
+

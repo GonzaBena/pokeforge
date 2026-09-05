@@ -86,6 +86,13 @@ export interface Translations {
     gameFilters: string;
     gameFiltersDesc: string;
   };
+  notFound: {
+    badge: string;
+    title: string;
+    desc: string;
+    backHome: string;
+    backBlog: string;
+  };
   pokedex: {
     title: string;
     subtitle: string;
@@ -426,6 +433,13 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       adFreeDesc: "Clean, fast experience with zero ads or interruptions.",
       gameFilters: "Game Filters",
       gameFiltersDesc: "Official data by version and location.",
+    },
+    notFound: {
+      badge: "404 Error",
+      title: "Lost in the Tall Grass?",
+      desc: "The page you're looking for was moved, doesn't exist, or has fled the battle.",
+      backHome: "Return Home",
+      backBlog: "Back to Blog",
     },
     pokedex: {
       title: "Pokédex",
@@ -789,6 +803,13 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       adFreeDesc: "Experiencia limpia y rápida, totalmente libre de anuncios.",
       gameFilters: "Filtros por Juego",
       gameFiltersDesc: "Datos oficiales por versión y ubicación.",
+    },
+    notFound: {
+      badge: "Error 404",
+      title: "¿Te perdiste en la hierba alta?",
+      desc: "La página que buscas fue movida, no existe o huyó del combate.",
+      backHome: "Volver al Inicio",
+      backBlog: "Ir al Blog",
     },
     pokedex: {
       title: "Pokédex",
