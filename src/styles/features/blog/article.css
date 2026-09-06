@@ -333,7 +333,7 @@
 
 .article-cover {
   width: 100%;
-  max-height: 420px;
+  aspect-ratio: 16 / 9;
   background: radial-gradient(circle at center, #252533 0%, #15151c 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -347,9 +347,14 @@
 .article-cover img {
   width: 100%;
   height: 100%;
-  max-height: 380px;
   object-fit: contain;
   padding: 24px;
+}
+
+.article-cover.article-cover--cover img {
+  object-fit: cover;
+  padding: 0;
+  object-position: center;
 }
 
 /* --------------------------------------------------------------- Content Prose */
@@ -991,15 +996,20 @@
 
 /* Banners de Mapas y Zonas (100% ancho, altura contenida y fondo estilizado)
    Uso en Markdown puro:
-     ![Mapa de Pueblo Paleta|banner](./assets/Pueblo_paleta.png)
-     ![Mapa de Pueblo Paleta|mapa](./assets/Pueblo_paleta.png)
+     ![Mapa de Pueblo Paleta|banner](./assets/Pueblo_paleta.png) (contain con marco)
+     ![Mapa de Pueblo Paleta|banner|cover](./assets/Pueblo_paleta.png) (cover recortado)
+     ![Mapa de Pueblo Paleta|cover](./assets/Pueblo_paleta.png) (cover recortado)
      ![Mapa de Pueblo Paleta|banner-lg](./assets/Pueblo_paleta.png) (380px)
+     ![Mapa de Pueblo Paleta|banner-lg|cover](./assets/Pueblo_paleta.png) (380px cover)
      ![Mapa de Pueblo Paleta|banner-sm](./assets/Pueblo_paleta.png) (200px)
+     ![Mapa de Pueblo Paleta|banner|cover-top](./assets/Pueblo_paleta.png) (foco arriba)
    O con contenedor:
      <div class="map-banner">![...](./assets/...)</div>
+     <div class="map-banner map-banner--cover">![...](./assets/...)</div>
 */
 .article-body img[alt*="|banner" i],
 .article-body img[alt*="|mapa" i],
+.article-body img[alt*="|cover" i],
 .article-body .map-banner img {
   width: 100% !important;
   max-width: 100% !important;
@@ -1013,6 +1023,28 @@
   box-shadow: var(--shadow-card);
   margin: 28px auto;
   display: block;
+}
+
+/* Modificador opcional Cover: llena todo el marco panorámico sin barras ni padding */
+.article-body img[alt*="|cover" i],
+.article-body img[alt*="|banner-cover" i],
+.article-body img[alt*="|mapa-cover" i],
+.article-body .map-banner--cover img,
+.article-body .map-banner.is-cover img {
+  object-fit: cover !important;
+  padding: 0 !important;
+  object-position: center !important;
+}
+
+/* Foco de posición opcional para banners cover */
+.article-body img[alt*="|cover-top" i],
+.article-body img[alt*="|top" i] {
+  object-position: top center !important;
+}
+
+.article-body img[alt*="|cover-bottom" i],
+.article-body img[alt*="|bottom" i] {
+  object-position: bottom center !important;
 }
 
 .article-body img[alt*="|sprite" i],
@@ -1037,12 +1069,16 @@
 }
 
 .article-body img[alt*="|banner-lg" i],
+.article-body img[alt*="|cover-lg" i],
+.article-body img[alt*="|banner-cover-lg" i],
 .article-body .map-banner--lg img {
   height: 380px !important;
   max-height: 380px !important;
 }
 
 .article-body img[alt*="|banner-sm" i],
+.article-body img[alt*="|cover-sm" i],
+.article-body img[alt*="|banner-cover-sm" i],
 .article-body .map-banner--sm img {
   height: 200px !important;
   max-height: 200px !important;
@@ -1100,6 +1136,7 @@
 @media (max-width: 640px) {
   .article-body img[alt*="|banner" i],
   .article-body img[alt*="|mapa" i],
+  .article-body img[alt*="|cover" i],
   .article-body .map-banner img {
     height: 200px !important;
     max-height: 200px !important;
@@ -1108,7 +1145,17 @@
     margin: 20px auto;
   }
 
+  .article-body img[alt*="|cover" i],
+  .article-body img[alt*="|banner-cover" i],
+  .article-body img[alt*="|mapa-cover" i],
+  .article-body .map-banner--cover img,
+  .article-body .map-banner.is-cover img {
+    padding: 0 !important;
+  }
+
   .article-body img[alt*="|banner-lg" i],
+  .article-body img[alt*="|cover-lg" i],
+  .article-body img[alt*="|banner-cover-lg" i],
   .article-body .map-banner--lg img {
     height: 260px !important;
     max-height: 260px !important;

@@ -4,22 +4,24 @@ import { glob } from 'astro/loaders';
 
 const blog = defineCollection({
   loader: glob({ pattern: '{en,es}/**/*.md', base: './src/content/blog' }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    pubDate: z.coerce.date(),
-    author: z.string().default('poketeam'),
-    category: z.enum(['guias', 'curiosidades', 'competitivo', 'novedades']),
-    tags: z.array(z.string()).default([]),
-    coverImage: z.string().optional(),
-    featured: z.boolean().default(false),
-    readingTime: z.string().optional(),
-    translation: z.string().optional(),
-    parentGuide: z.string().optional(),
-    order: z.number().optional(),
-    guideId: z.string().optional(),
-    isGuideHub: z.boolean().default(false),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      pubDate: z.coerce.date(),
+      author: z.string().default('poketeam'),
+      category: z.enum(['guias', 'curiosidades', 'competitivo', 'novedades']),
+      tags: z.array(z.string()).default([]),
+      coverImage: z.union([image(), z.string()]).optional(),
+      coverImageFit: z.enum(['contain', 'cover']).default('contain'),
+      featured: z.boolean().default(false),
+      readingTime: z.string().optional(),
+      translation: z.string().optional(),
+      parentGuide: z.string().optional(),
+      order: z.number().optional(),
+      guideId: z.string().optional(),
+      isGuideHub: z.boolean().default(false),
+    }),
 });
 
 export const collections = { blog };

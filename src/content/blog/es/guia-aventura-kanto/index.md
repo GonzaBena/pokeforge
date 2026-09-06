@@ -9,17 +9,15 @@ tags:
   - Gimnasios
   - Walkthrough
   - Guia
-coverImage: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png
+coverImage: ./assets/Pokemon_FireRed_LeafGreen.webp
 featured: true
 readingTime: 12 min
 author: gonzo
 isGuideHub: true
+coverImageFit: cover
 ---
-Esta guía esta hecha para los juegos Pokemon Rojo Fuego y Verde Hoja.
-Es igual tanto para la version de game boy advance como el port a switch
-
-![](./assets/Pokemon_FireRed.webp) 
-![](./assets/Pokemon_LeafGreen.webp)
+Esta guía está hecha para los juegos Pokémon Rojo Fuego y Verde Hoja.
+Es igual tanto para la versión de Game Boy Advance como el port a Nintendo Switch.
 
 > "Tu propio viaje Pokémon está a punto de comenzar. ¡Un mundo de sueños y aventuras con Pokémon te espera!" — Profesor Oak
 
@@ -38,7 +36,7 @@ Antes de poner un pie en la hierba alta, ten en cuenta estas tres reglas doradas
 
 1. **Equilibra tu equipo temprano**: No dependas exclusivamente de tu Pokémon inicial. Atrapa compañeros de diferentes tipos para cubrir sus debilidades elementales.
 2. **Aprovecha el Builder de PokeForge**: Revisa la matriz de tipos en la sección **Equipo** para verificar que no tengas debilidades compartidas contra Agua, Tierra o Psíquico. 
-3. **Habla con todos los personajes**: Muchos habitantes te darán MTs fundamentales, objetos clave, pistas valiosas sobre acertijos del mapa o intercambiaran pokemons.
+3. **Habla con todos los personajes**: Muchos habitantes te darán MTs fundamentales, objetos clave, pistas valiosas sobre acertijos del mapa o intercambiarán Pokémon.
 
 ---
 

@@ -124,3 +124,21 @@ export function getGuideHierarchy(
     nextUrl: null,
   };
 }
+
+/**
+ * Extrae la URL (src) de la portada de un post, ya sea un objeto ImageMetadata
+ * procesado por Astro, una URL externa en string, o un fallback por defecto.
+ */
+export function getCoverImageSrc(
+  coverImage: { src: string } | string | undefined | null,
+  fallback = "/favicon.png"
+): string {
+  if (!coverImage) return fallback;
+  if (typeof coverImage === "object" && "src" in coverImage) {
+    return coverImage.src;
+  }
+  return typeof coverImage === "string" && coverImage.trim().length > 0
+    ? coverImage
+    : fallback;
+}
+

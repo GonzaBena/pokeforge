@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
 import { getAuthor } from "../lib/authors";
-import { getGuideHierarchy, getPostUrl } from "../lib/guides";
+import { getGuideHierarchy, getPostUrl, getCoverImageSrc } from "../lib/guides";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -58,6 +58,8 @@ const alternateUrls: Partial<Record<Locale, string>> = {
   [currentLocale]: Astro.url.pathname,
   [targetLocale]: alternatePostUrl,
 };
+
+const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) : null;
 ---
 
 <BaseLayout title={`${post.data.title} · Blog`} alternateUrls={alternateUrls}>
@@ -185,10 +187,10 @@ const alternateUrls: Partial<Record<Locale, string>> = {
         <h1 class="article-title">{post.data.title}</h1>
         <p class="article-subtitle">{post.data.description}</p>
 
-        {post.data.coverImage && (
-          <div class="article-cover">
+        {coverSrc && (
+          <div class={`article-cover ${post.data.coverImageFit === "cover" ? "article-cover--cover" : ""}`}>
             <img
-              src={post.data.coverImage}
+              src={coverSrc}
               alt={post.data.title}
               loading="eager"
             />
@@ -598,7 +600,7 @@ const alternateUrls: Partial<Record<Locale, string>> = {
           if (!src) return;
 
           const cleanAlt = (img.alt || "")
-            .replace(/(\|(banner(-lg|-sm)?|sprite(-lg|-sm)?|mapa|pixel|\d+)\s*)+$/i, "")
+            .replace(/(\|([a-z0-9-]+)\s*)+$/i, "")
             .trim();
           lightboxImg.src = src;
           lightboxImg.alt = cleanAlt;

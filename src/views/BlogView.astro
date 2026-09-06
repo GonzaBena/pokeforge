@@ -4,7 +4,7 @@ import type { Page } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import { getTranslations, type Locale } from "../lib/i18n/translations";
 import { getAuthor } from "../lib/authors";
-import { getPostUrl } from "../lib/guides";
+import { getPostUrl, getCoverImageSrc } from "../lib/guides";
 
 interface Props {
   page?: Page<CollectionEntry<"blog">>;
@@ -110,7 +110,8 @@ const searchManifest = sortedPosts.map((p) => {
     categoryLabel:
       t.blog.categories[p.data.category as keyof typeof t.blog.categories] ?? p.data.category,
     tags: p.data.tags ?? [],
-    coverImage: p.data.coverImage ?? "/favicon.png",
+    coverImage: getCoverImageSrc(p.data.coverImage),
+    coverImageFit: p.data.coverImageFit ?? "contain",
     featured: p.data.featured ?? false,
     isGuideHub: p.data.isGuideHub ?? false,
     readingTime: p.data.readingTime ?? "",
@@ -153,7 +154,7 @@ const searchManifest = sortedPosts.map((p) => {
                 data-carousel-slide={index}
               >
                 <a href={getPostUrl(post.id, currentLocale)} class="blog-featured-card" data-astro-prefetch>
-                  <div class="blog-featured-card__media">
+                  <div class={`blog-featured-card__media ${post.data.coverImageFit === "cover" ? "blog-featured-card__media--cover" : ""}`}>
                     {post.data.isGuideHub ? (
                       <span class="blog-featured-card__flag blog-featured-card__flag--guide">
                         <i data-lucide="book-open"></i>
@@ -166,7 +167,7 @@ const searchManifest = sortedPosts.map((p) => {
                       </span>
                     )}
                     <img
-                      src={post.data.coverImage ?? "/favicon.png"}
+                      src={getCoverImageSrc(post.data.coverImage)}
                       alt={post.data.title}
                       loading={index === 0 ? "eager" : "lazy"}
                     />
@@ -329,7 +330,7 @@ const searchManifest = sortedPosts.map((p) => {
             data-search-text={`${post.data.title.toLowerCase()} ${post.data.description.toLowerCase()} ${postTags}`}
           >
             <a href={getPostUrl(post.id, currentLocale)} class="post-card__link" data-astro-prefetch>
-              <div class="post-card__media">
+              <div class={`post-card__media ${post.data.coverImageFit === "cover" ? "post-card__media--cover" : ""}`}>
                 <div class="post-card__badge-wrap">
                   <span class={`blog-badge blog-badge--${post.data.category}`}>
                     {categoryLabel}
@@ -348,7 +349,7 @@ const searchManifest = sortedPosts.map((p) => {
                   )}
                 </div>
                 <img
-                  src={post.data.coverImage ?? "/favicon.png"}
+                  src={getCoverImageSrc(post.data.coverImage)}
                   alt={post.data.title}
                   loading="lazy"
                 />
@@ -504,6 +505,7 @@ const searchManifest = sortedPosts.map((p) => {
       categoryLabel: string;
       tags: string[];
       coverImage: string;
+      coverImageFit?: string;
       featured: boolean;
       isGuideHub: boolean;
       readingTime: string;
@@ -585,7 +587,7 @@ const searchManifest = sortedPosts.map((p) => {
           .map((post) => `
             <article class="post-card ${post.featured ? "post-card--featured" : ""}" data-category="${post.category}">
               <a href="${post.url}" class="post-card__link" data-astro-prefetch>
-                <div class="post-card__media">
+                <div class="post-card__media ${post.coverImageFit === "cover" ? "post-card__media--cover" : ""}">
                   <div class="post-card__badge-wrap">
                     <span class="blog-badge blog-badge--${post.category}">${escapeHtml(post.categoryLabel)}</span>
                     ${post.isGuideHub ? `<span class="blog-featured-pill blog-featured-pill--guide"><i data-lucide="book-open"></i>${escapeHtml(guideHubBadge)}</span>` : ""}

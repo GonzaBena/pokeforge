@@ -185,6 +185,12 @@
   transition: transform 0.35s ease;
 }
 
+.blog-featured-card__media--cover img {
+  object-fit: cover;
+  padding: 0;
+  max-height: none;
+}
+
 .blog-featured-card:hover .blog-featured-card__media img {
   transform: scale(1.06);
 }
@@ -564,6 +570,11 @@
   object-fit: contain;
   padding: 20px;
   transition: transform 0.3s ease;
+}
+
+.post-card__media--cover img {
+  object-fit: cover;
+  padding: 0;
 }
 
 .post-card:hover .post-card__media img {

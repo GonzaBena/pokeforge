@@ -5,7 +5,7 @@ pubDate: 2026-09-05
 category: guias
 tags:
   - Kanto
-coverImage: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png
+coverImage: ./assets/01-CiudadVerde.png
 readingTime: 5 min
 author: gonzo
 parentGuide: guia-aventura-kanto
