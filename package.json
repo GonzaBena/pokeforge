@@ -15,6 +15,7 @@
     "fetch:pokedex:force": "tsx scripts/fetch-pokedex.ts --force"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.0",
     "@astrojs/netlify": "^8.2.5",
     "@libsql/client": "^0.18.0",
     "@tanstack/table-core": "^8.21.0",

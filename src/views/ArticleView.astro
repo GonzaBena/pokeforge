@@ -33,6 +33,7 @@ const formattedDate = post.data.pubDate.toLocaleDateString(
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   }
 );
 
@@ -422,9 +423,45 @@ const alternateUrls: Partial<Record<Locale, string>> = {
         )}
       </div>
     </article>
+
+    <!-- Lightbox Modal para ampliar fotos, mapas y capturas de artículos -->
+    <dialog
+      id="article-lightbox"
+      class="article-lightbox"
+      closedby="any"
+      aria-label={currentLocale === "es" ? "Vista ampliada de imagen" : "Enlarged image preview"}
+    >
+      <div class="article-lightbox__dialog">
+        <button
+          type="button"
+          class="article-lightbox__close"
+          aria-label={currentLocale === "es" ? "Cerrar imagen (Esc)" : "Close image (Esc)"}
+          data-lightbox-close
+        >
+          <i data-lucide="x"></i>
+        </button>
+        <div class="article-lightbox__media">
+          <img
+            id="article-lightbox-img"
+            class="article-lightbox__img"
+            src=""
+            alt=""
+          />
+        </div>
+        <div class="article-lightbox__footer">
+          <p id="article-lightbox-caption" class="article-lightbox__caption"></p>
+          <span class="article-lightbox__hint">
+            <i data-lucide="info"></i>
+            <span>{currentLocale === "es" ? "Haz clic fuera o presiona Esc para cerrar" : "Click outside or press Esc to close"}</span>
+          </span>
+        </div>
+      </div>
+    </dialog>
   </div>
 
   <script>
+    import { refreshIcons } from "../lib/icons";
+
     function setupTocScrollspy() {
       const tocLinks = document.querySelectorAll<HTMLAnchorElement>(
         "[data-article-toc] a[data-toc-slug]"
@@ -530,9 +567,254 @@ const alternateUrls: Partial<Record<Locale, string>> = {
       });
     }
 
+    function setupArticleLightbox() {
+      const lightbox = document.getElementById("article-lightbox") as HTMLDialogElement | null;
+      if (!lightbox) return;
+
+      const lightboxImg = document.getElementById("article-lightbox-img") as HTMLImageElement | null;
+      const captionEl = document.getElementById("article-lightbox-caption");
+      const closeBtn = lightbox.querySelector("[data-lightbox-close]");
+
+      if (!lightboxImg || !captionEl) return;
+
+      // Seleccionar todas las imágenes del cuerpo del artículo y la portada
+      const images = document.querySelectorAll<HTMLImageElement>(
+        ".article-body img:not([data-no-zoom]), .article-cover img"
+      );
+
+      images.forEach((img) => {
+        if (img.dataset.hasLightbox === "true") return;
+        img.dataset.hasLightbox = "true";
+
+        img.addEventListener("click", (e) => {
+          // Si la imagen está dentro de un enlace que navega a otra página, no bloquear la navegación
+          const parentLink = img.closest("a");
+          if (parentLink && parentLink.getAttribute("href") && !parentLink.getAttribute("href")?.startsWith("#")) {
+            return;
+          }
+          e.preventDefault();
+
+          const src = img.currentSrc || img.src;
+          if (!src) return;
+
+          const cleanAlt = (img.alt || "")
+            .replace(/(\|(banner(-lg|-sm)?|sprite(-lg|-sm)?|mapa|pixel|\d+)\s*)+$/i, "")
+            .trim();
+          lightboxImg.src = src;
+          lightboxImg.alt = cleanAlt;
+
+          // Extraer descripción o pie de foto
+          let caption = "";
+          const parentFigure = img.closest("figure");
+          const figcaption = parentFigure?.querySelector("figcaption");
+
+          if (figcaption && figcaption.textContent) {
+            caption = figcaption.textContent.trim();
+          } else {
+            // 1. Buscar si hay un <em> inmediatamente adyacente dentro del mismo contenedor
+            let adjacentEm: HTMLElement | null = null;
+            let sibling = img.nextElementSibling;
+            while (sibling && sibling.tagName === "BR") {
+              sibling = sibling.nextElementSibling;
+            }
+            if (sibling && sibling.tagName === "EM") {
+              adjacentEm = sibling as HTMLElement;
+            }
+
+            const parentP = img.closest("p");
+            const samePEm = parentP?.querySelector("em");
+            const nextElem = parentP?.nextElementSibling;
+            const nextEm = nextElem?.querySelector("em");
+
+            if (adjacentEm && adjacentEm.textContent) {
+              caption = adjacentEm.textContent.trim();
+            } else if (samePEm && samePEm.textContent && parentP && parentP.querySelectorAll("img").length === 1) {
+              caption = samePEm.textContent.trim();
+            } else if (nextEm && nextEm.textContent && nextElem?.children.length === 1) {
+              caption = nextEm.textContent.trim();
+            } else if (cleanAlt) {
+              caption = cleanAlt;
+            }
+          }
+
+          captionEl.textContent = caption;
+
+          // Si es un sprite pixel-art, renderizar con pixelated
+          const isPixelated =
+            img.naturalWidth <= 128 ||
+            img.classList.contains("starter-card__sprite") ||
+            img.classList.contains("sprite") ||
+            /\|sprite/i.test(img.alt || "") ||
+            window.getComputedStyle(img).imageRendering === "pixelated";
+
+          if (isPixelated) {
+            lightboxImg.classList.add("is-pixelated");
+          } else {
+            lightboxImg.classList.remove("is-pixelated");
+          }
+
+          document.body.style.overflow = "hidden";
+          lightbox.showModal();
+          refreshIcons();
+        });
+      });
+
+      function closeLightbox() {
+        if (lightbox && lightbox.open) {
+          lightbox.close();
+          document.body.style.overflow = "";
+        }
+      }
+
+      closeBtn?.addEventListener("click", closeLightbox);
+
+      lightbox.addEventListener("click", (e) => {
+        if (
+          e.target === lightbox ||
+          (e.target as HTMLElement).classList.contains("article-lightbox__dialog") ||
+          (e.target as HTMLElement).classList.contains("article-lightbox__media")
+        ) {
+          closeLightbox();
+        }
+      });
+
+      lightbox.addEventListener("close", () => {
+        document.body.style.overflow = "";
+        lightboxImg.src = "";
+      });
+    }
+
+    function setupArticleTables() {
+      document.querySelectorAll<HTMLTableElement>(".article-body table").forEach((table) => {
+        if (table.parentElement?.classList.contains("table-wrapper")) return;
+        const wrapper = document.createElement("div");
+        wrapper.className = "table-wrapper";
+        table.parentNode?.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+    }
+
+    function setupRivalStarterSelectors() {
+      const selectors = document.querySelectorAll<HTMLElement>(".rival-starter-selector");
+      const slots = document.querySelectorAll<HTMLElement>(".rival-slot-container");
+      if (!selectors.length && !slots.length) return;
+
+      const STORAGE_KEY = "pokeforge_player_starter";
+      let savedStarter = "bulbasaur";
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored && ["bulbasaur", "charmander", "squirtle"].includes(stored)) {
+          savedStarter = stored;
+        }
+      } catch (e) {
+        // En caso de que localStorage no esté disponible
+      }
+
+      function setActiveStarter(starterName: string) {
+        // 1. Actualizar botones en todos los selectores de la página
+        selectors.forEach((sel) => {
+          sel.querySelectorAll<HTMLButtonElement>(".rival-starter-selector__btn").forEach((btn) => {
+            const isMatch = btn.dataset.starter === starterName;
+            btn.classList.toggle("is-active", isMatch);
+            btn.setAttribute("aria-pressed", isMatch ? "true" : "false");
+          });
+        });
+
+        // 2. Actualizar tarjetas en todos los slots de rival
+        slots.forEach((slot) => {
+          slot.querySelectorAll<HTMLElement>(".starter-card").forEach((card) => {
+            const isMatch = card.dataset.forStarter === starterName;
+            card.classList.toggle("is-active", isMatch);
+          });
+        });
+
+        // 3. Guardar en almacenamiento local
+        try {
+          localStorage.setItem(STORAGE_KEY, starterName);
+        } catch (e) {}
+      }
+
+      // Asignar eventos a los botones
+      selectors.forEach((sel) => {
+        sel.querySelectorAll<HTMLButtonElement>(".rival-starter-selector__btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const starter = btn.dataset.starter;
+            if (starter) {
+              setActiveStarter(starter);
+            }
+          });
+        });
+      });
+
+      // Aplicar estado inicial
+      setActiveStarter(savedStarter);
+    }
+
+    function setupArticleChecklists() {
+      const taskItems = document.querySelectorAll<HTMLLIElement>(
+        ".article-body li.task-list-item, .article-body ul.contains-task-list li"
+      );
+      if (!taskItems.length) return;
+
+      const storageKey = `pokeforge_checklist_${window.location.pathname.replace(/\/$/, "")}`;
+      let savedData: Record<string, boolean> = {};
+      try {
+        const stored = localStorage.getItem(storageKey);
+        if (stored) savedData = JSON.parse(stored);
+      } catch (e) {}
+
+      taskItems.forEach((item, index) => {
+        const checkboxEl = item.querySelector<HTMLInputElement>('input[type="checkbox"]');
+        if (!checkboxEl) return;
+        const targetCheckbox = checkboxEl;
+
+        targetCheckbox.removeAttribute("disabled");
+        targetCheckbox.disabled = false;
+
+        const textSnippet = (item.textContent || "").trim().slice(0, 35).replace(/\s+/g, "_");
+        const itemKey = `item_${index}_${textSnippet}`;
+
+        if (savedData[itemKey] !== undefined) {
+          targetCheckbox.checked = Boolean(savedData[itemKey]);
+        }
+        item.classList.toggle("is-checked", targetCheckbox.checked);
+
+        function saveCheck(isChecked: boolean) {
+          targetCheckbox.checked = isChecked;
+          item.classList.toggle("is-checked", isChecked);
+          savedData[itemKey] = isChecked;
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(savedData));
+          } catch (e) {}
+        }
+
+        if ((item as any)._hasChecklistInit) return;
+        (item as any)._hasChecklistInit = true;
+
+        targetCheckbox.addEventListener("change", (e) => {
+          e.stopPropagation();
+          saveCheck(targetCheckbox.checked);
+        });
+
+        item.addEventListener("click", (e) => {
+          if (e.target === targetCheckbox) return;
+          if ((e.target as HTMLElement).closest("a")) return;
+          saveCheck(!targetCheckbox.checked);
+        });
+      });
+    }
+
     setupTocScrollspy();
     setupGuideInteractions();
+    setupArticleLightbox();
+    setupArticleTables();
+    setupRivalStarterSelectors();
+    setupArticleChecklists();
     document.addEventListener("astro:page-load", setupTocScrollspy);
     document.addEventListener("astro:page-load", setupGuideInteractions);
+    document.addEventListener("astro:page-load", setupArticleLightbox);
+    document.addEventListener("astro:page-load", setupArticleTables);
+    document.addEventListener("astro:page-load", setupRivalStarterSelectors);
+    document.addEventListener("astro:page-load", setupArticleChecklists);
   </script>
 </BaseLayout>

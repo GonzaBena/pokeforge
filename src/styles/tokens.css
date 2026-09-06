@@ -35,4 +35,27 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --header-h: 94px;
+
+  /* ===============================================================
+     Pokémon Elemental Types (18 Tipos Oficiales de PokeForge)
+     Uso: var(--type-fire), var(--type-water), var(--type-grass)...
+     =============================================================== */
+  --type-normal: #A8A878;
+  --type-fighting: #C03028;
+  --type-flying: #A890F0;
+  --type-poison: #A040A0;
+  --type-ground: #E0C068;
+  --type-rock: #B8A038;
+  --type-bug: #A8B820;
+  --type-ghost: #705898;
+  --type-steel: #B8B8D0;
+  --type-fire: #F08030;
+  --type-water: #6890F0;
+  --type-grass: #78C850;
+  --type-electric: #F8D030;
+  --type-psychic: #F85888;
+  --type-ice: #98D8D8;
+  --type-dragon: #7038F8;
+  --type-dark: #705848;
+  --type-fairy: #EE99AC;
 }

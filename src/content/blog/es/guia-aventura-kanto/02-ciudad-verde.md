@@ -1,7 +1,7 @@
 ---
 title: "Parte 2: Ciudad Verde y el Bosque Verde"
 description: Entrega del paquete de Oak, captura de Pokémon bicho y pájaro, y travesía por el Bosque Verde hacia Ciudad Plateada.
-pubDate: 2026-03-01
+pubDate: 2026-09-05
 category: guias
 tags:
   - Kanto

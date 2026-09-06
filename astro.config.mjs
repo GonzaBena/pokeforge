@@ -2,6 +2,8 @@
 import { defineConfig } from 'astro/config';
 import netlify from '@astrojs/netlify';
 import fs from 'node:fs';
+import { unified } from '@astrojs/markdown-remark';
+import { remarkPokemonCards, rehypePokemonCards } from './src/plugins/rehype-pokemon-cards.mjs';
 
 /**
  * @returns {import('astro').AstroIntegration}
@@ -67,6 +69,12 @@ const isBuild = process.argv.includes('build');
 
 // https://astro.build/config
 export default defineConfig({
+  markdown: {
+    processor: unified({
+      remarkPlugins: [remarkPokemonCards],
+      rehypePlugins: [rehypePokemonCards]
+    })
+  },
   integrations: [swVersionPlugin(), buildPaginationRedirectsPlugin()],
   adapter: isBuild ? netlify() : undefined,
   output: 'static',
