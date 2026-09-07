@@ -114,6 +114,7 @@ const searchManifest = sortedPosts.map((p) => {
     coverImageFit: p.data.coverImageFit ?? "contain",
     featured: p.data.featured ?? false,
     isGuideHub: p.data.isGuideHub ?? false,
+    inProgress: p.data.inProgress ?? false,
     readingTime: p.data.readingTime ?? "",
     pubDateStr: formatDate(p.data.pubDate),
     authorName: author.name,
@@ -155,17 +156,26 @@ const searchManifest = sortedPosts.map((p) => {
               >
                 <a href={getPostUrl(post.id, currentLocale)} class="blog-featured-card" data-astro-prefetch>
                   <div class={`blog-featured-card__media ${post.data.coverImageFit === "cover" ? "blog-featured-card__media--cover" : ""}`}>
-                    {post.data.isGuideHub ? (
-                      <span class="blog-featured-card__flag blog-featured-card__flag--guide">
-                        <i data-lucide="book-open"></i>
-                        {t.blog.guideHubBadge}
-                      </span>
-                    ) : (
-                      <span class="blog-featured-card__flag">
-                        <i data-lucide="flame"></i>
-                        {t.blog.featuredBadge}
-                      </span>
-                    )}
+                    <div class="blog-featured-card__flags">
+                      {post.data.isGuideHub && (
+                        <span class="blog-featured-card__flag blog-featured-card__flag--guide">
+                          <i data-lucide="book-open"></i>
+                          {t.blog.guideHubBadge}
+                        </span>
+                      )}
+                      {post.data.featured && (
+                        <span class="blog-featured-card__flag">
+                          <i data-lucide="flame"></i>
+                          {t.blog.featuredBadge}
+                        </span>
+                      )}
+                      {post.data.inProgress && (
+                        <span class="blog-featured-card__flag blog-featured-card__flag--wip">
+                          <i data-lucide="clock"></i>
+                          {t.blog.inProgressBadge}
+                        </span>
+                      )}
+                    </div>
                     <img
                       src={getCoverImageSrc(post.data.coverImage)}
                       alt={post.data.title}
@@ -312,8 +322,8 @@ const searchManifest = sortedPosts.map((p) => {
     <section
       class="blog-grid"
       data-blog-grid
-      data-guide-badge={t.blog.guideHubBadge}
       data-featured-badge={t.blog.featuredBadge}
+      data-in-progress-badge={t.blog.inProgressBadge}
     >
       {displayPosts.map((post) => {
         const categoryLabel =
@@ -335,16 +345,16 @@ const searchManifest = sortedPosts.map((p) => {
                   <span class={`blog-badge blog-badge--${post.data.category}`}>
                     {categoryLabel}
                   </span>
-                  {post.data.isGuideHub && (
-                    <span class="blog-featured-pill blog-featured-pill--guide">
-                      <i data-lucide="book-open"></i>
-                      {t.blog.guideHubBadge}
-                    </span>
-                  )}
-                  {post.data.featured && !post.data.isGuideHub && (
+                  {post.data.featured && (
                     <span class="blog-featured-pill">
                       <i data-lucide="flame"></i>
                       {t.blog.featuredBadge}
+                    </span>
+                  )}
+                  {post.data.inProgress && (
+                    <span class="blog-featured-pill blog-featured-pill--wip">
+                      <i data-lucide="clock"></i>
+                      {t.blog.inProgressBadge}
                     </span>
                   )}
                 </div>
@@ -508,6 +518,7 @@ const searchManifest = sortedPosts.map((p) => {
       coverImageFit?: string;
       featured: boolean;
       isGuideHub: boolean;
+      inProgress: boolean;
       readingTime: string;
       pubDateStr: string;
       authorName: string;
@@ -539,8 +550,8 @@ const searchManifest = sortedPosts.map((p) => {
       if (!grid) return;
       const blogGrid: HTMLElement = grid;
 
-      const guideHubBadge = blogGrid.dataset.guideBadge || "Guía";
       const featuredBadge = blogGrid.dataset.featuredBadge || "Destacado";
+      const inProgressBadge = blogGrid.dataset.inProgressBadge || "En progreso";
 
       // Guardar el HTML original estático de la cuadrícula y de la paginación
       const initialGridHtml = blogGrid.innerHTML;
@@ -590,8 +601,8 @@ const searchManifest = sortedPosts.map((p) => {
                 <div class="post-card__media ${post.coverImageFit === "cover" ? "post-card__media--cover" : ""}">
                   <div class="post-card__badge-wrap">
                     <span class="blog-badge blog-badge--${post.category}">${escapeHtml(post.categoryLabel)}</span>
-                    ${post.isGuideHub ? `<span class="blog-featured-pill blog-featured-pill--guide"><i data-lucide="book-open"></i>${escapeHtml(guideHubBadge)}</span>` : ""}
-                    ${post.featured && !post.isGuideHub ? `<span class="blog-featured-pill"><i data-lucide="flame"></i>${escapeHtml(featuredBadge)}</span>` : ""}
+                    ${post.featured ? `<span class="blog-featured-pill"><i data-lucide="flame"></i>${escapeHtml(featuredBadge)}</span>` : ""}
+                    ${post.inProgress ? `<span class="blog-featured-pill blog-featured-pill--wip"><i data-lucide="clock"></i>${escapeHtml(inProgressBadge)}</span>` : ""}
                   </div>
                   <img src="${post.coverImage}" alt="${escapeHtml(post.title)}" loading="lazy" />
                 </div>

@@ -380,6 +380,13 @@ export interface Translations {
     guideAllChapters: string;
     guideQuickNav: string;
     guideIndexShort: string;
+    inProgressBadge: string;
+    inProgressNoticeTitle: string;
+    inProgressNoticeDesc: string;
+    guideNextChapterPending: string;
+    guideNextChapterPendingDesc: string;
+    guideChapterPlanned: string;
+    guideChapterPlannedDesc: string;
     paginationPrev: string;
     paginationNext: string;
     paginationPage: string;
@@ -751,6 +758,15 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       guideAllChapters: "All chapters",
       guideQuickNav: "Chapters",
       guideIndexShort: "Index",
+      inProgressBadge: "In Progress",
+      inProgressNoticeTitle: "Guide in Active Development",
+      inProgressNoticeDesc:
+        "This guide is actively being written and updated. New chapters and sections will be published periodically.",
+      guideNextChapterPending: "Next chapter in preparation",
+      guideNextChapterPendingDesc:
+        "The next chapter will be published soon. Stay tuned!",
+      guideChapterPlanned: "Coming Soon",
+      guideChapterPlannedDesc: "Chapter currently in preparation",
       paginationPrev: "Previous",
       paginationNext: "Next",
       paginationPage: "Page",
@@ -1131,6 +1147,15 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       guideAllChapters: "Capítulos",
       guideQuickNav: "Capítulos",
       guideIndexShort: "Índice",
+      inProgressBadge: "En progreso",
+      inProgressNoticeTitle: "Guía en Desarrollo Activo",
+      inProgressNoticeDesc:
+        "Esta guía se encuentra en redacción continua. Iremos publicando nuevos capítulos, rutas y estrategias periódicamente.",
+      guideNextChapterPending: "Próximo capítulo en preparación",
+      guideNextChapterPendingDesc:
+        "El siguiente capítulo se publicará próximamente. ¡Vuelve a consultar pronto!",
+      guideChapterPlanned: "Próximamente",
+      guideChapterPlannedDesc: "Capítulo en preparación",
       paginationPrev: "Anterior",
       paginationNext: "Siguiente",
       paginationPage: "Página",

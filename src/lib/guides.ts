@@ -20,12 +20,20 @@ export function getPostUrl(id: string, locale: Locale): string {
   return getLocalizedPath(`/blog/${cleanSlug}/`, locale);
 }
 
+export interface PlannedChapter {
+  title: string;
+  description?: string;
+  order?: number;
+}
+
 export interface GuideHierarchy {
   isChapter: boolean;
   isHub: boolean;
   parentPost: CollectionEntry<"blog"> | null;
   parentUrl: string | null;
   chapters: CollectionEntry<"blog">[];
+  plannedChapters: PlannedChapter[];
+  nextPlannedChapter: PlannedChapter | null;
   currentIndex: number;
   currentNumber: number;
   totalChapters: number;
@@ -55,7 +63,7 @@ export function getGuideHierarchy(
       }) ?? null;
 
     const chapters = allLocalePosts
-      .filter((p) => p.data.parentGuide === parentGuideId)
+      .filter((p) => p.data.parentGuide === parentGuideId && !p.data.isPlanned)
       .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
 
     const currentIndex = chapters.findIndex((p) => p.id === currentPost.id);
@@ -65,12 +73,18 @@ export function getGuideHierarchy(
         ? chapters[currentIndex + 1]
         : null;
 
+    const parentPlanned: PlannedChapter[] = (parentPost?.data.plannedChapters ?? []) as PlannedChapter[];
+    const isLastChapter = currentIndex === chapters.length - 1;
+    const nextPlannedChapter = isLastChapter && parentPlanned.length > 0 ? parentPlanned[0] : null;
+
     return {
       isChapter: true,
       isHub: false,
       parentPost,
       parentUrl: parentPost ? getPostUrl(parentPost.id, locale) : null,
       chapters,
+      plannedChapters: parentPlanned,
+      nextPlannedChapter,
       currentIndex,
       currentNumber: currentPost.data.order ?? (currentIndex + 1),
       totalChapters: chapters.length,
@@ -86,18 +100,23 @@ export function getGuideHierarchy(
   const childChapters = allLocalePosts
     .filter(
       (p) =>
-        p.data.parentGuide === guideIdentifier ||
-        p.data.parentGuide === currentSlug
+        (p.data.parentGuide === guideIdentifier ||
+          p.data.parentGuide === currentSlug) &&
+        !p.data.isPlanned
     )
     .sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
 
-  if (childChapters.length > 0 || currentPost.data.isGuideHub) {
+  const hubPlanned: PlannedChapter[] = (currentPost.data.plannedChapters ?? []) as PlannedChapter[];
+
+  if (childChapters.length > 0 || currentPost.data.isGuideHub || hubPlanned.length > 0) {
     return {
       isChapter: false,
       isHub: true,
       parentPost: null,
       parentUrl: null,
       chapters: childChapters,
+      plannedChapters: hubPlanned,
+      nextPlannedChapter: hubPlanned.length > 0 ? hubPlanned[0] : null,
       currentIndex: -1,
       currentNumber: 0,
       totalChapters: childChapters.length,
@@ -115,6 +134,8 @@ export function getGuideHierarchy(
     parentPost: null,
     parentUrl: null,
     chapters: [],
+    plannedChapters: [],
+    nextPlannedChapter: null,
     currentIndex: -1,
     currentNumber: 0,
     totalChapters: 0,

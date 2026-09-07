@@ -14,7 +14,18 @@ featured: true
 readingTime: 12 min
 author: gonzo
 isGuideHub: true
+inProgress: true
 coverImageFit: cover
+plannedChapters:
+  - title: "Parte 3: Ciudad Plateada y la Medalla Roca"
+    description: "Desafío contra Brock en el primer gimnasio oficial, ventajas elementales y camino hacia la Ruta 3."
+    order: 3
+  - title: "Parte 4: Monte Moon y Ciudad Celeste"
+    description: "Exploración de la caverna, fósiles Pokémon, emboscadas del Team Rocket y la Medalla Cascada de Misty."
+    order: 4
+  - title: "Parte 5: El S.S. Anne y Ciudad Carmín"
+    description: "El crucero de lujo, obtención de la MO Corte y el combate eléctrico contra el Teniente Surge."
+    order: 5
 ---
 Esta guía está hecha para los juegos Pokémon Rojo Fuego y Verde Hoja.
 Es igual tanto para la versión de Game Boy Advance como el port a Nintendo Switch.

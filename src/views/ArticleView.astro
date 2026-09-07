@@ -19,6 +19,7 @@ const allLocalePosts = await getCollection("blog", ({ id }) =>
   id.startsWith(`${currentLocale}/`)
 );
 const guide = getGuideHierarchy(post, allLocalePosts, currentLocale);
+const isGuideInProgress = Boolean(post.data.inProgress || guide.parentPost?.data.inProgress);
 
 const author = getAuthor(post.data.author);
 const blogPath = getLocalizedPath("/blog/", currentLocale);
@@ -129,6 +130,21 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                         </li>
                       );
                     })}
+                    {guide.plannedChapters.map((pch, idx) => {
+                      const pchOrder = pch.order ?? (guide.chapters.length + idx + 1);
+                      return (
+                        <li>
+                          <div
+                            class="guide-quick-item guide-quick-item--planned"
+                            title={pch.description ?? t.blog.guideChapterPlannedDesc}
+                          >
+                            <span class="guide-quick-item__num">{pchOrder}</span>
+                            <span class="guide-quick-item__title">{pch.title}</span>
+                            <span class="guide-quick-item__badge">{t.blog.guideChapterPlanned}</span>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </details>
@@ -160,7 +176,15 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
           {guide.isHub && (
             <span class="blog-featured-pill blog-featured-pill--guide">
               <i data-lucide="book-open"></i>
-              {t.blog.guideHubBadge} ({guide.totalChapters} {t.blog.guideAllChapters.toLowerCase()})
+              {guide.plannedChapters.length > 0
+                ? `${t.blog.guideHubBadge} (${guide.totalChapters}/${guide.totalChapters + guide.plannedChapters.length} ${t.blog.guideAllChapters.toLowerCase()})`
+                : `${t.blog.guideHubBadge} (${guide.totalChapters} ${t.blog.guideAllChapters.toLowerCase()})`}
+            </span>
+          )}
+          {post.data.inProgress && (
+            <span class="blog-status-pill blog-status-pill--wip">
+              <i data-lucide="clock"></i>
+              <span>{t.blog.inProgressBadge}</span>
             </span>
           )}
           <div class="article-header__author-chip">
@@ -224,11 +248,23 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
       <!-- Layout: Contenido principal + Índice lateral Sticky en desktop -->
       <div class={`article-layout ${hasToc ? "has-toc" : ""}`}>
         <div class="article-main">
+          {post.data.inProgress && (
+            <aside class="article-wip-banner" aria-label={t.blog.inProgressNoticeTitle}>
+              <div class="article-wip-banner__icon">
+                <i data-lucide="clock"></i>
+              </div>
+              <div class="article-wip-banner__body">
+                <strong class="article-wip-banner__title">{t.blog.inProgressNoticeTitle}</strong>
+                <p class="article-wip-banner__desc">{t.blog.inProgressNoticeDesc}</p>
+              </div>
+            </aside>
+          )}
+
           <div class="article-body">
             <Content />
           </div>
 
-          {guide.isHub && guide.chapters.length > 0 && (
+          {guide.isHub && (guide.chapters.length > 0 || guide.plannedChapters.length > 0) && (
             <section class="guide-hub-section" id="capitulos">
               <div class="guide-hub-section__header">
                 <div class="guide-hub-section__badge">
@@ -267,6 +303,35 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                         <i data-lucide="arrow-right"></i>
                       </div>
                     </a>
+                  );
+                })}
+
+                {guide.plannedChapters.map((pch, idx) => {
+                  const pchOrder = pch.order ?? (guide.chapters.length + idx + 1);
+                  return (
+                    <div class="guide-chapter-card guide-chapter-card--planned" aria-disabled="true">
+                      <div class="guide-chapter-card__number">
+                        <span>{String(pchOrder).padStart(2, "0")}</span>
+                      </div>
+                      <div class="guide-chapter-card__content">
+                        <div class="guide-chapter-card__meta">
+                          <span class="guide-chapter-card__tag">
+                            {t.blog.guideChapter} {pchOrder}
+                          </span>
+                          <span class="guide-chapter-card__status-pill">
+                            <i data-lucide="clock"></i>
+                            {t.blog.guideChapterPlanned}
+                          </span>
+                        </div>
+                        <h3 class="guide-chapter-card__title">{pch.title}</h3>
+                        <p class="guide-chapter-card__desc">
+                          {pch.description ?? t.blog.guideChapterPlannedDesc}
+                        </p>
+                      </div>
+                      <div class="guide-chapter-card__action">
+                        <i data-lucide="lock"></i>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
@@ -330,6 +395,18 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                     </span>
                     <span class="guide-stepper__title">{guide.nextChapter.data.title}</span>
                   </a>
+                ) : isGuideInProgress ? (
+                  <div class="guide-stepper__card guide-stepper__card--next guide-stepper__card--wip">
+                    <span class="guide-stepper__sub">
+                      <i data-lucide="clock"></i>
+                      <span>{t.blog.guideNextChapterPending}</span>
+                    </span>
+                    <span class="guide-stepper__title">
+                      {guide.nextPlannedChapter
+                        ? guide.nextPlannedChapter.title
+                        : t.blog.guideNextChapterPendingDesc}
+                    </span>
+                  </div>
                 ) : guide.parentPost && guide.parentUrl ? (
                   <a
                     href={guide.parentUrl}

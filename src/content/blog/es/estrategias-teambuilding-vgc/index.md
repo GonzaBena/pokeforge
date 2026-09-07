@@ -1,13 +1,18 @@
 ---
-title: "Fundamentos de Teambuilding para Combates Dobles y VGC"
+title: Fundamentos de Teambuilding para Combates Dobles y VGC
 description: "Descubre cómo estructurar los roles de tu equipo: Control de velocidad, Redirección, Pivotes y atacantes clave."
 pubDate: 2026-02-18
-category: "competitivo"
-tags: ["VGC", "Competitivo", "Estrategia", "Dobles"]
-coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
+category: competitivo
+tags:
+  - VGC
+  - Competitivo
+  - Estrategia
+  - Dobles
+coverImage: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png
 featured: false
-readingTime: "5 min"
-translation: "vgc-teambuilding-strategies"
+readingTime: 5 min
+translation: vgc-teambuilding-strategies
+inProgress: false
 ---
 
 El formato oficial de Combates Dobles (**VGC**) es trepidante y táctico. A diferencia de las batallas individuales donde los cambios de Pokémon predominan, en Dobles un solo turno puede definir la partida por completo.

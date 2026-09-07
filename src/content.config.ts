@@ -21,6 +21,18 @@ const blog = defineCollection({
       order: z.number().optional(),
       guideId: z.string().optional(),
       isGuideHub: z.boolean().default(false),
+      inProgress: z.boolean().default(false),
+      isPlanned: z.boolean().default(false),
+      plannedChapters: z
+        .array(
+          z.object({
+            title: z.string(),
+            description: z.string().optional(),
+            order: z.number().optional(),
+          })
+        )
+        .optional()
+        .default([]),
     }),
 });
 

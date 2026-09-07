@@ -191,6 +191,20 @@
   max-height: none;
 }
 
+.blog-featured-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 14, 0.82) 0%,
+    rgba(10, 10, 14, 0.45) 30%,
+    transparent 65%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .blog-featured-card:hover .blog-featured-card__media img {
   transform: scale(1.06);
 }
@@ -201,16 +215,24 @@
   left: 16px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: rgba(16, 16, 20, 0.85);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(239, 68, 68, 0.4);
   color: #f87171;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   z-index: 2;
+  white-space: nowrap;
+}
+
+.blog-featured-card__flag i,
+.blog-featured-card__flag svg {
+  width: 13px;
+  height: 13px;
+  color: #f87171;
 }
 
 .blog-featured-card__flag--guide {
@@ -221,6 +243,31 @@
 .blog-featured-card__flag--guide i,
 .blog-featured-card__flag--guide svg {
   color: #38bdf8;
+}
+
+.blog-featured-card__flag--wip {
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #f59e0b;
+}
+
+.blog-featured-card__flag--wip i,
+.blog-featured-card__flag--wip svg {
+  color: #f59e0b;
+}
+
+.blog-featured-card__flags {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  flex-wrap: wrap;
+}
+
+.blog-featured-card__flags .blog-featured-card__flag {
+  position: static;
 }
 
 .blog-featured-card__body {
@@ -577,54 +624,107 @@
   padding: 0;
 }
 
+.post-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 14, 0.82) 0%,
+    rgba(10, 10, 14, 0.45) 35%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .post-card:hover .post-card__media img {
   transform: scale(1.08);
 }
 
 .post-card__badge-wrap {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 10px;
+  left: 10px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   z-index: 2;
   flex-wrap: wrap;
+  max-width: calc(100% - 20px);
+}
+
+.post-card__badge-wrap .blog-badge {
+  padding: 2.5px 8px;
+  font-size: 10px;
+  background: rgba(16, 16, 22, 0.85);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+
+.post-card__badge-wrap .blog-badge--guias {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.post-card__badge-wrap .blog-badge--curiosidades {
+  border-color: rgba(168, 85, 247, 0.5);
+}
+
+.post-card__badge-wrap .blog-badge--competitivo {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.post-card__badge-wrap .blog-badge--novedades {
+  border-color: rgba(14, 165, 233, 0.5);
 }
 
 .blog-featured-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  gap: 3.5px;
+  padding: 2.5px 8px;
   border-radius: var(--radius-pill);
-  background: rgba(239, 68, 68, 0.18);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(239, 68, 68, 0.5);
+  background: rgba(36, 14, 14, 0.88);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(239, 68, 68, 0.55);
   color: #fca5a5;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   line-height: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
 }
 
 .blog-featured-pill i,
 .blog-featured-pill svg {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   color: #ef4444;
 }
 
 .blog-featured-pill--guide {
-  background: rgba(56, 189, 248, 0.18);
-  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(10, 26, 44, 0.88);
+  border-color: rgba(56, 189, 248, 0.55);
   color: #7dd3fc;
 }
 
 .blog-featured-pill--guide i,
 .blog-featured-pill--guide svg {
   color: #38bdf8;
+}
+
+.blog-featured-pill--wip {
+  background: rgba(38, 24, 6, 0.88);
+  border-color: rgba(245, 158, 11, 0.6);
+  color: #fcd34d;
+}
+
+.blog-featured-pill--wip i,
+.blog-featured-pill--wip svg {
+  color: #f59e0b;
 }
 
 .post-card__body {
