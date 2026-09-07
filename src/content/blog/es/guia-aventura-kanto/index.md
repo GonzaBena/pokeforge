@@ -36,7 +36,7 @@ Es igual tanto para la versión de Game Boy Advance como el port a Nintendo Swit
 
 A lo largo de los distintos capítulos exploraremos cada pueblo, ciudad, ruta y cueva, detallando los Pokémon disponibles, objetos ocultos y estrategias recomendadas para superar a cada líder de gimnasio.
 
-![Bulbasaur|128](./assets/bulbasaur.png) ![Charmander|128](./assets/charmander.png) ![Squirtle|128](./assets/squirtle.png)
+![Bulbasaur|128](./assets/Bulbasaur.png) ![Charmander|128](./assets/Charmander.png) ![Squirtle|128](./assets/Squirtle.png)
 *Bulbasaur, Charmander y Squirtle esperando en el laboratorio.*
 
 ---
