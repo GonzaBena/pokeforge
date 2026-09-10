@@ -104,6 +104,23 @@
   line-height: 1;
 }
 
+.picker-modal-panel {
+  height: min(88vh, 780px);
+  width: min(940px, 95vw);
+  max-width: 940px;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-panel__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+}
+
 /* --- Picker Results Area --- */
 
 .picker-panel__results {

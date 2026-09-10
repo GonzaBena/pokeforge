@@ -70,6 +70,7 @@ let activeOffenseMode: "moves" | "stab" = "moves";
 
 const overlayEl = document.querySelector<HTMLElement>("[data-picker-overlay]")!;
 const pickerCloseBtn = document.querySelector<HTMLButtonElement>("[data-picker-close]")!;
+const pickerBodyEl = document.querySelector<HTMLElement>("[data-picker-body]");
 const pickerResultsEl = document.querySelector<HTMLElement>("[data-picker-results]")!;
 const pickerSearchEl = document.querySelector<HTMLInputElement>("[data-picker-search]")!;
 const pickerTypeFilterEl = document.querySelector<HTMLElement>("[data-picker-type-filter]")!;
@@ -1214,19 +1215,40 @@ function renderPickerResults(): void {
   if (countEl) {
     countEl.textContent = `${currentPickerResults.length} Pokémon`;
   }
-  pickerResultsEl.scrollTop = 0;
+  if (pickerBodyEl) {
+    pickerBodyEl.scrollTop = 0;
+  } else {
+    pickerResultsEl.scrollTop = 0;
+  }
   renderPickerBatch(false);
 }
 
-pickerResultsEl.addEventListener("scroll", () => {
-  if (pickerResultsEl.scrollTop + pickerResultsEl.clientHeight >= pickerResultsEl.scrollHeight - 300) {
-    renderPickerBatch(true);
-  }
-});
+const pickerScrollTarget = pickerBodyEl ?? pickerResultsEl;
+pickerScrollTarget.addEventListener(
+  "scroll",
+  () => {
+    if (pickerScrollTarget.scrollTop + pickerScrollTarget.clientHeight >= pickerScrollTarget.scrollHeight - 300) {
+      renderPickerBatch(true);
+    }
+  },
+  { passive: true }
+);
+
+function updateBodyScrollLock(): void {
+  const isAnyModalOpen =
+    (!overlayEl.hidden) ||
+    (!movePickerOverlayEl.hidden) ||
+    Boolean(teamCardOverlay && !teamCardOverlay.hidden) ||
+    Boolean(typeMatrixOverlay && !typeMatrixOverlay.hidden) ||
+    Boolean(synergyModalOverlay && !synergyModalOverlay.hidden);
+
+  document.body.style.overflow = isAnyModalOpen ? "hidden" : "";
+}
 
 function openPicker(index: number): void {
   activeSlotIndex = index;
   overlayEl.hidden = false;
+  document.body.style.overflow = "hidden";
   pickerState.search = "";
   pickerState.types.clear();
   pickerState.generations.clear();
@@ -1247,6 +1269,7 @@ function openPicker(index: number): void {
 
 function closePicker(): void {
   overlayEl.hidden = true;
+  updateBodyScrollLock();
   activeSlotIndex = null;
 }
 
@@ -1312,6 +1335,7 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
   }
   movePickerSearchEl.value = "";
   movePickerOverlayEl.hidden = false;
+  document.body.style.overflow = "hidden";
 
   const methodChips = moveMethodFilterEl?.querySelectorAll<HTMLButtonElement>("[data-method]");
   methodChips?.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.method === "all")));
@@ -1346,6 +1370,7 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
 
 function closeMovePicker(): void {
   movePickerOverlayEl.hidden = true;
+  updateBodyScrollLock();
   activeMoveSlotIndex = null;
   activeMoveIndex = null;
   currentMoveRows = [];
@@ -1778,7 +1803,7 @@ function openTeamCardModal(): void {
 function closeTeamCardModal(): void {
   if (!teamCardOverlay) return;
   teamCardOverlay.hidden = true;
-  document.body.style.overflow = "";
+  updateBodyScrollLock();
 }
 
 const openTypeMatrixBtns = document.querySelectorAll<HTMLButtonElement>("[data-open-type-matrix]");
@@ -2054,6 +2079,7 @@ function renderTypeMatrix(): void {
   });
 }
 
+
 function openTypeMatrixModal(): void {
   if (!typeMatrixOverlay || !typeMatrixContent) return;
   renderTypeMatrix();
@@ -2065,7 +2091,7 @@ function openTypeMatrixModal(): void {
 function closeTypeMatrixModal(): void {
   if (!typeMatrixOverlay) return;
   typeMatrixOverlay.hidden = true;
-  document.body.style.overflow = "";
+  updateBodyScrollLock();
 }
 
 openTypeMatrixBtns.forEach((btn) => btn.addEventListener("click", openTypeMatrixModal));
@@ -2085,7 +2111,7 @@ function openSynergyModal(): void {
 function closeSynergyModal(): void {
   if (!synergyModalOverlay) return;
   synergyModalOverlay.hidden = true;
-  document.body.style.overflow = "";
+  updateBodyScrollLock();
 }
 
 openSynergyBtns.forEach((btn) => btn.addEventListener("click", openSynergyModal));

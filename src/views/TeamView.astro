@@ -111,51 +111,53 @@ const t = getTranslations(currentLocale);
           <i data-lucide="x"></i>
         </button>
       </div>
-      <div class="picker-panel__filters">
-        <div class="picker-panel__inputs-row">
-          <label class="picker-input-wrap">
-            <i data-lucide="search" class="picker-input-icon"></i>
-            <input class="picker-input" type="search" placeholder={t.team.searchByNameOrNum} data-picker-search />
-          </label>
-          <label class="picker-input-wrap">
-            <i data-lucide="swords" class="picker-input-icon"></i>
-            <input
-              class="picker-input"
-              type="text"
-              list="picker-move-options"
-              placeholder={t.team.filterByMove}
-              data-picker-move-filter
-            />
-            <datalist id="picker-move-options" data-picker-move-options></datalist>
-          </label>
-        </div>
-        <div class="picker-panel__filter-section">
-          <span class="picker-panel__section-title">{t.team.typesSection}</span>
-          <div class="filter-group filter-group--compact" data-picker-type-filter aria-label={t.team.typesSection}></div>
-        </div>
-        <div class="picker-panel__filter-section">
-          <span class="picker-panel__section-title">{t.team.gensSection}</span>
-          <div class="filter-group filter-group--compact" data-picker-generation-filter aria-label={t.team.gensSection}></div>
-        </div>
-        <div class="picker-panel__filter-section">
-          <span class="picker-panel__section-title">{t.team.gameSection}</span>
-          <div class="filters-panel__game-row">
-            <div class="select-wrapper">
-              <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
-              <select class="game-select" data-picker-game-filter aria-label={t.team.gameSection}>
-                <option value="">{t.pokedex.allGames}</option>
-              </select>
-              <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+      <div class="picker-panel__body" data-picker-body>
+        <div class="picker-panel__filters">
+          <div class="picker-panel__inputs-row">
+            <label class="picker-input-wrap">
+              <i data-lucide="search" class="picker-input-icon"></i>
+              <input class="picker-input" type="search" placeholder={t.team.searchByNameOrNum} data-picker-search />
+            </label>
+            <label class="picker-input-wrap">
+              <i data-lucide="swords" class="picker-input-icon"></i>
+              <input
+                class="picker-input"
+                type="text"
+                list="picker-move-options"
+                placeholder={t.team.filterByMove}
+                data-picker-move-filter
+              />
+              <datalist id="picker-move-options" data-picker-move-options></datalist>
+            </label>
+          </div>
+          <div class="picker-panel__filter-section">
+            <span class="picker-panel__section-title">{t.team.typesSection}</span>
+            <div class="filter-group filter-group--compact" data-picker-type-filter aria-label={t.team.typesSection}></div>
+          </div>
+          <div class="picker-panel__filter-section">
+            <span class="picker-panel__section-title">{t.team.gensSection}</span>
+            <div class="filter-group filter-group--compact" data-picker-generation-filter aria-label={t.team.gensSection}></div>
+          </div>
+          <div class="picker-panel__filter-section">
+            <span class="picker-panel__section-title">{t.team.gameSection}</span>
+            <div class="filters-panel__game-row">
+              <div class="select-wrapper">
+                <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+                <select class="game-select" data-picker-game-filter aria-label={t.team.gameSection}>
+                  <option value="">{t.pokedex.allGames}</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+              </div>
+              <div class="view-toggle" data-picker-game-mode-toggle aria-label={t.pokedex.dexMode} hidden>
+                <button class="view-toggle__btn" type="button" data-picker-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
+                <button class="view-toggle__btn" type="button" data-picker-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
+              </div>
+              <div class="view-toggle exclusive-toggle" data-picker-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden></div>
             </div>
-            <div class="view-toggle" data-picker-game-mode-toggle aria-label={t.pokedex.dexMode} hidden>
-              <button class="view-toggle__btn" type="button" data-picker-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
-              <button class="view-toggle__btn" type="button" data-picker-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
-            </div>
-            <div class="view-toggle exclusive-toggle" data-picker-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden></div>
           </div>
         </div>
+        <div class="picker-panel__results" data-picker-results></div>
       </div>
-      <div class="picker-panel__results" data-picker-results></div>
     </div>
   </div>
 

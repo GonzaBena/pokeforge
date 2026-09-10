@@ -494,17 +494,6 @@
   margin-bottom: 12px;
 }
 
-.picker-modal-panel {
-  height: min(85vh, 780px);
-  min-height: 380px;
-  overflow-y: auto;
-}
-
-.picker-modal-panel .modal-panel__header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
 
 .modal-panel__header {
   display: flex;
