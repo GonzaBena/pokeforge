@@ -9,13 +9,33 @@ const t = getTranslations(currentLocale);
     <div class="side-panel__title-row">
       <h2 class="side-panel__title">{t.strengthsWeaknesses.title}</h2>
       <div class="side-panel__header-btns">
-        <button class="panel-matrix-trigger-btn" type="button" data-open-synergy title={t.strengthsWeaknesses.synergyTitle}>
-          <i data-lucide="sparkles"></i>
-          <span>{t.strengthsWeaknesses.tabSynergy}</span>
+        <button
+          class="side-panel__guide-btn"
+          type="button"
+          data-open-panel-guide
+          title={t.strengthsWeaknesses.guideButtonTitle}
+          aria-label={t.strengthsWeaknesses.guideButtonTitle}
+        >
+          <i data-lucide="help-circle"></i>
         </button>
-        <button class="panel-matrix-trigger-btn" type="button" data-open-type-matrix title={t.team.typeMatrixTitle}>
-          <i data-lucide="grid"></i>
-          <span>{t.team.typeMatrixShort}</span>
+        <button
+          class="density-switch"
+          type="button"
+          role="switch"
+          aria-checked="true"
+          data-density-switch
+          title={t.strengthsWeaknesses.viewCompact}
+          aria-label={t.strengthsWeaknesses.viewCompact}
+        >
+          <span class="density-switch__track">
+            <span class="density-switch__icon density-switch__icon--compact">
+              <i data-lucide="layout-grid"></i>
+            </span>
+            <span class="density-switch__icon density-switch__icon--detailed">
+              <i data-lucide="list"></i>
+            </span>
+            <span class="density-switch__thumb"></span>
+          </span>
         </button>
       </div>
     </div>
@@ -31,102 +51,121 @@ const t = getTranslations(currentLocale);
     </div>
   </div>
 
-  <p class="side-panel__empty" data-panel-empty>{t.strengthsWeaknesses.noTeam}</p>
+  <div class="side-panel__empty-container" data-panel-empty>
+    <p class="side-panel__empty">{t.strengthsWeaknesses.noTeam}</p>
+    <button class="side-panel__empty-guide-btn" type="button" data-open-panel-guide>
+      <i data-lucide="help-circle"></i>
+      <span>{t.strengthsWeaknesses.guideEmptyPrompt}</span>
+    </button>
+  </div>
 
-  <div data-panel-content hidden>
-    <!-- TAB 1: DEFENSE -->
-    <div data-tab-content-defense>
-      <div class="defense-group">
-        <div class="defense-group__label">
-          <div class="defense-group__label-title">
-            <i data-lucide="alert-triangle"></i>
-            <span>{t.strengthsWeaknesses.weaknesses}</span>
-          </div>
-          <span class="defense-group__count" data-weaknesses-count></span>
-        </div>
-        <div class="defense-list" data-weaknesses-list></div>
-      </div>
+  <div class="side-panel__content" data-panel-content hidden>
+    <div class="side-panel__scrollable">
+      <!-- TAB 1: DEFENSE -->
+      <div data-tab-content-defense>
+        <!-- EXECUTIVE KPIS -->
+        <div class="side-panel-kpis" data-defense-kpis></div>
 
-      <div class="defense-group">
-        <div class="defense-group__label">
-          <div class="defense-group__label-title">
-            <i data-lucide="shield-check"></i>
-            <span>{t.strengthsWeaknesses.resistances}</span>
-          </div>
-          <span class="defense-group__count" data-resistances-count></span>
-        </div>
-        <div class="defense-list" data-resistances-list></div>
-      </div>
-
-      <div class="defense-group">
-        <div class="defense-group__label">
-          <div class="defense-group__label-title">
-            <i data-lucide="shield-off"></i>
-            <span>{t.strengthsWeaknesses.immunities}</span>
-          </div>
-          <span class="defense-group__count" data-immunities-count></span>
-        </div>
-        <div class="defense-list" data-immunities-list></div>
-      </div>
-    </div>
-
-    <!-- TAB 2: OFFENSE -->
-    <div data-tab-content-offense hidden>
-      <div class="offense-header">
-        <div class="coverage-score-card">
-          <div class="coverage-score-card__top">
-            <span class="coverage-score-card__label" data-offense-score-label>{t.strengthsWeaknesses.coverageScore}</span>
-            <span class="coverage-score-card__pct" data-offense-pct>0%</span>
-          </div>
-          <div class="coverage-meter">
-            <div class="coverage-meter__fill" data-offense-meter style="width: 0%;"></div>
-          </div>
+        <!-- COMPACT VIEW: MINI GRID -->
+        <div class="type-mini-grid-container" data-defense-grid-container>
+          <div class="type-mini-grid" data-defense-mini-grid></div>
         </div>
 
-        <div class="offense-mode-toggle" data-offense-mode-toggle>
-          <button class="offense-mode-btn" type="button" data-offense-mode="moves" aria-pressed="true">
-            <i data-lucide="swords"></i>
-            <span>{t.strengthsWeaknesses.offenseModeMoves}</span>
-          </button>
-          <button class="offense-mode-btn" type="button" data-offense-mode="stab" aria-pressed="false">
-            <i data-lucide="sparkles"></i>
-            <span>{t.strengthsWeaknesses.offenseModeStab}</span>
-          </button>
+        <!-- DETAILED VIEW: ACCORDIONS -->
+        <div class="defense-detailed-groups" data-defense-detailed-groups>
+          <div class="defense-group">
+            <div class="defense-group__label">
+              <div class="defense-group__label-title">
+                <i data-lucide="alert-triangle"></i>
+                <span>{t.strengthsWeaknesses.weaknesses}</span>
+              </div>
+              <span class="defense-group__count" data-weaknesses-count></span>
+            </div>
+            <div class="defense-list" data-weaknesses-list></div>
+          </div>
+
+          <div class="defense-group">
+            <div class="defense-group__label">
+              <div class="defense-group__label-title">
+                <i data-lucide="shield-check"></i>
+                <span>{t.strengthsWeaknesses.resistances}</span>
+              </div>
+              <span class="defense-group__count" data-resistances-count></span>
+            </div>
+            <div class="defense-list" data-resistances-list></div>
+          </div>
+
+          <div class="defense-group">
+            <div class="defense-group__label">
+              <div class="defense-group__label-title">
+                <i data-lucide="shield-off"></i>
+                <span>{t.strengthsWeaknesses.immunities}</span>
+              </div>
+              <span class="defense-group__count" data-immunities-count></span>
+            </div>
+            <div class="defense-list" data-immunities-list></div>
+          </div>
         </div>
       </div>
 
-      <div class="defense-group">
-        <div class="defense-group__label">
-          <div class="defense-group__label-title">
-            <i data-lucide="swords"></i>
-            <span>{t.strengthsWeaknesses.superEffectiveTypes}</span>
+      <!-- TAB 2: OFFENSE -->
+      <div data-tab-content-offense hidden>
+        <div class="offense-header">
+          <div class="coverage-score-card">
+            <div class="coverage-score-card__top">
+              <span class="coverage-score-card__label" data-offense-score-label>{t.strengthsWeaknesses.coverageScore}</span>
+              <span class="coverage-score-card__pct" data-offense-pct>0%</span>
+            </div>
+            <div class="coverage-meter">
+              <div class="coverage-meter__fill" data-offense-meter style="width: 0%;"></div>
+            </div>
           </div>
-          <span class="defense-group__count" data-offense-covered-count></span>
-        </div>
-        <div class="defense-list" data-offense-covered-list></div>
-      </div>
 
-      <div class="defense-group">
-        <div class="defense-group__label">
-          <div class="defense-group__label-title">
-            <i data-lucide="circle-x"></i>
-            <span>{t.strengthsWeaknesses.blindSpots}</span>
+          <div class="offense-mode-toggle" data-offense-mode-toggle>
+            <button class="offense-mode-btn" type="button" data-offense-mode="moves" aria-pressed="true">
+              <i data-lucide="swords"></i>
+              <span>{t.strengthsWeaknesses.offenseModeMoves}</span>
+            </button>
+            <button class="offense-mode-btn" type="button" data-offense-mode="stab" aria-pressed="false">
+              <i data-lucide="sparkles"></i>
+              <span>{t.strengthsWeaknesses.offenseModeStab}</span>
+            </button>
           </div>
-          <span class="defense-group__count" data-offense-blindspots-count></span>
         </div>
-        <div class="defense-list" data-offense-blindspots-list></div>
-      </div>
-    </div>
 
-    <!-- QUICK CALLOUT TO SYNERGY MODAL -->
-    <div class="side-panel__synergy-callout" data-synergy-sidebar-callout>
-      <button type="button" class="side-panel__synergy-btn" data-open-synergy>
-        <div class="side-panel__synergy-btn-left">
-          <i data-lucide="sparkles"></i>
-          <span>{t.strengthsWeaknesses.synergyTitle}</span>
+        <!-- EXECUTIVE KPIS (OFFENSE) -->
+        <div class="side-panel-kpis side-panel-kpis--offense" data-offense-kpis></div>
+
+        <!-- COMPACT VIEW: MINI GRID -->
+        <div class="type-mini-grid-container" data-offense-grid-container>
+          <div class="type-mini-grid" data-offense-mini-grid></div>
         </div>
-        <i data-lucide="arrow-right" class="side-panel__synergy-btn-arrow"></i>
-      </button>
+
+        <!-- DETAILED VIEW: LISTS -->
+        <div class="offense-detailed-groups" data-offense-detailed-groups>
+          <div class="defense-group">
+            <div class="defense-group__label">
+              <div class="defense-group__label-title">
+                <i data-lucide="swords"></i>
+                <span>{t.strengthsWeaknesses.superEffectiveTypes}</span>
+              </div>
+              <span class="defense-group__count" data-offense-covered-count></span>
+            </div>
+            <div class="defense-list" data-offense-covered-list></div>
+          </div>
+
+          <div class="defense-group">
+            <div class="defense-group__label">
+              <div class="defense-group__label-title">
+                <i data-lucide="circle-x"></i>
+                <span>{t.strengthsWeaknesses.blindSpots}</span>
+              </div>
+              <span class="defense-group__count" data-offense-blindspots-count></span>
+            </div>
+            <div class="defense-list" data-offense-blindspots-list></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </aside>

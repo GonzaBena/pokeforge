@@ -18,6 +18,7 @@
 /* Features: Team Builder */
 @import "./features/team/team-page.css";
 @import "./features/team/move-picker.css";
+@import "./features/team/item-picker.css";
 @import "./features/team/side-panel.css";
 @import "./components/modal.css";
 @import "./features/team/graphic-modal.css";

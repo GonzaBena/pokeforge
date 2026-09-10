@@ -3,6 +3,7 @@ import type { MoveData, Pokemon, TeamState } from "./types";
 import { typeColor } from "./typeColors";
 import { toast } from "./toast";
 import { getMoveName, type Locale } from "./i18n/translations";
+import { getItemById, getItemDisplayName, renderItemIconHTML } from "./items";
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -20,8 +21,10 @@ export function generateShowdownText(team: TeamState, pokemonMap: Map<number, Po
     const p = pokemonMap.get(slot.pokemonId);
     if (!p) continue;
 
+    const item = getItemById(slot.item);
+    const itemStr = item ? ` @ ${item.nameEn}` : "";
     const lines: string[] = [];
-    lines.push(`${capitalize(p.name)}`);
+    lines.push(`${capitalize(p.name)}${itemStr}`);
     if (slot.ability) {
       lines.push(`Ability: ${slot.ability.split("-").map(capitalize).join(" ")}`);
     }
@@ -90,6 +93,10 @@ export function renderTeamCardHTML(
         ? `<div class="team-card-item__nature-tag"><i data-lucide="sparkle"></i> ${capitalize(slot.nature)}</div>`
         : "";
 
+      const itemTag = slot.item
+        ? `<div class="team-card-item__item-tag">${renderItemIconHTML(slot.item, { size: 12 })} ${getItemDisplayName(slot.item, locale)}</div>`
+        : "";
+
       return `
         <div class="team-card-item" style="--item-glow:${glowColor};">
           <div class="team-card-item__header">
@@ -100,7 +107,10 @@ export function renderTeamCardHTML(
             <img src="${sprite}" alt="${p.name}" loading="lazy" />
           </div>
           <h4 class="team-card-item__name">${p.name}</h4>
-          ${natureTag}
+          <div class="team-card-item__tags-row">
+            ${natureTag}
+            ${itemTag}
+          </div>
           <div class="team-card-item__moves">${movesList || '<span class="team-card-item__no-moves">Sin ataques</span>'}</div>
         </div>
       `;

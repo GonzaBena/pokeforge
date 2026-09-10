@@ -24,4 +24,5 @@ export interface MoveTableRow {
 export interface EffectivenessItem {
   type: string;
   multiplier: number;
+  note?: string;
 }

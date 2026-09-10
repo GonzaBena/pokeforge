@@ -27,7 +27,7 @@ export interface TeamSynergyReport {
 
 export function computeTeamSynergy(
   chart: TypeChart,
-  team: Pokemon[],
+  team: (Pokemon & { item?: string | null; ability?: string | null })[],
   allCandidates: Pokemon[],
   options?: {
     limit?: number;
@@ -47,8 +47,15 @@ export function computeTeamSynergy(
     };
   }
 
-  // 1. Analyze defense weaknesses
-  const defense = computeTeamDefense(chart, team);
+  // 1. Analyze defense weaknesses with item / ability modifications
+  const teamMembers = team.map((p) => ({
+    name: p.name,
+    types: p.types,
+    speciesId: p.id,
+    item: p.item ?? null,
+    ability: p.ability ?? null,
+  }));
+  const defense = computeTeamDefense(chart, teamMembers);
   const criticalWeaknesses = defense.filter((d) => d.threatLevel === "critical").map((d) => d.type);
   const exposedWeaknesses = defense.filter((d) => d.threatLevel === "exposed").map((d) => d.type);
   const coveredWeaknesses = defense.filter((d) => d.threatLevel === "covered").map((d) => d.type);

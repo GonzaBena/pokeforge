@@ -66,6 +66,19 @@ export interface Translations {
     cloudTooltipError: string;
     cloudTooltipUnlinked: string;
     cloudRemoteUpdated: string;
+    pwaPopoverTitle: string;
+    pwaPopoverSubtitle: string;
+    pwaFeatureOffline: string;
+    pwaFeatureOfflineDesc: string;
+    pwaFeatureFast: string;
+    pwaFeatureFastDesc: string;
+    pwaFeatureSafe: string;
+    pwaFeatureSafeDesc: string;
+    pwaInstallCta: string;
+    pwaIosTitle: string;
+    pwaIosStep1: string;
+    pwaIosStep2: string;
+    pwaClose: string;
   };
   home: {
     badge: string;
@@ -156,6 +169,22 @@ export interface Translations {
     typesSection: string;
     gensSection: string;
     gameSection: string;
+    item: string;
+    selectItem: string;
+    chooseItem: string;
+    removeItem: string;
+    filterByItem: string;
+    searchItemPlaceholder: string;
+    itemCategories: {
+      all: string;
+      competitive: string;
+      statBoost: string;
+      typeBoost: string;
+      defensive: string;
+      berries: string;
+      speciesSpecific: string;
+      utility: string;
+    };
     typeMatrix: string;
     typeMatrixTitle: string;
     typeMatrixSubtitle: string;
@@ -223,6 +252,44 @@ export interface Translations {
     synergyGameFilterLabel: string;
     synergyGameAllPrompt: string;
     synergyGameFilteredNotice: string;
+    viewCompact: string;
+    viewDetailed: string;
+    kpiCritical: string;
+    kpiResists: string;
+    kpiImmunes: string;
+    kpiCovered: string;
+    kpiBlindSpots: string;
+    kpiScore: string;
+    guideButtonTitle: string;
+    guideEmptyPrompt: string;
+    guideModalTitle: string;
+    guideModalSubtitle: string;
+    guideTabDefense: string;
+    guideTabOffense: string;
+    guideTabModes: string;
+    guideDefenseTitle: string;
+    guideDefenseDesc: string;
+    guideMultiplier4xTitle: string;
+    guideMultiplier4xDesc: string;
+    guideMultiplier2xTitle: string;
+    guideMultiplier2xDesc: string;
+    guideMultiplierHalfTitle: string;
+    guideMultiplierHalfDesc: string;
+    guideMultiplierQuarterTitle: string;
+    guideMultiplierQuarterDesc: string;
+    guideMultiplierZeroTitle: string;
+    guideMultiplierZeroDesc: string;
+    guideKpiCriticalDesc: string;
+    guideOffenseTitle: string;
+    guideOffenseDesc: string;
+    guideOffenseMovesDesc: string;
+    guideOffenseStabDesc: string;
+    guideBlindSpotsTitle: string;
+    guideBlindSpotsDesc: string;
+    guideModesTitle: string;
+    guideModesCompactDesc: string;
+    guideModesDetailedDesc: string;
+    guideSynergyTip: string;
   };
   modal: {
     stats: string;
@@ -431,6 +498,19 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudTooltipError: "Error syncing with cloud. Click to retry.",
       cloudTooltipUnlinked: "Sync with cloud and other devices",
       cloudRemoteUpdated: "Data updated from cloud",
+      pwaPopoverTitle: "Install PokeForge",
+      pwaPopoverSubtitle: "Install PokeForge on your device for instant offline access and a faster experience.",
+      pwaFeatureOffline: "Works 100% Offline",
+      pwaFeatureOfflineDesc: "Access the Pokédex and your saved teams without internet connection.",
+      pwaFeatureFast: "Fullscreen & Fast",
+      pwaFeatureFastDesc: "No browser clutter, instant launch, and maximum screen space.",
+      pwaFeatureSafe: "Device Sync & Cloud",
+      pwaFeatureSafeDesc: "Seamlessly save your teams and sync across all your devices.",
+      pwaInstallCta: "Install PokeForge",
+      pwaIosTitle: "How to install on iOS / Safari:",
+      pwaIosStep1: "Tap the Share button in Safari toolbar",
+      pwaIosStep2: "Scroll down and select 'Add to Home Screen'",
+      pwaClose: "Maybe later",
     },
     home: {
       badge: "PokeForge PWA v1.0 · Gen I to IX",
@@ -522,6 +602,22 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       typesSection: "Types",
       gensSection: "Generations",
       gameSection: "Game",
+      item: "Item",
+      selectItem: "Select Item",
+      chooseItem: "Equip Item",
+      removeItem: "Remove item",
+      filterByItem: "Filter by item...",
+      searchItemPlaceholder: "Search item by name or effect...",
+      itemCategories: {
+        all: "All",
+        competitive: "Competitive",
+        statBoost: "Stats",
+        typeBoost: "Type Boost",
+        defensive: "Defensive",
+        berries: "Berries",
+        speciesSpecific: "Species",
+        utility: "Utility",
+      },
       typeMatrix: "Type Matrix",
       typeMatrixTitle: "Team Type Matrix",
       typeMatrixSubtitle:
@@ -596,6 +692,59 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         "Select a game to see Pokémon available specifically in that version's Pokédex.",
       synergyGameFilteredNotice:
         "Suggestions filtered for {game} ({count} Pokémon in {dex}).",
+      viewCompact: "Compact",
+      viewDetailed: "Detailed",
+      kpiCritical: "Critical",
+      kpiResists: "Resisted",
+      kpiImmunes: "Immune",
+      kpiCovered: "Covered",
+      kpiBlindSpots: "Blind Spots",
+      kpiScore: "Coverage",
+      guideButtonTitle: "Team Analysis Guide & Legend",
+      guideEmptyPrompt: "How do team stats and coverage work?",
+      guideModalTitle: "Team Analysis Guide",
+      guideModalSubtitle:
+        "Learn how to read defensive multipliers, offense coverage, and KPIs.",
+      guideTabDefense: "Defense & Multipliers",
+      guideTabOffense: "Offense & Coverage",
+      guideTabModes: "Views & Tips",
+      guideDefenseTitle: "Defensive Matchups & Multipliers",
+      guideDefenseDesc:
+        "Evaluates incoming damage from enemy attacks against your team's Pokémon.",
+      guideMultiplier4xTitle: "4× Critical Weakness",
+      guideMultiplier4xDesc:
+        "Double weakness (e.g. Grass/Bug vs Fire). Takes quadruple damage.",
+      guideMultiplier2xTitle: "2× Weakness",
+      guideMultiplier2xDesc:
+        "Takes super-effective damage (double incoming damage).",
+      guideMultiplierHalfTitle: "½× Resistance",
+      guideMultiplierHalfDesc:
+        "Resistant to this type. Takes half incoming damage.",
+      guideMultiplierQuarterTitle: "¼× S-Resistance",
+      guideMultiplierQuarterDesc:
+        "Double resistance. Takes only 25% incoming damage.",
+      guideMultiplierZeroTitle: "0× Immunity",
+      guideMultiplierZeroDesc:
+        "Completely immune. Takes zero damage from this type.",
+      guideKpiCriticalDesc:
+        "Counts elemental types that hit 2 or more members of your team with super-effective damage (potential team risks).",
+      guideOffenseTitle: "Offensive Coverage",
+      guideOffenseDesc:
+        "Measures how many of the 18 elemental types your team can hit with super-effective (2×) damage.",
+      guideOffenseMovesDesc:
+        "Calculates coverage based on the actual 4 moves assigned to each Pokémon.",
+      guideOffenseStabDesc:
+        "Calculates coverage based on your team's innate Pokémon types (STAB bonus).",
+      guideBlindSpotsTitle: "Blind Spots",
+      guideBlindSpotsDesc:
+        "Elemental types that none of your current attacks can hit super-effectively.",
+      guideModesTitle: "Display Modes & Tips",
+      guideModesCompactDesc:
+        "Mini Grid (18 types): Quick color-coded overview of all type interactions.",
+      guideModesDetailedDesc:
+        "Detailed Breakdown: Pokémon-by-Pokémon list of weaknesses, resistances, and moves.",
+      guideSynergyTip:
+        "Use the 'Synergy' button in the header for smart recommendations to balance weaknesses and patch blind spots.",
     },
     modal: {
       stats: "Stats",
@@ -822,6 +971,19 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         "Error al sincronizar con la nube. Clic para reintentar.",
       cloudTooltipUnlinked: "Sincronizar con la nube y otros dispositivos",
       cloudRemoteUpdated: "Datos actualizados desde la nube",
+      pwaPopoverTitle: "Instalar PokeForge",
+      pwaPopoverSubtitle: "Instalá PokeForge en tu dispositivo para acceder al instante sin conexión y con mayor fluidez.",
+      pwaFeatureOffline: "100% Sin Conexión",
+      pwaFeatureOfflineDesc: "Consultá la Pokédex y tus equipos guardados sin necesidad de internet.",
+      pwaFeatureFast: "Pantalla Completa y Rápida",
+      pwaFeatureFastDesc: "Sin barras del navegador, inicio instantáneo y mayor espacio visual.",
+      pwaFeatureSafe: "Sincronización en la Nube",
+      pwaFeatureSafeDesc: "Guardá y sincronizá tus equipos fácilmente entre todos tus dispositivos.",
+      pwaInstallCta: "Instalar PokeForge",
+      pwaIosTitle: "Cómo instalar en iOS / Safari:",
+      pwaIosStep1: "Tocá el botón Compartir en la barra de Safari",
+      pwaIosStep2: "Deslizá hacia abajo y elegí 'Agregar a pantalla de inicio'",
+      pwaClose: "Quizás más tarde",
     },
     home: {
       badge: "PokeForge PWA v1.0 · Gen I a IX",
@@ -915,6 +1077,22 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       typesSection: "Tipos",
       gensSection: "Generaciones",
       gameSection: "Juego",
+      item: "Objeto",
+      selectItem: "Seleccionar objeto",
+      chooseItem: "Equipar objeto",
+      removeItem: "Quitar objeto",
+      filterByItem: "Filtrar por objeto...",
+      searchItemPlaceholder: "Buscar objeto por nombre o efecto...",
+      itemCategories: {
+        all: "Todos",
+        competitive: "Competitivo",
+        statBoost: "Estadísticas",
+        typeBoost: "Potenciadores",
+        defensive: "Defensivos",
+        berries: "Bayas",
+        speciesSpecific: "Específicos",
+        utility: "Utilidad",
+      },
       typeMatrix: "Matriz de Tipos",
       typeMatrixTitle: "Matriz de Tipos del Equipo",
       typeMatrixSubtitle:
@@ -989,6 +1167,59 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         "Seleccioná un juego para ver Pokémon disponibles específicamente en la Pokédex de esa versión.",
       synergyGameFilteredNotice:
         "Sugerencias filtradas para {game} ({count} Pokémon en {dex}).",
+      viewCompact: "Compacto",
+      viewDetailed: "Detallado",
+      kpiCritical: "Críticas",
+      kpiResists: "Resistidas",
+      kpiImmunes: "Inmunes",
+      kpiCovered: "Cubiertos",
+      kpiBlindSpots: "Puntos Ciegos",
+      kpiScore: "Cobertura",
+      guideButtonTitle: "Guía de análisis y leyenda",
+      guideEmptyPrompt: "¿Cómo funciona el análisis de equipo?",
+      guideModalTitle: "Guía de Análisis de Equipo",
+      guideModalSubtitle:
+        "Aprende a interpretar multiplicadores defensivos, cobertura de ataque y KPIs.",
+      guideTabDefense: "Defensa y Multiplicadores",
+      guideTabOffense: "Ofensiva y Cobertura",
+      guideTabModes: "Vistas y Consejos",
+      guideDefenseTitle: "Balance Defensivo y Multiplicadores",
+      guideDefenseDesc:
+        "Evalúa el daño que recibe tu equipo ante los ataques enemigos según sus tipos elementales.",
+      guideMultiplier4xTitle: "4× Debilidad Crítica",
+      guideMultiplier4xDesc:
+        "Doble debilidad (ej. Planta/Bicho contra Fuego). Recibe daño cuádruple.",
+      guideMultiplier2xTitle: "2× Debilidad",
+      guideMultiplier2xDesc:
+        "Daño súper eficaz recibido (el doble de daño normal).",
+      guideMultiplierHalfTitle: "½× Resistencia",
+      guideMultiplierHalfDesc:
+        "El Pokémon aguanta bien este tipo y recibe la mitad del daño.",
+      guideMultiplierQuarterTitle: "¼× Súper Resistencia",
+      guideMultiplierQuarterDesc:
+        "Doble resistencia. Recibe únicamente el 25% del daño.",
+      guideMultiplierZeroTitle: "0× Inmunidad",
+      guideMultiplierZeroDesc:
+        "Inmunidad total. No recibe daño de movimientos de este tipo.",
+      guideKpiCriticalDesc:
+        "Indica cuántos tipos elementales golpean a 2 o más miembros de tu equipo con súper eficacia (posibles amenazas colectivas).",
+      guideOffenseTitle: "Cobertura Ofensiva",
+      guideOffenseDesc:
+        "Mide cuántos de los 18 tipos elementales puede golpear tu equipo con ventaja (súper eficaz 2×).",
+      guideOffenseMovesDesc:
+        "Calcula la cobertura según los 4 ataques asignados a cada Pokémon.",
+      guideOffenseStabDesc:
+        "Calcula la cobertura según los tipos naturales de tus Pokémon (bonus de daño STAB).",
+      guideBlindSpotsTitle: "Puntos Ciegos",
+      guideBlindSpotsDesc:
+        "Tipos contra los que ningún miembro de tu equipo tiene un ataque con ventaja súper eficaz.",
+      guideModesTitle: "Modos de Vista y Recomendaciones",
+      guideModesCompactDesc:
+        "Mini Grid (18 tipos): Cuadrícula compacta para ver el balance global de un vistazo rápido.",
+      guideModesDetailedDesc:
+        "Desglose Detallado: Lista agrupada Pokémon por Pokémon con sus multiplicadores exactos.",
+      guideSynergyTip:
+        "Usa el botón 'Sinergia' en la barra superior para recibir sugerencias inteligentes de Pokémon que cubran tus debilidades y puntos ciegos.",
     },
     modal: {
       stats: "Estadísticas",

@@ -10,6 +10,7 @@ import {
   setCaptured,
   setPokemonOverrides,
   setTeamSlotAbility,
+  setTeamSlotItem,
   setTeamSlotNature,
   setTeamSlotStats,
   setTeamSlotUsePokedexData,
@@ -21,6 +22,7 @@ import { STAT_KEYS } from "./constants";
 import { getModalElements } from "./dom";
 import { closeModal, openPokemonModal } from "./lifecycle";
 import { renderAbilitiesContent } from "./sections/abilities";
+import { renderEffectivenessContent } from "./sections/effectiveness";
 import { moveSectionToEdge, swapSection, toggleSectionCollapse } from "./sections/actions";
 import { reRenderHeader, updateHeaderCapturedState } from "./sections/header";
 import { modalState } from "./state";
@@ -147,82 +149,115 @@ export function bindModalEvents(): void {
       return;
     }
 
-    if (!target.matches("[data-nature-select]") || modalState.currentId === null) return;
-
-    const value = (target as HTMLSelectElement).value || null;
-    if (modalState.currentSlotIndex !== null) {
-      const team = getTeam();
-      const slot = team.slots[modalState.currentSlotIndex];
-      if (slot) {
-        if (slot.usePokedexData) {
-          const overrides = getPokemonOverrides(modalState.currentId);
-          overrides.nature = value;
-          setPokemonOverrides(modalState.currentId, overrides);
-        }
-        setTeamSlotNature(modalState.currentSlotIndex, value);
-      }
-    } else {
-      const overrides = getPokemonOverrides(modalState.currentId);
-      overrides.nature = value;
-      setPokemonOverrides(modalState.currentId, overrides);
-    }
-
-    const nature = modalState.lastContext?.natures.find((n) => n.name === value) ?? null;
-    const { bodyEl } = getModalElements();
-    const locale = getCurrentLocale();
-
-    if (bodyEl && modalState.lastContext) {
-      const natureTitleEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-title="nature"]');
-      const natureTextEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-text="nature"]');
-      const natureTriggerEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-trigger="nature"]');
-      const effText = natureEffectText(nature, locale);
-
-      if (natureTriggerEl) natureTriggerEl.setAttribute("title", effText);
-      if (natureTitleEl) {
-        natureTitleEl.textContent = nature ? capitalize(nature.name) : (locale === "es" ? "Naturaleza" : "Nature");
-      }
-      if (natureTextEl) {
-        natureTextEl.textContent = effText;
-      }
-
-      const effectsEl = bodyEl.querySelector<HTMLElement>("[data-nature-effects-container]");
-      if (effectsEl) effectsEl.innerHTML = renderNatureEffectBadges(nature, locale);
-
-      STAT_KEYS.forEach((key) => {
-        const inputEl = bodyEl.querySelector<HTMLInputElement>(`[data-stat-input][data-stat-key="${key}"]`);
-        const statEl = inputEl?.closest<HTMLElement>(".detail-stat");
-        if (statEl) {
-          const mod = getNatureModifier(nature, key);
-          statEl.classList.toggle("is-nature-up", mod === "up");
-          statEl.classList.toggle("is-nature-down", mod === "down");
-
-          let labelGroup = statEl.querySelector<HTMLElement>(".detail-stat__label-group");
-          let modBadge = statEl.querySelector<HTMLElement>(".detail-stat__mod");
-
-          if (mod === "up") {
-            if (!modBadge) {
-              modBadge = document.createElement("span");
-              labelGroup?.appendChild(modBadge);
-            }
-            modBadge.className = "detail-stat__mod detail-stat__mod--up";
-            modBadge.textContent = "▲ +10%";
-            modBadge.title = locale === "es" ? "+10% por naturaleza" : "+10% from nature";
-          } else if (mod === "down") {
-            if (!modBadge) {
-              modBadge = document.createElement("span");
-              labelGroup?.appendChild(modBadge);
-            }
-            modBadge.className = "detail-stat__mod detail-stat__mod--down";
-            modBadge.textContent = "▼ -10%";
-            modBadge.title = locale === "es" ? "-10% por naturaleza" : "-10% from nature";
-          } else if (modBadge) {
-            modBadge.remove();
+    if (target.matches("[data-nature-select]") && modalState.currentId !== null) {
+      const value = (target as HTMLSelectElement).value || null;
+      if (modalState.currentSlotIndex !== null) {
+        const team = getTeam();
+        const slot = team.slots[modalState.currentSlotIndex];
+        if (slot) {
+          if (slot.usePokedexData) {
+            const overrides = getPokemonOverrides(modalState.currentId);
+            overrides.nature = value;
+            setPokemonOverrides(modalState.currentId, overrides);
           }
+          setTeamSlotNature(modalState.currentSlotIndex, value);
         }
-      });
+      } else {
+        const overrides = getPokemonOverrides(modalState.currentId);
+        overrides.nature = value;
+        setPokemonOverrides(modalState.currentId, overrides);
+      }
+
+      const nature = modalState.lastContext?.natures.find((n) => n.name === value) ?? null;
+      const { bodyEl } = getModalElements();
+      const locale = getCurrentLocale();
+
+      if (bodyEl && modalState.lastContext) {
+        const natureTitleEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-title="nature"]');
+        const natureTextEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-text="nature"]');
+        const natureTriggerEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-trigger="nature"]');
+        const effText = natureEffectText(nature, locale);
+
+        if (natureTriggerEl) natureTriggerEl.setAttribute("title", effText);
+        if (natureTitleEl) {
+          natureTitleEl.textContent = nature ? capitalize(nature.name) : (locale === "es" ? "Naturaleza" : "Nature");
+        }
+        if (natureTextEl) {
+          natureTextEl.textContent = effText;
+        }
+
+        const effectsEl = bodyEl.querySelector<HTMLElement>("[data-nature-effects-container]");
+        if (effectsEl) effectsEl.innerHTML = renderNatureEffectBadges(nature, locale);
+
+        STAT_KEYS.forEach((key) => {
+          const inputEl = bodyEl.querySelector<HTMLInputElement>(`[data-stat-input][data-stat-key="${key}"]`);
+          const statEl = inputEl?.closest<HTMLElement>(".detail-stat");
+          if (statEl) {
+            const mod = getNatureModifier(nature, key);
+            statEl.classList.toggle("is-nature-up", mod === "up");
+            statEl.classList.toggle("is-nature-down", mod === "down");
+
+            let labelGroup = statEl.querySelector<HTMLElement>(".detail-stat__label-group");
+            let modBadge = statEl.querySelector<HTMLElement>(".detail-stat__mod");
+
+            if (mod === "up") {
+              if (!modBadge) {
+                modBadge = document.createElement("span");
+                labelGroup?.appendChild(modBadge);
+              }
+              modBadge.className = "detail-stat__mod detail-stat__mod--up";
+              modBadge.textContent = "▲ +10%";
+              modBadge.title = locale === "es" ? "+10% por naturaleza" : "+10% from nature";
+            } else if (mod === "down") {
+              if (!modBadge) {
+                modBadge = document.createElement("span");
+                labelGroup?.appendChild(modBadge);
+              }
+              modBadge.className = "detail-stat__mod detail-stat__mod--down";
+              modBadge.textContent = "▼ -10%";
+              modBadge.title = locale === "es" ? "-10% por naturaleza" : "-10% from nature";
+            } else if (modBadge) {
+              modBadge.remove();
+            }
+          }
+        });
+      }
+      updateHexagonChartIfVisible();
+      return;
     }
 
-    updateHexagonChartIfVisible();
+    if (target.matches("[data-item-select]") && modalState.currentId !== null && modalState.lastContext) {
+      const value = (target as HTMLSelectElement).value || null;
+      if (modalState.currentSlotIndex !== null) {
+        const team = getTeam();
+        const slot = team.slots[modalState.currentSlotIndex];
+        if (slot) {
+          if (slot.usePokedexData) {
+            const overrides = getPokemonOverrides(modalState.currentId);
+            overrides.item = value;
+            setPokemonOverrides(modalState.currentId, overrides);
+          }
+          setTeamSlotItem(modalState.currentSlotIndex, value);
+        }
+      } else {
+        const overrides = getPokemonOverrides(modalState.currentId);
+        overrides.item = value;
+        setPokemonOverrides(modalState.currentId, overrides);
+      }
+
+      reRenderHeader();
+
+      // Also update effectiveness section if present
+      const { bodyEl } = getModalElements();
+      if (bodyEl && modalState.lastContext) {
+        const effSection = bodyEl.querySelector<HTMLElement>('[data-section-id="effectiveness"] .detail-section__content');
+        if (effSection) {
+          effSection.innerHTML = renderEffectivenessContent(modalState.lastContext.pokemon, modalState.lastContext.typeChart);
+          refreshIcons();
+        }
+      }
+      return;
+    }
   });
 
   document.addEventListener("click", (e) => {

@@ -56,7 +56,12 @@ export function isStatDown(nature: Nature | null, key: keyof PokemonStats): bool
   return getNatureModifier(nature, key) === "down";
 }
 
-export function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string, nature: Nature | null = null): string {
+export function renderHexagonChart(
+  stats: PokemonStats,
+  primaryTypeColor: string,
+  nature: Nature | null = null,
+  itemModifiers?: Partial<Record<keyof PokemonStats, { multiplier: number; labelEs: string; labelEn: string }>>
+): string {
   const width = 250;
   const height = 165;
   const cx = width / 2;
@@ -85,9 +90,20 @@ export function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string
       .join(" ");
   }
 
+  // Calculate effective stats taking item multiplier into account
+  const effectiveStats: PokemonStats = { ...stats };
+  if (itemModifiers) {
+    for (const [key, mod] of Object.entries(itemModifiers)) {
+      if (mod && mod.multiplier > 0) {
+        const k = key as keyof PokemonStats;
+        effectiveStats[k] = Math.floor((stats[k] ?? 0) * mod.multiplier);
+      }
+    }
+  }
+
   const valuePoints = statList
     .map((item, i) => {
-      const val = Math.min(stats[item.key] ?? 0, MAX_STAT);
+      const val = Math.min(effectiveStats[item.key] ?? 0, MAX_STAT);
       const ratio = Math.max(val / MAX_STAT, 0.08);
       const x = cx + radius * ratio * Math.cos(angles[i]);
       const y = cy + radius * ratio * Math.sin(angles[i]);
@@ -105,9 +121,10 @@ export function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string
 
   const labelsHtml = statList
     .map((item, i) => {
-      const val = stats[item.key] ?? 0;
+      const val = effectiveStats[item.key] ?? 0;
       const up = isStatUp(nature, item.key);
       const down = isStatDown(nature, item.key);
+      const itemMod = itemModifiers?.[item.key];
       const labelRadius = radius + 17;
       const lx = cx + labelRadius * Math.cos(angles[i]);
       const ly = cy + labelRadius * Math.sin(angles[i]);
@@ -123,7 +140,14 @@ export function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string
         symbolColor = "#60a5fa";
       }
 
-      const valColor = up ? "#f87171" : down ? "#60a5fa" : val >= 130 ? "var(--accent)" : "var(--text)";
+      if (itemMod) {
+        symbol = itemMod.multiplier > 1 ? "★" : "▼";
+        symbolColor = itemMod.multiplier > 1 ? "#34d399" : "#60a5fa";
+      }
+
+      const valColor = itemMod
+        ? itemMod.multiplier > 1 ? "#34d399" : "#60a5fa"
+        : up ? "#f87171" : down ? "#60a5fa" : val >= 130 ? "var(--accent)" : "var(--text)";
 
       return `
         <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="central" class="hexagon-chart__label">
@@ -161,7 +185,7 @@ export function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string
 
         ${statList
           .map((item, i) => {
-            const val = Math.min(stats[item.key] ?? 0, MAX_STAT);
+            const val = Math.min(effectiveStats[item.key] ?? 0, MAX_STAT);
             const ratio = Math.max(val / MAX_STAT, 0.08);
             const vx = cx + radius * ratio * Math.cos(angles[i]);
             const vy = cy + radius * ratio * Math.sin(angles[i]);
@@ -174,6 +198,8 @@ export function renderHexagonChart(stats: PokemonStats, primaryTypeColor: string
     </div>
   `;
 }
+
+import { getItemById, getItemStatModifiers } from "../items";
 
 export function updateHexagonChartIfVisible(): void {
   if (!modalState.showHexagonChart || modalState.currentId === null || !modalState.lastContext) return;
@@ -195,5 +221,11 @@ export function updateHexagonChartIfVisible(): void {
   const selectedNature = (modalState.lastContext.natures ?? []).find((n) => n.name === overrides.nature) ?? null;
   const primaryTypeColor = typeColor(modalState.lastContext.pokemon.types[0] ?? "normal");
 
-  hexView.innerHTML = renderHexagonChart(currentStats, primaryTypeColor, selectedNature);
+  const item = getItemById(overrides.item);
+  const hasEvolution = Boolean(
+    modalState.lastContext.chain?.nodes.some((n) => n.evolvesFromSpecies === modalState.lastContext!.pokemon.name)
+  );
+  const itemModifiers = getItemStatModifiers(item, modalState.lastContext.pokemon.id, hasEvolution);
+
+  hexView.innerHTML = renderHexagonChart(currentStats, primaryTypeColor, selectedNature, itemModifiers);
 }

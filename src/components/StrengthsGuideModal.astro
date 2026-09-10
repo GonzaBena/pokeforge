@@ -1,0 +1,190 @@
+---
+import { getTranslations, type Locale } from "../lib/i18n/translations";
+
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
+---
+
+<div class="modal-overlay" data-strengths-guide-overlay hidden>
+  <div class="modal-panel guide-modal-panel" role="dialog" aria-modal="true" aria-labelledby="strengths-guide-modal-title">
+    <div class="modal-panel__header">
+      <div class="picker-panel__header-info">
+        <h2 id="strengths-guide-modal-title">
+          <i data-lucide="help-circle"></i>
+          <span>{t.strengthsWeaknesses.guideModalTitle}</span>
+        </h2>
+        <span class="type-matrix-modal__subtitle">{t.strengthsWeaknesses.guideModalSubtitle}</span>
+      </div>
+      <button class="modal-panel__close" type="button" data-strengths-guide-close aria-label={t.modal.close}>
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <div class="guide-modal__nav" data-guide-nav>
+      <button class="guide-modal__tab-btn is-active" type="button" data-guide-tab="defense" aria-selected="true">
+        <i data-lucide="shield"></i>
+        <span>{t.strengthsWeaknesses.guideTabDefense}</span>
+      </button>
+      <button class="guide-modal__tab-btn" type="button" data-guide-tab="offense" aria-selected="false">
+        <i data-lucide="swords"></i>
+        <span>{t.strengthsWeaknesses.guideTabOffense}</span>
+      </button>
+      <button class="guide-modal__tab-btn" type="button" data-guide-tab="modes" aria-selected="false">
+        <i data-lucide="layout-grid"></i>
+        <span>{t.strengthsWeaknesses.guideTabModes}</span>
+      </button>
+    </div>
+
+    <div class="guide-modal__body">
+      <!-- PANE 1: DEFENSA -->
+      <section class="guide-modal__pane" data-guide-pane="defense">
+        <div class="guide-section-header">
+          <div class="guide-section-header__icon guide-section-header__icon--defense">
+            <i data-lucide="shield-alert"></i>
+          </div>
+          <div>
+            <h3 class="guide-section-header__title">{t.strengthsWeaknesses.guideDefenseTitle}</h3>
+            <p class="guide-section-header__desc">{t.strengthsWeaknesses.guideDefenseDesc}</p>
+          </div>
+        </div>
+
+        <div class="guide-multipliers-grid">
+          <div class="guide-card guide-card--weak-crit">
+            <div class="guide-card__badge-wrap">
+              <span class="matrix-badge matrix-badge--4x">4×</span>
+            </div>
+            <div class="guide-card__info">
+              <h4>{t.strengthsWeaknesses.guideMultiplier4xTitle}</h4>
+              <p>{t.strengthsWeaknesses.guideMultiplier4xDesc}</p>
+            </div>
+          </div>
+
+          <div class="guide-card guide-card--weak">
+            <div class="guide-card__badge-wrap">
+              <span class="matrix-badge matrix-badge--2x">2×</span>
+            </div>
+            <div class="guide-card__info">
+              <h4>{t.strengthsWeaknesses.guideMultiplier2xTitle}</h4>
+              <p>{t.strengthsWeaknesses.guideMultiplier2xDesc}</p>
+            </div>
+          </div>
+
+          <div class="guide-card guide-card--resist">
+            <div class="guide-card__badge-wrap">
+              <span class="matrix-badge matrix-badge--half">½</span>
+            </div>
+            <div class="guide-card__info">
+              <h4>{t.strengthsWeaknesses.guideMultiplierHalfTitle}</h4>
+              <p>{t.strengthsWeaknesses.guideMultiplierHalfDesc}</p>
+            </div>
+          </div>
+
+          <div class="guide-card guide-card--resist-super">
+            <div class="guide-card__badge-wrap">
+              <span class="matrix-badge matrix-badge--quarter">¼</span>
+            </div>
+            <div class="guide-card__info">
+              <h4>{t.strengthsWeaknesses.guideMultiplierQuarterTitle}</h4>
+              <p>{t.strengthsWeaknesses.guideMultiplierQuarterDesc}</p>
+            </div>
+          </div>
+
+          <div class="guide-card guide-card--immune">
+            <div class="guide-card__badge-wrap">
+              <span class="matrix-badge matrix-badge--immune">0×</span>
+            </div>
+            <div class="guide-card__info">
+              <h4>{t.strengthsWeaknesses.guideMultiplierZeroTitle}</h4>
+              <p>{t.strengthsWeaknesses.guideMultiplierZeroDesc}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-callout guide-callout--alert">
+          <i data-lucide="alert-triangle"></i>
+          <div>
+            <strong>{t.strengthsWeaknesses.kpiCritical}:</strong>
+            <span> {t.strengthsWeaknesses.guideKpiCriticalDesc}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANE 2: OFENSIVA -->
+      <section class="guide-modal__pane" data-guide-pane="offense" hidden>
+        <div class="guide-section-header">
+          <div class="guide-section-header__icon guide-section-header__icon--offense">
+            <i data-lucide="zap"></i>
+          </div>
+          <div>
+            <h3 class="guide-section-header__title">{t.strengthsWeaknesses.guideOffenseTitle}</h3>
+            <p class="guide-section-header__desc">{t.strengthsWeaknesses.guideOffenseDesc}</p>
+          </div>
+        </div>
+
+        <div class="guide-modes-grid">
+          <div class="guide-card guide-card--feature">
+            <div class="guide-card__icon-header">
+              <i data-lucide="swords"></i>
+              <h4>{t.strengthsWeaknesses.offenseModeMoves}</h4>
+            </div>
+            <p>{t.strengthsWeaknesses.guideOffenseMovesDesc}</p>
+          </div>
+
+          <div class="guide-card guide-card--feature">
+            <div class="guide-card__icon-header">
+              <i data-lucide="sparkles"></i>
+              <h4>{t.strengthsWeaknesses.offenseModeStab}</h4>
+            </div>
+            <p>{t.strengthsWeaknesses.guideOffenseStabDesc}</p>
+          </div>
+        </div>
+
+        <div class="guide-card guide-card--blindspots">
+          <div class="guide-card__icon-header guide-card__icon-header--danger">
+            <i data-lucide="circle-x"></i>
+            <h4>{t.strengthsWeaknesses.guideBlindSpotsTitle}</h4>
+          </div>
+          <p>{t.strengthsWeaknesses.guideBlindSpotsDesc}</p>
+        </div>
+      </section>
+
+      <!-- PANE 3: VISTAS Y CONSEJOS -->
+      <section class="guide-modal__pane" data-guide-pane="modes" hidden>
+        <div class="guide-section-header">
+          <div class="guide-section-header__icon guide-section-header__icon--tips">
+            <i data-lucide="compass"></i>
+          </div>
+          <div>
+            <h3 class="guide-section-header__title">{t.strengthsWeaknesses.guideModesTitle}</h3>
+          </div>
+        </div>
+
+        <div class="guide-modes-grid">
+          <div class="guide-card">
+            <div class="guide-card__icon-header">
+              <i data-lucide="layout-grid"></i>
+              <h4>{t.strengthsWeaknesses.viewCompact}</h4>
+            </div>
+            <p>{t.strengthsWeaknesses.guideModesCompactDesc}</p>
+          </div>
+
+          <div class="guide-card">
+            <div class="guide-card__icon-header">
+              <i data-lucide="list"></i>
+              <h4>{t.strengthsWeaknesses.viewDetailed}</h4>
+            </div>
+            <p>{t.strengthsWeaknesses.guideModesDetailedDesc}</p>
+          </div>
+        </div>
+
+        <div class="guide-callout guide-callout--synergy">
+          <i data-lucide="sparkles"></i>
+          <div>
+            <strong>{t.strengthsWeaknesses.tabSynergy}:</strong>
+            <span> {t.strengthsWeaknesses.guideSynergyTip}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

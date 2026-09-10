@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.astro";
+import StrengthsGuideModal from "../components/StrengthsGuideModal.astro";
 import PokemonDetailModal from "../components/PokemonDetailModal.astro";
 import { getTranslations, type Locale } from "../lib/i18n/translations";
 
@@ -207,6 +208,43 @@ const t = getTranslations(currentLocale);
     </div>
   </div>
 
+  <div class="modal-overlay" data-item-picker-overlay hidden>
+    <div class="modal-panel item-picker-modal-panel">
+      <div class="modal-panel__header">
+        <div class="picker-panel__header-info">
+          <h2><i data-lucide="backpack"></i> <span data-item-picker-title>{t.team.selectItem}</span></h2>
+          <span class="picker-panel__count" data-item-picker-count></span>
+        </div>
+        <button class="modal-panel__close" type="button" data-item-picker-close aria-label={t.modal.close}>
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="picker-panel__body" data-item-picker-body>
+        <div class="picker-panel__filters">
+          <label class="picker-input-wrap">
+            <i data-lucide="search" class="picker-input-icon"></i>
+            <input class="picker-input" type="search" placeholder={t.team.searchItemPlaceholder} data-item-picker-search />
+          </label>
+          <div class="picker-panel__filter-section">
+            <span class="picker-panel__section-title">{t.team.category}</span>
+            <div class="filter-group filter-group--compact" data-item-category-filter aria-label={t.team.category}>
+              <button class="filter-chip" type="button" data-item-category="all" aria-pressed="true">{t.team.itemCategories.all}</button>
+              <button class="filter-chip" type="button" data-item-category="competitive" aria-pressed="false">{t.team.itemCategories.competitive}</button>
+              <button class="filter-chip" type="button" data-item-category="stat-boost" aria-pressed="false">{t.team.itemCategories.statBoost}</button>
+              <button class="filter-chip" type="button" data-item-category="type-boost" aria-pressed="false">{t.team.itemCategories.typeBoost}</button>
+              <button class="filter-chip" type="button" data-item-category="defensive" aria-pressed="false">{t.team.itemCategories.defensive}</button>
+              <button class="filter-chip" type="button" data-item-category="berries" aria-pressed="false">{t.team.itemCategories.berries}</button>
+              <button class="filter-chip" type="button" data-item-category="species-specific" aria-pressed="false">{t.team.itemCategories.speciesSpecific}</button>
+              <button class="filter-chip" type="button" data-item-category="utility" aria-pressed="false">{t.team.itemCategories.utility}</button>
+            </div>
+          </div>
+        </div>
+        <div class="item-picker__results" data-item-picker-results></div>
+      </div>
+    </div>
+  </div>
+
+  <StrengthsGuideModal />
   <PokemonDetailModal />
 
   <script>

@@ -49,11 +49,89 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
         <span class="nav__lang-divider">/</span>
         <a href={esHref} class:list={["nav__lang-btn", { active: currentLocale === "es" }]} data-astro-prefetch>ES</a>
       </div>
-      <div class="nav__pwa-wrapper nav__pwa-wrapper--desktop" data-pwa-row hidden>
-        <button class="nav__pwa-btn" type="button" data-pwa-install title={t.nav.installAppTitle} aria-label={t.nav.installAppTitle}>
+      <div class="nav__pwa-wrapper" data-pwa-wrapper hidden>
+        <button
+          class="nav__pwa-btn"
+          type="button"
+          data-pwa-trigger
+          title={t.nav.pwaPopoverTitle}
+          aria-label={t.nav.pwaPopoverTitle}
+          aria-haspopup="dialog"
+          aria-expanded="false"
+        >
           <i data-lucide="download"></i>
-          <span>{t.nav.installApp}</span>
+          <span class="nav__pwa-badge-dot" aria-hidden="true"></span>
         </button>
+
+        <div class="pwa-popover" id="pwa-install-popover" data-pwa-popover role="dialog" aria-modal="true" aria-labelledby="pwa-popover-title" hidden>
+          <div class="pwa-popover__header">
+            <div class="pwa-popover__brand">
+              <img src="/favicon.png" alt="PokeForge Logo" class="pwa-popover__logo" />
+              <div>
+                <h3 id="pwa-popover-title" class="pwa-popover__title">{t.nav.pwaPopoverTitle}</h3>
+                <p class="pwa-popover__subtitle">{t.nav.pwaPopoverSubtitle}</p>
+              </div>
+            </div>
+            <button type="button" class="pwa-popover__close" data-pwa-close aria-label={t.nav.pwaClose}>
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+
+          <div class="pwa-popover__features">
+            <div class="pwa-popover__feature">
+              <span class="pwa-popover__feature-icon"><i data-lucide="wifi-off"></i></span>
+              <div class="pwa-popover__feature-text">
+                <strong>{t.nav.pwaFeatureOffline}</strong>
+                <span>{t.nav.pwaFeatureOfflineDesc}</span>
+              </div>
+            </div>
+            <div class="pwa-popover__feature">
+              <span class="pwa-popover__feature-icon"><i data-lucide="maximize"></i></span>
+              <div class="pwa-popover__feature-text">
+                <strong>{t.nav.pwaFeatureFast}</strong>
+                <span>{t.nav.pwaFeatureFastDesc}</span>
+              </div>
+            </div>
+            <div class="pwa-popover__feature">
+              <span class="pwa-popover__feature-icon"><i data-lucide="cloud"></i></span>
+              <div class="pwa-popover__feature-text">
+                <strong>{t.nav.pwaFeatureSafe}</strong>
+                <span>{t.nav.pwaFeatureSafeDesc}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic block for Chrome/Edge/Android vs iOS Safari -->
+          <div class="pwa-popover__action-block" data-pwa-native-block>
+            <button type="button" class="pwa-popover__install-btn" data-pwa-install-action>
+              <i data-lucide="download"></i>
+              <span>{t.nav.pwaInstallCta}</span>
+            </button>
+          </div>
+
+          <div class="pwa-popover__ios-block" data-pwa-ios-block hidden>
+            <div class="pwa-popover__ios-title">
+              <i data-lucide="info"></i>
+              <span>{t.nav.pwaIosTitle}</span>
+            </div>
+            <ol class="pwa-popover__ios-steps">
+              <li>
+                <span class="pwa-popover__step-badge">1</span>
+                <span>{t.nav.pwaIosStep1} <i data-lucide="share-2" class="pwa-popover__inline-icon"></i></span>
+              </li>
+              <li>
+                <span class="pwa-popover__step-badge">2</span>
+                <span>{t.nav.pwaIosStep2} <i data-lucide="plus-square" class="pwa-popover__inline-icon"></i></span>
+              </li>
+            </ol>
+          </div>
+
+          <div class="pwa-popover__footer">
+            <button type="button" class="pwa-popover__cancel-btn" data-pwa-close>
+              {t.nav.pwaClose}
+            </button>
+          </div>
+        </div>
       </div>
       <button
         class="nav__sync-btn"
@@ -94,21 +172,13 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
             <i data-lucide="cloud"></i>
           </span>
         </span>
-        <span class="nav__sync-text" data-cloud-text>{t.nav.sync}</span>
+        <!--- <span class="nav__sync-text" data-cloud-text>{t.nav.sync}</span> --->
       </button>
       <button class="nav__sound-btn" type="button" data-sound-toggle title={t.nav.soundTitle} aria-label={t.nav.soundTitle}>
         <i data-lucide="volume-2" data-sound-icon-on></i>
         <i data-lucide="volume-x" data-sound-icon-off hidden></i>
       </button>
     </div>
-  </div>
-
-  <!-- Fila exclusiva para botón de instalar en celulares (evita superposición con el logo) -->
-  <div class="nav__pwa-mobile-row" data-pwa-row hidden>
-    <button class="nav__pwa-mobile-btn" type="button" data-pwa-install title={t.nav.installAppTitle} aria-label={t.nav.installAppTitle}>
-      <i data-lucide="download"></i>
-      <span>{t.nav.installApp}</span>
-    </button>
   </div>
 </nav>
 
@@ -174,51 +244,102 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
   }
 
   function initPwaInstall() {
-    const pwaRows = document.querySelectorAll<HTMLElement>("[data-pwa-row]");
-    const pwaBtns = document.querySelectorAll<HTMLButtonElement>("[data-pwa-install]");
-    if (!pwaRows.length || !pwaBtns.length) return;
+    const pwaWrapper = document.querySelector<HTMLElement>("[data-pwa-wrapper]");
+    const triggerBtn = document.querySelector<HTMLButtonElement>("[data-pwa-trigger]");
+    const popover = document.querySelector<HTMLElement>("[data-pwa-popover]");
+    const nativeBlock = document.querySelector<HTMLElement>("[data-pwa-native-block]");
+    const iosBlock = document.querySelector<HTMLElement>("[data-pwa-ios-block]");
+    const installActionBtn = document.querySelector<HTMLButtonElement>("[data-pwa-install-action]");
+    const closeBtns = document.querySelectorAll<HTMLElement>("[data-pwa-close]");
 
-    function hideAll() {
-      pwaRows.forEach((row) => (row.hidden = true));
+    if (!pwaWrapper || !triggerBtn || !popover) return;
+
+    function hideWrapper() {
+      if (pwaWrapper) pwaWrapper.hidden = true;
+      closePopover();
     }
 
-    function showAll() {
-      pwaRows.forEach((row) => (row.hidden = false));
+    function showWrapper() {
+      if (pwaWrapper && !isAppInstalled()) {
+        pwaWrapper.hidden = false;
+        refreshIcons();
+      }
+    }
+
+    function openPopover() {
+      if (!popover || !triggerBtn) return;
+      popover.hidden = false;
+      triggerBtn.setAttribute("aria-expanded", "true");
+      triggerBtn.classList.add("nav__pwa-btn--active");
+
+      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+      if (isIos) {
+        if (iosBlock) iosBlock.hidden = false;
+        if (nativeBlock) nativeBlock.hidden = true;
+      } else {
+        if (iosBlock) iosBlock.hidden = true;
+        if (nativeBlock) nativeBlock.hidden = false;
+      }
+
       refreshIcons();
     }
 
+    function closePopover() {
+      if (!popover || !triggerBtn) return;
+      popover.hidden = true;
+      triggerBtn.setAttribute("aria-expanded", "false");
+      triggerBtn.classList.remove("nav__pwa-btn--active");
+    }
+
     if (isAppInstalled()) {
-      hideAll();
+      hideWrapper();
       return;
     }
 
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      if (!isAppInstalled()) showAll();
+      if (!isAppInstalled()) showWrapper();
     });
 
-    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-    if (isIos && !isAppInstalled()) {
-      showAll();
+    const isIosDevice = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    if (isIosDevice && !isAppInstalled()) {
+      showWrapper();
     }
 
     window.addEventListener("appinstalled", () => {
       localStorage.setItem("pokeforge_installed", "true");
-      hideAll();
+      hideWrapper();
       const t = getTranslations(getCurrentLocale());
       toast.success(t.nav.installedSuccess);
     });
 
-    pwaBtns.forEach((btn) => {
-      btn.addEventListener("click", async () => {
+    triggerBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (popover.hidden) {
+        openPopover();
+      } else {
+        closePopover();
+      }
+    });
+
+    closeBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closePopover();
+      });
+    });
+
+    if (installActionBtn) {
+      installActionBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
         const t = getTranslations(getCurrentLocale());
         if (deferredPrompt) {
           deferredPrompt.prompt();
           const choice = await deferredPrompt.userChoice;
-          if (choice.outcome === "accepted") {
+          if (choice && choice.outcome === "accepted") {
             localStorage.setItem("pokeforge_installed", "true");
-            hideAll();
+            hideWrapper();
             toast.success(t.nav.installedSuccess);
           }
           deferredPrompt = null;
@@ -226,6 +347,19 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
           toast.info(t.nav.pwaHint);
         }
       });
+    }
+
+    // Cerrar popover al hacer click afuera o presionar Escape
+    document.addEventListener("click", (e) => {
+      if (!popover.hidden && !popover.contains(e.target as Node) && !triggerBtn.contains(e.target as Node)) {
+        closePopover();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !popover.hidden) {
+        closePopover();
+      }
     });
   }
 

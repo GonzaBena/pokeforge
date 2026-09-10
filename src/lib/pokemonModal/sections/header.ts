@@ -3,6 +3,7 @@ import { refreshIcons } from "../../icons";
 import { getTeam, isCaptured } from "../../storage";
 import { typeColor } from "../../typeColors";
 import type { PokemonStats } from "../../types";
+import { getAllItems, getItemById, getItemStatModifiers, renderItemIconHTML } from "../../items";
 import {
   getNatureModifier,
   natureEffectText,
@@ -44,6 +45,26 @@ export function renderHeader(ctx: RenderContext): string {
   const selectedNature =
     naturesList.find((n) => n.name === overrides.nature) ?? null;
 
+  const hasEvolution = Boolean(
+    ctx.chain?.nodes.some((n) => n.evolvesFromSpecies === pokemon.name)
+  );
+  const currentItem = getItemById(overrides.item);
+  const itemModifiers = getItemStatModifiers(currentItem, pokemon.id, hasEvolution);
+  const selectedItemDesc = currentItem
+    ? locale === "es"
+      ? currentItem.effect?.descriptionEs || currentItem.shortDescEs
+      : currentItem.effect?.descriptionEn || currentItem.shortDescEn
+    : "";
+
+  const allItems = getAllItems();
+  const itemOptionsHtml = allItems
+    .map((it) => {
+      const isSelected = overrides.item === it.id;
+      const label = locale === "es" ? it.nameEs : it.nameEn;
+      return `<option value="${it.id}" ${isSelected ? "selected" : ""}>${label}</option>`;
+    })
+    .join("");
+
   const abilitiesList = detail.abilities ?? [];
   const defaultAbility = getDefaultAbility(detail);
   const currentAbilityName = overrides.ability ?? defaultAbility;
@@ -75,6 +96,7 @@ export function renderHeader(ctx: RenderContext): string {
     const base = detail.stats?.[key] ?? 0;
     const value = userStats[key] ?? base;
     const modifier = getNatureModifier(selectedNature, key);
+    const itemMod = itemModifiers[key];
     let modBadge = "";
     let modClass = "";
 
@@ -86,11 +108,19 @@ export function renderHeader(ctx: RenderContext): string {
       modClass = "is-nature-down";
     }
 
+    let itemBadge = "";
+    if (itemMod) {
+      const itemLabel = locale === "es" ? itemMod.labelEs : itemMod.labelEn;
+      itemBadge = `<span class="detail-stat__mod detail-stat__mod--item" title="${itemLabel}">★ ${itemLabel}</span>`;
+      modClass += " is-item-boosted";
+    }
+
     return `
       <div class="detail-stat ${modClass}">
         <div class="detail-stat__label-group">
           <span class="detail-stat__label">${STAT_LABELS[key]}</span>
           ${modBadge}
+          ${itemBadge}
         </div>
         <input
           class="detail-stat__input"
@@ -187,61 +217,88 @@ export function renderHeader(ctx: RenderContext): string {
         <div class="detail-stats-wrapper ${modalState.showHexagonChart ? "has-hexagon" : ""}" data-stats-wrapper>
           <div class="detail-stats" data-stats-bars-view>${statsHtml}</div>
           <div class="detail-hexagon-view" data-stats-hexagon-view ${modalState.showHexagonChart ? "" : "hidden"}>
-            ${renderHexagonChart(currentStats, primaryTypeColor, selectedNature)}
+            ${renderHexagonChart(currentStats, primaryTypeColor, selectedNature, itemModifiers)}
           </div>
         </div>
         <div class="detail-footer-row">
           <div class="detail-footer-row__customization">
-            <div class="detail-ability">
-              <div class="detail-ability__select-row">
-                <span class="detail-ability__label">${t.modal.ability}</span>
-                <select data-ability-select ${canEdit ? "" : "disabled"}>
-                  ${abilityOptionsHtml}
-                </select>
-                <div class="detail-help-tooltip" data-help-tooltip="ability">
-                  <button
-                    type="button"
-                    class="detail-help-tooltip__trigger"
-                    data-tooltip-trigger="ability"
-                    aria-label="${t.modal.ability}"
-                    title="${selectedAbilityDesc || (locale === "es" ? "Información de la habilidad" : "Ability information")}"
-                  >
-                    <i data-lucide="info"></i>
-                  </button>
-                  <div class="detail-help-tooltip__popover" data-tooltip-popover="ability" role="tooltip">
-                    <strong class="detail-help-tooltip__title" data-tooltip-title="ability">${selectedAbility ? (locale === "es" ? selectedAbility.nameEs || capitalize(selectedAbility.name) : selectedAbility.nameEn || capitalize(selectedAbility.name)) : t.modal.ability}</strong>
-                    <p class="detail-help-tooltip__text" data-tooltip-text="ability">${selectedAbilityDesc || (locale === "es" ? "La habilidad otorga efectos pasivos únicos en combate o aventura." : "Abilities provide unique passive effects in battle or adventure.")}</p>
-                    ${selectedAbility?.isHidden ? `<p class="detail-help-tooltip__sub" data-tooltip-sub="ability">${locale === "es" ? "Habilidad Oculta" : "Hidden Ability"}</p>` : ""}
+            <div class="detail-custom-grid">
+              <div class="detail-ability">
+                <div class="detail-ability__select-row">
+                  <span class="detail-ability__label">${t.modal.ability}</span>
+                  <select data-ability-select ${canEdit ? "" : "disabled"}>
+                    ${abilityOptionsHtml}
+                  </select>
+                  <div class="detail-help-tooltip" data-help-tooltip="ability">
+                    <button
+                      type="button"
+                      class="detail-help-tooltip__trigger"
+                      data-tooltip-trigger="ability"
+                      aria-label="${t.modal.ability}"
+                      title="${selectedAbilityDesc || (locale === "es" ? "Información de la habilidad" : "Ability information")}"
+                    >
+                      <i data-lucide="info"></i>
+                    </button>
+                    <div class="detail-help-tooltip__popover" data-tooltip-popover="ability" role="tooltip">
+                      <strong class="detail-help-tooltip__title" data-tooltip-title="ability">${selectedAbility ? (locale === "es" ? selectedAbility.nameEs || capitalize(selectedAbility.name) : selectedAbility.nameEn || capitalize(selectedAbility.name)) : t.modal.ability}</strong>
+                      <p class="detail-help-tooltip__text" data-tooltip-text="ability">${selectedAbilityDesc || (locale === "es" ? "La habilidad otorga efectos pasivos únicos en combate o aventura." : "Abilities provide unique passive effects in battle or adventure.")}</p>
+                      ${selectedAbility?.isHidden ? `<p class="detail-help-tooltip__sub" data-tooltip-sub="ability">${locale === "es" ? "Habilidad Oculta" : "Hidden Ability"}</p>` : ""}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="detail-nature">
-              <div class="detail-nature__select-row">
-                <span class="detail-nature__label">${t.modal.nature}</span>
-                <select data-nature-select ${canEdit ? "" : "disabled"}>
-                  <option value="">${locale === "es" ? "Sin definir" : "Undefined"}</option>
-                  ${natureOptionsHtml}
-                </select>
-                <div class="detail-help-tooltip" data-help-tooltip="nature">
-                  <button
-                    type="button"
-                    class="detail-help-tooltip__trigger"
-                    data-tooltip-trigger="nature"
-                    aria-label="${t.modal.nature}"
-                    title="${natureEffectText(selectedNature, locale)}"
-                  >
-                    <i data-lucide="info"></i>
-                  </button>
-                  <div class="detail-help-tooltip__popover" data-tooltip-popover="nature" role="tooltip">
-                    <strong class="detail-help-tooltip__title" data-tooltip-title="nature">${selectedNature ? capitalize(selectedNature.name) : t.modal.nature}</strong>
-                    <p class="detail-help-tooltip__text" data-tooltip-text="nature">${natureEffectText(selectedNature, locale)}</p>
-                    <p class="detail-help-tooltip__sub">${locale === "es" ? "Las naturalezas modifican un stat en +10% y otro en -10% (o son neutras)." : "Natures increase one stat by +10% and decrease another by -10% (or are neutral)."}</p>
+              <div class="detail-nature">
+                <div class="detail-nature__select-row">
+                  <span class="detail-nature__label">${t.modal.nature}</span>
+                  <select data-nature-select ${canEdit ? "" : "disabled"}>
+                    <option value="">${locale === "es" ? "Sin definir" : "Undefined"}</option>
+                    ${natureOptionsHtml}
+                  </select>
+                  <div class="detail-help-tooltip" data-help-tooltip="nature">
+                    <button
+                      type="button"
+                      class="detail-help-tooltip__trigger"
+                      data-tooltip-trigger="nature"
+                      aria-label="${t.modal.nature}"
+                      title="${natureEffectText(selectedNature, locale)}"
+                    >
+                      <i data-lucide="info"></i>
+                    </button>
+                    <div class="detail-help-tooltip__popover" data-tooltip-popover="nature" role="tooltip">
+                      <strong class="detail-help-tooltip__title" data-tooltip-title="nature">${selectedNature ? capitalize(selectedNature.name) : t.modal.nature}</strong>
+                      <p class="detail-help-tooltip__text" data-tooltip-text="nature">${natureEffectText(selectedNature, locale)}</p>
+                      <p class="detail-help-tooltip__sub">${locale === "es" ? "Las naturalezas modifican un stat en +10% y otro en -10% (o son neutras)." : "Natures increase one stat by +10% and decrease another by -10% (or are neutral)."}</p>
+                    </div>
                   </div>
                 </div>
+                <div class="detail-nature__effects" data-nature-effects-container>
+                  ${renderNatureEffectBadges(selectedNature, locale)}
+                </div>
               </div>
-              <div class="detail-nature__effects" data-nature-effects-container>
-                ${renderNatureEffectBadges(selectedNature, locale)}
+              <div class="detail-item">
+                <div class="detail-item__select-row">
+                  <span class="detail-item__label">${locale === "es" ? "Objeto" : "Item"}</span>
+                  ${currentItem ? renderItemIconHTML(currentItem.id, { size: 18 }) : ""}
+                  <select data-item-select ${canEdit ? "" : "disabled"}>
+                    <option value="">${locale === "es" ? "Sin objeto" : "No item"}</option>
+                    ${itemOptionsHtml}
+                  </select>
+                  <div class="detail-help-tooltip" data-help-tooltip="item">
+                    <button
+                      type="button"
+                      class="detail-help-tooltip__trigger"
+                      data-tooltip-trigger="item"
+                      aria-label="${locale === "es" ? "Objeto" : "Item"}"
+                      title="${selectedItemDesc || (locale === "es" ? "Información del objeto" : "Item information")}"
+                    >
+                      <i data-lucide="info"></i>
+                    </button>
+                    <div class="detail-help-tooltip__popover" data-tooltip-popover="item" role="tooltip">
+                      <strong class="detail-help-tooltip__title" data-tooltip-title="item">${currentItem ? (locale === "es" ? currentItem.nameEs : currentItem.nameEn) : (locale === "es" ? "Objeto" : "Item")}</strong>
+                      <p class="detail-help-tooltip__text" data-tooltip-text="item">${selectedItemDesc || (locale === "es" ? "Los objetos equipados otorgan efectos pasivos o modifican estadísticas y efectividades." : "Held items provide passive battle effects or modify stats and type effectiveness.")}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             ${isTeamMode ? `<p class="detail-nature-hint">${t.modal.teamNatureNotice}</p>` : !captured ? `<p class="detail-hint" data-capture-hint>${t.modal.captureHint}</p>` : ""}

@@ -4,8 +4,10 @@ import {
   getTeam,
   setTeam,
   setTeamSlot,
+  setTeamSlotItem,
   setTeamSlotMove,
   swapTeamSlotMoves,
+  swapTeamSlots,
   getSelectedGame,
   setSelectedGame,
   getGameDexMode,
@@ -22,7 +24,9 @@ import {
   getTypeMultiplier,
   type TeamDefenseEntry,
   type TeamOffenseEntry,
+  type TeamOffenseSummary,
   type AttackSource,
+  type TeamMember,
 } from "../lib/typeChart";
 import { badgeBounceIn, slotPopIn, teamSizeTransition } from "../lib/animations";
 import { toast } from "../lib/toast";
@@ -33,10 +37,13 @@ import { getDefaultAbility } from "../lib/pokemonModal/utils";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
 import { getCurrentLocale, getTranslations, getTypeName, getGameTitle, getRegionName, getMoveName, type Locale } from "../lib/i18n/translations";
 import { computeTeamSynergy } from "../lib/teamSynergy";
+import { filterItems, getItemById, getItemDisplayName, renderItemIconHTML } from "../lib/items";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamSlotState, TeamState, TypeChart } from "../lib/types";
 
 const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
 const slotsEl = document.querySelector<HTMLElement>("[data-team-slots]")!;
+const sidePanelEl = document.querySelector<HTMLElement>("[data-strengths-panel]");
+const densitySwitchEl = document.querySelector<HTMLButtonElement>("[data-density-switch]");
 const panelEmptyEl = document.querySelector<HTMLElement>("[data-panel-empty]")!;
 const panelContentEl = document.querySelector<HTMLElement>("[data-panel-content]")!;
 const panelTabToggleEl = document.querySelector<HTMLElement>("[data-panel-tab-toggle]");
@@ -49,6 +56,14 @@ const synergyModalCloseBtn = document.querySelector<HTMLButtonElement>("[data-sy
 const synergyModalContent = document.querySelector<HTMLElement>("[data-synergy-panel-content]");
 const synergySidebarCalloutEl = document.querySelector<HTMLElement>("[data-synergy-sidebar-callout]");
 
+const openPanelGuideBtns = document.querySelectorAll<HTMLButtonElement>("[data-open-panel-guide]");
+const strengthsGuideOverlay = document.querySelector<HTMLElement>("[data-strengths-guide-overlay]");
+const strengthsGuideCloseBtn = document.querySelector<HTMLButtonElement>("[data-strengths-guide-close]");
+const guideTabBtns = document.querySelectorAll<HTMLButtonElement>("[data-guide-tab]");
+const guidePanes = document.querySelectorAll<HTMLElement>("[data-guide-pane]");
+
+const defenseKpisEl = document.querySelector<HTMLElement>("[data-defense-kpis]");
+const defenseMiniGridEl = document.querySelector<HTMLElement>("[data-defense-mini-grid]");
 const weaknessesListEl = document.querySelector<HTMLElement>("[data-weaknesses-list]")!;
 const resistancesListEl = document.querySelector<HTMLElement>("[data-resistances-list]")!;
 const immunitiesListEl = document.querySelector<HTMLElement>("[data-immunities-list]");
@@ -56,6 +71,8 @@ const weaknessesCountEl = document.querySelector<HTMLElement>("[data-weaknesses-
 const resistancesCountEl = document.querySelector<HTMLElement>("[data-resistances-count]");
 const immunitiesCountEl = document.querySelector<HTMLElement>("[data-immunities-count]");
 
+const offenseKpisEl = document.querySelector<HTMLElement>("[data-offense-kpis]");
+const offenseMiniGridEl = document.querySelector<HTMLElement>("[data-offense-mini-grid]");
 const offenseModeToggleEl = document.querySelector<HTMLElement>("[data-offense-mode-toggle]");
 const offensePctEl = document.querySelector<HTMLElement>("[data-offense-pct]");
 const offenseMeterEl = document.querySelector<HTMLElement>("[data-offense-meter]");
@@ -67,6 +84,10 @@ const offenseBlindspotsListEl = document.querySelector<HTMLElement>("[data-offen
 
 let activePanelTab: "defense" | "offense" = "defense";
 let activeOffenseMode: "moves" | "stab" = "moves";
+let activeDensity: "compact" | "detailed" =
+  typeof window !== "undefined" && localStorage.getItem("poketeam_view_density") === "detailed"
+    ? "detailed"
+    : "compact";
 
 const overlayEl = document.querySelector<HTMLElement>("[data-picker-overlay]")!;
 const pickerCloseBtn = document.querySelector<HTMLButtonElement>("[data-picker-close]")!;
@@ -91,6 +112,15 @@ const moveMethodFilterEl = document.querySelector<HTMLElement>("[data-move-metho
 const moveCategoryFilterEl = document.querySelector<HTMLElement>("[data-move-category-filter]");
 const moveTypeFilterEl = document.querySelector<HTMLElement>("[data-move-type-filter]");
 
+const itemPickerOverlayEl = document.querySelector<HTMLElement>("[data-item-picker-overlay]");
+const itemPickerBodyEl = document.querySelector<HTMLElement>("[data-item-picker-body]");
+const itemPickerCloseBtn = document.querySelector<HTMLButtonElement>("[data-item-picker-close]");
+const itemPickerSearchEl = document.querySelector<HTMLInputElement>("[data-item-picker-search]");
+const itemPickerResultsEl = document.querySelector<HTMLElement>("[data-item-picker-results]");
+const itemPickerTitleEl = document.querySelector<HTMLElement>("[data-item-picker-title]");
+const itemPickerCountEl = document.querySelector<HTMLElement>("[data-item-picker-count]");
+const itemCategoryFilterEl = document.querySelector<HTMLElement>("[data-item-category-filter]");
+
 let team: TeamState = { size: 6, slots: [] };
 let allPokemon: Pokemon[] = [];
 let pokemonById = new Map<number, Pokemon>();
@@ -106,6 +136,9 @@ let activeMoveIndex: number | null = null;
 let activeMethodFilter: string = "all";
 let activeCategoryFilter: string = "all";
 let activeMoveTypeFilter: string = "all";
+
+let activeItemSlotIndex: number | null = null;
+let activeItemCategory: string = "all";
 
 interface MovePickerRow {
   name: string;
@@ -232,7 +265,7 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
     .join("");
 
   return `
-    <div class="team-slot-column" data-slot-column="${index}">
+    <div class="team-slot-column" data-slot-column="${index}" draggable="true">
       <div class="team-slot filled" data-team-slot data-slot-index="${index}">
         <button class="team-slot__remove-btn" type="button" data-remove-slot data-slot-index="${index}" aria-label="${locale === "es" ? "Quitar Pokémon" : "Remove Pokémon"}">
           <i data-lucide="x"></i>
@@ -245,14 +278,27 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
             <span class="team-slot__id">${dexNumber(pokemon.id)}</span>
             <div class="team-slot__name">${pokemon.name}</div>
             <div class="pokemon-card__types">${typesHtml}</div>
-            ${
-              slotData?.nature
-                ? `<div class="team-slot__nature-pill" title="${locale === "es" ? `Naturaleza: ${capitalize(slotData.nature)}` : `Nature: ${capitalize(slotData.nature)}`}">
-                    <i data-lucide="sparkle"></i>
-                    <span>${capitalize(slotData.nature)}</span>
-                  </div>`
-                : ""
-            }
+            <div class="team-slot__pills-row">
+              ${
+                slotData?.nature
+                  ? `<div class="team-slot__nature-pill" title="${locale === "es" ? `Naturaleza: ${capitalize(slotData.nature)}` : `Nature: ${capitalize(slotData.nature)}`}">
+                      <i data-lucide="sparkle"></i>
+                      <span>${capitalize(slotData.nature)}</span>
+                    </div>`
+                  : ""
+              }
+              ${
+                slotData?.item
+                  ? `<div class="team-slot__item-pill" draggable="true" title="${locale === "es" ? `Objeto: ${getItemDisplayName(slotData.item, locale)} (Arrastrá para mover o soltá fuera para quitar)` : `Item: ${getItemDisplayName(slotData.item, locale)} (Drag to move or drop outside to unequip)`}" data-select-item data-item-pill data-slot-index="${index}">
+                      ${renderItemIconHTML(slotData.item, { size: 16 })}
+                      <span>${getItemDisplayName(slotData.item, locale)}</span>
+                    </div>`
+                  : `<button class="team-slot__item-btn empty" type="button" data-select-item data-slot-index="${index}" title="${t.team.chooseItem}">
+                      <i data-lucide="backpack"></i>
+                      <span>${t.team.item}</span>
+                    </button>`
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -350,6 +396,231 @@ function formatMult(mult: number): string {
   return `${mult}×`;
 }
 
+function updateDensityUI(): void {
+  if (sidePanelEl) {
+    sidePanelEl.setAttribute("data-view-density", activeDensity);
+  }
+  if (densitySwitchEl) {
+    const isCompact = activeDensity === "compact";
+    densitySwitchEl.setAttribute("aria-checked", String(isCompact));
+    const locale = getCurrentLocale();
+    const t = getTranslations(locale);
+    densitySwitchEl.title = isCompact ? t.strengthsWeaknesses.viewCompact : t.strengthsWeaknesses.viewDetailed;
+  }
+}
+
+function setDensity(density: "compact" | "detailed"): void {
+  activeDensity = density;
+  try {
+    localStorage.setItem("poketeam_view_density", density);
+  } catch {}
+  updateDensityUI();
+}
+
+function handleCrossHighlight(targetType: string | null): void {
+  const slotCols = document.querySelectorAll<HTMLElement>(".team-slot-column");
+  if (!targetType || !typeChart) {
+    slotCols.forEach((col) => {
+      col.classList.remove(
+        "is-dimmed",
+        "is-highlighted-weak-4x",
+        "is-highlighted-weak-2x",
+        "is-highlighted-resist",
+        "is-highlighted-immune",
+        "is-highlighted-attacker"
+      );
+    });
+    return;
+  }
+
+  slotCols.forEach((col) => {
+    const idx = Number(col.dataset.slotColumn);
+    const slot = team.slots[idx];
+    if (!slot || slot.pokemonId === null) {
+      col.classList.add("is-dimmed");
+      return;
+    }
+    const pokemon = pokemonById.get(slot.pokemonId);
+    if (!pokemon) {
+      col.classList.add("is-dimmed");
+      return;
+    }
+
+    col.classList.remove(
+      "is-dimmed",
+      "is-highlighted-weak-4x",
+      "is-highlighted-weak-2x",
+      "is-highlighted-resist",
+      "is-highlighted-immune",
+      "is-highlighted-attacker"
+    );
+
+    if (activePanelTab === "defense") {
+      const mult = getTypeMultiplier(typeChart!, targetType, pokemon.types, {
+        item: slot.item,
+        speciesId: pokemon.id,
+        ability: slot.ability,
+      });
+      if (mult >= 4) {
+        col.classList.add("is-highlighted-weak-4x");
+      } else if (mult >= 2) {
+        col.classList.add("is-highlighted-weak-2x");
+      } else if (mult === 0) {
+        col.classList.add("is-highlighted-immune");
+      } else if (mult <= 0.5) {
+        col.classList.add("is-highlighted-resist");
+      } else {
+        col.classList.add("is-dimmed");
+      }
+    } else {
+      let isAttacker = false;
+      if (activeOffenseMode === "moves" && slot.moves?.length) {
+        for (const mName of slot.moves) {
+          if (!mName) continue;
+          const meta = moveDetailsMap[mName];
+          if (meta && meta.category !== "status") {
+            const mMult = typeChart!.chart[meta.type]?.[targetType] ?? 1;
+            if (mMult >= 2) {
+              isAttacker = true;
+              break;
+            }
+          }
+        }
+      }
+      if (!isAttacker) {
+        for (const pType of pokemon.types) {
+          const mMult = typeChart!.chart[pType]?.[targetType] ?? 1;
+          if (mMult >= 2) {
+            isAttacker = true;
+            break;
+          }
+        }
+      }
+
+      if (isAttacker) {
+        col.classList.add("is-highlighted-attacker");
+      } else {
+        col.classList.add("is-dimmed");
+      }
+    }
+  });
+}
+
+function renderDefenseKPIs(
+  weaknesses: TeamDefenseEntry[],
+  resistances: TeamDefenseEntry[],
+  immunities: TeamDefenseEntry[]
+): void {
+  if (!defenseKpisEl) return;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  const criticalCount = weaknesses.filter(
+    (w) => w.threatLevel === "critical" || w.threatLevel === "exposed"
+  ).length;
+  const resistCount = resistances.length;
+  const immuneCount = immunities.length;
+
+  defenseKpisEl.innerHTML = `
+    <div class="side-panel-kpi side-panel-kpi--critical" title="${t.strengthsWeaknesses.threatCritical}">
+      <span class="side-panel-kpi__count">${criticalCount}</span>
+      <span class="side-panel-kpi__label">${t.strengthsWeaknesses.kpiCritical}</span>
+    </div>
+    <div class="side-panel-kpi side-panel-kpi--resist" title="${t.strengthsWeaknesses.resistances}">
+      <span class="side-panel-kpi__count">${resistCount}</span>
+      <span class="side-panel-kpi__label">${t.strengthsWeaknesses.kpiResists}</span>
+    </div>
+    <div class="side-panel-kpi side-panel-kpi--immune" title="${t.strengthsWeaknesses.immunities}">
+      <span class="side-panel-kpi__count">${immuneCount}</span>
+      <span class="side-panel-kpi__label">${t.strengthsWeaknesses.kpiImmunes}</span>
+    </div>
+  `;
+}
+
+function renderDefenseMiniGrid(defense: TeamDefenseEntry[]): void {
+  if (!defenseMiniGridEl || !typeChart) return;
+  const locale = getCurrentLocale();
+  const allTypes = typeChart.types || Object.keys(typeChart.chart);
+  const defenseMap = new Map<string, TeamDefenseEntry>(defense.map((d) => [d.type, d]));
+
+  const chipsHtml = allTypes
+    .map((type) => {
+      const entry = defenseMap.get(type);
+      let severityClass = "type-mini-chip--neutral";
+      let multLabel = "1×";
+
+      if (entry) {
+        if (entry.threatLevel === "critical" || entry.threatLevel === "exposed") {
+          severityClass = entry.threatLevel === "critical" ? "type-mini-chip--critical" : "type-mini-chip--exposed";
+          const maxMult = Math.max(...entry.weakDetails.map((m) => m.multiplier), 2);
+          multLabel = formatMult(maxMult);
+        } else if (entry.threatLevel === "covered") {
+          severityClass = "type-mini-chip--covered";
+          multLabel = "2×";
+        } else if (entry.immuneCount > 0) {
+          severityClass = "type-mini-chip--immune";
+          multLabel = "0×";
+        } else if (entry.resistCount > 0) {
+          severityClass = "type-mini-chip--safe";
+          const minMult = Math.min(...entry.resistDetails.map((m) => m.multiplier), 0.5);
+          multLabel = formatMult(minMult);
+        }
+      }
+
+      return `
+        <div class="type-mini-chip ${severityClass}" data-type="${type}" title="${getTypeName(type, locale)}: ${multLabel}">
+          <span class="type-badge" data-type="${type}" style="--badge-bg:${typeColor(type)}">${getTypeName(type, locale)}</span>
+          <span class="type-mini-chip__mult">${multLabel}</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  defenseMiniGridEl.innerHTML = chipsHtml;
+}
+
+function renderOffenseKPIs(offense: TeamOffenseSummary): void {
+  if (!offenseKpisEl) return;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+
+  offenseKpisEl.innerHTML = `
+    <div class="side-panel-kpi side-panel-kpi--covered" title="${t.strengthsWeaknesses.superEffectiveTypes}">
+      <span class="side-panel-kpi__count">${offense.coveredCount}</span>
+      <span class="side-panel-kpi__label">${t.strengthsWeaknesses.kpiCovered}</span>
+    </div>
+    <div class="side-panel-kpi side-panel-kpi--blindspot" title="${t.strengthsWeaknesses.blindSpots}">
+      <span class="side-panel-kpi__count">${offense.blindSpots.length}</span>
+      <span class="side-panel-kpi__label">${t.strengthsWeaknesses.kpiBlindSpots}</span>
+    </div>
+  `;
+}
+
+function renderOffenseMiniGrid(offense: TeamOffenseSummary): void {
+  if (!offenseMiniGridEl || !typeChart) return;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  const allTypes = typeChart.types || Object.keys(typeChart.chart);
+  const coveredSet = new Set(offense.coveredTypes.map((c: TeamOffenseEntry) => c.targetType));
+
+  const chipsHtml = allTypes
+    .map((type) => {
+      const isCovered = coveredSet.has(type);
+      const severityClass = isCovered ? "type-mini-chip--offense-covered" : "type-mini-chip--offense-blindspot";
+      const multLabel = isCovered ? "2×" : "-";
+
+      return `
+        <div class="type-mini-chip ${severityClass}" data-type="${type}" title="${getTypeName(type, locale)}: ${isCovered ? "2×" : t.strengthsWeaknesses.blindSpots}">
+          <span class="type-badge" data-type="${type}" style="--badge-bg:${typeColor(type)}">${getTypeName(type, locale)}</span>
+          <span class="type-mini-chip__mult">${multLabel}</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  offenseMiniGridEl.innerHTML = chipsHtml;
+}
+
 function renderWeaknessItemHTML(entry: TeamDefenseEntry): string {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
@@ -384,36 +655,44 @@ function renderWeaknessItemHTML(entry: TeamDefenseEntry): string {
 
   const weakTags = entry.weakDetails
     .map(
-      (m) =>
-        `<span class="member-tag member-tag--weak">${capitalize(m.name)} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`
+      (m) => {
+        const noteTag = m.itemEffectNote ? ` <span class="member-tag__note" title="${m.itemEffectNote}">(${m.itemEffectNote})</span>` : "";
+        return `<span class="member-tag member-tag--weak">${capitalize(m.name)}${noteTag} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`;
+      }
     )
     .join("");
 
   const safeTags = [
     ...entry.immuneDetails.map(
-      (m) =>
-        `<span class="member-tag member-tag--immune">${capitalize(m.name)} <span class="member-tag__mult">0×</span></span>`
+      (m) => {
+        const noteTag = m.itemEffectNote ? ` <span class="member-tag__note" title="${m.itemEffectNote}">(${m.itemEffectNote})</span>` : "";
+        return `<span class="member-tag member-tag--immune">${capitalize(m.name)}${noteTag} <span class="member-tag__mult">0×</span></span>`;
+      }
     ),
     ...entry.resistDetails.map(
-      (m) =>
-        `<span class="member-tag member-tag--resist">${capitalize(m.name)} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`
+      (m) => {
+        const noteTag = m.itemEffectNote ? ` <span class="member-tag__note" title="${m.itemEffectNote}">(${m.itemEffectNote})</span>` : "";
+        return `<span class="member-tag member-tag--resist">${capitalize(m.name)}${noteTag} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`;
+      }
     ),
   ].join("");
 
   return `
-    <details class="defense-item defense-item--${entry.threatLevel}" data-defense-item>
+    <details class="defense-item defense-item--${entry.threatLevel}" data-defense-item name="sidepanel-breakdown" data-type="${entry.type}">
       <summary class="defense-item__summary">
-        <div class="defense-item__type-col">
-          <span class="type-badge type-badge--sm" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
-            ${getTypeName(entry.type, locale)}
-          </span>
+        <div class="defense-item__header-row">
+          <div class="defense-item__type-col">
+            <span class="type-badge" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
+              ${getTypeName(entry.type, locale)}
+            </span>
+          </div>
+          <i data-lucide="chevron-down" class="defense-item__chevron"></i>
         </div>
         <div class="defense-item__badges-col">
           ${threatBadge}
           ${weakCountBadge}
           ${supportBadge}
         </div>
-        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
       </summary>
       <div class="defense-item__details">
         <div class="defense-item__group">
@@ -456,23 +735,27 @@ function renderResistItemHTML(entry: TeamDefenseEntry): string {
 
   const resistTags = entry.resistDetails
     .map(
-      (m) =>
-        `<span class="member-tag member-tag--resist">${capitalize(m.name)} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`
+      (m) => {
+        const noteTag = m.itemEffectNote ? ` <span class="member-tag__note" title="${m.itemEffectNote}">(${m.itemEffectNote})</span>` : "";
+        return `<span class="member-tag member-tag--resist">${capitalize(m.name)}${noteTag} <span class="member-tag__mult">${formatMult(m.multiplier)}</span></span>`;
+      }
     )
     .join("");
 
   return `
-    <details class="defense-item defense-item--safe" data-defense-item>
+    <details class="defense-item defense-item--safe" data-defense-item name="sidepanel-breakdown" data-type="${entry.type}">
       <summary class="defense-item__summary">
-        <div class="defense-item__type-col">
-          <span class="type-badge type-badge--sm" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
-            ${getTypeName(entry.type, locale)}
-          </span>
+        <div class="defense-item__header-row">
+          <div class="defense-item__type-col">
+            <span class="type-badge" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
+              ${getTypeName(entry.type, locale)}
+            </span>
+          </div>
+          <i data-lucide="chevron-down" class="defense-item__chevron"></i>
         </div>
         <div class="defense-item__badges-col">
           ${resistBadge}
         </div>
-        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
       </summary>
       <div class="defense-item__details">
         <div class="defense-item__group">
@@ -497,23 +780,27 @@ function renderImmunityItemHTML(entry: TeamDefenseEntry): string {
 
   const immuneTags = entry.immuneDetails
     .map(
-      (m) =>
-        `<span class="member-tag member-tag--immune">${capitalize(m.name)} <span class="member-tag__mult">0×</span></span>`
+      (m) => {
+        const noteTag = m.itemEffectNote ? ` <span class="member-tag__note" title="${m.itemEffectNote}">(${m.itemEffectNote})</span>` : "";
+        return `<span class="member-tag member-tag--immune">${capitalize(m.name)}${noteTag} <span class="member-tag__mult">0×</span></span>`;
+      }
     )
     .join("");
 
   return `
-    <details class="defense-item defense-item--immune" data-defense-item>
+    <details class="defense-item defense-item--immune" data-defense-item name="sidepanel-breakdown" data-type="${entry.type}">
       <summary class="defense-item__summary">
-        <div class="defense-item__type-col">
-          <span class="type-badge type-badge--sm" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
-            ${getTypeName(entry.type, locale)}
-          </span>
+        <div class="defense-item__header-row">
+          <div class="defense-item__type-col">
+            <span class="type-badge" data-type="${entry.type}" style="--badge-bg:${typeColor(entry.type)}">
+              ${getTypeName(entry.type, locale)}
+            </span>
+          </div>
+          <i data-lucide="chevron-down" class="defense-item__chevron"></i>
         </div>
         <div class="defense-item__badges-col">
           ${immuneBadge}
         </div>
-        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
       </summary>
       <div class="defense-item__details">
         <div class="defense-item__group">
@@ -530,11 +817,22 @@ function renderImmunityItemHTML(entry: TeamDefenseEntry): string {
 function renderStrengthsPanel(): void {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
-  const activePokemon = team.slots
-    .map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) ?? null : null))
-    .filter((p): p is Pokemon => p !== null);
+  const activeMembers: TeamMember[] = team.slots
+    .map((s): TeamMember | null => {
+      if (s.pokemonId === null) return null;
+      const p = pokemonById.get(s.pokemonId);
+      if (!p) return null;
+      return {
+        name: p.name,
+        types: p.types,
+        speciesId: p.id,
+        item: s.item ?? null,
+        ability: s.ability ?? null,
+      };
+    })
+    .filter((m): m is TeamMember => m !== null);
 
-  if (!activePokemon.length || !typeChart) {
+  if (!activeMembers.length || !typeChart) {
     panelEmptyEl.hidden = false;
     panelContentEl.hidden = true;
     return;
@@ -543,8 +841,11 @@ function renderStrengthsPanel(): void {
   panelEmptyEl.hidden = true;
   panelContentEl.hidden = false;
 
-  const defense = computeTeamDefense(typeChart, activePokemon);
+  const defense = computeTeamDefense(typeChart, activeMembers);
   const { weaknesses, resistances, immunities } = splitWeaknessesAndResistances(defense);
+
+  renderDefenseKPIs(weaknesses, resistances, immunities);
+  renderDefenseMiniGrid(defense);
 
   if (weaknessesCountEl) {
     weaknessesCountEl.textContent = weaknesses.length ? `(${weaknesses.length})` : "";
@@ -642,18 +943,20 @@ function renderOffenseCoveredItemHTML(entry: TeamOffenseEntry): string {
     .join("");
 
   return `
-    <details class="defense-item defense-item--covered-offense" data-defense-item>
+    <details class="defense-item defense-item--covered-offense" data-defense-item name="sidepanel-breakdown" data-type="${entry.targetType}">
       <summary class="defense-item__summary">
-        <div class="defense-item__type-col">
-          <span class="type-badge type-badge--sm" data-type="${entry.targetType}" style="--badge-bg:${typeColor(entry.targetType)}">
-            ${getTypeName(entry.targetType, locale)}
-          </span>
+        <div class="defense-item__header-row">
+          <div class="defense-item__type-col">
+            <span class="type-badge" data-type="${entry.targetType}" style="--badge-bg:${typeColor(entry.targetType)}">
+              ${getTypeName(entry.targetType, locale)}
+            </span>
+          </div>
+          <i data-lucide="chevron-down" class="defense-item__chevron"></i>
         </div>
         <div class="defense-item__badges-col">
           <span class="threat-pill threat-pill--covered-offense">${countLabel}</span>
           <span class="threat-pill threat-pill--covered-offense">2×</span>
         </div>
-        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
       </summary>
       <div class="defense-item__details">
         <div class="defense-item__group">
@@ -672,17 +975,19 @@ function renderOffenseBlindSpotItemHTML(entry: TeamOffenseEntry): string {
   const t = getTranslations(locale);
 
   return `
-    <details class="defense-item defense-item--blindspot" data-defense-item>
+    <details class="defense-item defense-item--blindspot" data-defense-item name="sidepanel-breakdown" data-type="${entry.targetType}">
       <summary class="defense-item__summary">
-        <div class="defense-item__type-col">
-          <span class="type-badge type-badge--sm" data-type="${entry.targetType}" style="--badge-bg:${typeColor(entry.targetType)}">
-            ${getTypeName(entry.targetType, locale)}
-          </span>
+        <div class="defense-item__header-row">
+          <div class="defense-item__type-col">
+            <span class="type-badge" data-type="${entry.targetType}" style="--badge-bg:${typeColor(entry.targetType)}">
+              ${getTypeName(entry.targetType, locale)}
+            </span>
+          </div>
+          <i data-lucide="chevron-down" class="defense-item__chevron"></i>
         </div>
         <div class="defense-item__badges-col">
           <span class="threat-pill threat-pill--blindspot">${t.strengthsWeaknesses.blindSpots}</span>
         </div>
-        <i data-lucide="chevron-down" class="defense-item__chevron"></i>
       </summary>
       <div class="defense-item__details">
         <div class="defense-item__notice defense-item__notice--warn">
@@ -701,6 +1006,9 @@ function renderOffensePanel(): void {
 
   const sources = getAttackSources();
   const offense = computeTeamOffense(typeChart, sources);
+
+  renderOffenseKPIs(offense);
+  renderOffenseMiniGrid(offense);
 
   if (offensePctEl) {
     offensePctEl.textContent = `${offense.coveragePercentage}%`;
@@ -775,9 +1083,15 @@ function renderSynergyPanel(): void {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
 
-  const activePokemon = team.slots
-    .map((s) => (s.pokemonId !== null ? pokemonById.get(s.pokemonId) ?? null : null))
-    .filter((p): p is Pokemon => p !== null);
+  type SynergyMember = Pokemon & { item?: string | null; ability?: string | null };
+  const activePokemon: SynergyMember[] = team.slots
+    .map((s): SynergyMember | null => {
+      if (s.pokemonId === null) return null;
+      const p = pokemonById.get(s.pokemonId);
+      if (!p) return null;
+      return { ...p, item: s.item ?? null, ability: s.ability ?? null };
+    })
+    .filter((p): p is SynergyMember => p !== null);
 
   if (!activePokemon.length) {
     if (synergySidebarCalloutEl) synergySidebarCalloutEl.hidden = true;
@@ -1238,6 +1552,7 @@ function updateBodyScrollLock(): void {
   const isAnyModalOpen =
     (!overlayEl.hidden) ||
     (!movePickerOverlayEl.hidden) ||
+    Boolean(itemPickerOverlayEl && !itemPickerOverlayEl.hidden) ||
     Boolean(teamCardOverlay && !teamCardOverlay.hidden) ||
     Boolean(typeMatrixOverlay && !typeMatrixOverlay.hidden) ||
     Boolean(synergyModalOverlay && !synergyModalOverlay.hidden);
@@ -1497,6 +1812,143 @@ function renderMovePickerTable(): void {
   refreshIcons();
 }
 
+function openItemPicker(slotIndex: number): void {
+  if (!itemPickerOverlayEl) return;
+  activeItemSlotIndex = slotIndex;
+  activeItemCategory = "all";
+  if (itemPickerSearchEl) itemPickerSearchEl.value = "";
+
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  const slot = team.slots[slotIndex];
+  const pokemon = slot && slot.pokemonId !== null ? pokemonById.get(slot.pokemonId) : null;
+
+  if (itemPickerTitleEl) {
+    itemPickerTitleEl.textContent = pokemon
+      ? `${t.team.selectItem} - ${capitalize(pokemon.name)}`
+      : t.team.selectItem;
+  }
+
+  if (itemCategoryFilterEl) {
+    itemCategoryFilterEl.querySelectorAll<HTMLButtonElement>("[data-item-category]").forEach((btn) => {
+      btn.setAttribute("aria-pressed", String(btn.dataset.itemCategory === "all"));
+    });
+  }
+
+  itemPickerOverlayEl.hidden = false;
+  if (itemPickerBodyEl) {
+    itemPickerBodyEl.scrollTop = 0;
+  }
+  updateBodyScrollLock();
+  renderItemPickerResults();
+  if (itemPickerSearchEl) itemPickerSearchEl.focus();
+}
+
+function closeItemPicker(): void {
+  if (!itemPickerOverlayEl) return;
+  itemPickerOverlayEl.hidden = true;
+  updateBodyScrollLock();
+  activeItemSlotIndex = null;
+}
+
+function renderItemPickerResults(): void {
+  if (!itemPickerResultsEl) return;
+  const locale = getCurrentLocale();
+  const t = getTranslations(locale);
+  const search = itemPickerSearchEl ? itemPickerSearchEl.value.trim() : "";
+  const filtered = filterItems(search, activeItemCategory, locale);
+
+  const slot = activeItemSlotIndex !== null ? team.slots[activeItemSlotIndex] : null;
+  const currentItemId = slot?.item ?? null;
+
+  if (itemPickerCountEl) {
+    itemPickerCountEl.textContent = `${filtered.length} ${locale === "es" ? "objetos" : "items"}`;
+  }
+
+  let html = "";
+
+  if (currentItemId) {
+    const currentItem = getItemById(currentItemId);
+    const itemName = currentItem ? (locale === "es" ? currentItem.nameEs : currentItem.nameEn) : currentItemId;
+    html += `
+      <div class="item-picker__current-banner">
+        <div class="item-picker__current-info">
+          ${renderItemIconHTML(currentItemId, { size: 22 })}
+          <span>${locale === "es" ? "Equipado actualmente:" : "Currently equipped:"} <strong>${itemName}</strong></span>
+        </div>
+        <button class="btn btn--sm btn--danger" type="button" data-remove-item-picker>
+          <i data-lucide="trash-2"></i> ${t.team.removeItem}
+        </button>
+      </div>
+    `;
+  }
+
+  if (!filtered.length) {
+    html += `<p class="pokedex-empty">${locale === "es" ? "No se encontraron objetos con los filtros seleccionados." : "No items found matching the selected filters."}</p>`;
+    itemPickerResultsEl.innerHTML = html;
+    refreshIcons();
+    return;
+  }
+
+  const cardsHtml = filtered
+    .map((item) => {
+      const isSelected = item.id === currentItemId;
+      const itemName = locale === "es" ? item.nameEs : item.nameEn;
+      const itemDesc = locale === "es" ? (item.shortDescEs || item.effect?.descriptionEs || "") : (item.shortDescEn || item.effect?.descriptionEn || "");
+      const categoryName = (t.team.itemCategories as Record<string, string>)[item.category] ?? item.category;
+
+      let effectBadges = "";
+      if (item.effect?.statMultipliers) {
+        for (const [, mult] of Object.entries(item.effect.statMultipliers)) {
+          if (typeof mult === "number") {
+            const pct = Math.round((mult - 1) * 100);
+            const sign = pct > 0 ? `+${pct}%` : `${pct}%`;
+            effectBadges += `<span class="item-effect-badge item-effect-badge--stat">★ ${sign}</span>`;
+          }
+        }
+      }
+      if (item.effect?.grantsImmunities?.length) {
+        for (const imm of item.effect.grantsImmunities) {
+          effectBadges += `<span class="item-effect-badge item-effect-badge--immunity"><i data-lucide="shield"></i> ${locale === "es" ? "Inmune a " : "Immune to "}${getTypeName(imm, locale)}</span>`;
+        }
+      }
+      if (item.effect?.changesPokemonType) {
+        effectBadges += `<span class="item-effect-badge item-effect-badge--type"><i data-lucide="sparkles"></i> ${getTypeName(item.effect.changesPokemonType, locale)}</span>`;
+      }
+
+      return `
+        <div class="item-picker-card ${isSelected ? "is-selected" : ""}" data-item-id="${item.id}" data-pick-item="${item.id}">
+          <div class="item-picker-card__header">
+            <div class="item-picker-card__icon-wrap">
+              ${renderItemIconHTML(item.id, { size: 24, fallbackIcon: item.icon || "backpack" })}
+            </div>
+            <div class="item-picker-card__title-group">
+              <div class="item-picker-card__name">${itemName}</div>
+              <span class="item-picker-card__category">${categoryName}</span>
+            </div>
+            ${
+              isSelected
+                ? `<span class="item-picker-card__badge-equipped"><i data-lucide="check"></i> ${locale === "es" ? "Equipado" : "Equipped"}</span>`
+                : ""
+            }
+          </div>
+          <p class="item-picker-card__desc">${itemDesc}</p>
+          ${effectBadges ? `<div class="item-picker-card__effects">${effectBadges}</div>` : ""}
+          <div class="item-picker-card__actions">
+            <button class="btn btn--sm ${isSelected ? "btn--secondary" : "btn--primary"} item-picker-card__btn" type="button" data-pick-item="${item.id}">
+              ${isSelected ? (locale === "es" ? "Conservar" : "Keep") : (locale === "es" ? "Equipar" : "Equip")}
+            </button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  html += `<div class="item-picker__grid">${cardsHtml}</div>`;
+  itemPickerResultsEl.innerHTML = html;
+  refreshIcons();
+}
+
 // --- event wiring -----------------------------------------------------
 
 panelTabToggleEl?.addEventListener("click", (e) => {
@@ -1512,7 +1964,24 @@ panelTabToggleEl?.addEventListener("click", (e) => {
 
   if (tabContentDefenseEl) tabContentDefenseEl.hidden = activePanelTab !== "defense";
   if (tabContentOffenseEl) tabContentOffenseEl.hidden = activePanelTab !== "offense";
+  handleCrossHighlight(null);
   refreshIcons();
+});
+
+densitySwitchEl?.addEventListener("click", () => {
+  const newDensity = activeDensity === "compact" ? "detailed" : "compact";
+  setDensity(newDensity);
+});
+
+sidePanelEl?.addEventListener("mouseover", (e) => {
+  const target = (e.target as HTMLElement).closest<HTMLElement>("[data-type]");
+  if (target && target.dataset.type) {
+    handleCrossHighlight(target.dataset.type);
+  }
+});
+
+sidePanelEl?.addEventListener("mouseleave", () => {
+  handleCrossHighlight(null);
 });
 
 synergyModalContent?.addEventListener("click", async (e) => {
@@ -1585,6 +2054,15 @@ slotsEl.addEventListener("click", (e) => {
     return;
   }
 
+  const selectItemBtn = target.closest<HTMLElement>("[data-select-item]");
+  if (selectItemBtn) {
+    if (itemDragJustEnded) return;
+    e.stopPropagation();
+    const sIdx = Number(selectItemBtn.dataset.slotIndex);
+    openItemPicker(sIdx);
+    return;
+  }
+
   const removeBtn = target.closest<HTMLButtonElement>("[data-remove-slot]");
   if (removeBtn) {
     const idx = Number(removeBtn.dataset.slotIndex);
@@ -1606,85 +2084,321 @@ slotsEl.addEventListener("click", (e) => {
   }
 });
 
-// --- Drag and Drop for Move Slots (Desktop & Touch) ---
+// --- Drag and Drop for Pokemon Slots, Move Slots, and Held Items (Desktop & Touch) ---
 
+let draggedItem: { slotIndex: number; itemId: string; droppedOnSlot: boolean } | null = null;
 let draggedMove: { slotIndex: number; moveIndex: number } | null = null;
+let draggedSlot: number | null = null;
+
+let itemDragJustEnded = false;
 
 slotsEl.addEventListener("dragstart", (e) => {
   const target = e.target as HTMLElement;
-  const card = target.closest<HTMLElement>(".move-slot-card[draggable='true']");
-  if (!card) return;
 
-  if (target.closest("[data-clear-move]")) {
-    e.preventDefault();
+  // 1. Item pill dragstart
+  const itemPill = target.closest<HTMLElement>(".team-slot__item-pill[draggable='true']");
+  if (itemPill) {
+    const sIdx = Number(itemPill.dataset.slotIndex);
+    const slot = team.slots[sIdx];
+    if (slot && slot.item) {
+      draggedItem = { slotIndex: sIdx, itemId: slot.item, droppedOnSlot: false };
+      draggedMove = null;
+      draggedSlot = null;
+
+      if (e.dataTransfer) {
+        e.dataTransfer.setData("text/plain", `item:${sIdx}:${slot.item}`);
+        e.dataTransfer.effectAllowed = "move";
+      }
+
+      requestAnimationFrame(() => {
+        itemPill.classList.add("is-dragging");
+      });
+      return;
+    }
+  }
+
+  // 2. Move dragstart
+  const moveCard = target.closest<HTMLElement>(".move-slot-card[draggable='true']");
+  if (moveCard) {
+    if (target.closest("[data-clear-move]")) {
+      e.preventDefault();
+      return;
+    }
+    const sIdx = Number(moveCard.dataset.slotIndex);
+    const mIdx = Number(moveCard.dataset.moveIndex);
+    draggedMove = { slotIndex: sIdx, moveIndex: mIdx };
+    draggedSlot = null;
+    draggedItem = null;
+
+    if (e.dataTransfer) {
+      e.dataTransfer.setData("text/plain", `move:${sIdx}:${mIdx}`);
+      e.dataTransfer.effectAllowed = "move";
+    }
+
+    requestAnimationFrame(() => {
+      moveCard.classList.add("is-dragging");
+    });
     return;
   }
 
-  const sIdx = Number(card.dataset.slotIndex);
-  const mIdx = Number(card.dataset.moveIndex);
-  draggedMove = { slotIndex: sIdx, moveIndex: mIdx };
+  // 3. Pokemon slot column dragstart
+  const slotCol = target.closest<HTMLElement>(".team-slot-column[draggable='true']");
+  if (slotCol) {
+    if (
+      target.closest("[data-remove-slot]") ||
+      target.closest("[data-move-slot]") ||
+      target.closest(".team-slot-moves") ||
+      target.closest(".team-slot__item-pill") ||
+      target.closest(".team-slot__item-btn")
+    ) {
+      e.preventDefault();
+      return;
+    }
 
-  if (e.dataTransfer) {
-    e.dataTransfer.setData("text/plain", `${sIdx}:${mIdx}`);
-    e.dataTransfer.effectAllowed = "move";
+    const sIdx = Number(slotCol.dataset.slotColumn);
+    draggedSlot = sIdx;
+    draggedMove = null;
+    draggedItem = null;
+
+    if (e.dataTransfer) {
+      e.dataTransfer.setData("text/plain", `slot:${sIdx}`);
+      e.dataTransfer.effectAllowed = "move";
+    }
+
+    requestAnimationFrame(() => {
+      slotCol.classList.add("is-slot-dragging");
+    });
   }
-
-  requestAnimationFrame(() => {
-    card.classList.add("is-dragging");
-  });
 });
 
 slotsEl.addEventListener("dragend", () => {
   slotsEl.querySelectorAll<HTMLElement>("[data-move-slot]").forEach((el) => {
     el.classList.remove("is-dragging", "is-dragover");
   });
+  slotsEl.querySelectorAll<HTMLElement>("[data-slot-column]").forEach((el) => {
+    el.classList.remove("is-slot-dragging", "is-slot-dragover", "is-item-dragover");
+  });
+  slotsEl.querySelectorAll<HTMLElement>(".team-slot__item-pill").forEach((el) => {
+    el.classList.remove("is-dragging");
+  });
+
+  // If item was dragged and dropped outside (drag ended without dropping on a slot)
+  if (draggedItem && !draggedItem.droppedOnSlot) {
+    const sIdx = draggedItem.slotIndex;
+    team = setTeamSlotItem(sIdx, null);
+    renderSingleSlot(sIdx);
+    renderStrengthsPanel();
+    if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
+    const locale = getCurrentLocale();
+    toast.info(locale === "es" ? "Objeto quitado" : "Item unequipped");
+    itemDragJustEnded = true;
+    setTimeout(() => { itemDragJustEnded = false; }, 100);
+  }
+
+  draggedItem = null;
   draggedMove = null;
+  draggedSlot = null;
 });
 
 slotsEl.addEventListener("dragover", (e) => {
-  if (!draggedMove) return;
-  const targetSlot = (e.target as HTMLElement).closest<HTMLElement>("[data-move-slot]");
-  if (!targetSlot) return;
+  const target = e.target as HTMLElement;
 
-  const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
-  if (targetSlotIdx !== draggedMove.slotIndex) return;
+  if (draggedItem) {
+    const targetCol = target.closest<HTMLElement>("[data-slot-column]");
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
 
-  e.preventDefault();
-  if (e.dataTransfer) {
-    e.dataTransfer.dropEffect = "move";
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-item-dragover").forEach((el) => {
+      if (el !== targetCol) el.classList.remove("is-item-dragover");
+    });
+    if (targetCol) {
+      targetCol.classList.add("is-item-dragover");
+    }
+    return;
   }
 
-  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
-    if (el !== targetSlot) el.classList.remove("is-dragover");
-  });
-  targetSlot.classList.add("is-dragover");
+  if (draggedMove) {
+    const targetSlot = target.closest<HTMLElement>("[data-move-slot]");
+    if (!targetSlot) return;
+
+    const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
+    if (targetSlotIdx !== draggedMove.slotIndex) return;
+
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
+
+    slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+      if (el !== targetSlot) el.classList.remove("is-dragover");
+    });
+    targetSlot.classList.add("is-dragover");
+    return;
+  }
+
+  if (draggedSlot !== null) {
+    const targetCol = target.closest<HTMLElement>("[data-slot-column]");
+    if (!targetCol) return;
+
+    const targetSlotIdx = Number(targetCol.dataset.slotColumn);
+    if (targetSlotIdx === draggedSlot) return;
+
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
+
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-slot-dragover").forEach((el) => {
+      if (el !== targetCol) el.classList.remove("is-slot-dragover");
+    });
+    targetCol.classList.add("is-slot-dragover");
+  }
 });
 
 slotsEl.addEventListener("dragleave", (e) => {
-  const targetSlot = (e.target as HTMLElement).closest<HTMLElement>("[data-move-slot]");
-  targetSlot?.classList.remove("is-dragover");
+  const target = e.target as HTMLElement;
+  if (draggedItem) {
+    const targetCol = target.closest<HTMLElement>("[data-slot-column]");
+    const related = (e as MouseEvent).relatedTarget as HTMLElement | null;
+    if (!targetCol?.contains(related)) {
+      targetCol?.classList.remove("is-item-dragover");
+    }
+  } else if (draggedMove) {
+    const targetSlot = target.closest<HTMLElement>("[data-move-slot]");
+    targetSlot?.classList.remove("is-dragover");
+  } else if (draggedSlot !== null) {
+    const targetCol = target.closest<HTMLElement>("[data-slot-column]");
+    const related = (e as MouseEvent).relatedTarget as HTMLElement | null;
+    if (!targetCol?.contains(related)) {
+      targetCol?.classList.remove("is-slot-dragover");
+    }
+  }
 });
 
 slotsEl.addEventListener("drop", (e) => {
-  if (!draggedMove) return;
-  const targetSlot = (e.target as HTMLElement).closest<HTMLElement>("[data-move-slot]");
-  if (!targetSlot) return;
+  const target = e.target as HTMLElement;
 
-  const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
-  const targetMoveIdx = Number(targetSlot.dataset.moveIndex);
+  if (draggedItem) {
+    const targetCol = target.closest<HTMLElement>("[data-slot-column]");
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-item-dragover").forEach((el) => {
+      el.classList.remove("is-item-dragover");
+    });
 
-  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
-    el.classList.remove("is-dragover");
-  });
+    if (targetCol) {
+      const targetSlotIdx = Number(targetCol.dataset.slotColumn);
+      draggedItem.droppedOnSlot = true;
 
-  if (targetSlotIdx === draggedMove.slotIndex && targetMoveIdx !== draggedMove.moveIndex) {
-    e.preventDefault();
-    team = swapTeamSlotMoves(targetSlotIdx, draggedMove.moveIndex, targetMoveIdx);
-    renderSingleSlot(targetSlotIdx);
-    renderStrengthsPanel();
+      if (targetSlotIdx !== draggedItem.slotIndex) {
+        e.preventDefault();
+        const targetSlot = team.slots[targetSlotIdx];
+        if (targetSlot && targetSlot.pokemonId !== null) {
+          const targetPrevItem = targetSlot.item ?? null;
+          team = setTeamSlotItem(targetSlotIdx, draggedItem.itemId);
+          team = setTeamSlotItem(draggedItem.slotIndex, targetPrevItem);
+          renderSingleSlot(draggedItem.slotIndex);
+          renderSingleSlot(targetSlotIdx);
+          renderStrengthsPanel();
+          if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
+        }
+      }
+    } else {
+      // Dropped on slotsEl but outside any slot column -> unequip
+      e.preventDefault();
+      draggedItem.droppedOnSlot = false;
+      const sIdx = draggedItem.slotIndex;
+      team = setTeamSlotItem(sIdx, null);
+      renderSingleSlot(sIdx);
+      renderStrengthsPanel();
+      if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
+      const locale = getCurrentLocale();
+      toast.info(locale === "es" ? "Objeto quitado" : "Item unequipped");
+    }
+
+    const itemPill = slotsEl.querySelector<HTMLElement>(`[data-item-pill][data-slot-index="${draggedItem.slotIndex}"]`);
+    itemPill?.classList.remove("is-dragging");
+    itemDragJustEnded = true;
+    setTimeout(() => { itemDragJustEnded = false; }, 100);
+    draggedItem = null;
+    return;
   }
 
-  draggedMove = null;
+  if (draggedMove) {
+    const targetSlot = target.closest<HTMLElement>("[data-move-slot]");
+    if (!targetSlot) return;
+
+    const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
+    const targetMoveIdx = Number(targetSlot.dataset.moveIndex);
+
+    slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+      el.classList.remove("is-dragover");
+    });
+
+    if (targetSlotIdx === draggedMove.slotIndex && targetMoveIdx !== draggedMove.moveIndex) {
+      e.preventDefault();
+      team = swapTeamSlotMoves(targetSlotIdx, draggedMove.moveIndex, targetMoveIdx);
+      renderSingleSlot(targetSlotIdx);
+      renderStrengthsPanel();
+    }
+
+    draggedMove = null;
+    return;
+  }
+
+  if (draggedSlot !== null) {
+    const targetCol = target.closest<HTMLElement>("[data-slot-column]");
+    if (!targetCol) return;
+
+    const targetSlotIdx = Number(targetCol.dataset.slotColumn);
+
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-slot-dragover").forEach((el) => {
+      el.classList.remove("is-slot-dragover");
+    });
+
+    if (targetSlotIdx !== draggedSlot) {
+      e.preventDefault();
+      team = swapTeamSlots(draggedSlot, targetSlotIdx);
+      renderAllSlots();
+      renderStrengthsPanel();
+    }
+
+    draggedSlot = null;
+  }
+});
+
+// Document-level dragover and drop to handle dropping items anywhere outside slots
+document.addEventListener("dragover", (e) => {
+  if (draggedItem) {
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = "move";
+    }
+  }
+});
+
+document.addEventListener("drop", (e) => {
+  if (draggedItem) {
+    const target = e.target as HTMLElement;
+    if (!slotsEl.contains(target)) {
+      e.preventDefault();
+      const sIdx = draggedItem.slotIndex;
+      team = setTeamSlotItem(sIdx, null);
+      renderSingleSlot(sIdx);
+      renderStrengthsPanel();
+      if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
+      const locale = getCurrentLocale();
+      toast.info(locale === "es" ? "Objeto quitado" : "Item unequipped");
+      itemDragJustEnded = true;
+      setTimeout(() => { itemDragJustEnded = false; }, 100);
+    }
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-item-dragover").forEach((el) => {
+      el.classList.remove("is-item-dragover");
+    });
+    const pill = slotsEl.querySelector<HTMLElement>(`[data-item-pill][data-slot-index="${draggedItem.slotIndex}"]`);
+    pill?.classList.remove("is-dragging");
+    draggedItem = null;
+  }
 });
 
 // Touch drag & drop support for mobile devices
@@ -1694,18 +2408,85 @@ let touchDragState: {
   card: HTMLElement;
 } | null = null;
 
+let touchItemDragState: {
+  slotIndex: number;
+  itemId: string;
+  pillEl: HTMLElement;
+  startX: number;
+  startY: number;
+  isDragging: boolean;
+} | null = null;
+
+let touchSlotDragState: {
+  slotIndex: number;
+  columnEl: HTMLElement;
+  startX: number;
+  startY: number;
+  isDragging: boolean;
+} | null = null;
+
 slotsEl.addEventListener(
   "touchstart",
   (e) => {
-    const handle = (e.target as HTMLElement).closest<HTMLElement>("[data-drag-handle]");
-    if (!handle) return;
-    const card = handle.closest<HTMLElement>(".move-slot-card");
-    if (!card) return;
+    const target = e.target as HTMLElement;
 
-    const sIdx = Number(card.dataset.slotIndex);
-    const mIdx = Number(card.dataset.moveIndex);
-    touchDragState = { slotIndex: sIdx, moveIndex: mIdx, card };
-    card.classList.add("is-dragging");
+    // 1. Item pill drag handle
+    const itemPill = target.closest<HTMLElement>(".team-slot__item-pill[draggable='true']");
+    if (itemPill) {
+      const sIdx = Number(itemPill.dataset.slotIndex);
+      const slot = team.slots[sIdx];
+      if (slot && slot.item) {
+        const touch = e.touches[0];
+        touchItemDragState = {
+          slotIndex: sIdx,
+          itemId: slot.item,
+          pillEl: itemPill,
+          startX: touch.clientX,
+          startY: touch.clientY,
+          isDragging: false,
+        };
+        return;
+      }
+    }
+
+    // 2. Move drag handle
+    const moveHandle = target.closest<HTMLElement>("[data-drag-handle]");
+    if (moveHandle) {
+      const card = moveHandle.closest<HTMLElement>(".move-slot-card");
+      if (!card) return;
+
+      const sIdx = Number(card.dataset.slotIndex);
+      const mIdx = Number(card.dataset.moveIndex);
+      touchDragState = { slotIndex: sIdx, moveIndex: mIdx, card };
+      card.classList.add("is-dragging");
+      return;
+    }
+
+    // 3. Whole filled slot card drag
+    const filledSlot = target.closest<HTMLElement>(".team-slot.filled");
+    if (filledSlot) {
+      if (
+        target.closest("[data-remove-slot]") ||
+        target.closest("[data-move-slot]") ||
+        target.closest(".team-slot-moves") ||
+        target.closest(".team-slot__item-pill") ||
+        target.closest(".team-slot__item-btn")
+      ) {
+        return;
+      }
+      const columnEl = filledSlot.closest<HTMLElement>("[data-slot-column]");
+      if (!columnEl) return;
+
+      const sIdx = Number(filledSlot.dataset.slotIndex);
+      const touch = e.touches[0];
+      touchSlotDragState = {
+        slotIndex: sIdx,
+        columnEl,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        isDragging: false,
+      };
+    }
   },
   { passive: true }
 );
@@ -1713,20 +2494,80 @@ slotsEl.addEventListener(
 slotsEl.addEventListener(
   "touchmove",
   (e) => {
-    if (!touchDragState) return;
-    const touch = e.touches[0];
-    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-    const targetSlot = targetEl?.closest<HTMLElement>("[data-move-slot]");
+    if (touchItemDragState) {
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchItemDragState.startX;
+      const dy = touch.clientY - touchItemDragState.startY;
 
-    slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
-      if (el !== targetSlot) el.classList.remove("is-dragover");
-    });
+      if (!touchItemDragState.isDragging) {
+        if (Math.hypot(dx, dy) > 8) {
+          touchItemDragState.isDragging = true;
+          touchItemDragState.pillEl.classList.add("is-dragging");
+        }
+      }
 
-    if (targetSlot) {
-      const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
-      if (targetSlotIdx === touchDragState.slotIndex) {
-        targetSlot.classList.add("is-dragover");
+      if (touchItemDragState.isDragging) {
         if (e.cancelable) e.preventDefault();
+        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        const targetCol = targetEl?.closest<HTMLElement>("[data-slot-column]");
+
+        slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-item-dragover").forEach((el) => {
+          if (el !== targetCol) el.classList.remove("is-item-dragover");
+        });
+
+        if (targetCol) {
+          targetCol.classList.add("is-item-dragover");
+        }
+      }
+      return;
+    }
+
+    if (touchDragState) {
+      const touch = e.touches[0];
+      const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+      const targetSlot = targetEl?.closest<HTMLElement>("[data-move-slot]");
+
+      slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+        if (el !== targetSlot) el.classList.remove("is-dragover");
+      });
+
+      if (targetSlot) {
+        const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
+        if (targetSlotIdx === touchDragState.slotIndex) {
+          targetSlot.classList.add("is-dragover");
+          if (e.cancelable) e.preventDefault();
+        }
+      }
+      return;
+    }
+
+    if (touchSlotDragState) {
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchSlotDragState.startX;
+      const dy = touch.clientY - touchSlotDragState.startY;
+
+      if (!touchSlotDragState.isDragging) {
+        if (Math.hypot(dx, dy) > 10) {
+          touchSlotDragState.isDragging = true;
+          touchSlotDragState.columnEl.classList.add("is-slot-dragging");
+        }
+      }
+
+      if (touchSlotDragState.isDragging) {
+        if (e.cancelable) e.preventDefault();
+        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        const targetCol = targetEl?.closest<HTMLElement>("[data-slot-column]");
+
+        slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-slot-dragover").forEach((el) => {
+          if (el !== targetCol) el.classList.remove("is-slot-dragover");
+        });
+
+        if (targetCol) {
+          const targetSlotIdx = Number(targetCol.dataset.slotColumn);
+          if (targetSlotIdx !== touchSlotDragState.slotIndex) {
+            targetCol.classList.add("is-slot-dragover");
+          }
+        }
       }
     }
   },
@@ -1734,37 +2575,122 @@ slotsEl.addEventListener(
 );
 
 slotsEl.addEventListener("touchend", (e) => {
-  if (!touchDragState) return;
-  touchDragState.card.classList.remove("is-dragging");
+  if (touchItemDragState) {
+    touchItemDragState.pillEl.classList.remove("is-dragging");
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-item-dragover").forEach((el) => {
+      el.classList.remove("is-item-dragover");
+    });
 
-  const touch = e.changedTouches[0];
-  const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-  const targetSlot = targetEl?.closest<HTMLElement>("[data-move-slot]");
+    if (touchItemDragState.isDragging) {
+      itemDragJustEnded = true;
+      setTimeout(() => { itemDragJustEnded = false; }, 100);
 
-  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
-    el.classList.remove("is-dragover");
-  });
+      const touch = e.changedTouches[0];
+      const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+      const targetCol = targetEl?.closest<HTMLElement>("[data-slot-column]");
 
-  if (targetSlot) {
-    const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
-    const targetMoveIdx = Number(targetSlot.dataset.moveIndex);
-    if (targetSlotIdx === touchDragState.slotIndex && targetMoveIdx !== touchDragState.moveIndex) {
-      team = swapTeamSlotMoves(targetSlotIdx, touchDragState.moveIndex, targetMoveIdx);
-      renderSingleSlot(targetSlotIdx);
-      renderStrengthsPanel();
+      if (targetCol) {
+        const targetSlotIdx = Number(targetCol.dataset.slotColumn);
+        if (targetSlotIdx !== touchItemDragState.slotIndex) {
+          const targetSlot = team.slots[targetSlotIdx];
+          if (targetSlot && targetSlot.pokemonId !== null) {
+            const targetPrevItem = targetSlot.item ?? null;
+            team = setTeamSlotItem(targetSlotIdx, touchItemDragState.itemId);
+            team = setTeamSlotItem(touchItemDragState.slotIndex, targetPrevItem);
+            renderSingleSlot(touchItemDragState.slotIndex);
+            renderSingleSlot(targetSlotIdx);
+            renderStrengthsPanel();
+            if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
+          }
+        }
+      } else {
+        // Dragged outside -> remove item!
+        team = setTeamSlotItem(touchItemDragState.slotIndex, null);
+        renderSingleSlot(touchItemDragState.slotIndex);
+        renderStrengthsPanel();
+        if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
+        const locale = getCurrentLocale();
+        toast.info(locale === "es" ? "Objeto quitado" : "Item unequipped");
+      }
     }
+
+    touchItemDragState = null;
+    return;
   }
 
-  touchDragState = null;
+  if (touchDragState) {
+    touchDragState.card.classList.remove("is-dragging");
+
+    const touch = e.changedTouches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetSlot = targetEl?.closest<HTMLElement>("[data-move-slot]");
+
+    slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+      el.classList.remove("is-dragover");
+    });
+
+    if (targetSlot) {
+      const targetSlotIdx = Number(targetSlot.dataset.slotIndex);
+      const targetMoveIdx = Number(targetSlot.dataset.moveIndex);
+      if (targetSlotIdx === touchDragState.slotIndex && targetMoveIdx !== touchDragState.moveIndex) {
+        team = swapTeamSlotMoves(targetSlotIdx, touchDragState.moveIndex, targetMoveIdx);
+        renderSingleSlot(targetSlotIdx);
+        renderStrengthsPanel();
+      }
+    }
+
+    touchDragState = null;
+    return;
+  }
+
+  if (touchSlotDragState) {
+    touchSlotDragState.columnEl.classList.remove("is-slot-dragging");
+
+    const touch = e.changedTouches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetCol = targetEl?.closest<HTMLElement>("[data-slot-column]");
+
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-slot-dragover").forEach((el) => {
+      el.classList.remove("is-slot-dragover");
+    });
+
+    if (touchSlotDragState.isDragging && targetCol) {
+      const targetSlotIdx = Number(targetCol.dataset.slotColumn);
+      if (targetSlotIdx !== touchSlotDragState.slotIndex) {
+        team = swapTeamSlots(touchSlotDragState.slotIndex, targetSlotIdx);
+        renderAllSlots();
+        renderStrengthsPanel();
+      }
+    }
+
+    touchSlotDragState = null;
+  }
 });
 
 slotsEl.addEventListener("touchcancel", () => {
-  if (!touchDragState) return;
-  touchDragState.card.classList.remove("is-dragging");
-  slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
-    el.classList.remove("is-dragover");
-  });
-  touchDragState = null;
+  if (touchItemDragState) {
+    touchItemDragState.pillEl.classList.remove("is-dragging");
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-item-dragover").forEach((el) => {
+      el.classList.remove("is-item-dragover");
+    });
+    touchItemDragState = null;
+  }
+
+  if (touchDragState) {
+    touchDragState.card.classList.remove("is-dragging");
+    slotsEl.querySelectorAll<HTMLElement>("[data-move-slot].is-dragover").forEach((el) => {
+      el.classList.remove("is-dragover");
+    });
+    touchDragState = null;
+  }
+
+  if (touchSlotDragState) {
+    touchSlotDragState.columnEl.classList.remove("is-slot-dragging");
+    slotsEl.querySelectorAll<HTMLElement>("[data-slot-column].is-slot-dragover").forEach((el) => {
+      el.classList.remove("is-slot-dragover");
+    });
+    touchSlotDragState = null;
+  }
 });
 
 pickerCloseBtn.addEventListener("click", closePicker);
@@ -1890,7 +2816,11 @@ function renderTypeMatrix(): void {
       const cellsHtml = typeChart!.types
         .map((type) => {
           if (activeMatrixMode === "defense") {
-            const mult = getTypeMultiplier(typeChart!, type, pokemon.types);
+            const mult = getTypeMultiplier(typeChart!, type, pokemon.types, {
+              item: slot.item,
+              speciesId: pokemon.id,
+              ability: slot.ability,
+            });
             let badgeClass = "matrix-badge--1x";
             let label = "-";
 
@@ -2127,10 +3057,48 @@ function closeSynergyModal(): void {
   updateBodyScrollLock();
 }
 
+function openStrengthsGuideModal(): void {
+  if (!strengthsGuideOverlay) return;
+  strengthsGuideOverlay.hidden = false;
+  document.body.style.overflow = "hidden";
+  refreshIcons();
+}
+
+function closeStrengthsGuideModal(): void {
+  if (!strengthsGuideOverlay) return;
+  strengthsGuideOverlay.hidden = true;
+  updateBodyScrollLock();
+}
+
 openSynergyBtns.forEach((btn) => btn.addEventListener("click", openSynergyModal));
 synergyModalCloseBtn?.addEventListener("click", closeSynergyModal);
 synergyModalOverlay?.addEventListener("click", (e) => {
   if (e.target === synergyModalOverlay) closeSynergyModal();
+});
+
+openPanelGuideBtns.forEach((btn) => btn.addEventListener("click", openStrengthsGuideModal));
+strengthsGuideCloseBtn?.addEventListener("click", closeStrengthsGuideModal);
+strengthsGuideOverlay?.addEventListener("click", (e) => {
+  if (e.target === strengthsGuideOverlay) closeStrengthsGuideModal();
+});
+
+guideTabBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const tabName = btn.dataset.guideTab;
+    if (!tabName) return;
+
+    guideTabBtns.forEach((b) => {
+      const isActive = b === btn;
+      b.classList.toggle("is-active", isActive);
+      b.setAttribute("aria-selected", String(isActive));
+    });
+
+    guidePanes.forEach((pane) => {
+      pane.hidden = pane.dataset.guidePane !== tabName;
+    });
+
+    refreshIcons();
+  });
 });
 
 openTeamCardBtn?.addEventListener("click", openTeamCardModal);
@@ -2160,11 +3128,65 @@ copyShowdownBtn?.addEventListener("click", () => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    if (synergyModalOverlay && !synergyModalOverlay.hidden) closeSynergyModal();
+    if (strengthsGuideOverlay && !strengthsGuideOverlay.hidden) closeStrengthsGuideModal();
+    else if (synergyModalOverlay && !synergyModalOverlay.hidden) closeSynergyModal();
     else if (typeMatrixOverlay && !typeMatrixOverlay.hidden) closeTypeMatrixModal();
     else if (teamCardOverlay && !teamCardOverlay.hidden) closeTeamCardModal();
+    else if (itemPickerOverlayEl && !itemPickerOverlayEl.hidden) closeItemPicker();
     else if (!movePickerOverlayEl.hidden) closeMovePicker();
     else if (!overlayEl.hidden) closePicker();
+  }
+});
+
+itemPickerCloseBtn?.addEventListener("click", closeItemPicker);
+itemPickerOverlayEl?.addEventListener("click", (e) => {
+  if (e.target === itemPickerOverlayEl) closeItemPicker();
+});
+
+let itemSearchDebounce: number | undefined;
+itemPickerSearchEl?.addEventListener("input", () => {
+  window.clearTimeout(itemSearchDebounce);
+  itemSearchDebounce = window.setTimeout(() => {
+    renderItemPickerResults();
+  }, 150);
+});
+
+itemCategoryFilterEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-item-category]");
+  if (!btn) return;
+  activeItemCategory = btn.dataset.itemCategory!;
+  itemCategoryFilterEl.querySelectorAll<HTMLButtonElement>("[data-item-category]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b === btn));
+  });
+  renderItemPickerResults();
+});
+
+itemPickerResultsEl?.addEventListener("click", (e) => {
+  const target = e.target as HTMLElement;
+
+  const removeBtn = target.closest<HTMLButtonElement>("[data-remove-item-picker]");
+  if (removeBtn) {
+    if (activeItemSlotIndex !== null) {
+      team = setTeamSlotItem(activeItemSlotIndex, null);
+      renderSingleSlot(activeItemSlotIndex);
+      renderStrengthsPanel();
+      if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
+      closeItemPicker();
+    }
+    return;
+  }
+
+  const pickBtn = target.closest<HTMLElement>("[data-pick-item]");
+  if (pickBtn) {
+    const itemId = pickBtn.dataset.pickItem;
+    if (activeItemSlotIndex !== null && itemId) {
+      team = setTeamSlotItem(activeItemSlotIndex, itemId);
+      renderSingleSlot(activeItemSlotIndex);
+      renderStrengthsPanel();
+      if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
+      closeItemPicker();
+    }
+    return;
   }
 });
 
@@ -2221,10 +3243,12 @@ movePickerResultsEl.addEventListener("click", (e) => {
   closeMovePicker();
   if (pokemon) {
     const locale = getCurrentLocale();
+    const meta = moveDetailsMap[moveName];
+    const localizedMove = getMoveName(moveName, locale, meta);
     toast.success(
       locale === "es"
-        ? `Ataque "${formatLabel(moveName)}" asignado a ${capitalize(pokemon.name)}.`
-        : `Move "${formatLabel(moveName)}" assigned to ${capitalize(pokemon.name)}.`
+        ? `Ataque "${localizedMove}" asignado a ${capitalize(pokemon.name)}.`
+        : `Move "${localizedMove}" assigned to ${capitalize(pokemon.name)}.`
     );
   }
 });
@@ -2422,6 +3446,7 @@ async function init(): Promise<void> {
   }
 
   populatePickerFilters();
+  updateDensityUI();
   renderAllSlots();
   renderStrengthsPanel();
 }

@@ -4,16 +4,54 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
   z-index: 1000;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.22s ease-out,
+    visibility 0.22s ease-out,
+    display 0.22s ease-out;
+  transition-behavior: allow-discrete;
 }
 
-.modal-overlay[hidden] {
-  display: none;
+.modal-panel,
+[class*="modal-panel"] {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition:
+    opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Entry animation: transition FROM these values when first shown */
+@starting-style {
+  .modal-overlay {
+    opacity: 0;
+  }
+
+  .modal-panel,
+  [class*="modal-panel"] {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+}
+
+/* Exit animation: transition TO these values when hidden */
+.modal-overlay:where([hidden]) {
+  display: none !important;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.modal-overlay:where([hidden]) .modal-panel,
+.modal-overlay:where([hidden]) [class*="modal-panel"] {
+  opacity: 0;
+  transform: scale(0.96) translateY(8px);
 }
 
 .detail-loading {
@@ -61,10 +99,7 @@
   }
 
   .modal-panel,
-  .picker-modal-panel,
-  .move-picker-modal-panel,
-  .detail-modal-panel,
-  .team-card-modal-panel {
+  [class*="modal-panel"] {
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
@@ -72,6 +107,31 @@
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
     padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    transform: translateY(0);
+  }
+
+  @starting-style {
+    .modal-panel,
+    [class*="modal-panel"] {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+
+  .modal-overlay:where([hidden]) .modal-panel,
+  .modal-overlay:where([hidden]) [class*="modal-panel"] {
+    opacity: 0;
+    transform: translateY(100%);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-panel,
+  [class*="modal-panel"] {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 

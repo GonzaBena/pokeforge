@@ -54,6 +54,7 @@ const DEFAULT_SLOTS: TeamSlotState[] = Array.from({ length: TEAM_FIXED_SIZE }, (
   moves: [null, null, null, null],
   nature: null,
   ability: null,
+  item: null,
   stats: {},
   usePokedexData: false,
 }));
@@ -68,6 +69,7 @@ function normalizeTeam(team: TeamState): TeamState {
         moves: [null, null, null, null],
         nature: null,
         ability: null,
+        item: null,
         stats: {},
         usePokedexData: false,
       };
@@ -75,9 +77,10 @@ function normalizeTeam(team: TeamState): TeamState {
     const moves = Array.from({ length: 4 }, (_, mIdx) => raw.moves?.[mIdx] ?? null);
     const nature = typeof raw.nature === "string" ? raw.nature : null;
     const ability = typeof raw.ability === "string" ? raw.ability : null;
+    const item = typeof raw.item === "string" ? raw.item : null;
     const stats = raw.stats && typeof raw.stats === "object" ? { ...raw.stats } : {};
     const usePokedexData = Boolean(raw.usePokedexData);
-    return { pokemonId: raw.pokemonId, moves, nature, ability, stats, usePokedexData };
+    return { pokemonId: raw.pokemonId, moves, nature, ability, item, stats, usePokedexData };
   });
   return { size: TEAM_FIXED_SIZE, slots };
 }
@@ -102,7 +105,8 @@ export function setTeamSlot(
   pokemonId: number | null,
   initialStats?: Partial<PokemonStats>,
   initialNature?: string | null,
-  initialAbility?: string | null
+  initialAbility?: string | null,
+  initialItem?: string | null
 ): TeamState {
   const current = getTeam();
   const slots = [...current.slots];
@@ -113,6 +117,7 @@ export function setTeamSlot(
         moves: [null, null, null, null],
         nature: null,
         ability: null,
+        item: null,
         stats: {},
         usePokedexData: false,
       };
@@ -122,6 +127,7 @@ export function setTeamSlot(
         moves: [null, null, null, null],
         nature: initialNature ?? null,
         ability: initialAbility ?? null,
+        item: initialItem ?? null,
         stats: initialStats ? { ...initialStats } : {},
         usePokedexData: false,
       };
@@ -166,6 +172,27 @@ export function swapTeamSlotMoves(slotIndex: number, fromMoveIndex: number, toMo
   return setTeam({ ...current, slots });
 }
 
+export function swapTeamSlots(fromIndex: number, toIndex: number): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  if (
+    fromIndex < 0 ||
+    fromIndex >= slots.length ||
+    toIndex < 0 ||
+    toIndex >= slots.length ||
+    fromIndex === toIndex
+  ) {
+    return current;
+  }
+
+  const temp = slots[fromIndex];
+  slots[fromIndex] = slots[toIndex];
+  slots[toIndex] = temp;
+
+  return setTeam({ ...current, slots });
+}
+
+
 export function setTeamSlotNature(slotIndex: number, nature: string | null): TeamState {
   const current = getTeam();
   const slots = [...current.slots];
@@ -188,6 +215,19 @@ export function setTeamSlotAbility(slotIndex: number, ability: string | null): T
   slots[slotIndex] = {
     ...targetSlot,
     ability,
+  };
+  return setTeam({ ...current, slots });
+}
+
+export function setTeamSlotItem(slotIndex: number, item: string | null): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  const targetSlot = slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return current;
+
+  slots[slotIndex] = {
+    ...targetSlot,
+    item,
   };
   return setTeam({ ...current, slots });
 }
@@ -229,6 +269,7 @@ export function copyPokedexToSlot(slotIndex: number): TeamState {
     ...targetSlot,
     nature: pokedexOverrides.nature,
     ability: pokedexOverrides.ability ?? null,
+    item: pokedexOverrides.item ?? null,
     stats: { ...pokedexOverrides.stats },
     usePokedexData: false,
   };
@@ -243,6 +284,7 @@ export function copySlotToPokedex(slotIndex: number): void {
   setPokemonOverrides(targetSlot.pokemonId, {
     nature: targetSlot.nature ?? null,
     ability: targetSlot.ability ?? null,
+    item: targetSlot.item ?? null,
     stats: targetSlot.stats ? { ...targetSlot.stats } : {},
   });
 }
@@ -253,6 +295,7 @@ export function getTeamSlotEffectiveOverrides(slot: TeamSlotState, baseStats?: P
     return {
       nature: pOverrides.nature ?? null,
       ability: pOverrides.ability ?? null,
+      item: pOverrides.item ?? null,
       stats: { ...(baseStats ?? {}), ...(pOverrides.stats ?? {}) },
     };
   }
@@ -260,19 +303,21 @@ export function getTeamSlotEffectiveOverrides(slot: TeamSlotState, baseStats?: P
   return {
     nature: slot.nature ?? null,
     ability: slot.ability ?? null,
+    item: slot.item ?? null,
     stats: { ...(baseStats ?? {}), ...(slot.stats ?? {}) },
   };
 }
 
-// --- Per-pokemon detail overrides (stats/nature/ability, informational only) ----
+// --- Per-pokemon detail overrides (stats/nature/ability/item, informational only) ----
 
 export interface PokemonOverrides {
   stats: Partial<PokemonStats>;
   nature: string | null;
   ability?: string | null;
+  item?: string | null;
 }
 
-const DEFAULT_OVERRIDES: PokemonOverrides = { stats: {}, nature: null, ability: null };
+const DEFAULT_OVERRIDES: PokemonOverrides = { stats: {}, nature: null, ability: null, item: null };
 
 export function getPokemonOverrides(id: number): PokemonOverrides {
   const stored = readJson<PokemonOverrides>(overridesKey(id), DEFAULT_OVERRIDES);
@@ -280,6 +325,7 @@ export function getPokemonOverrides(id: number): PokemonOverrides {
     stats: stored && typeof stored.stats === "object" && stored.stats !== null ? stored.stats : {},
     nature: stored?.nature ?? null,
     ability: stored?.ability ?? null,
+    item: stored?.item ?? null,
   };
 }
 

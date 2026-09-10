@@ -108,6 +108,7 @@ export interface TeamSlotState {
   moves?: (string | null)[];
   nature?: string | null;
   ability?: string | null;
+  item?: string | null;
   stats?: Partial<PokemonStats>;
   usePokedexData?: boolean;
 }
@@ -173,3 +174,42 @@ export interface Nature {
 export interface NaturesIndex {
   natures: Nature[];
 }
+
+export type ItemCategory =
+  | "competitive"
+  | "stat-boost"
+  | "type-boost"
+  | "defensive"
+  | "berries"
+  | "species-specific"
+  | "utility";
+
+export interface ItemEffect {
+  statMultipliers?: Partial<Record<keyof PokemonStats, number>>;
+  statCondition?: {
+    speciesIds?: number[];
+    requiresUnevolved?: boolean;
+  };
+  grantsImmunities?: string[];
+  revokesImmunities?: boolean;
+  changesPokemonType?: string;
+  boostedType?: string;
+  boostMultiplier?: number;
+  resistBerryType?: string;
+  descriptionEs: string;
+  descriptionEn: string;
+}
+
+export interface ItemData {
+  id: string;
+  name: string;
+  nameEs: string;
+  nameEn: string;
+  category: ItemCategory;
+  icon?: string;
+  sprite?: string | null;
+  effect?: ItemEffect;
+  shortDescEs: string;
+  shortDescEn: string;
+}
+

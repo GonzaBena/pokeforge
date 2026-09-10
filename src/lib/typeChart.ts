@@ -1,13 +1,18 @@
 import type { TypeChart } from "./types";
+import { getItemById, getItemTypeEffect } from "./items";
 
 export interface TeamMember {
   name: string;
   types: string[];
+  speciesId?: number;
+  item?: string | null;
+  ability?: string | null;
 }
 
 export interface MemberDefenseImpact {
   name: string;
   multiplier: number;
+  itemEffectNote?: string;
 }
 
 export type DefenseThreatLevel = "critical" | "exposed" | "covered";
@@ -29,8 +34,61 @@ export interface TeamDefenseEntry {
   netScore: number;
 }
 
-export function getTypeMultiplier(chart: TypeChart, attackingType: string, defendingTypes: string[]): number {
-  return defendingTypes.reduce((mult, def) => mult * (chart.chart[attackingType]?.[def] ?? 1), 1);
+export function getEffectiveTypeMultiplier(
+  chart: TypeChart,
+  attackingType: string,
+  defendingTypes: string[],
+  options?: {
+    item?: string | null;
+    speciesId?: number;
+    ability?: string | null;
+  }
+): { multiplier: number; itemEffectNote?: string } {
+  let types = [...defendingTypes];
+  const item = getItemById(options?.item);
+
+  if (item && options?.speciesId) {
+    const typeEffect = getItemTypeEffect(item, options.speciesId);
+    if (typeEffect.overrideType) {
+      types = [typeEffect.overrideType];
+    }
+  }
+
+  let baseMult = types.reduce((mult, def) => mult * (chart.chart[attackingType]?.[def] ?? 1), 1);
+  let itemEffectNote: string | undefined = undefined;
+
+  if (item) {
+    const typeEffect = getItemTypeEffect(item, options?.speciesId ?? 0);
+    // Air balloon or other immunity grant
+    if (typeEffect.grantsImmunities.includes(attackingType)) {
+      baseMult = 0;
+      itemEffectNote = item.id;
+    } else if (typeEffect.revokesImmunities && baseMult === 0) {
+      // Ring target converts immunities to 1x
+      baseMult = 1;
+      itemEffectNote = item.id;
+    } else if (item.id === "iron-ball" && attackingType === "ground") {
+      // Iron ball removes ground immunity from Flying
+      if (baseMult === 0 && types.includes("flying")) {
+        const nonFlying = types.filter((t) => t !== "flying");
+        baseMult = nonFlying.length
+          ? nonFlying.reduce((mult, def) => mult * (chart.chart["ground"]?.[def] ?? 1), 1)
+          : 1;
+        itemEffectNote = item.id;
+      }
+    }
+  }
+
+  return { multiplier: baseMult, itemEffectNote };
+}
+
+export function getTypeMultiplier(
+  chart: TypeChart,
+  attackingType: string,
+  defendingTypes: string[],
+  options?: { item?: string | null; speciesId?: number; ability?: string | null }
+): number {
+  return getEffectiveTypeMultiplier(chart, attackingType, defendingTypes, options).multiplier;
 }
 
 export function computeTeamDefense(chart: TypeChart, team: TeamMember[]): TeamDefenseEntry[] {
@@ -45,9 +103,13 @@ export function computeTeamDefense(chart: TypeChart, team: TeamMember[]): TeamDe
     let product = 1;
 
     for (const member of team) {
-      const mult = getTypeMultiplier(chart, attackingType, member.types);
+      const { multiplier: mult, itemEffectNote } = getEffectiveTypeMultiplier(chart, attackingType, member.types, {
+        item: member.item,
+        speciesId: member.speciesId,
+        ability: member.ability,
+      });
       product *= mult;
-      const impact: MemberDefenseImpact = { name: member.name, multiplier: mult };
+      const impact: MemberDefenseImpact = { name: member.name, multiplier: mult, itemEffectNote };
 
       if (mult === 0) {
         immuneDetails.push(impact);

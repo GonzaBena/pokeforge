@@ -1,8 +1,10 @@
-import { getTypeMultiplier } from "../../typeChart";
+import { getEffectiveTypeMultiplier } from "../../typeChart";
 import { typeColor } from "../../typeColors";
 import { getCurrentLocale, getTypeName, getTranslations, type Locale } from "../../i18n/translations";
+import { getItemDisplayName } from "../../items";
 import type { Pokemon, TypeChart } from "../../types";
 import type { EffectivenessItem } from "../types";
+import { getCurrentEffectiveOverrides } from "../overrides";
 
 export function getValClass(multiplier: number): string {
   if (multiplier >= 4) return "quad";
@@ -18,13 +20,15 @@ export function renderEffectivenessItem(item: EffectivenessItem, locale: Locale)
   const color = typeColor(item.type);
   const valStr = `x${item.multiplier}`;
   const valClass = getValClass(item.multiplier);
+  const noteBadge = item.note ? `<span class="detail-effectiveness__note">(${item.note})</span>` : "";
 
-  return `<li class="detail-effectiveness__item"><span class="type-badge type-badge--sm" data-type="${item.type}" style="--badge-bg:${color}">${typeName}</span>, <span class="detail-effectiveness__val detail-effectiveness__val--${valClass}">${valStr}</span></li>`;
+  return `<li class="detail-effectiveness__item"><span class="type-badge type-badge--sm" data-type="${item.type}" style="--badge-bg:${color}">${typeName}</span>, <span class="detail-effectiveness__val detail-effectiveness__val--${valClass}">${valStr}</span> ${noteBadge}</li>`;
 }
 
 export function renderEffectivenessContent(pokemon: Pokemon, typeChart: TypeChart): string {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
+  const overrides = getCurrentEffectiveOverrides();
 
   if (!typeChart || !typeChart.types) {
     return `<p class="detail-empty">${locale === "es" ? "Datos de tipos no disponibles." : "Type data not available."}</p>`;
@@ -35,13 +39,20 @@ export function renderEffectivenessContent(pokemon: Pokemon, typeChart: TypeChar
   const immunities: EffectivenessItem[] = [];
 
   for (const attackingType of typeChart.types) {
-    const mult = getTypeMultiplier(typeChart, attackingType, pokemon.types);
+    const { multiplier: mult, itemEffectNote } = getEffectiveTypeMultiplier(typeChart, attackingType, pokemon.types, {
+      item: overrides.item,
+      speciesId: pokemon.id,
+      ability: overrides.ability,
+    });
+
+    const note = itemEffectNote ? getItemDisplayName(itemEffectNote, locale) : undefined;
+
     if (mult > 1) {
-      weaknesses.push({ type: attackingType, multiplier: mult });
+      weaknesses.push({ type: attackingType, multiplier: mult, note });
     } else if (mult === 0) {
-      immunities.push({ type: attackingType, multiplier: mult });
+      immunities.push({ type: attackingType, multiplier: mult, note });
     } else if (mult < 1) {
-      resistances.push({ type: attackingType, multiplier: mult });
+      resistances.push({ type: attackingType, multiplier: mult, note });
     }
   }
 
