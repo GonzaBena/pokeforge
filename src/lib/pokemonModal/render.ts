@@ -36,7 +36,7 @@ export function render(ctx: RenderContext): void {
     renderDataTable(
       movesMount,
       getMoveColumns(locale),
-      buildMoveTableRows(ctx.detail.moveDetails, locale),
+      buildMoveTableRows(ctx.detail.moveDetails, locale, ctx.moveDetailsMap),
       locale === "es" ? "Sin datos de movimientos." : "No move data available."
     );
   }

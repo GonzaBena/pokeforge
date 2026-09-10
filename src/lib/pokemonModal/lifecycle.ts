@@ -1,6 +1,6 @@
 import { modalIn, modalOut } from "../animations";
 import { getCurrentLocale, getTranslations } from "../i18n/translations";
-import { getAllPokemon, getTypeChart } from "../pokedexData";
+import { getAllPokemon, getMoveDetailsMap, getTypeChart } from "../pokedexData";
 import { getEvolutionChain, getNatures, getPokemonDetail } from "../pokemonDetail";
 import { toast } from "../toast";
 import type { Pokemon } from "../types";
@@ -48,11 +48,12 @@ export async function openPokemonModal(id: number, options?: PokemonModalOptions
   }
 
   try {
-    const [allPokemon, detail, natures, typeChart] = await Promise.all([
+    const [allPokemon, detail, natures, typeChart, moveDetailsMap] = await Promise.all([
       getAllPokemon(),
       getPokemonDetail(id),
       getNatures(),
       getTypeChart(),
+      getMoveDetailsMap().catch(() => ({})),
     ]);
     if (modalState.currentId !== id) return;
 
@@ -66,7 +67,7 @@ export async function openPokemonModal(id: number, options?: PokemonModalOptions
     const chain = detail.evolutionChainId !== null ? await getEvolutionChain(detail.evolutionChainId).catch(() => null) : null;
     if (modalState.currentId !== id) return;
 
-    render({ pokemon, detail, chain, natures, allById, typeChart });
+    render({ pokemon, detail, chain, natures, allById, typeChart, moveDetailsMap });
     bodyEl.scrollTop = 0;
   } catch (err) {
     console.error("Error cargando detalles del Pokémon:", err);

@@ -1,7 +1,8 @@
 import { toPng } from "html-to-image";
-import type { Pokemon, TeamState } from "./types";
+import type { MoveData, Pokemon, TeamState } from "./types";
 import { typeColor } from "./typeColors";
 import { toast } from "./toast";
+import { getMoveName, type Locale } from "./i18n/translations";
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -40,7 +41,12 @@ export function generateShowdownText(team: TeamState, pokemonMap: Map<number, Po
   return blocks.join("\n\n");
 }
 
-export function renderTeamCardHTML(team: TeamState, pokemonMap: Map<number, Pokemon>): string {
+export function renderTeamCardHTML(
+  team: TeamState,
+  pokemonMap: Map<number, Pokemon>,
+  locale: Locale = "es",
+  moveDetailsMap?: Record<string, MoveData>,
+): string {
   const activeSlots = team.slots.filter((s) => s.pokemonId !== null);
 
   if (activeSlots.length === 0) {
@@ -77,7 +83,7 @@ export function renderTeamCardHTML(team: TeamState, pokemonMap: Map<number, Poke
 
       const movesList = (slot.moves ?? [])
         .filter(Boolean)
-        .map((m) => `<span class="team-card-item__move-tag">${m!.split("-").map(capitalize).join(" ")}</span>`)
+        .map((m) => `<span class="team-card-item__move-tag">${getMoveName(m!, locale, moveDetailsMap?.[m!])}</span>`)
         .join("");
 
       const natureTag = slot.nature

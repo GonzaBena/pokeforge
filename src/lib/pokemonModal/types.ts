@@ -1,4 +1,4 @@
-import type { EvolutionChain, Nature, Pokemon, PokemonDetail, TypeChart } from "../types";
+import type { EvolutionChain, MoveData, Nature, Pokemon, PokemonDetail, TypeChart } from "../types";
 
 export interface RenderContext {
   pokemon: Pokemon;
@@ -7,6 +7,7 @@ export interface RenderContext {
   natures: Nature[];
   allById: Map<number, Pokemon>;
   typeChart: TypeChart;
+  moveDetailsMap?: Record<string, MoveData>;
 }
 
 export interface PokemonModalOptions {

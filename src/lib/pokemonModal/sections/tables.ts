@@ -1,18 +1,25 @@
 import type { ColumnDef } from "@tanstack/table-core";
-import { getTranslations, getGameTitle, type Locale } from "../../i18n/translations";
-import type { AcquisitionRow, MoveDetail } from "../../types";
+import { getTranslations, getGameTitle, getMoveName, type Locale } from "../../i18n/translations";
+import type { AcquisitionRow, MoveData, MoveDetail } from "../../types";
 import { METHOD_LABELS } from "../constants";
 import type { MoveTableRow } from "../types";
 import { formatGeneration, formatLabel } from "../utils";
 
-export function buildMoveTableRows(moveDetails: MoveDetail[], locale: Locale): MoveTableRow[] {
+export function buildMoveTableRows(
+  moveDetails: MoveDetail[],
+  locale: Locale,
+  moveDetailsMap?: Record<string, MoveData>,
+): MoveTableRow[] {
   const methodMap = METHOD_LABELS[locale] ?? METHOD_LABELS.en;
-  return moveDetails.map((m) => ({
-    name: m.name,
-    method: m.method,
-    methodLabel: methodMap[m.method] ?? formatLabel(m.method),
-    level: m.level,
-  }));
+  return moveDetails.map((m) => {
+    const meta = moveDetailsMap?.[m.name];
+    return {
+      name: getMoveName(m.name, locale, meta),
+      method: m.method,
+      methodLabel: methodMap[m.method] ?? formatLabel(m.method),
+      level: m.level,
+    };
+  });
 }
 
 export function getLocationColumns(locale: Locale): ColumnDef<AcquisitionRow, unknown>[] {
@@ -47,7 +54,7 @@ export function getLocationColumns(locale: Locale): ColumnDef<AcquisitionRow, un
 export function getMoveColumns(locale: Locale): ColumnDef<MoveTableRow, unknown>[] {
   const t = getTranslations(locale);
   return [
-    { accessorKey: "name", header: t.modal.move, size: 220, cell: (info) => formatLabel(String(info.getValue())) },
+    { accessorKey: "name", header: t.modal.move, size: 220, cell: (info) => String(info.getValue()) },
     { accessorKey: "methodLabel", header: t.modal.method, size: 70 },
     {
       accessorFn: (row) => row.level,
