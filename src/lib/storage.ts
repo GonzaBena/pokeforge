@@ -48,7 +48,7 @@ export function setCaptured(id: number, captured: boolean): Set<number> {
 
 // --- Active team --------------------------------------------------------
 
-const TEAM_FIXED_SIZE = 5;
+const TEAM_FIXED_SIZE = 6;
 const DEFAULT_SLOTS: TeamSlotState[] = Array.from({ length: TEAM_FIXED_SIZE }, () => ({
   pokemonId: null,
   moves: [null, null, null, null],

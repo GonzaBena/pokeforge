@@ -90,7 +90,7 @@ const moveMethodFilterEl = document.querySelector<HTMLElement>("[data-move-metho
 const moveCategoryFilterEl = document.querySelector<HTMLElement>("[data-move-category-filter]");
 const moveTypeFilterEl = document.querySelector<HTMLElement>("[data-move-type-filter]");
 
-let team: TeamState = { size: 5, slots: [] };
+let team: TeamState = { size: 6, slots: [] };
 let allPokemon: Pokemon[] = [];
 let pokemonById = new Map<number, Pokemon>();
 let typeChart: TypeChart | null = null;
