@@ -1758,7 +1758,7 @@ function renderMovePickerTable(): void {
       const methodBadgeClass = `move-method-badge move-method-badge--${r.method}`;
 
       return `
-        <tr>
+        <tr data-pick-move="${r.name}">
           <td class="move-table__cell-name" data-label="${t.modal.move}">
             <span class="move-table__name">${getMoveName(r.name, locale, meta)}</span>
           </td>
@@ -3232,9 +3232,9 @@ moveTypeFilterEl?.addEventListener("click", (e) => {
 });
 
 movePickerResultsEl.addEventListener("click", (e) => {
-  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-pick-move]");
-  if (!btn || activeMoveSlotIndex === null || activeMoveIndex === null) return;
-  const moveName = btn.dataset.pickMove!;
+  const target = (e.target as HTMLElement).closest<HTMLElement>("[data-pick-move]");
+  if (!target || activeMoveSlotIndex === null || activeMoveIndex === null) return;
+  const moveName = target.dataset.pickMove!;
   const pokemon = pokemonForSlot(activeMoveSlotIndex);
 
   team = setTeamSlotMove(activeMoveSlotIndex, activeMoveIndex, moveName);

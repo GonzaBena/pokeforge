@@ -108,8 +108,17 @@
   background: var(--bg-card);
 }
 
+.move-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
 .move-table tbody tr:hover td {
   background: var(--bg-card-hover);
+}
+
+.move-table tbody tr:active td {
+  background: var(--bg-elevated);
 }
 
 .move-table__name {
