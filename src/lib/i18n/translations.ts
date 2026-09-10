@@ -393,6 +393,13 @@ export interface Translations {
     cloudDeleteConfirmBtn: string;
     cloudStatusReadOnly: string;
     cloudStatusReadWrite: string;
+    cloudSecretKeyLabel: string;
+    cloudCopySecret: string;
+    cloudSecretCopied: string;
+    cloudPasteFromClipboard: string;
+    cloudToggleSecretVisibility: string;
+    cloudReadOnlyBadge: string;
+    cloudReadOnlyTip: string;
     cloudQrTitle: string;
     cloudQrDesc: string;
     cloudCopyPairingLink: string;
@@ -858,14 +865,21 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudDeleteConfirmBtn: "Yes, delete from cloud",
       cloudStatusReadOnly: "Connected (Read Only)",
       cloudStatusReadWrite: "Connected (Read & Write)",
+      cloudSecretKeyLabel: "Secret Key (Write Access):",
+      cloudCopySecret: "Copy secret key",
+      cloudSecretCopied: "Secret key copied to clipboard!",
+      cloudPasteFromClipboard: "Paste from clipboard",
+      cloudToggleSecretVisibility: "Toggle visibility",
+      cloudReadOnlyBadge: "Read-Only Mode Active",
+      cloudReadOnlyTip: "Tip: You can find or copy your secret key from the sync modal on the device where you created the vault.",
       cloudQrTitle: "Link Mobile Phone via QR Code",
       cloudQrDesc:
         "Scan this code with your phone camera to link it automatically with full sync permissions (read & write).",
       cloudCopyPairingLink: "Copy full pairing link",
       cloudPairingLinkCopied: "Full pairing link copied to clipboard!",
       cloudReadOnlyWarning:
-        "This device is currently in Read-Only mode. To enable write permissions, scan the pairing QR code shown on your PC, or enter your secret key below.",
-      cloudUpgradeKeyPlaceholder: "Paste secret key (UUID)...",
+        "This device is in Read-Only mode and cannot upload changes. Enter your secret key below or scan the pairing QR code from your main device to unlock full write permissions.",
+      cloudUpgradeKeyPlaceholder: "Paste secret key (e.g. 550e8400-e29b-41d4-a716-446655440000)...",
       cloudUpgradeKeyBtn: "Enable write permissions",
       cloudUpgradeSuccess: "Write permissions enabled successfully!",
       cancel: "Cancel",
@@ -1340,14 +1354,21 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudDeleteConfirmBtn: "Sí, borrar de la nube",
       cloudStatusReadOnly: "Conectado (Solo Lectura)",
       cloudStatusReadWrite: "Conectado (Lectura y Escritura)",
+      cloudSecretKeyLabel: "Clave secreta (Acceso de escritura):",
+      cloudCopySecret: "Copiar clave secreta",
+      cloudSecretCopied: "¡Clave secreta copiada al portapapeles!",
+      cloudPasteFromClipboard: "Pegar clave",
+      cloudToggleSecretVisibility: "Mostrar u ocultar clave",
+      cloudReadOnlyBadge: "Modo Solo Lectura Activo",
+      cloudReadOnlyTip: "Tip: Podés copiar tu clave secreta desde el modal de sincronización en el dispositivo donde creaste la bóveda.",
       cloudQrTitle: "Vincular Celular con Código QR",
       cloudQrDesc:
         "Escaneá este código con la cámara de tu celular para vincularlo automáticamente con permisos completos de sincronización (lectura y escritura).",
       cloudCopyPairingLink: "Copiar enlace de vinculación completa",
       cloudPairingLinkCopied: "¡Enlace de vinculación copiado al portapapeles!",
       cloudReadOnlyWarning:
-        "Este celular está en modo Solo Lectura (no puede subir cambios a la nube). Escaneá el código QR que se muestra en tu PC para habilitar permisos de escritura o ingresá tu clave secreta.",
-      cloudUpgradeKeyPlaceholder: "Pegar clave secreta (UUID)...",
+        "Este dispositivo está en modo Solo Lectura (no puede subir cambios a la nube). Ingresá tu clave secreta a continuación o escaneá el QR desde tu dispositivo principal para activar permisos de escritura.",
+      cloudUpgradeKeyPlaceholder: "Pegá tu clave secreta (ej. 550e8400-e29b-41d4-a716-446655440000)...",
       cloudUpgradeKeyBtn: "Activar permisos de escritura",
       cloudUpgradeSuccess: "¡Permisos de escritura activados con éxito!",
       cancel: "Cancelar",

@@ -89,6 +89,40 @@ const t = getTranslations(currentLocale);
               </div>
             </div>
 
+            <!-- Clave secreta para que el usuario pueda copiarla a otros dispositivos -->
+            <div class="cloud-secret-display" data-cloud-secret-wrap hidden>
+              <div class="cloud-secret-label-row">
+                <span class="cloud-code-label">{t.syncModal.cloudSecretKeyLabel}</span>
+              </div>
+              <div class="cloud-secret-val-wrap">
+                <input
+                  type="password"
+                  readonly
+                  class="cloud-secret-input"
+                  data-cloud-secret-input
+                  value=""
+                  spellcheck="false"
+                  aria-label={t.syncModal.cloudSecretKeyLabel}
+                />
+                <button
+                  class="cloud-secret-icon-btn"
+                  type="button"
+                  data-cloud-toggle-secret
+                  title={t.syncModal.cloudToggleSecretVisibility}
+                >
+                  <i data-lucide="eye"></i>
+                </button>
+                <button
+                  class="cloud-secret-icon-btn"
+                  type="button"
+                  data-cloud-copy-secret
+                  title={t.syncModal.cloudCopySecret}
+                >
+                  <i data-lucide="copy"></i>
+                </button>
+              </div>
+            </div>
+
             <p class="cloud-code-help">
               {t.syncModal.cloudHelp}
             </p>
@@ -121,25 +155,69 @@ const t = getTranslations(currentLocale);
           <!-- Aviso Modo Solo Lectura (Si el dispositivo no tiene secretKey) -->
           <div class="cloud-readonly-box" data-cloud-readonly-box hidden>
             <div class="cloud-readonly-header">
-              <i data-lucide="alert-circle"></i>
-              <strong>{t.syncModal.cloudStatusReadOnly}</strong>
+              <div class="cloud-readonly-badge-wrap">
+                <div class="cloud-readonly-icon-box">
+                  <i data-lucide="lock"></i>
+                </div>
+                <div>
+                  <div class="cloud-readonly-title">{t.syncModal.cloudStatusReadOnly}</div>
+                  <span class="cloud-readonly-pill">{t.syncModal.cloudReadOnlyBadge}</span>
+                </div>
+              </div>
             </div>
+
             <p class="cloud-readonly-desc">
               {t.syncModal.cloudReadOnlyWarning}
             </p>
-            <div class="cloud-readonly-form">
-              <input
-                type="text"
-                class="cloud-code-input cloud-readonly-input"
-                placeholder={t.syncModal.cloudUpgradeKeyPlaceholder}
-                data-cloud-upgrade-key-input
-                autocomplete="off"
-                spellcheck="false"
-              />
-              <button class="btn btn--secondary btn--sm" type="button" data-cloud-upgrade-key-btn>
-                <i data-lucide="key"></i>
+
+            <div class="cloud-readonly-card">
+              <label class="cloud-readonly-label" for="cloud-upgrade-key-input">
+                <i data-lucide="key-round"></i>
+                <span>{t.syncModal.cloudSecretKeyLabel}</span>
+              </label>
+
+              <div class="cloud-readonly-input-group">
+                <div class="cloud-readonly-field-wrapper">
+                  <i data-lucide="key" class="cloud-readonly-field-icon"></i>
+                  <input
+                    id="cloud-upgrade-key-input"
+                    type="password"
+                    class="cloud-readonly-input"
+                    placeholder={t.syncModal.cloudUpgradeKeyPlaceholder}
+                    data-cloud-upgrade-key-input
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                  <button
+                    class="cloud-readonly-icon-action"
+                    type="button"
+                    data-cloud-toggle-upgrade-visibility
+                    title={t.syncModal.cloudToggleSecretVisibility}
+                  >
+                    <i data-lucide="eye"></i>
+                  </button>
+                </div>
+
+                <button
+                  class="btn btn--secondary btn--sm cloud-readonly-paste-btn"
+                  type="button"
+                  data-cloud-paste-upgrade-key
+                  title={t.syncModal.cloudPasteFromClipboard}
+                >
+                  <i data-lucide="clipboard-paste"></i>
+                  <span>{t.syncModal.cloudPasteFromClipboard}</span>
+                </button>
+              </div>
+
+              <button class="btn btn--primary cloud-readonly-submit-btn" type="button" data-cloud-upgrade-key-btn>
+                <i data-lucide="unlock"></i>
                 <span>{t.syncModal.cloudUpgradeKeyBtn}</span>
               </button>
+
+              <div class="cloud-readonly-tip">
+                <i data-lucide="info"></i>
+                <span>{t.syncModal.cloudReadOnlyTip}</span>
+              </div>
             </div>
           </div>
 
@@ -327,6 +405,10 @@ const t = getTranslations(currentLocale);
     const cloudJoinBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-join-btn]");
     const cloudCodeValue = overlay.querySelector<HTMLElement>("[data-cloud-code-value]");
     const cloudCopyCode = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-code]");
+    const cloudSecretWrap = overlay.querySelector<HTMLDivElement>("[data-cloud-secret-wrap]");
+    const cloudSecretInput = overlay.querySelector<HTMLInputElement>("[data-cloud-secret-input]");
+    const cloudToggleSecret = overlay.querySelector<HTMLButtonElement>("[data-cloud-toggle-secret]");
+    const cloudCopySecret = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-secret]");
     const cloudLastSyncEl = overlay.querySelector<HTMLElement>("[data-cloud-last-sync]");
     const cloudStatusDot = overlay.querySelector<HTMLElement>("[data-cloud-status-dot]");
     const cloudStatusText = overlay.querySelector<HTMLElement>("[data-cloud-status-text]");
@@ -336,6 +418,8 @@ const t = getTranslations(currentLocale);
     const cloudCopyPairingBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-pairing-link]");
     const cloudReadOnlyBox = overlay.querySelector<HTMLDivElement>("[data-cloud-readonly-box]");
     const cloudUpgradeKeyInput = overlay.querySelector<HTMLInputElement>("[data-cloud-upgrade-key-input]");
+    const cloudToggleUpgradeVis = overlay.querySelector<HTMLButtonElement>("[data-cloud-toggle-upgrade-visibility]");
+    const cloudPasteUpgradeKey = overlay.querySelector<HTMLButtonElement>("[data-cloud-paste-upgrade-key]");
     const cloudUpgradeKeyBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-upgrade-key-btn]");
     const cloudSyncNowBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-sync-now]");
     const cloudCheckNowBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-check-now]");
@@ -407,18 +491,25 @@ const t = getTranslations(currentLocale);
           if (cloudStatusText) cloudStatusText.textContent = t.syncModal.cloudStatusReadWrite;
           if (cloudPairingCard) cloudPairingCard.hidden = false;
           if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = true;
+          if (cloudSecretWrap) cloudSecretWrap.hidden = false;
+          if (cloudSecretInput) {
+            cloudSecretInput.value = state.secretKey;
+            cloudSecretInput.type = "password";
+          }
           renderCloudPairingQr(state.code, state.secretKey);
         } else {
           if (cloudStatusDot) cloudStatusDot.classList.add("cloud-status-dot--readonly");
           if (cloudStatusText) cloudStatusText.textContent = t.syncModal.cloudStatusReadOnly;
           if (cloudPairingCard) cloudPairingCard.hidden = true;
           if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = false;
+          if (cloudSecretWrap) cloudSecretWrap.hidden = true;
         }
       } else {
         cloudUnlinked.hidden = false;
         cloudLinked.hidden = true;
         if (cloudPairingCard) cloudPairingCard.hidden = true;
         if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = true;
+        if (cloudSecretWrap) cloudSecretWrap.hidden = true;
       }
 
       if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = true;
@@ -577,16 +668,85 @@ const t = getTranslations(currentLocale);
       }
     });
 
+    cloudToggleSecret?.addEventListener("click", () => {
+      if (!cloudSecretInput) return;
+      const isPassword = cloudSecretInput.type === "password";
+      cloudSecretInput.type = isPassword ? "text" : "password";
+      const icon = cloudToggleSecret.querySelector("i");
+      if (icon) {
+        icon.setAttribute("data-lucide", isPassword ? "eye-off" : "eye");
+        refreshIcons();
+      }
+    });
+
+    cloudCopySecret?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
+      const t = getTranslations(locale);
+      const state = getCloudState();
+      if (!state.secretKey) return;
+      try {
+        await navigator.clipboard.writeText(state.secretKey);
+        toast.success(t.syncModal.cloudSecretCopied);
+      } catch {
+        toast.info(t.syncModal.cloudCopySecret + ": " + state.secretKey);
+      }
+    });
+
+    cloudToggleUpgradeVis?.addEventListener("click", () => {
+      if (!cloudUpgradeKeyInput) return;
+      const isPassword = cloudUpgradeKeyInput.type === "password";
+      cloudUpgradeKeyInput.type = isPassword ? "text" : "password";
+      const icon = cloudToggleUpgradeVis.querySelector("i");
+      if (icon) {
+        icon.setAttribute("data-lucide", isPassword ? "eye-off" : "eye");
+        refreshIcons();
+      }
+    });
+
+    cloudPasteUpgradeKey?.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text && cloudUpgradeKeyInput) {
+          let keyToSet = text.trim();
+          const keyMatch = text.match(/key=([^&]+)/i);
+          if (keyMatch) {
+            keyToSet = decodeURIComponent(keyMatch[1]).trim();
+          }
+          cloudUpgradeKeyInput.value = keyToSet;
+          cloudUpgradeKeyInput.focus();
+          toast.info(locale === "es" ? "Clave pegada del portapapeles" : "Key pasted from clipboard");
+        }
+      } catch {
+        toast.info(locale === "es" ? "No se pudo leer el portapapeles. Pégala manualmente." : "Could not read clipboard. Paste manually.");
+      }
+    });
+
+    cloudUpgradeKeyInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        cloudUpgradeKeyBtn?.click();
+      }
+    });
+
     cloudUpgradeKeyBtn?.addEventListener("click", () => {
       const locale = getCurrentLocale();
       const t = getTranslations(locale);
-      const keyVal = cloudUpgradeKeyInput?.value?.trim();
-      if (!keyVal) {
+      const rawVal = cloudUpgradeKeyInput?.value?.trim() || "";
+      if (!rawVal) {
         toast.info(locale === "es" ? "Ingresá tu clave secreta" : "Enter your secret key");
         return;
       }
+      let keyVal = rawVal;
+      const keyMatch = rawVal.match(/key=([^&]+)/i);
+      if (keyMatch) {
+        keyVal = decodeURIComponent(keyMatch[1]).trim();
+      }
       setCloudSecretKey(keyVal);
-      if (cloudUpgradeKeyInput) cloudUpgradeKeyInput.value = "";
+      if (cloudUpgradeKeyInput) {
+        cloudUpgradeKeyInput.value = "";
+        cloudUpgradeKeyInput.type = "password";
+      }
       toast.success(t.syncModal.cloudUpgradeSuccess);
     });
 
@@ -619,10 +779,14 @@ const t = getTranslations(currentLocale);
       const locale = getCurrentLocale();
       cloudCheckNowBtn.disabled = true;
       toast.info(locale === "es" ? "Comprobando cambios en la nube..." : "Checking for updates in cloud...");
-      await fetchFromCloud();
+      const updated = await fetchFromCloud(true);
       pingSyncWorkerCheck();
       cloudCheckNowBtn.disabled = false;
-      toast.success(locale === "es" ? "Comprobación finalizada." : "Check completed.");
+      if (updated) {
+        toast.success(locale === "es" ? "¡Equipo y capturas actualizados desde la nube!" : "Team and captures updated from cloud!");
+      } else {
+        toast.success(locale === "es" ? "Comprobación finalizada (ya tenés la última versión)." : "Check completed (already up to date).");
+      }
     });
 
     cloudUnlinkBtn?.addEventListener("click", () => {

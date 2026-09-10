@@ -57,7 +57,7 @@ export const GET: APIRoute = async ({ url }) => {
       success: true,
       code,
       payload: row.payload,
-      updatedAt: row.updated_at,
+      updatedAt: Number(row.updated_at),
     });
   } catch (err) {
     console.error("Error al consultar bóveda en la base de datos:", err);

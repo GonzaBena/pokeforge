@@ -231,11 +231,13 @@ export async function fetchCloudVault(
 /**
  * Asigna o actualiza la clave secreta en el dispositivo local para habilitar permisos de escritura.
  */
-export function setCloudSecretKey(secretKey: string): boolean {
+export async function setCloudSecretKey(secretKey: string): Promise<boolean> {
   const cleanKey = secretKey.trim();
   if (!cleanKey) return false;
   localStorage.setItem(CLOUD_SECRET_KEY, cleanKey);
   notifyStatusChange();
+  // Traer inmediatamente el estado más reciente de la nube
+  await fetchFromCloud(true);
   return true;
 }
 
@@ -334,7 +336,12 @@ export async function joinCloudVault(
 /**
  * Envía los cambios locales a la bóveda en la DB (PUT /api/vault).
  */
-export async function syncToCloudNow(): Promise<{ success: boolean; error?: string }> {
+export async function syncToCloudNow(skipRemoteCheck = false): Promise<{ success: boolean; error?: string }> {
+  if (syncDebounceTimer) {
+    window.clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = null;
+  }
+
   const state = getCloudState();
   if (!state.isLinked || !state.code) {
     return { success: false, error: "Dispositivo no vinculado a la nube" };
@@ -350,6 +357,38 @@ export async function syncToCloudNow(): Promise<{ success: boolean; error?: stri
     isSyncing = true;
     lastSyncError = null;
     notifyStatusChange();
+
+    // Protección contra sobreescritura accidental: si otro dispositivo guardó algo más nuevo, descargarlo
+    if (!skipRemoteCheck) {
+      try {
+        const checkRes = await fetch(`/api/vault?code=${encodeURIComponent(state.code)}&_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
+        if (checkRes.ok) {
+          const remoteData = await checkRes.json();
+          if (remoteData.success && remoteData.updatedAt) {
+            const remoteUpdated = Number(remoteData.updatedAt);
+            const localLastSync = state.lastSync || 0;
+            if (remoteUpdated > localLastSync + 1500) {
+              isApplyingRemoteUpdate = true;
+              try {
+                const remotePayload = await decodeSyncPayload(remoteData.payload);
+                applySyncPayload(remotePayload, "replace");
+                localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated));
+                toast.info(getSyncRemoteUpdatedText());
+                return { success: true };
+              } finally {
+                isApplyingRemoteUpdate = false;
+                notifyStatusChange();
+              }
+            }
+          }
+        }
+      } catch {
+        // En caso de fallo de red en el chequeo previo, continuar con el intento de guardado
+      }
+    }
 
     const localPayload = createSyncPayload();
     const token = await encodeSyncPayload(localPayload);
@@ -385,30 +424,37 @@ export async function syncToCloudNow(): Promise<{ success: boolean; error?: stri
 /**
  * Consulta la nube para comprobar si hay actualizaciones más recientes (GET /api/vault).
  */
-export async function fetchFromCloud(): Promise<void> {
+export async function fetchFromCloud(force: boolean = false): Promise<boolean> {
+  if (syncDebounceTimer) {
+    window.clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = null;
+  }
+
   const state = getCloudState();
-  if (!state.isLinked || !state.code) return;
+  if (!state.isLinked || !state.code) return false;
 
   try {
     const res = await fetch(`/api/vault?code=${encodeURIComponent(state.code)}&_t=${Date.now()}`, {
       cache: "no-store",
       headers: { "Cache-Control": "no-cache" },
     });
-    if (!res.ok) return;
+    if (!res.ok) return false;
 
     const data = await res.json();
-    if (!data.success || !data.updatedAt) return;
+    if (!data.success || !data.updatedAt) return false;
 
     const localLastSync = state.lastSync || 0;
-    // Si la nube tiene cambios más nuevos por más de 1.5s
-    if (data.updatedAt > localLastSync + 1500) {
+    const remoteUpdated = Number(data.updatedAt);
+    // Si la nube tiene cambios más nuevos por más de 1.5s o se solicita verificación forzada
+    if (force || remoteUpdated > localLastSync + 1500) {
       isApplyingRemoteUpdate = true;
       try {
         const payload = await decodeSyncPayload(data.payload);
         applySyncPayload(payload, "replace");
-        localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt));
+        localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated));
         lastSyncError = null;
         toast.info(getSyncRemoteUpdatedText());
+        return true;
       } finally {
         isApplyingRemoteUpdate = false;
         notifyStatusChange();
@@ -416,9 +462,11 @@ export async function fetchFromCloud(): Promise<void> {
     } else {
       lastSyncError = null;
       notifyStatusChange();
+      return false;
     }
   } catch {
     // Modo offline silencioso
+    return false;
   }
 }
 
@@ -441,6 +489,7 @@ export function scheduleAutoSync(): void {
   }
 
   syncDebounceTimer = window.setTimeout(async () => {
+    if (isApplyingRemoteUpdate) return;
     await syncToCloudNow();
   }, 1500);
 }
@@ -524,7 +573,7 @@ export function initCloudSyncClient(): void {
     lastSyncError = null;
     notifyStatusChange();
     pingSyncWorkerCheck();
-    syncToCloudNow();
+    fetchFromCloud(true);
   });
 
   window.addEventListener("offline", () => {

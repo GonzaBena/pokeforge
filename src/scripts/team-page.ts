@@ -3441,7 +3441,9 @@ async function init(): Promise<void> {
     const autoGame = autoDetectGameFromTeam();
     if (autoGame) {
       pickerState.game = autoGame;
-      setSelectedGame(autoGame);
+      try {
+        localStorage.setItem("poketeam:selected_game", autoGame);
+      } catch {}
     }
   }
 

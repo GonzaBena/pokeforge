@@ -151,7 +151,7 @@
 /* ------------------------------------------------------------ sync-modal */
 
 .sync-modal-panel {
-  width: min(480px, 95vw);
+  width: min(620px, 95vw);
 }
 
 .sync-modal__title-group {
@@ -252,7 +252,7 @@
   color: var(--text-muted);
   margin: 0 0 18px;
   line-height: 1.45;
-  max-width: 380px;
+  max-width: 440px;
 }
 
 .cloud-primary-btn {
@@ -381,6 +381,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
 }
 
 .cloud-code-copy-btn:hover {
@@ -389,6 +390,73 @@
 }
 
 .cloud-code-copy-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Clave secreta visible/copiable en dispositivo con permisos */
+.cloud-secret-display {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-card);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+}
+
+.cloud-secret-display[hidden] {
+  display: none !important;
+}
+
+.cloud-secret-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cloud-secret-val-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+}
+
+.cloud-secret-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  outline: none;
+  min-width: 0;
+  padding: 4px 2px;
+}
+
+.cloud-secret-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.cloud-secret-icon-btn:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.cloud-secret-icon-btn svg {
   width: 14px;
   height: 14px;
 }
@@ -458,61 +526,241 @@
   display: none !important;
 }
 
+/* --- Rediseño y Mejora de Caja Solo Lectura / Clave Secreta --- */
+
 .cloud-readonly-box {
-  background: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.04) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.06);
 }
 
 .cloud-readonly-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #f59e0b;
+  justify-content: space-between;
 }
 
-.cloud-readonly-header svg {
-  width: 16px;
-  height: 16px;
+.cloud-readonly-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cloud-readonly-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cloud-readonly-icon-box svg {
+  width: 18px;
+  height: 18px;
+}
+
+.cloud-readonly-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-bottom: 2px;
+}
+
+.cloud-readonly-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.16);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
 }
 
 .cloud-readonly-desc {
   margin: 0;
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--text-muted);
   line-height: 1.45;
 }
 
-.cloud-readonly-form {
+.cloud-readonly-card {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cloud-readonly-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.cloud-readonly-label svg {
+  width: 14px;
+  height: 14px;
+  color: #f59e0b;
+}
+
+.cloud-readonly-input-group {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.cloud-readonly-field-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.cloud-readonly-field-icon {
+  position: absolute;
+  left: 12px;
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
 .cloud-readonly-input {
-  flex: 1;
-  font-size: 12px;
-  padding: 8px 12px;
+  width: 100%;
+  padding: 10px 38px 10px 34px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
-.cloud-worker-badge {
+.cloud-readonly-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.cloud-readonly-icon-action {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(34, 197, 94, 0.07);
-  border: 1px solid rgba(34, 197, 94, 0.22);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.cloud-readonly-icon-action:hover {
+  color: var(--text);
+}
+
+.cloud-readonly-icon-action svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cloud-readonly-paste-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 10px 14px;
+  height: 40px;
   font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.cloud-readonly-paste-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cloud-readonly-submit-btn {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #f59e0b;
+  border-color: #d97706;
+  color: #101014;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.cloud-readonly-submit-btn:hover {
+  background: #fbbf24;
+  border-color: #f59e0b;
+  color: #101014;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.cloud-readonly-submit-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cloud-readonly-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-faint);
   line-height: 1.4;
-  margin-bottom: 12px;
+  margin-top: 2px;
+}
+
+.cloud-readonly-tip svg {
+  width: 13px;
+  height: 13px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+@media (max-width: 520px) {
+  .cloud-readonly-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cloud-readonly-paste-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .cloud-worker-badge svg {
