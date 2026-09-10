@@ -1,5 +1,9 @@
 ---
 import { getTranslations, type Locale } from "../lib/i18n/translations";
+import "../styles/components/modal.css";
+import "../styles/features/pokemon-detail/detail-modal.css";
+import "../styles/features/pokemon-detail/effectiveness.css";
+
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
 ---

@@ -73,11 +73,6 @@ const TRIGGER_ES: Record<string, string> = {
   other: "Especial",
 };
 
-function idFromUrl(url: string): number {
-  const match = url.match(/\/(\d+)\/?$/);
-  return match ? Number(match[1]) : 0;
-}
-
 function formatLabel(s: string): string {
   return s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }

@@ -152,7 +152,7 @@ function initSyncWorker(): void {
         };
       } catch (err) {
         console.warn("No se pudo iniciar Web Worker, usando temporizador estándar:", err);
-        startFallbackTimer(state.code);
+        startFallbackTimer();
         return;
       }
     }
@@ -163,7 +163,7 @@ function initSyncWorker(): void {
       intervalMs: SYNC_WORKER_INTERVAL,
     });
   } else {
-    startFallbackTimer(state.code);
+    startFallbackTimer();
   }
 }
 
@@ -179,7 +179,7 @@ function stopSyncWorker(): void {
   }
 }
 
-function startFallbackTimer(code: string): void {
+function startFallbackTimer(): void {
   if (fallbackIntervalTimer) {
     window.clearInterval(fallbackIntervalTimer);
   }

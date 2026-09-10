@@ -425,7 +425,7 @@ function replaceContainers(str, locale = 'es') {
   // 4. Download Card
   output = output.replace(
     /<(?:download-card|download)\b([^>]*)>(?:<\/(?:download-card|download)>)?|<(?:download-card|download)\b([^/>]*)\/>/gi,
-    (match, attrs1, attrs2) => {
+    (_match, attrs1, attrs2) => {
       const attrs = parseCardAttrs(attrs1 || attrs2 || '');
       return renderDownloadCardHtml(attrs, locale);
     }

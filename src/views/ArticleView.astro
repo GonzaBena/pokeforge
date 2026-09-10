@@ -1,10 +1,11 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import BlogLayout from "../layouts/BlogLayout.astro";
 import DownloadCard from "../components/DownloadCard.astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
 import { getAuthor } from "../lib/authors";
 import { getGuideHierarchy, getPostUrl, getCoverImageSrc } from "../lib/guides";
+import "../styles/features/blog/article.css";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -64,7 +65,15 @@ const alternateUrls: Partial<Record<Locale, string>> = {
 const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) : null;
 ---
 
-<BaseLayout title={`${post.data.title} · Blog`} alternateUrls={alternateUrls}>
+<BlogLayout
+  title={`${post.data.title} · Blog`}
+  description={post.data.description}
+  image={coverSrc ?? undefined}
+  pubDate={post.data.pubDate}
+  author={author.name}
+  alternateUrls={alternateUrls}
+  type="article"
+>
   <div class="article-page">
     <div class="article-ambient-glow" aria-hidden="true"></div>
 
@@ -218,6 +227,9 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
               src={coverSrc}
               alt={post.data.title}
               loading="eager"
+              decoding="async"
+              width="800"
+              height="450"
             />
           </div>
         )}
@@ -643,15 +655,19 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
 
       headingMap.forEach((el) => observer.observe(el));
 
-      // Si el usuario llega al fondo del artículo, activar el último encabezado
-      function handleScroll() {
-        const scrollBottom = window.innerHeight + window.scrollY;
-        const pageHeight = document.documentElement.scrollHeight;
-        if (pageHeight - scrollBottom < 120 && slugs.length > 0) {
-          updateActiveLink(slugs[slugs.length - 1]);
-        }
+      // Si el usuario llega al pie del artículo, activar el último encabezado
+      const footerEl = document.querySelector(".article-footer-box");
+      if (footerEl && slugs.length > 0) {
+        const footerObserver = new IntersectionObserver(
+          (entries) => {
+            if (entries[0]?.isIntersecting) {
+              updateActiveLink(slugs[slugs.length - 1]);
+            }
+          },
+          { threshold: 0.1 }
+        );
+        footerObserver.observe(footerEl);
       }
-      window.addEventListener("scroll", handleScroll, { passive: true });
 
       // En móviles, cerrar el desplegable al tocar un enlace
       const mobileDetails = document.querySelector<HTMLDetailsElement>(".article-toc-mobile");
@@ -923,4 +939,4 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
     document.addEventListener("astro:page-load", setupRivalStarterSelectors);
     document.addEventListener("astro:page-load", setupArticleChecklists);
   </script>
-</BaseLayout>
+</BlogLayout>

@@ -4,6 +4,9 @@ import CapturedCounter from "../components/CapturedCounter.astro";
 import LoadMoreButton from "../components/LoadMoreButton.astro";
 import PokemonDetailModal from "../components/PokemonDetailModal.astro";
 import { getTranslations, type Locale } from "../lib/i18n/translations";
+import "../styles/features/pokedex/filters.css";
+import "../styles/features/pokedex/moves-filter.css";
+import "../styles/features/pokedex/grid.css";
 
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);

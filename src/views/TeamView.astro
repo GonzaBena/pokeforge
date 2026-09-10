@@ -4,6 +4,14 @@ import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.ast
 import StrengthsGuideModal from "../components/StrengthsGuideModal.astro";
 import PokemonDetailModal from "../components/PokemonDetailModal.astro";
 import { getTranslations, type Locale } from "../lib/i18n/translations";
+import "../styles/features/team/team-page.css";
+import "../styles/features/team/move-picker.css";
+import "../styles/features/team/item-picker.css";
+import "../styles/features/team/side-panel.css";
+import "../styles/features/team/graphic-modal.css";
+import "../styles/features/team/type-matrix.css";
+import "../styles/features/team/synergy.css";
+import "../styles/features/team/picker-filters.css";
 
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);

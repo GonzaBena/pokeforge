@@ -96,10 +96,6 @@ export function setTeam(team: TeamState): TeamState {
   return normalized;
 }
 
-export function setTeamSize(size: number): TeamState {
-  return getTeam();
-}
-
 export function setTeamSlot(
   index: number,
   pokemonId: number | null,

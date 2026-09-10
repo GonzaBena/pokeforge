@@ -19,7 +19,7 @@ import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, Pokemon } from "../lib/types";
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 24;
 
 const grid = document.querySelector<HTMLElement>("[data-pokedex-grid]")!;
 const emptyMsg = document.querySelector<HTMLElement>("[data-pokedex-empty]")!;
@@ -77,7 +77,6 @@ function dexNumber(id: number): string {
   return `#${String(id).padStart(4, "0")}`;
 }
 
-// Mirrors src/components/PokemonCard.astro — keep both in sync when the markup changes.
 function renderCardHTML(p: Pokemon, captured: boolean): string {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
@@ -1041,13 +1040,49 @@ exclusiveToggleEl?.addEventListener("click", (e) => {
   applyFilters();
 });
 
-loadMoreBtn.addEventListener("click", async () => {
-  if (!allPokemonReady) {
+let isLoadingBatch = false;
+let infiniteScrollObserver: IntersectionObserver | null = null;
+
+async function handleLoadMore(): Promise<void> {
+  if (isLoadingBatch) return;
+  const isFinished = allPokemonReady ? shown >= filtered.length : shown >= manifestTotal;
+  if (isFinished) return;
+
+  isLoadingBatch = true;
+  if (shown >= filtered.length && !allPokemonReady) {
     allPokemon = await getAllPokemon();
     allPokemonReady = true;
     filtered = computeFiltered(allPokemon);
   }
   renderNextBatch();
+  isLoadingBatch = false;
+}
+
+function setupInfiniteScroll(): void {
+  if (infiniteScrollObserver) {
+    infiniteScrollObserver.disconnect();
+  }
+
+  if (!("IntersectionObserver" in window) || !loadMoreWrap) return;
+
+  infiniteScrollObserver = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry && entry.isIntersecting) {
+        handleLoadMore();
+      }
+    },
+    {
+      rootMargin: "350px 0px",
+      threshold: 0.1,
+    }
+  );
+
+  infiniteScrollObserver.observe(loadMoreWrap);
+}
+
+loadMoreBtn.addEventListener("click", () => {
+  handleLoadMore();
 });
 
 window.addEventListener(CAPTURED_CHANGED_EVENT, (e) => {
@@ -1158,6 +1193,7 @@ async function init(): Promise<void> {
   }
 
   cardHoverTilt(grid);
+  setupInfiniteScroll();
   const warmCache = () => {
     const onReady = (pokemon: Pokemon[]) => {
       allPokemon = pokemon;

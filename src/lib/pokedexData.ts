@@ -23,11 +23,13 @@ export function getManifest(): Promise<PokedexManifest> {
 export function getChunk(index: number): Promise<Pokemon[]> {
   let promise = chunkPromises.get(index);
   if (!promise) {
-    promise = getManifest().then((manifest) => {
+    promise = (async () => {
+      const manifest = await getManifest();
       const entry = manifest.chunks[index];
       if (!entry) throw new Error(`Unknown chunk index ${index}`);
-      return fetchJson<PokedexChunk>(`${DATA_ROOT}/pokedex/${entry.file}`).then((c) => c.pokemon);
-    });
+      const chunk = await fetchJson<PokedexChunk>(`${DATA_ROOT}/pokedex/${entry.file}`);
+      return chunk.pokemon;
+    })();
     chunkPromises.set(index, promise);
   }
   return promise;

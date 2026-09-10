@@ -1,10 +1,12 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import BlogLayout from "../layouts/BlogLayout.astro";
 import type { Page } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import { getTranslations, type Locale } from "../lib/i18n/translations";
 import { getAuthor } from "../lib/authors";
 import { getPostUrl, getCoverImageSrc } from "../lib/guides";
+import "../styles/features/home/home.css";
+import "../styles/features/blog/blog.css";
 
 interface Props {
   page?: Page<CollectionEntry<"blog">>;
@@ -125,7 +127,7 @@ const searchManifest = sortedPosts.map((p) => {
 });
 ---
 
-<BaseLayout title={pageTitle} alternateUrls={alternateUrls}>
+<BlogLayout title={pageTitle} alternateUrls={alternateUrls}>
   <div class="hero-container">
     <div class="hero-ambient-glow" aria-hidden="true"></div>
     <section class="hero">
@@ -181,6 +183,9 @@ const searchManifest = sortedPosts.map((p) => {
                       src={getCoverImageSrc(post.data.coverImage)}
                       alt={post.data.title}
                       loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      width="800"
+                      height="450"
                     />
                   </div>
                   <div class="blog-featured-card__body">
@@ -368,6 +373,9 @@ const searchManifest = sortedPosts.map((p) => {
                   src={getCoverImageSrc(post.data.coverImage)}
                   alt={post.data.title}
                   loading="lazy"
+                  decoding="async"
+                  width="600"
+                  height="340"
                 />
               </div>
 
@@ -920,4 +928,4 @@ const searchManifest = sortedPosts.map((p) => {
     setupBlogInteractions();
     document.addEventListener("astro:page-load", setupBlogInteractions);
   </script>
-</BaseLayout>
+</BlogLayout>

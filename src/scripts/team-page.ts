@@ -2,7 +2,6 @@ import { getAllPokemon, getGenerations, getMoveDetailsMap, getMoveIndex, getType
 import { getPokemonDetail } from "../lib/pokemonDetail";
 import {
   getTeam,
-  setTeam,
   setTeamSlot,
   setTeamSlotItem,
   setTeamSlotMove,
@@ -28,7 +27,7 @@ import {
   type AttackSource,
   type TeamMember,
 } from "../lib/typeChart";
-import { badgeBounceIn, slotPopIn, teamSizeTransition } from "../lib/animations";
+import { badgeBounceIn, slotPopIn } from "../lib/animations";
 import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
@@ -39,8 +38,6 @@ import { getCurrentLocale, getNatureName, getTranslations, getTypeName, getGameT
 import { computeTeamSynergy } from "../lib/teamSynergy";
 import { filterItems, getItemById, getItemDisplayName, renderItemIconHTML } from "../lib/items";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamSlotState, TeamState, TypeChart } from "../lib/types";
-
-const sizeSelectorEl = document.querySelector<HTMLElement>("[data-team-size-selector]");
 const slotsEl = document.querySelector<HTMLElement>("[data-team-slots]")!;
 const sidePanelEl = document.querySelector<HTMLElement>("[data-strengths-panel]");
 const densitySwitchEl = document.querySelector<HTMLButtonElement>("[data-density-switch]");
@@ -195,7 +192,6 @@ function categoryLabel(cat: string, locale: Locale = getCurrentLocale()): string
   return cat;
 }
 
-// Mirrors src/components/TeamSlot.astro — keep both in sync when the markup changes.
 function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
@@ -318,12 +314,6 @@ function pokemonForSlot(index: number): Pokemon | null {
   return id !== null ? pokemonById.get(id) ?? null : null;
 }
 
-function renderSizeSelector(): void {
-  sizeSelectorEl?.querySelectorAll<HTMLButtonElement>("[data-size]").forEach((btn) => {
-    btn.setAttribute("aria-pressed", String(Number(btn.dataset.size) === team.size));
-  });
-}
-
 function renderAllSlots(): void {
   slotsEl.innerHTML = team.slots.map((_, i) => renderSlotHTML(i, pokemonForSlot(i))).join("");
   refreshIcons();
@@ -345,46 +335,6 @@ function renderSingleSlot(index: number, animatePop = false): void {
     const badges = newEl.querySelectorAll(".type-badge");
     if (badges.length) badgeBounceIn(badges);
   }
-}
-
-function changeTeamSize(newSize: number): void {
-  if (newSize === team.size) return;
-  const oldSize = team.size;
-
-  if (newSize < oldSize) {
-    const losing = team.slots.slice(newSize).filter((s) => s.pokemonId !== null);
-    const removedEls = Array.from(slotsEl.children).slice(newSize) as HTMLElement[];
-
-    team = setTeam({ size: newSize, slots: team.slots.slice(0, newSize) });
-    renderSizeSelector();
-
-    if (losing.length) {
-      const locale = getCurrentLocale();
-      toast.info(
-        locale === "es"
-          ? `Se ${losing.length === 1 ? "quitó" : "quitaron"} ${losing.length} Pokémon del equipo al reducir el tamaño.`
-          : `${losing.length} Pokémon ${losing.length === 1 ? "was" : "were"} removed from the team due to size reduction.`
-      );
-    }
-
-    teamSizeTransition({
-      removed: removedEls,
-      onRemoved: () => removedEls.forEach((el) => el.remove()),
-    });
-  } else {
-    const newSlots = Array.from({ length: newSize }, (_, i) => team.slots[i] ?? { pokemonId: null });
-    team = setTeam({ size: newSize, slots: newSlots });
-    renderSizeSelector();
-
-    const template = document.createElement("template");
-    template.innerHTML = Array.from({ length: newSize - oldSize }, (_, i) => renderSlotHTML(oldSize + i, null)).join("");
-    const addedEls = Array.from(template.content.children) as HTMLElement[];
-    slotsEl.append(...addedEls);
-    refreshIcons();
-    teamSizeTransition({ added: addedEls });
-  }
-
-  renderStrengthsPanel();
 }
 
 function formatMult(mult: number): string {
@@ -2025,12 +1975,6 @@ offenseModeToggleEl?.addEventListener("click", (e) => {
   refreshIcons();
 });
 
-sizeSelectorEl?.addEventListener("click", (e) => {
-  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-size]");
-  if (!btn) return;
-  changeTeamSize(Number(btn.dataset.size));
-});
-
 slotsEl.addEventListener("click", (e) => {
   const target = e.target as HTMLElement;
 
@@ -2716,7 +2660,6 @@ window.addEventListener(DATA_RESET_EVENT, () => {
 // controls — re-render slots and size selector so it shows up without reload.
 window.addEventListener(TEAM_CHANGED_EVENT, () => {
   team = getTeam();
-  renderSizeSelector();
   renderAllSlots();
   renderStrengthsPanel();
   if (typeMatrixOverlay && !typeMatrixOverlay.hidden) renderTypeMatrix();
@@ -3408,7 +3351,6 @@ pickerResultsEl.addEventListener("click", async (e) => {
 
 async function init(): Promise<void> {
   team = getTeam();
-  renderSizeSelector();
 
   const [full, chart, gens, moves, moveDetails, gameDex] = await Promise.all([
     getAllPokemon(),

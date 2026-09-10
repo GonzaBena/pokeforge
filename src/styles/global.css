@@ -8,39 +8,7 @@
 @import "./components/nav.css";
 @import "./components/buttons.css";
 @import "./components/badges.css";
-@import "./components/captured-counter.css";
-
-/* Features: Pokédex */
-@import "./features/pokedex/filters.css";
-@import "./features/pokedex/moves-filter.css";
-@import "./features/pokedex/grid.css";
-
-/* Features: Team Builder */
-@import "./features/team/team-page.css";
-@import "./features/team/move-picker.css";
-@import "./features/team/item-picker.css";
-@import "./features/team/side-panel.css";
-@import "./components/modal.css";
-@import "./features/team/graphic-modal.css";
-@import "./features/team/type-matrix.css";
-@import "./features/team/synergy.css";
-@import "./features/team/picker-filters.css";
-
-/* Features: Pokémon Detail */
-@import "./features/pokemon-detail/detail-modal.css";
-@import "./features/pokemon-detail/effectiveness.css";
-
-/* Toast & Home */
 @import "./components/toast.css";
-@import "./features/home/home.css";
-
-/* Features: Sync */
-@import "./features/sync/sync-modal.css";
-@import "./features/sync/sync-page.css";
-
-/* Features: Blog */
-@import "./features/blog/blog.css";
-@import "./features/blog/article.css";
 
 .capitalize {
   text-transform: capitalize;

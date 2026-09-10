@@ -170,37 +170,6 @@ export function slotPopIn(slotEl: HTMLElement): void {
   });
 }
 
-export function teamSizeTransition(opts: {
-  removed?: HTMLElement[];
-  added?: HTMLElement[];
-  onRemoved?: () => void;
-}): void {
-  const { removed = [], added = [], onRemoved } = opts;
-
-  if (removed.length) {
-    anime({
-      targets: removed,
-      scale: 0,
-      opacity: 0,
-      duration: 260,
-      easing: "easeInQuad",
-      complete: onRemoved,
-    });
-  }
-
-  if (added.length) {
-    anime.set(added, { opacity: 0, scale: 0.85 });
-    anime({
-      targets: added,
-      opacity: [0, 1],
-      scale: [0.85, 1],
-      duration: 340,
-      delay: anime.stagger(60),
-      easing: "easeOutQuad",
-    });
-  }
-}
-
 export function badgeBounceIn(badgeEls: Element[] | NodeListOf<Element>): void {
   anime.set(badgeEls, { opacity: 0, scale: 0 });
   anime({
@@ -210,18 +179,6 @@ export function badgeBounceIn(badgeEls: Element[] | NodeListOf<Element>): void {
     duration: 480,
     delay: anime.stagger(60),
     easing: "easeOutElastic(1, .6)",
-  });
-}
-
-export function barsAnimateIn(barEls: HTMLElement[] | NodeListOf<HTMLElement>): void {
-  const targets = Array.from(barEls);
-  anime.set(targets, { width: "0%" });
-  anime({
-    targets,
-    width: (el: Element) => (el as HTMLElement).dataset.targetWidth ?? "0%",
-    duration: 620,
-    delay: anime.stagger(30),
-    easing: "easeOutExpo",
   });
 }
 

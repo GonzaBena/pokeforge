@@ -3,9 +3,10 @@ import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/tran
 
 interface Props {
   alternateUrls?: Partial<Record<Locale, string>>;
+  variant?: "default" | "minimal";
 }
 
-const { alternateUrls } = Astro.props;
+const { alternateUrls, variant = "default" } = Astro.props;
 
 const path = Astro.url.pathname;
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
@@ -23,6 +24,7 @@ const isHome = currentLocale === "es" ? (path === "/es" || path === "/es/") : (p
 const isPokedex = currentLocale === "es" ? path.startsWith("/es/pokedex") : path.startsWith("/pokedex");
 const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : path.startsWith("/equipo");
 const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.startsWith("/blog");
+const isMinimal = variant === "minimal" || isBlog;
 ---
 
 <nav class="nav">
@@ -49,135 +51,139 @@ const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.start
         <span class="nav__lang-divider">/</span>
         <a href={esHref} class:list={["nav__lang-btn", { active: currentLocale === "es" }]} data-astro-prefetch>ES</a>
       </div>
-      <div class="nav__pwa-wrapper" data-pwa-wrapper hidden>
-        <button
-          class="nav__pwa-btn"
-          type="button"
-          data-pwa-trigger
-          title={t.nav.pwaPopoverTitle}
-          aria-label={t.nav.pwaPopoverTitle}
-          aria-haspopup="dialog"
-          aria-expanded="false"
-        >
-          <i data-lucide="download"></i>
-          <span class="nav__pwa-badge-dot" aria-hidden="true"></span>
-        </button>
-
-        <div class="pwa-popover" id="pwa-install-popover" data-pwa-popover role="dialog" aria-modal="true" aria-labelledby="pwa-popover-title" hidden>
-          <div class="pwa-popover__header">
-            <div class="pwa-popover__brand">
-              <img src="/favicon.png" alt="PokeForge Logo" class="pwa-popover__logo" />
-              <div>
-                <h3 id="pwa-popover-title" class="pwa-popover__title">{t.nav.pwaPopoverTitle}</h3>
-                <p class="pwa-popover__subtitle">{t.nav.pwaPopoverSubtitle}</p>
-              </div>
-            </div>
-            <button type="button" class="pwa-popover__close" data-pwa-close aria-label={t.nav.pwaClose}>
-              <i data-lucide="x"></i>
-            </button>
-          </div>
-
-          <div class="pwa-popover__features">
-            <div class="pwa-popover__feature">
-              <span class="pwa-popover__feature-icon"><i data-lucide="wifi-off"></i></span>
-              <div class="pwa-popover__feature-text">
-                <strong>{t.nav.pwaFeatureOffline}</strong>
-                <span>{t.nav.pwaFeatureOfflineDesc}</span>
-              </div>
-            </div>
-            <div class="pwa-popover__feature">
-              <span class="pwa-popover__feature-icon"><i data-lucide="maximize"></i></span>
-              <div class="pwa-popover__feature-text">
-                <strong>{t.nav.pwaFeatureFast}</strong>
-                <span>{t.nav.pwaFeatureFastDesc}</span>
-              </div>
-            </div>
-            <div class="pwa-popover__feature">
-              <span class="pwa-popover__feature-icon"><i data-lucide="cloud"></i></span>
-              <div class="pwa-popover__feature-text">
-                <strong>{t.nav.pwaFeatureSafe}</strong>
-                <span>{t.nav.pwaFeatureSafeDesc}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Dynamic block for Chrome/Edge/Android vs iOS Safari -->
-          <div class="pwa-popover__action-block" data-pwa-native-block>
-            <button type="button" class="pwa-popover__install-btn" data-pwa-install-action>
+      {!isMinimal && (
+        <>
+          <div class="nav__pwa-wrapper" data-pwa-wrapper hidden>
+            <button
+              class="nav__pwa-btn"
+              type="button"
+              data-pwa-trigger
+              title={t.nav.pwaPopoverTitle}
+              aria-label={t.nav.pwaPopoverTitle}
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
               <i data-lucide="download"></i>
-              <span>{t.nav.pwaInstallCta}</span>
+              <span class="nav__pwa-badge-dot" aria-hidden="true"></span>
             </button>
-          </div>
 
-          <div class="pwa-popover__ios-block" data-pwa-ios-block hidden>
-            <div class="pwa-popover__ios-title">
-              <i data-lucide="info"></i>
-              <span>{t.nav.pwaIosTitle}</span>
+            <div class="pwa-popover" id="pwa-install-popover" data-pwa-popover role="dialog" aria-modal="true" aria-labelledby="pwa-popover-title" hidden>
+              <div class="pwa-popover__header">
+                <div class="pwa-popover__brand">
+                  <img src="/favicon.png" alt="PokeForge Logo" class="pwa-popover__logo" />
+                  <div>
+                    <h3 id="pwa-popover-title" class="pwa-popover__title">{t.nav.pwaPopoverTitle}</h3>
+                    <p class="pwa-popover__subtitle">{t.nav.pwaPopoverSubtitle}</p>
+                  </div>
+                </div>
+                <button type="button" class="pwa-popover__close" data-pwa-close aria-label={t.nav.pwaClose}>
+                  <i data-lucide="x"></i>
+                </button>
+              </div>
+
+              <div class="pwa-popover__features">
+                <div class="pwa-popover__feature">
+                  <span class="pwa-popover__feature-icon"><i data-lucide="wifi-off"></i></span>
+                  <div class="pwa-popover__feature-text">
+                    <strong>{t.nav.pwaFeatureOffline}</strong>
+                    <span>{t.nav.pwaFeatureOfflineDesc}</span>
+                  </div>
+                </div>
+                <div class="pwa-popover__feature">
+                  <span class="pwa-popover__feature-icon"><i data-lucide="maximize"></i></span>
+                  <div class="pwa-popover__feature-text">
+                    <strong>{t.nav.pwaFeatureFast}</strong>
+                    <span>{t.nav.pwaFeatureFastDesc}</span>
+                  </div>
+                </div>
+                <div class="pwa-popover__feature">
+                  <span class="pwa-popover__feature-icon"><i data-lucide="cloud"></i></span>
+                  <div class="pwa-popover__feature-text">
+                    <strong>{t.nav.pwaFeatureSafe}</strong>
+                    <span>{t.nav.pwaFeatureSafeDesc}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dynamic block for Chrome/Edge/Android vs iOS Safari -->
+              <div class="pwa-popover__action-block" data-pwa-native-block>
+                <button type="button" class="pwa-popover__install-btn" data-pwa-install-action>
+                  <i data-lucide="download"></i>
+                  <span>{t.nav.pwaInstallCta}</span>
+                </button>
+              </div>
+
+              <div class="pwa-popover__ios-block" data-pwa-ios-block hidden>
+                <div class="pwa-popover__ios-title">
+                  <i data-lucide="info"></i>
+                  <span>{t.nav.pwaIosTitle}</span>
+                </div>
+                <ol class="pwa-popover__ios-steps">
+                  <li>
+                    <span class="pwa-popover__step-badge">1</span>
+                    <span>{t.nav.pwaIosStep1} <i data-lucide="share-2" class="pwa-popover__inline-icon"></i></span>
+                  </li>
+                  <li>
+                    <span class="pwa-popover__step-badge">2</span>
+                    <span>{t.nav.pwaIosStep2} <i data-lucide="plus-square" class="pwa-popover__inline-icon"></i></span>
+                  </li>
+                </ol>
+              </div>
+
+              <div class="pwa-popover__footer">
+                <button type="button" class="pwa-popover__cancel-btn" data-pwa-close>
+                  {t.nav.pwaClose}
+                </button>
+              </div>
             </div>
-            <ol class="pwa-popover__ios-steps">
-              <li>
-                <span class="pwa-popover__step-badge">1</span>
-                <span>{t.nav.pwaIosStep1} <i data-lucide="share-2" class="pwa-popover__inline-icon"></i></span>
-              </li>
-              <li>
-                <span class="pwa-popover__step-badge">2</span>
-                <span>{t.nav.pwaIosStep2} <i data-lucide="plus-square" class="pwa-popover__inline-icon"></i></span>
-              </li>
-            </ol>
           </div>
-
-          <div class="pwa-popover__footer">
-            <button type="button" class="pwa-popover__cancel-btn" data-pwa-close>
-              {t.nav.pwaClose}
-            </button>
-          </div>
-        </div>
-      </div>
-      <button
-        class="nav__sync-btn"
-        type="button"
-        data-sync-open
-        data-cloud-btn
-        title={t.nav.syncTitle}
-        aria-label={t.nav.syncTitle}
-      >
-        <span class="nav__cloud-wrapper" aria-hidden="true">
-          <!-- 1. Sincronizado / Guardado (Google Docs: Nube con check) -->
-          <span class="nav__cloud-icon nav__cloud-icon--synced" data-cloud-state="synced" hidden>
-            <i data-lucide="cloud"></i>
-            <span class="nav__cloud-badge nav__cloud-badge--check">
-              <i data-lucide="check"></i>
+          <button
+            class="nav__sync-btn"
+            type="button"
+            data-sync-open
+            data-cloud-btn
+            title={t.nav.syncTitle}
+            aria-label={t.nav.syncTitle}
+          >
+            <span class="nav__cloud-wrapper" aria-hidden="true">
+              <!-- 1. Sincronizado / Guardado (Google Docs: Nube con check) -->
+              <span class="nav__cloud-icon nav__cloud-icon--synced" data-cloud-state="synced" hidden>
+                <i data-lucide="cloud"></i>
+                <span class="nav__cloud-badge nav__cloud-badge--check">
+                  <i data-lucide="check"></i>
+                </span>
+              </span>
+              <!-- 2. Sincronizando / Guardando... (Nube con spinner) -->
+              <span class="nav__cloud-icon nav__cloud-icon--syncing" data-cloud-state="syncing" hidden>
+                <i data-lucide="cloud"></i>
+                <span class="nav__cloud-badge nav__cloud-badge--spin">
+                  <i data-lucide="loader-2" class="spin"></i>
+                </span>
+              </span>
+              <!-- 3. Offline / Sin conexión (Nube tachada) -->
+              <span class="nav__cloud-icon nav__cloud-icon--offline" data-cloud-state="offline" hidden>
+                <i data-lucide="cloud-off"></i>
+              </span>
+              <!-- 4. Error al guardar (Nube con alerta) -->
+              <span class="nav__cloud-icon nav__cloud-icon--error" data-cloud-state="error" hidden>
+                <i data-lucide="cloud"></i>
+                <span class="nav__cloud-badge nav__cloud-badge--error">
+                  <i data-lucide="alert-triangle"></i>
+                </span>
+              </span>
+              <!-- 5. No vinculado / Solo local (Nube por defecto) -->
+              <span class="nav__cloud-icon nav__cloud-icon--unlinked" data-cloud-state="unlinked">
+                <i data-lucide="cloud"></i>
+              </span>
             </span>
-          </span>
-          <!-- 2. Sincronizando / Guardando... (Nube con spinner) -->
-          <span class="nav__cloud-icon nav__cloud-icon--syncing" data-cloud-state="syncing" hidden>
-            <i data-lucide="cloud"></i>
-            <span class="nav__cloud-badge nav__cloud-badge--spin">
-              <i data-lucide="loader-2" class="spin"></i>
-            </span>
-          </span>
-          <!-- 3. Offline / Sin conexión (Nube tachada) -->
-          <span class="nav__cloud-icon nav__cloud-icon--offline" data-cloud-state="offline" hidden>
-            <i data-lucide="cloud-off"></i>
-          </span>
-          <!-- 4. Error al guardar (Nube con alerta) -->
-          <span class="nav__cloud-icon nav__cloud-icon--error" data-cloud-state="error" hidden>
-            <i data-lucide="cloud"></i>
-            <span class="nav__cloud-badge nav__cloud-badge--error">
-              <i data-lucide="alert-triangle"></i>
-            </span>
-          </span>
-          <!-- 5. No vinculado / Solo local (Nube por defecto) -->
-          <span class="nav__cloud-icon nav__cloud-icon--unlinked" data-cloud-state="unlinked">
-            <i data-lucide="cloud"></i>
-          </span>
-        </span>
-        <!--- <span class="nav__sync-text" data-cloud-text>{t.nav.sync}</span> --->
-      </button>
-      <button class="nav__sound-btn" type="button" data-sound-toggle title={t.nav.soundTitle} aria-label={t.nav.soundTitle}>
-        <i data-lucide="volume-2" data-sound-icon-on></i>
-        <i data-lucide="volume-x" data-sound-icon-off hidden></i>
-      </button>
+            <!--- <span class="nav__sync-text" data-cloud-text>{t.nav.sync}</span> --->
+          </button>
+          <button class="nav__sound-btn" type="button" data-sound-toggle title={t.nav.soundTitle} aria-label={t.nav.soundTitle}>
+            <i data-lucide="volume-2" data-sound-icon-on></i>
+            <i data-lucide="volume-x" data-sound-icon-off hidden></i>
+          </button>
+        </>
+      )}
     </div>
   </div>
 </nav>
