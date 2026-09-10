@@ -649,11 +649,7 @@ function populateGameSelect(generations: GenerationInfo[]): void {
 
 const STORAGE_KEY_FILTERS_EXPANDED = "poketeam:pokedex-filters-expanded";
 
-function isMobile(): boolean {
-  return window.innerWidth <= 820;
-}
-
-let filtersExpanded = !isMobile();
+let filtersExpanded = false;
 
 function updateFiltersCollapseUI(expanded: boolean): void {
   if (!filtersPanelEl || !filterToggleBtn) return;
@@ -1113,7 +1109,7 @@ async function init(): Promise<void> {
   const manifest = await getManifest();
   manifestTotal = manifest.totalCount;
 
-  let initialExpanded = !isMobile();
+  let initialExpanded = false;
   try {
     const saved = sessionStorage.getItem(STORAGE_KEY_FILTERS_EXPANDED);
     if (saved !== null) {
@@ -1135,16 +1131,6 @@ async function init(): Promise<void> {
     }
   });
   clearFiltersBtn?.addEventListener("click", clearAllFilters);
-  window.addEventListener("resize", () => {
-    try {
-      const saved = sessionStorage.getItem(STORAGE_KEY_FILTERS_EXPANDED);
-      if (saved === null) {
-        updateFiltersCollapseUI(!isMobile());
-      }
-    } catch {
-      updateFiltersCollapseUI(!isMobile());
-    }
-  });
 
   try {
     gameDexData = await getGameDexData();
