@@ -5,6 +5,7 @@ pubDate: 2026-02-24
 category: "guias"
 tags: ["Teambuilding", "Strategy", "Types", "Guide"]
 coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png"
+coverImageFit: "contain"
 featured: true
 readingTime: "6 min"
 author: "gonzo"

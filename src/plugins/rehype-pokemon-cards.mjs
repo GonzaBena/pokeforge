@@ -10,6 +10,21 @@ function capitalize(str) {
 }
 
 /**
+ * Detect language/locale from vfile or attributes
+ * @param {any} file
+ * @param {Record<string, any>} [attrs]
+ * @returns {'es' | 'en'}
+ */
+function detectLocale(file, attrs = {}) {
+  if (attrs.lang) return String(attrs.lang).toLowerCase() === 'en' ? 'en' : 'es';
+  if (attrs.locale) return String(attrs.locale).toLowerCase() === 'en' ? 'en' : 'es';
+  const filePath = file?.history?.[0] || file?.path || file?.filename || '';
+  if (/(?:^|[\\/])en(?:[\\/]|$)/i.test(filePath)) return 'en';
+  if (/(?:^|[\\/])es(?:[\\/]|$)/i.test(filePath)) return 'es';
+  return 'es';
+}
+
+/**
  * Parse HTML tag attributes into a key-value object
  * @param {string} attrsStr
  * @returns {Record<string, any>}
@@ -28,16 +43,22 @@ function parseCardAttrs(attrsStr) {
  * Build HTML parts for a starter card
  * @param {Record<string, any>} attrs
  * @param {string} [fallbackSprite]
+ * @param {'es' | 'en'} [locale]
  */
-function buildCardParts(attrs, fallbackSprite = '') {
+function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
+  const isEn = locale === 'en';
   const name = attrs.name || attrs.nombre || 'Pokémon';
 
   // Nivel
   let level = attrs.level || attrs.nivel || attrs.lvl ? String(attrs.level || attrs.nivel || attrs.lvl).trim() : '';
   if (/^\d+(-\d+)?$/.test(level)) {
-    level = `Nv. ${level}`;
+    level = isEn ? `Lv. ${level}` : `Nv. ${level}`;
   } else if (!level) {
-    level = 'Nv. ?';
+    level = isEn ? 'Lv. ?' : 'Nv. ?';
+  } else if (isEn && /^nv\.\s*/i.test(level)) {
+    level = level.replace(/^nv\.\s*/i, 'Lv. ');
+  } else if (!isEn && /^lv\.\s*/i.test(level)) {
+    level = level.replace(/^lv\.\s*/i, 'Nv. ');
   }
 
   // Género (por defecto masculino U+2642)
@@ -52,7 +73,7 @@ function buildCardParts(attrs, fallbackSprite = '') {
 
   let genderSymbol = '\u2642'; // U+2642 (♂)
   let genderClass = 'male';
-  let genderLabel = 'Macho';
+  let genderLabel = isEn ? 'Male' : 'Macho';
 
   if (
     rawGender === 'none' ||
@@ -72,7 +93,7 @@ function buildCardParts(attrs, fallbackSprite = '') {
   ) {
     genderSymbol = '\u2640'; // U+2640 (♀)
     genderClass = 'female';
-    genderLabel = 'Hembra';
+    genderLabel = isEn ? 'Female' : 'Hembra';
   }
 
   const genderHtml = genderSymbol
@@ -125,7 +146,7 @@ function buildCardParts(attrs, fallbackSprite = '') {
     attrs.abilityLabel ||
     attrs['habilidad-label'] ||
     attrs.habilidadLabel ||
-    'Habilidad';
+    (isEn ? 'Ability' : 'Habilidad');
 
   const item = attrs.item || attrs.objeto || attrs['held-item'] || attrs.heldItem;
   const itemLabel =
@@ -133,7 +154,7 @@ function buildCardParts(attrs, fallbackSprite = '') {
     attrs.itemLabel ||
     attrs['objeto-label'] ||
     attrs.objetoLabel ||
-    'Objeto';
+    (isEn ? 'Item' : 'Objeto');
 
   let traitsHtml = '';
   if (ability || item) {
@@ -187,7 +208,8 @@ function buildCardParts(attrs, fallbackSprite = '') {
         attrs.movesLabel ||
         attrs['ataques-label'] ||
         attrs.ataquesLabel ||
-        (attrs.for ? 'Ataques' : 'Ataques iniciales');
+        (isEn ? 'Moves' : 'Ataques');
+
       const items = moveList
         .map((m) => {
           const isEmpty =
@@ -322,16 +344,18 @@ function getDownloadFileInfo(ext) {
 /**
  * Render a <download-card> HTML string
  * @param {Record<string, any>} attrs
+ * @param {'es' | 'en'} [locale]
  * @returns {string}
  */
-function renderDownloadCardHtml(attrs) {
+function renderDownloadCardHtml(attrs, locale = 'es') {
+  const isEn = locale === 'en';
   const fileUrl = attrs.path || attrs.url || attrs.src || attrs.href || '#';
-  const fileTitle = attrs.text || attrs.title || attrs.name || fileUrl.split('/').pop() || 'Descarga';
+  const fileTitle = attrs.text || attrs.title || attrs.name || fileUrl.split('/').pop() || (isEn ? 'Download' : 'Descarga');
   const description = attrs.description || attrs.desc || '';
   const size = attrs.size || attrs.tamano || '';
   const detectedExt = (attrs.format || extractExtension(fileUrl)).toUpperCase();
   const { icon, badgeClass } = getDownloadFileInfo(detectedExt);
-  const actionLabel = attrs.btnText || attrs.buttonText || 'Descargar';
+  const actionLabel = attrs.btnText || attrs.buttonText || (isEn ? 'Download' : 'Descargar');
   const fileNameAttr = attrs.fileName ? ` download="${attrs.fileName}"` : ' download';
 
   return `<div class="download-card">
@@ -358,15 +382,18 @@ function renderDownloadCardHtml(attrs) {
 /**
  * Replace container tags and rival selector in an HTML string
  * @param {string} str
+ * @param {'es' | 'en'} [locale]
  * @returns {string}
  */
-function replaceContainers(str) {
+function replaceContainers(str, locale = 'es') {
+  const isEn = locale === 'en';
   let output = str;
 
   // 1. Selector de Rival
   output = output.replace(/<rival-selector\b[^>]*>(?:<\/rival-selector>)?/gi, () => {
+    const label = isEn ? 'Which was your starter?' : '¿Cuál fue tu inicial?';
     return `<div class="rival-starter-selector">
-  <span class="rival-starter-selector__label">¿Cuál fue tu inicial?</span>
+  <span class="rival-starter-selector__label">${label}</span>
   <div class="rival-starter-selector__options">
     <button type="button" class="rival-starter-selector__btn is-active" data-starter="bulbasaur">
       <span class="rival-starter-selector__dot"></span>
@@ -400,7 +427,7 @@ function replaceContainers(str) {
     /<(?:download-card|download)\b([^>]*)>(?:<\/(?:download-card|download)>)?|<(?:download-card|download)\b([^/>]*)\/>/gi,
     (match, attrs1, attrs2) => {
       const attrs = parseCardAttrs(attrs1 || attrs2 || '');
-      return renderDownloadCardHtml(attrs);
+      return renderDownloadCardHtml(attrs, locale);
     }
   );
 
@@ -410,10 +437,11 @@ function replaceContainers(str) {
 /**
  * Transform text containing <pokemon-card> into MDAST nodes (splitting around images)
  * @param {string} text
+ * @param {'es' | 'en'} [locale]
  * @returns {any[]}
  */
-function transformCardsToNodes(text) {
-  const prepared = replaceContainers(text);
+function transformCardsToNodes(text, locale = 'es') {
+  const prepared = replaceContainers(text, locale);
   const cardRegex =
     /<(?:pokemon-card|card)\b([^>]*)>([\s\S]*?)<\/(?:pokemon-card|card)>|<(?:pokemon-card|card)\b([^/>]*)\/>/gi;
 
@@ -432,6 +460,7 @@ function transformCardsToNodes(text) {
     const attrsStr = match[1] || match[3] || '';
     const content = match[2] || '';
     const attrs = parseCardAttrs(attrsStr);
+    const cardLocale = attrs.lang || attrs.locale || locale;
 
     let sprite = '';
     if (content) {
@@ -441,7 +470,7 @@ function transformCardsToNodes(text) {
       }
     }
 
-    const { beforeImg, afterImg, name } = buildCardParts(attrs);
+    const { beforeImg, afterImg, name } = buildCardParts(attrs, '', cardLocale);
 
     nodes.push({ type: 'html', value: beforeImg });
     if (sprite) {
@@ -465,9 +494,10 @@ function transformCardsToNodes(text) {
 /**
  * Process a paragraph node that may contain <pokemon-card> tags and markdown image nodes
  * @param {any} paraNode
+ * @param {'es' | 'en'} [locale]
  * @returns {any[]}
  */
-function processParagraph(paraNode) {
+function processParagraph(paraNode, locale = 'es') {
   const result = [];
   let currentCard = null;
 
@@ -480,7 +510,7 @@ function processParagraph(paraNode) {
       if (openMatch) {
         const before = val.slice(0, openMatch.index);
         if (before.trim()) {
-          result.push({ type: 'html', value: replaceContainers(before) });
+          result.push({ type: 'html', value: replaceContainers(before, locale) });
         }
         const attrs = parseCardAttrs(openMatch[1]);
         currentCard = { attrs, imageNode: null };
@@ -490,7 +520,8 @@ function processParagraph(paraNode) {
       // Check for closing card tag
       const closeMatch = /<\/(?:pokemon-card|card)>/i.exec(val);
       if (closeMatch && currentCard) {
-        const { beforeImg, afterImg, sprite, name } = buildCardParts(currentCard.attrs);
+        const cardLocale = currentCard.attrs.lang || currentCard.attrs.locale || locale;
+        const { beforeImg, afterImg, sprite, name } = buildCardParts(currentCard.attrs, '', cardLocale);
         result.push({ type: 'html', value: beforeImg });
         if (currentCard.imageNode) {
           result.push(currentCard.imageNode);
@@ -502,13 +533,13 @@ function processParagraph(paraNode) {
 
         const after = val.slice(closeMatch.index + closeMatch[0].length);
         if (after.trim()) {
-          result.push({ type: 'html', value: replaceContainers(after) });
+          result.push({ type: 'html', value: replaceContainers(after, locale) });
         }
         continue;
       }
 
       if (val.trim()) {
-        result.push({ type: 'html', value: replaceContainers(val) });
+        result.push({ type: 'html', value: replaceContainers(val, locale) });
       }
     } else if (child.type === 'image') {
       if (currentCard) {
@@ -532,7 +563,8 @@ function processParagraph(paraNode) {
  * Remark plugin to transform custom Pokémon tags
  */
 export function remarkPokemonCards() {
-  return (tree) => {
+  return (tree, file) => {
+    const locale = detectLocale(file);
     function processChildren(parent) {
       if (!parent || !Array.isArray(parent.children)) return;
 
@@ -546,7 +578,7 @@ export function remarkPokemonCards() {
             val.includes('card') ||
             val.includes('showcase')
           ) {
-            const transformed = transformCardsToNodes(val);
+            const transformed = transformCardsToNodes(val, locale);
             newChildren.push(...transformed);
             continue;
           }
@@ -563,7 +595,7 @@ export function remarkPokemonCards() {
                 c.value.includes('showcase'))
           );
           if (hasPokemon) {
-            const transformed = processParagraph(child);
+            const transformed = processParagraph(child, locale);
             newChildren.push(...transformed);
             continue;
           }
@@ -585,7 +617,8 @@ export function remarkPokemonCards() {
  * Rehype plugin fallback
  */
 export function rehypePokemonCards() {
-  return (tree) => {
+  return (tree, file) => {
+    const locale = detectLocale(file);
     function walkRehype(node) {
       if (!node || typeof node !== 'object') return;
       if (node.type === 'element' && node.tagName === 'input' && node.properties?.type === 'checkbox') {
@@ -601,7 +634,7 @@ export function rehypePokemonCards() {
           val.includes('card') ||
           val.includes('showcase')
         ) {
-          node.value = replaceContainers(val);
+          node.value = replaceContainers(val, locale);
         }
       }
       if (Array.isArray(node.children)) {
