@@ -29,6 +29,23 @@ export const NATURE_STAT_DISPLAY: Record<Locale, Record<string, string>> = {
   },
 };
 
+export const NATURE_STAT_ABBR: Record<Locale, Record<string, string>> = {
+  es: {
+    attack: "ATK",
+    defense: "DEF",
+    "special-attack": "SPA",
+    "special-defense": "SPD",
+    speed: "VEL",
+  },
+  en: {
+    attack: "ATK",
+    defense: "DEF",
+    "special-attack": "SPA",
+    "special-defense": "SPD",
+    speed: "SPE",
+  },
+};
+
 export const METHOD_LABELS: Record<Locale, Record<string, string>> = {
   es: {
     "level-up": "Nivel",

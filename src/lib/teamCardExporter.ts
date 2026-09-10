@@ -2,7 +2,7 @@ import { toPng } from "html-to-image";
 import type { MoveData, Pokemon, TeamState } from "./types";
 import { typeColor } from "./typeColors";
 import { toast } from "./toast";
-import { getMoveName, type Locale } from "./i18n/translations";
+import { getMoveName, getNatureName, type Locale } from "./i18n/translations";
 import { getItemById, getItemDisplayName, renderItemIconHTML } from "./items";
 
 function capitalize(s: string): string {
@@ -90,7 +90,7 @@ export function renderTeamCardHTML(
         .join("");
 
       const natureTag = slot.nature
-        ? `<div class="team-card-item__nature-tag"><i data-lucide="sparkle"></i> ${capitalize(slot.nature)}</div>`
+        ? `<div class="team-card-item__nature-tag"><i data-lucide="sparkle"></i> ${getNatureName(slot.nature, locale)}</div>`
         : "";
 
       const itemTag = slot.item

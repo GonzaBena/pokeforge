@@ -1,5 +1,5 @@
 import { animateMedalReveal } from "../animations";
-import { getCurrentLocale, getTranslations } from "../i18n/translations";
+import { getCurrentLocale, getNatureName, getTranslations } from "../i18n/translations";
 import { refreshIcons } from "../icons";
 import {
   copyPokedexToSlot,
@@ -180,7 +180,7 @@ export function bindModalEvents(): void {
 
         if (natureTriggerEl) natureTriggerEl.setAttribute("title", effText);
         if (natureTitleEl) {
-          natureTitleEl.textContent = nature ? capitalize(nature.name) : (locale === "es" ? "Naturaleza" : "Nature");
+          natureTitleEl.textContent = nature ? getNatureName(nature.name, locale) : (locale === "es" ? "Naturaleza" : "Nature");
         }
         if (natureTextEl) {
           natureTextEl.textContent = effText;
@@ -206,7 +206,7 @@ export function bindModalEvents(): void {
                 labelGroup?.appendChild(modBadge);
               }
               modBadge.className = "detail-stat__mod detail-stat__mod--up";
-              modBadge.textContent = "▲ +10%";
+              modBadge.textContent = "▲ 10%";
               modBadge.title = locale === "es" ? "+10% por naturaleza" : "+10% from nature";
             } else if (mod === "down") {
               if (!modBadge) {
@@ -214,7 +214,7 @@ export function bindModalEvents(): void {
                 labelGroup?.appendChild(modBadge);
               }
               modBadge.className = "detail-stat__mod detail-stat__mod--down";
-              modBadge.textContent = "▼ -10%";
+              modBadge.textContent = "▼ 10%";
               modBadge.title = locale === "es" ? "-10% por naturaleza" : "-10% from nature";
             } else if (modBadge) {
               modBadge.remove();

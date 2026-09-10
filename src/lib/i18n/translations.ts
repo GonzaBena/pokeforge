@@ -42,6 +42,34 @@ export const EVOLUTION_TRIGGER_NAMES: Record<
   other: { en: "Special", es: "Especial" },
 };
 
+export const NATURE_NAMES: Record<string, { en: string; es: string }> = {
+  hardy: { en: "Hardy", es: "Fuerte" },
+  lonely: { en: "Lonely", es: "Huraña" },
+  brave: { en: "Brave", es: "Audaz" },
+  adamant: { en: "Adamant", es: "Firme" },
+  naughty: { en: "Naughty", es: "Pícara" },
+  bold: { en: "Bold", es: "Osada" },
+  docile: { en: "Docile", es: "Dócil" },
+  relaxed: { en: "Relaxed", es: "Plácida" },
+  impish: { en: "Impish", es: "Agitada" },
+  lax: { en: "Lax", es: "Floja" },
+  timid: { en: "Timid", es: "Miedosa" },
+  hasty: { en: "Hasty", es: "Activa" },
+  serious: { en: "Serious", es: "Seria" },
+  jolly: { en: "Jolly", es: "Alegre" },
+  naive: { en: "Naive", es: "Ingenua" },
+  modest: { en: "Modest", es: "Modesta" },
+  mild: { en: "Mild", es: "Afable" },
+  quiet: { en: "Quiet", es: "Mansa" },
+  bashful: { en: "Bashful", es: "Tímida" },
+  rash: { en: "Rash", es: "Alocada" },
+  calm: { en: "Calm", es: "Serena" },
+  gentle: { en: "Gentle", es: "Amable" },
+  sassy: { en: "Sassy", es: "Grosera" },
+  careful: { en: "Careful", es: "Cauta" },
+  quirky: { en: "Quirky", es: "Rara" },
+};
+
 export interface Translations {
   nav: {
     pokedex: string;
@@ -1632,3 +1660,17 @@ export function getMoveName(
   }
   return moveKey.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+export function getNatureName(
+  natureKey: string | null | undefined,
+  locale: Locale = "es",
+): string {
+  if (!natureKey) return "";
+  const key = natureKey.toLowerCase();
+  const match = NATURE_NAMES[key];
+  if (match) {
+    return locale === "es" ? match.es : match.en;
+  }
+  return natureKey.charAt(0).toUpperCase() + natureKey.slice(1);
+}
+

@@ -1,7 +1,7 @@
 ---
 import TypeBadge from "./TypeBadge.astro";
 import type { Pokemon } from "../lib/types";
-import { getTranslations, type Locale } from "../lib/i18n/translations";
+import { getNatureName, getTranslations, type Locale } from "../lib/i18n/translations";
 import { getItemDisplayName, getItemSpriteUrl } from "../lib/items";
 
 interface Props {
@@ -38,9 +38,9 @@ const itemSpriteUrl = getItemSpriteUrl(item);
           </div>
           <div class="team-slot__pills-row">
             {nature && (
-              <div class="team-slot__nature-pill" title={currentLocale === "es" ? `Naturaleza: ${nature}` : `Nature: ${nature}`}>
+              <div class="team-slot__nature-pill" title={currentLocale === "es" ? `Naturaleza: ${getNatureName(nature, currentLocale)}` : `Nature: ${getNatureName(nature, currentLocale)}`}>
                 <i data-lucide="sparkle"></i>
-                <span>{nature}</span>
+                <span>{getNatureName(nature, currentLocale)}</span>
               </div>
             )}
             {item ? (

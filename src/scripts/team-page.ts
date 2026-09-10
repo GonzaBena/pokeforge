@@ -35,7 +35,7 @@ import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import { getDefaultAbility } from "../lib/pokemonModal/utils";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
-import { getCurrentLocale, getTranslations, getTypeName, getGameTitle, getRegionName, getMoveName, type Locale } from "../lib/i18n/translations";
+import { getCurrentLocale, getNatureName, getTranslations, getTypeName, getGameTitle, getRegionName, getMoveName, type Locale } from "../lib/i18n/translations";
 import { computeTeamSynergy } from "../lib/teamSynergy";
 import { filterItems, getItemById, getItemDisplayName, renderItemIconHTML } from "../lib/items";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamSlotState, TeamState, TypeChart } from "../lib/types";
@@ -281,9 +281,9 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
             <div class="team-slot__pills-row">
               ${
                 slotData?.nature
-                  ? `<div class="team-slot__nature-pill" title="${locale === "es" ? `Naturaleza: ${capitalize(slotData.nature)}` : `Nature: ${capitalize(slotData.nature)}`}">
+                  ? `<div class="team-slot__nature-pill" title="${locale === "es" ? `Naturaleza: ${getNatureName(slotData.nature, locale)}` : `Nature: ${getNatureName(slotData.nature, locale)}`}">
                       <i data-lucide="sparkle"></i>
-                      <span>${capitalize(slotData.nature)}</span>
+                      <span>${getNatureName(slotData.nature, locale)}</span>
                     </div>`
                   : ""
               }

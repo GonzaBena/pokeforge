@@ -1,7 +1,7 @@
 import type { Nature, PokemonStats } from "../types";
 import { getCurrentLocale, getTranslations, type Locale } from "../i18n/translations";
 import { typeColor } from "../typeColors";
-import { NATURE_STAT_DISPLAY } from "./constants";
+import { NATURE_STAT_ABBR, NATURE_STAT_DISPLAY } from "./constants";
 import { getModalElements } from "./dom";
 import { getCurrentEffectiveOverrides } from "./overrides";
 import { modalState } from "./state";
@@ -39,9 +39,9 @@ export function renderNatureEffectBadges(nature: Nature | null, locale: Locale =
   if (!nature.increasedStat || !nature.decreasedStat || nature.increasedStat === nature.decreasedStat) {
     return `<span class="detail-nature-tag detail-nature-tag--neutral">${locale === "es" ? "Naturaleza neutra (sin cambios)" : "Neutral nature (no changes)"}</span>`;
   }
-  const statMap = NATURE_STAT_DISPLAY[locale] ?? NATURE_STAT_DISPLAY.en;
-  const upLabel = statMap[nature.increasedStat] ?? nature.increasedStat;
-  const downLabel = statMap[nature.decreasedStat] ?? nature.decreasedStat;
+  const abbrMap = NATURE_STAT_ABBR[locale] ?? NATURE_STAT_ABBR.en;
+  const upLabel = abbrMap[nature.increasedStat] ?? nature.increasedStat;
+  const downLabel = abbrMap[nature.decreasedStat] ?? nature.decreasedStat;
   return `
     <span class="detail-nature-tag detail-nature-tag--up">+10% ${upLabel}</span>
     <span class="detail-nature-tag detail-nature-tag--down">-10% ${downLabel}</span>
