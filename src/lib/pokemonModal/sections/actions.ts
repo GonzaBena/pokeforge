@@ -24,6 +24,30 @@ export function swapSection(id: string, direction: -1 | 1): void {
   }
 }
 
+export function moveSectionToEdge(id: string, edge: "top" | "bottom"): void {
+  const order = getSectionOrder();
+  const idx = order.indexOf(id);
+  if (idx === -1) return;
+  if (edge === "top" && idx === 0) return;
+  if (edge === "bottom" && idx === order.length - 1) return;
+
+  order.splice(idx, 1);
+  if (edge === "top") {
+    order.unshift(id);
+  } else {
+    order.push(id);
+  }
+
+  setSectionOrder(order);
+  if (modalState.lastContext) render(modalState.lastContext);
+
+  const { bodyEl } = getModalElements();
+  if (!bodyEl) return;
+
+  const el = bodyEl.querySelector<HTMLElement>(`[data-section-id="${id}"]`);
+  if (el) sectionSwap(el);
+}
+
 export function toggleSectionCollapse(sectionId: string): void {
   const { bodyEl } = getModalElements();
   if (!bodyEl) return;

@@ -9,6 +9,7 @@ import {
   isCaptured,
   setCaptured,
   setPokemonOverrides,
+  setTeamSlotAbility,
   setTeamSlotNature,
   setTeamSlotStats,
   setTeamSlotUsePokedexData,
@@ -19,11 +20,12 @@ import { getNatureModifier, natureEffectText, renderNatureEffectBadges, updateHe
 import { STAT_KEYS } from "./constants";
 import { getModalElements } from "./dom";
 import { closeModal, openPokemonModal } from "./lifecycle";
-import { swapSection, toggleSectionCollapse } from "./sections/actions";
+import { renderAbilitiesContent } from "./sections/abilities";
+import { moveSectionToEdge, swapSection, toggleSectionCollapse } from "./sections/actions";
 import { reRenderHeader, updateHeaderCapturedState } from "./sections/header";
 import { modalState } from "./state";
 import { closeTocMenu, scrollToSection, toggleTocMenu } from "./toc";
-import { capitalize } from "./utils";
+import { capitalize, getDefaultAbility } from "./utils";
 
 let hasBoundEvents = false;
 
@@ -71,7 +73,7 @@ export function bindModalEvents(): void {
       const isChecked = (target as HTMLInputElement).checked;
       if (isChecked) {
         const pOverrides = getPokemonOverrides(modalState.currentId);
-        const hasPokedexData = pOverrides.nature !== null || Object.keys(pOverrides.stats).length > 0;
+        const hasPokedexData = pOverrides.nature !== null || pOverrides.ability !== null || Object.keys(pOverrides.stats).length > 0;
         if (hasPokedexData) {
           copyPokedexToSlot(modalState.currentSlotIndex);
         } else {
@@ -82,6 +84,66 @@ export function bindModalEvents(): void {
         setTeamSlotUsePokedexData(modalState.currentSlotIndex, false);
       }
       reRenderHeader();
+      return;
+    }
+
+    if (target.matches("[data-ability-select]") && modalState.currentId !== null && modalState.lastContext) {
+      const value = (target as HTMLSelectElement).value || null;
+      if (modalState.currentSlotIndex !== null) {
+        const team = getTeam();
+        const slot = team.slots[modalState.currentSlotIndex];
+        if (slot) {
+          if (slot.usePokedexData) {
+            const overrides = getPokemonOverrides(modalState.currentId);
+            overrides.ability = value;
+            setPokemonOverrides(modalState.currentId, overrides);
+          }
+          setTeamSlotAbility(modalState.currentSlotIndex, value);
+        }
+      } else {
+        const overrides = getPokemonOverrides(modalState.currentId);
+        overrides.ability = value;
+        setPokemonOverrides(modalState.currentId, overrides);
+      }
+
+      const ability = modalState.lastContext.detail.abilities?.find((a) => a.name === value) ?? null;
+      const { bodyEl } = getModalElements();
+      const locale = getCurrentLocale();
+      if (bodyEl && modalState.lastContext) {
+        const desc = ability
+          ? (locale === "es" ? (ability.descriptionEs || ability.descriptionEn || "") : (ability.descriptionEn || ability.descriptionEs || ""))
+          : "";
+
+        const titleEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-title="ability"]');
+        const textEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-text="ability"]');
+        const subEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-sub="ability"]');
+        const popoverEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-popover="ability"]');
+        const triggerEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-trigger="ability"]');
+
+        if (triggerEl) triggerEl.setAttribute("title", desc);
+        if (titleEl) {
+          titleEl.textContent = ability ? (locale === "es" ? (ability.nameEs || capitalize(ability.name)) : (ability.nameEn || capitalize(ability.name))) : (locale === "es" ? "Habilidad" : "Ability");
+        }
+        if (textEl) {
+          textEl.textContent = desc || (locale === "es" ? "La habilidad otorga efectos pasivos únicos en combate o aventura." : "Abilities provide unique passive effects in battle or adventure.");
+        }
+        if (subEl) {
+          subEl.textContent = ability?.isHidden ? (locale === "es" ? "Habilidad Oculta" : "Hidden Ability") : "";
+          subEl.hidden = !ability?.isHidden;
+        } else if (ability?.isHidden && popoverEl) {
+          const newSub = document.createElement("p");
+          newSub.className = "detail-help-tooltip__sub";
+          newSub.setAttribute("data-tooltip-sub", "ability");
+          newSub.textContent = locale === "es" ? "Habilidad Oculta" : "Hidden Ability";
+          popoverEl.appendChild(newSub);
+        }
+
+        const abilitySection = bodyEl.querySelector<HTMLElement>('[data-section-id="abilities"] .detail-section__content');
+        if (abilitySection) {
+          abilitySection.innerHTML = renderAbilitiesContent(modalState.lastContext.detail, value);
+          refreshIcons();
+        }
+      }
       return;
     }
 
@@ -110,8 +172,18 @@ export function bindModalEvents(): void {
     const locale = getCurrentLocale();
 
     if (bodyEl && modalState.lastContext) {
-      const tooltipEl = bodyEl.querySelector<HTMLElement>("[data-nature-tooltip]");
-      if (tooltipEl) tooltipEl.setAttribute("title", natureEffectText(nature, locale));
+      const natureTitleEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-title="nature"]');
+      const natureTextEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-text="nature"]');
+      const natureTriggerEl = bodyEl.querySelector<HTMLElement>('[data-tooltip-trigger="nature"]');
+      const effText = natureEffectText(nature, locale);
+
+      if (natureTriggerEl) natureTriggerEl.setAttribute("title", effText);
+      if (natureTitleEl) {
+        natureTitleEl.textContent = nature ? capitalize(nature.name) : (locale === "es" ? "Naturaleza" : "Nature");
+      }
+      if (natureTextEl) {
+        natureTextEl.textContent = effText;
+      }
 
       const effectsEl = bodyEl.querySelector<HTMLElement>("[data-nature-effects-container]");
       if (effectsEl) effectsEl.innerHTML = renderNatureEffectBadges(nature, locale);
@@ -229,12 +301,76 @@ export function bindModalEvents(): void {
       const name = capitalize(modalState.lastContext.pokemon.name);
       const locale = getCurrentLocale();
       if (nowCaptured) {
+        // If overrides.ability is not set, persist the displayed ability
+        const currentOverrides = getPokemonOverrides(modalState.currentId);
+        const abilitySelect = bodyEl.querySelector<HTMLSelectElement>("[data-ability-select]");
+        const selectedAbilityVal = abilitySelect?.value || getDefaultAbility(modalState.lastContext.detail);
+        if (!currentOverrides.ability && selectedAbilityVal) {
+          currentOverrides.ability = selectedAbilityVal;
+          setPokemonOverrides(modalState.currentId, currentOverrides);
+        }
+
+        const abilitySection = bodyEl.querySelector<HTMLElement>('[data-section-id="abilities"] .detail-section__content');
+        if (abilitySection) {
+          abilitySection.innerHTML = renderAbilitiesContent(modalState.lastContext.detail, currentOverrides.ability ?? selectedAbilityVal);
+          refreshIcons();
+        }
+
         toast.success(locale === "es" ? `¡${name} capturado!` : `${name} caught!`);
         if (medal && medalImg && stampImg) {
           medal.hidden = false;
           animateMedalReveal(medalImg, stampImg);
         }
       } else {
+        const detail = modalState.lastContext.detail;
+
+        // 1. Reset stat inputs to base stats and remove modifier classes/badges
+        bodyEl.querySelectorAll<HTMLInputElement>("[data-stat-input]").forEach((input) => {
+          const statKey = input.dataset.statKey as keyof PokemonStats;
+          if (statKey && detail.stats[statKey] !== undefined) {
+            input.value = String(detail.stats[statKey]);
+          }
+          const statRow = input.closest(".detail-stat");
+          if (statRow) {
+            statRow.classList.remove("is-nature-up", "is-nature-down");
+            statRow.querySelectorAll(".detail-stat__mod").forEach((badge) => badge.remove());
+          }
+        });
+
+        // 2. Reset nature select & effects
+        const natureSelect = bodyEl.querySelector<HTMLSelectElement>("[data-nature-select]");
+        if (natureSelect) natureSelect.value = "";
+        const effectsContainer = bodyEl.querySelector<HTMLElement>("[data-nature-effects-container]");
+        if (effectsContainer) {
+          effectsContainer.innerHTML = renderNatureEffectBadges(null, locale);
+        }
+
+        // 3. Reset ability select to default non-hidden ability
+        const defaultAb = getDefaultAbility(detail);
+        const abilitySelect = bodyEl.querySelector<HTMLSelectElement>("[data-ability-select]");
+        if (abilitySelect) abilitySelect.value = defaultAb ?? "";
+
+        const abilityTooltipDesc = bodyEl.querySelector<HTMLElement>("[data-ability-help-popover] .detail-help-tooltip__desc");
+        if (abilityTooltipDesc) {
+          const matchedAbility = detail.abilities.find((a) => a.name === defaultAb);
+          if (matchedAbility) {
+            const flavor = locale === "es"
+              ? (matchedAbility.descriptionEs || matchedAbility.descriptionEn || "")
+              : (matchedAbility.descriptionEn || matchedAbility.descriptionEs || "");
+            abilityTooltipDesc.textContent = flavor || (locale === "es" ? "Sin descripción disponible." : "No description available.");
+          }
+        }
+
+        // 4. Reset abilities section in modal
+        const abilitySection = bodyEl.querySelector<HTMLElement>('[data-section-id="abilities"] .detail-section__content');
+        if (abilitySection) {
+          abilitySection.innerHTML = renderAbilitiesContent(detail, defaultAb);
+          refreshIcons();
+        }
+
+        // 5. Update Hexagon Chart
+        updateHexagonChartIfVisible();
+
         toast.info(locale === "es" ? `${name} liberado de tu Pokédex.` : `${name} released from your Pokédex.`);
         if (medal) medal.hidden = true;
       }
@@ -244,6 +380,14 @@ export function bindModalEvents(): void {
     const evoCard = target.closest<HTMLElement>("[data-evolution-pick]");
     if (evoCard) {
       openPokemonModal(Number(evoCard.dataset.pokemonId));
+      return;
+    }
+
+    const topBtn = target.closest<HTMLButtonElement>("[data-move-top]");
+    if (topBtn) {
+      if (!topBtn.disabled) {
+        moveSectionToEdge(topBtn.dataset.sectionId!, "top");
+      }
       return;
     }
 
@@ -259,6 +403,14 @@ export function bindModalEvents(): void {
     if (downBtn) {
       if (!downBtn.disabled) {
         swapSection(downBtn.dataset.sectionId!, 1);
+      }
+      return;
+    }
+
+    const bottomBtn = target.closest<HTMLButtonElement>("[data-move-bottom]");
+    if (bottomBtn) {
+      if (!bottomBtn.disabled) {
+        moveSectionToEdge(bottomBtn.dataset.sectionId!, "bottom");
       }
       return;
     }
@@ -289,6 +441,21 @@ export function bindModalEvents(): void {
       return;
     }
 
+    const tooltipTrigger = target.closest<HTMLButtonElement>("[data-tooltip-trigger]");
+    if (tooltipTrigger) {
+      const container = tooltipTrigger.closest<HTMLElement>(".detail-help-tooltip");
+      const wasOpen = container?.classList.contains("is-open");
+      document.querySelectorAll(".detail-help-tooltip.is-open").forEach((el) => el.classList.remove("is-open"));
+      if (!wasOpen && container) {
+        container.classList.add("is-open");
+      }
+      return;
+    }
+
+    if (!target.closest(".detail-help-tooltip")) {
+      document.querySelectorAll(".detail-help-tooltip.is-open").forEach((el) => el.classList.remove("is-open"));
+    }
+
     const { tocMenu } = getModalElements();
     if (tocMenu && tocMenu.classList.contains("is-open") && !target.closest("[data-detail-fab-container]")) {
       closeTocMenu();
@@ -298,6 +465,11 @@ export function bindModalEvents(): void {
   document.addEventListener("keydown", (e) => {
     const { overlayEl, tocMenu } = getModalElements();
     if (e.key === "Escape") {
+      const openTooltips = document.querySelectorAll(".detail-help-tooltip.is-open");
+      if (openTooltips.length > 0) {
+        openTooltips.forEach((el) => el.classList.remove("is-open"));
+        return;
+      }
       if (tocMenu && tocMenu.classList.contains("is-open")) {
         closeTocMenu();
         return;

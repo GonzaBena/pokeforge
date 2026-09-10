@@ -90,12 +90,24 @@ export interface MoveData {
   nameEn?: string;
 }
 
+export interface PokemonAbilityInfo {
+  name: string;
+  nameEs?: string;
+  nameEn?: string;
+  isHidden: boolean;
+  slot: number;
+  probability: number;
+  descriptionEs?: string;
+  descriptionEn?: string;
+}
+
 export type MovesDetailsMap = Record<string, MoveData>;
 
 export interface TeamSlotState {
   pokemonId: number | null;
   moves?: (string | null)[];
   nature?: string | null;
+  ability?: string | null;
   stats?: Partial<PokemonStats>;
   usePokedexData?: boolean;
 }
@@ -130,6 +142,7 @@ export interface AcquisitionRow {
 export interface PokemonDetail {
   id: number;
   stats: PokemonStats;
+  abilities: PokemonAbilityInfo[];
   moveDetails: MoveDetail[];
   evolvesFrom: string | null;
   evolutionChainId: number | null;

@@ -3,6 +3,7 @@ import { buildTypeChart } from "./lib/buildTypeChart.ts";
 import { buildMovesIndex } from "./lib/buildMovesIndex.ts";
 import { buildMoveDetails } from "./lib/buildMoveDetails.ts";
 import { buildNatures } from "./lib/buildNatures.ts";
+import { buildAbilities } from "./lib/buildAbilities.ts";
 import { buildPokedex } from "./lib/buildPokedex.ts";
 import { buildSpeciesInfo } from "./lib/buildSpeciesInfo.ts";
 import { buildEvolutionChains } from "./lib/buildEvolutionChains.ts";
@@ -18,6 +19,7 @@ async function main() {
   await buildMovesIndex(force);
   await buildMoveDetails(force);
   await buildNatures(force);
+  const abilitiesMap = await buildAbilities(force);
   const pokedexResult = await buildPokedex(speciesToGeneration, force);
 
   if (pokedexResult.failedIds.length > 0) {
@@ -40,6 +42,7 @@ async function main() {
     generations,
     versionToGroup,
     groupToGeneration,
+    abilitiesMap,
     force,
   );
 

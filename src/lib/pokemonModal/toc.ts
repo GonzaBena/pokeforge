@@ -14,12 +14,14 @@ export function updateTocMenu(): void {
   const t = getTranslations(locale);
   const titles: Record<string, string> = {
     effectiveness: t.modal.effectiveness,
+    abilities: t.modal.abilities,
     location: t.modal.acquisition,
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
   };
   const icons: Record<string, string> = {
     effectiveness: "shield-check",
+    abilities: "zap",
     location: "gamepad-2",
     moves: "swords",
     evolutions: "sparkles",

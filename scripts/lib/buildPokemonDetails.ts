@@ -4,12 +4,14 @@ import { fetchJson } from "./http.ts";
 import { readCache, cachedFetch } from "./diskCache.ts";
 import { createLimiter } from "./limiter.ts";
 import type { SpeciesInfo } from "./buildSpeciesInfo.ts";
+import type { AbilitiesMap } from "./buildAbilities.ts";
 import type {
   AcquisitionRow,
   EvolutionChain,
   EvolutionNode,
   GenerationInfo,
   MoveDetail,
+  PokemonAbilityInfo,
   PokemonDetail,
   PokemonStats,
 } from "../../src/lib/types.ts";
@@ -40,11 +42,18 @@ interface RawStatEntry {
   stat: { name: string };
 }
 
+interface RawAbilityEntry {
+  is_hidden: boolean;
+  slot: number;
+  ability: { name: string; url: string };
+}
+
 interface RawPokemonDetail {
   id: number;
   name: string;
   stats: RawStatEntry[];
   moves: RawMoveEntry[];
+  abilities?: RawAbilityEntry[];
 }
 
 interface EncounterEntry {
@@ -84,6 +93,30 @@ function extractStats(raw: RawPokemonDetail): PokemonStats {
     specialDefense: find("special-defense"),
     speed: find("speed"),
   };
+}
+
+function extractAbilities(raw: RawPokemonDetail, abilitiesMap: AbilitiesMap): PokemonAbilityInfo[] {
+  const rawList = raw.abilities ?? [];
+  const nonHiddenCount = rawList.filter((a) => !a.is_hidden).length;
+
+  return rawList
+    .sort((a, b) => a.slot - b.slot)
+    .map((entry) => {
+      const abilityData = abilitiesMap.get(entry.ability.name);
+      const isHidden = entry.is_hidden;
+      const probability = isHidden ? 0 : (nonHiddenCount > 0 ? Number((1 / nonHiddenCount).toFixed(2)) : 0);
+
+      return {
+        name: entry.ability.name,
+        ...(abilityData?.nameEs ? { nameEs: abilityData.nameEs } : {}),
+        ...(abilityData?.nameEn ? { nameEn: abilityData.nameEn } : {}),
+        isHidden,
+        slot: entry.slot,
+        probability,
+        ...(abilityData?.descriptionEs ? { descriptionEs: abilityData.descriptionEs } : {}),
+        ...(abilityData?.descriptionEn ? { descriptionEn: abilityData.descriptionEn } : {}),
+      };
+    });
 }
 
 // Picks the most recent version group referenced across this pokemon's
@@ -230,6 +263,7 @@ interface BuildContext {
   versionGroupDisplay: Map<string, string>;
   generationOrder: Map<string, number>;
   versionGroupOrder: Map<string, number>;
+  abilitiesMap: AbilitiesMap;
 }
 
 function sortAndFormatRows(
@@ -313,6 +347,7 @@ async function buildOneDetail(
     const detail: PokemonDetail = {
       id,
       stats: extractStats(raw),
+      abilities: extractAbilities(raw, ctx.abilitiesMap),
       moveDetails: extractMoveDetails(raw),
       evolvesFrom: speciesInfo.evolvesFrom,
       evolutionChainId: speciesInfo.evolutionChainId,
@@ -343,6 +378,7 @@ export async function buildPokemonDetails(
   generations: GenerationInfo[],
   versionToGroup: Map<string, string>,
   groupToGeneration: Map<string, string>,
+  abilitiesMap: AbilitiesMap,
   force = false,
 ): Promise<BuildPokemonDetailsResult> {
   await mkdir(OUT_DIR, { recursive: true });
@@ -376,6 +412,7 @@ export async function buildPokemonDetails(
     versionGroupDisplay,
     generationOrder,
     versionGroupOrder,
+    abilitiesMap,
   };
 
   const limit = createLimiter();

@@ -261,6 +261,101 @@ function buildCardParts(attrs, fallbackSprite = '') {
 }
 
 /**
+ * Extract file extension from URL
+ * @param {string} rawUrl
+ * @returns {string}
+ */
+function extractExtension(rawUrl) {
+  try {
+    const clean = String(rawUrl).split('?')[0].split('#')[0];
+    const parts = clean.split('.');
+    if (parts.length > 1) {
+      const ext = parts.pop()?.trim().toUpperCase() || '';
+      if (ext.length >= 1 && ext.length <= 5 && !ext.includes('/')) {
+        return ext;
+      }
+    }
+  } catch {}
+  return 'FILE';
+}
+
+/**
+ * Get icon and badge class by extension
+ * @param {string} ext
+ * @returns {{ icon: string, badgeClass: string }}
+ */
+function getDownloadFileInfo(ext) {
+  switch (ext) {
+    case 'PDF':
+      return { icon: 'file-text', badgeClass: 'badge-pdf' };
+    case 'PNG':
+    case 'JPG':
+    case 'JPEG':
+    case 'WEBP':
+    case 'SVG':
+    case 'GIF':
+    case 'AVIF':
+      return { icon: 'image', badgeClass: 'badge-image' };
+    case 'ZIP':
+    case 'RAR':
+    case '7Z':
+    case 'TAR':
+    case 'GZ':
+      return { icon: 'archive', badgeClass: 'badge-archive' };
+    case 'SAV':
+    case 'DAT':
+    case 'BIN':
+    case 'PKM':
+    case 'PK9':
+      return { icon: 'hard-drive', badgeClass: 'badge-save' };
+    case 'JSON':
+    case 'CSV':
+    case 'XLSX':
+    case 'XLS':
+    case 'TXT':
+      return { icon: 'file-spreadsheet', badgeClass: 'badge-data' };
+    default:
+      return { icon: 'file-down', badgeClass: 'badge-default' };
+  }
+}
+
+/**
+ * Render a <download-card> HTML string
+ * @param {Record<string, any>} attrs
+ * @returns {string}
+ */
+function renderDownloadCardHtml(attrs) {
+  const fileUrl = attrs.path || attrs.url || attrs.src || attrs.href || '#';
+  const fileTitle = attrs.text || attrs.title || attrs.name || fileUrl.split('/').pop() || 'Descarga';
+  const description = attrs.description || attrs.desc || '';
+  const size = attrs.size || attrs.tamano || '';
+  const detectedExt = (attrs.format || extractExtension(fileUrl)).toUpperCase();
+  const { icon, badgeClass } = getDownloadFileInfo(detectedExt);
+  const actionLabel = attrs.btnText || attrs.buttonText || 'Descargar';
+  const fileNameAttr = attrs.fileName ? ` download="${attrs.fileName}"` : ' download';
+
+  return `<div class="download-card">
+  <div class="download-card__icon ${badgeClass}" aria-hidden="true">
+    <i data-lucide="${icon}"></i>
+  </div>
+  <div class="download-card__body">
+    <div class="download-card__meta">
+      <span class="download-badge ${badgeClass}">${detectedExt}</span>
+      ${size ? `<span class="download-size">${size}</span>` : ''}
+    </div>
+    <h4 class="download-card__title">${fileTitle}</h4>
+    ${description ? `<p class="download-card__desc">${description}</p>` : ''}
+  </div>
+  <div class="download-card__action">
+    <a href="${fileUrl}"${fileNameAttr} class="download-btn" aria-label="${actionLabel}: ${fileTitle}">
+      <i data-lucide="download"></i>
+      <span>${actionLabel}</span>
+    </a>
+  </div>
+</div>`;
+}
+
+/**
  * Replace container tags and rival selector in an HTML string
  * @param {string} str
  * @returns {string}
@@ -299,6 +394,15 @@ function replaceContainers(str) {
     '<div class="starter-showcase">\n<div class="starter-showcase__grid">'
   );
   output = output.replace(/<\/(?:pokemon-showcase|showcase)>/gi, '</div>\n</div>');
+
+  // 4. Download Card
+  output = output.replace(
+    /<(?:download-card|download)\b([^>]*)>(?:<\/(?:download-card|download)>)?|<(?:download-card|download)\b([^/>]*)\/>/gi,
+    (match, attrs1, attrs2) => {
+      const attrs = parseCardAttrs(attrs1 || attrs2 || '');
+      return renderDownloadCardHtml(attrs);
+    }
+  );
 
   return output;
 }

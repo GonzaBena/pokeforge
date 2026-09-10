@@ -37,6 +37,20 @@
   border-color: var(--accent-strong);
 }
 
+.btn--captured,
+.btn--success {
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.btn--captured:hover,
+.btn--success:hover {
+  background: var(--success);
+  border-color: var(--success);
+  color: #0b1e11;
+}
+
 .btn--block {
   width: 100%;
   justify-content: center;

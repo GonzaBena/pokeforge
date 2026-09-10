@@ -29,6 +29,7 @@ import { toast } from "../lib/toast";
 import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
+import { getDefaultAbility } from "../lib/pokemonModal/utils";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
 import { getCurrentLocale, getTranslations, getTypeName, getGameTitle, getRegionName, type Locale } from "../lib/i18n/translations";
 import { computeTeamSynergy } from "../lib/teamSynergy";
@@ -1477,7 +1478,7 @@ panelTabToggleEl?.addEventListener("click", (e) => {
   refreshIcons();
 });
 
-synergyModalContent?.addEventListener("click", (e) => {
+synergyModalContent?.addEventListener("click", async (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-synergy-add]");
   if (!btn) return;
   const pId = Number(btn.dataset.synergyAdd);
@@ -1493,7 +1494,11 @@ synergyModalContent?.addEventListener("click", (e) => {
     return;
   }
 
-  team = setTeamSlot(emptySlotIndex, pId);
+  const detail = await getPokemonDetail(pId).catch(() => null);
+  const baseStats = detail ? { ...detail.stats } : {};
+  const defaultAbility = getDefaultAbility(detail);
+
+  team = setTeamSlot(emptySlotIndex, pId, baseStats, null, defaultAbility);
   renderSingleSlot(emptySlotIndex);
   renderStrengthsPanel();
   toast.success(t.strengthsWeaknesses.teamAddedSuccess.replace("{name}", capitalize(pokemon.name)));
@@ -2308,8 +2313,9 @@ pickerResultsEl.addEventListener("click", async (e) => {
 
   const detail = await getPokemonDetail(id).catch(() => null);
   const baseStats = detail ? { ...detail.stats } : {};
+  const defaultAbility = getDefaultAbility(detail);
 
-  team = setTeamSlot(activeSlotIndex, id, baseStats);
+  team = setTeamSlot(activeSlotIndex, id, baseStats, null, defaultAbility);
   renderSingleSlot(activeSlotIndex, true);
   renderStrengthsPanel();
   if (pokemon) {

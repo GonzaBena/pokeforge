@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import DownloadCard from "../components/DownloadCard.astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
 import { getAuthor } from "../lib/authors";
@@ -263,6 +264,32 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
           <div class="article-body">
             <Content />
           </div>
+
+          {post.data.downloads && post.data.downloads.length > 0 && (
+            <section class="article-downloads" id="recursos-descargables">
+              <div class="article-downloads__header">
+                <div class="article-downloads__badge">
+                  <i data-lucide="folder-down"></i>
+                  <span>{t.blog.downloadsTitle}</span>
+                </div>
+                <h3 class="article-downloads__title">{t.blog.downloadsTitle}</h3>
+                <p class="article-downloads__subtitle">{t.blog.downloadsSubtitle}</p>
+              </div>
+
+              <div class="article-downloads__list">
+                {post.data.downloads.map((item) => (
+                  <DownloadCard
+                    path={item.url || item.src || item.href || item.path}
+                    text={item.title || item.text}
+                    format={item.format}
+                    size={item.size}
+                    description={item.description}
+                    fileName={item.fileName}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
 
           {guide.isHub && (guide.chapters.length > 0 || guide.plannedChapters.length > 0) && (
             <section class="guide-hub-section" id="capitulos">

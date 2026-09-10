@@ -3,13 +3,24 @@ import { refreshIcons } from "../../icons";
 import { getTeam, isCaptured } from "../../storage";
 import { typeColor } from "../../typeColors";
 import type { PokemonStats } from "../../types";
-import { getNatureModifier, natureEffectText, renderHexagonChart, renderNatureEffectBadges, updateHexagonChartIfVisible } from "../chart";
+import {
+  getNatureModifier,
+  natureEffectText,
+  renderHexagonChart,
+  renderNatureEffectBadges,
+  updateHexagonChartIfVisible,
+} from "../chart";
 import { STAT_KEYS, STAT_LABELS } from "../constants";
 import { getModalElements } from "../dom";
 import { getCurrentEffectiveOverrides } from "../overrides";
 import { modalState } from "../state";
 import type { RenderContext } from "../types";
-import { capitalize, dexNumber, typeBadgesHtml } from "../utils";
+import {
+  capitalize,
+  dexNumber,
+  getDefaultAbility,
+  typeBadgesHtml,
+} from "../utils";
 
 export function renderHeader(ctx: RenderContext): string {
   const { pokemon, detail } = ctx;
@@ -20,13 +31,45 @@ export function renderHeader(ctx: RenderContext): string {
   const canEdit = isTeamMode ? true : captured;
 
   const team = isTeamMode ? getTeam() : null;
-  const currentSlot = isTeamMode && team ? (team.slots[modalState.currentSlotIndex!] ?? null) : null;
+  const currentSlot =
+    isTeamMode && team
+      ? (team.slots[modalState.currentSlotIndex!] ?? null)
+      : null;
   const overrides = getCurrentEffectiveOverrides();
 
   const userStats = overrides.stats ?? {};
-  const sprite = pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
+  const sprite =
+    pokemon.sprites.officialArtwork ?? pokemon.sprites.default ?? "";
   const naturesList = ctx.natures ?? [];
-  const selectedNature = naturesList.find((n) => n.name === overrides.nature) ?? null;
+  const selectedNature =
+    naturesList.find((n) => n.name === overrides.nature) ?? null;
+
+  const abilitiesList = detail.abilities ?? [];
+  const defaultAbility = getDefaultAbility(detail);
+  const currentAbilityName = overrides.ability ?? defaultAbility;
+  const selectedAbility =
+    abilitiesList.find((a) => a.name === currentAbilityName) ?? null;
+  const selectedAbilityDesc = selectedAbility
+    ? locale === "es"
+      ? selectedAbility.descriptionEs || selectedAbility.descriptionEn || ""
+      : selectedAbility.descriptionEn || selectedAbility.descriptionEs || ""
+    : "";
+
+  const abilityOptionsHtml = abilitiesList
+    .map((a) => {
+      const isSelected = currentAbilityName === a.name;
+      const label =
+        locale === "es"
+          ? a.nameEs || capitalize(a.name)
+          : a.nameEn || capitalize(a.name);
+      const tag = a.isHidden
+        ? locale === "es"
+          ? ` (${t.modal.hiddenBadge})`
+          : ` (${t.modal.hiddenBadge})`
+        : "";
+      return `<option value="${a.name}" ${isSelected ? "selected" : ""}>${label}${tag}</option>`;
+    })
+    .join("");
 
   const statsHtml = STAT_KEYS.map((key) => {
     const base = detail.stats?.[key] ?? 0;
@@ -63,7 +106,10 @@ export function renderHeader(ctx: RenderContext): string {
   }).join("");
 
   const natureOptionsHtml = naturesList
-    .map((n) => `<option value="${n.name}" ${overrides.nature === n.name ? "selected" : ""}>${capitalize(n.name)}</option>`)
+    .map(
+      (n) =>
+        `<option value="${n.name}" ${overrides.nature === n.name ? "selected" : ""}>${capitalize(n.name)}</option>`,
+    )
     .join("");
 
   const currentStats: PokemonStats = {
@@ -103,7 +149,7 @@ export function renderHeader(ctx: RenderContext): string {
     `;
   } else {
     footerActionsHtml = `
-      <button class="btn ${captured ? "" : "btn--primary"}" type="button" data-modal-capture-btn>
+      <button class="btn ${captured ? "btn--captured" : "btn--primary"}" type="button" data-modal-capture-btn>
         <i data-lucide="${captured ? "check" : "circle-dot"}"></i>
         ${captured ? t.pokedex.caught : t.pokedex.catch}
       </button>
@@ -128,13 +174,13 @@ export function renderHeader(ctx: RenderContext): string {
       <div class="detail-header__info">
         <div class="detail-header__name-row">
           <div class="detail-header__title-group">
-            <h3 class="detail-header__name">${pokemon.name}</h3>
+            <h3 class="detail-header__name capitalize">${pokemon.name}</h3>
             <span class="detail-header__id">${dexNumber(pokemon.id)}</span>
             ${badgeTeamHtml}
           </div>
           <button class="btn btn--compact detail-chart-toggle-btn ${modalState.showHexagonChart ? "btn--primary" : ""}" type="button" data-toggle-chart-view title="${t.modal.chartToggle}">
             <i data-lucide="${modalState.showHexagonChart ? "bar-chart-2" : "hexagon"}"></i>
-            <span data-chart-toggle-label>${modalState.showHexagonChart ? (locale === "es" ? "Ocultar Juez" : "Hide Judge") : (locale === "es" ? "Gráfico Juez" : "Judge Chart")}</span>
+            <span data-chart-toggle-label>${modalState.showHexagonChart ? (locale === "es" ? "Ocultar Juez" : "Hide Judge") : locale === "es" ? "Gráfico Juez" : "Judge Chart"}</span>
           </button>
         </div>
         <div class="detail-header__types">${typeBadgesHtml(pokemon.types)}</div>
@@ -145,7 +191,31 @@ export function renderHeader(ctx: RenderContext): string {
           </div>
         </div>
         <div class="detail-footer-row">
-          <div class="detail-footer-row__nature">
+          <div class="detail-footer-row__customization">
+            <div class="detail-ability">
+              <div class="detail-ability__select-row">
+                <span class="detail-ability__label">${t.modal.ability}</span>
+                <select data-ability-select ${canEdit ? "" : "disabled"}>
+                  ${abilityOptionsHtml}
+                </select>
+                <div class="detail-help-tooltip" data-help-tooltip="ability">
+                  <button
+                    type="button"
+                    class="detail-help-tooltip__trigger"
+                    data-tooltip-trigger="ability"
+                    aria-label="${t.modal.ability}"
+                    title="${selectedAbilityDesc || (locale === "es" ? "Información de la habilidad" : "Ability information")}"
+                  >
+                    <i data-lucide="info"></i>
+                  </button>
+                  <div class="detail-help-tooltip__popover" data-tooltip-popover="ability" role="tooltip">
+                    <strong class="detail-help-tooltip__title" data-tooltip-title="ability">${selectedAbility ? (locale === "es" ? selectedAbility.nameEs || capitalize(selectedAbility.name) : selectedAbility.nameEn || capitalize(selectedAbility.name)) : t.modal.ability}</strong>
+                    <p class="detail-help-tooltip__text" data-tooltip-text="ability">${selectedAbilityDesc || (locale === "es" ? "La habilidad otorga efectos pasivos únicos en combate o aventura." : "Abilities provide unique passive effects in battle or adventure.")}</p>
+                    ${selectedAbility?.isHidden ? `<p class="detail-help-tooltip__sub" data-tooltip-sub="ability">${locale === "es" ? "Habilidad Oculta" : "Hidden Ability"}</p>` : ""}
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="detail-nature">
               <div class="detail-nature__select-row">
                 <span class="detail-nature__label">${t.modal.nature}</span>
@@ -153,13 +223,28 @@ export function renderHeader(ctx: RenderContext): string {
                   <option value="">${locale === "es" ? "Sin definir" : "Undefined"}</option>
                   ${natureOptionsHtml}
                 </select>
-                <i data-lucide="info" class="detail-nature__tooltip" data-nature-tooltip title="${natureEffectText(selectedNature, locale)}"></i>
+                <div class="detail-help-tooltip" data-help-tooltip="nature">
+                  <button
+                    type="button"
+                    class="detail-help-tooltip__trigger"
+                    data-tooltip-trigger="nature"
+                    aria-label="${t.modal.nature}"
+                    title="${natureEffectText(selectedNature, locale)}"
+                  >
+                    <i data-lucide="info"></i>
+                  </button>
+                  <div class="detail-help-tooltip__popover" data-tooltip-popover="nature" role="tooltip">
+                    <strong class="detail-help-tooltip__title" data-tooltip-title="nature">${selectedNature ? capitalize(selectedNature.name) : t.modal.nature}</strong>
+                    <p class="detail-help-tooltip__text" data-tooltip-text="nature">${natureEffectText(selectedNature, locale)}</p>
+                    <p class="detail-help-tooltip__sub">${locale === "es" ? "Las naturalezas modifican un stat en +10% y otro en -10% (o son neutras)." : "Natures increase one stat by +10% and decrease another by -10% (or are neutral)."}</p>
+                  </div>
+                </div>
               </div>
               <div class="detail-nature__effects" data-nature-effects-container>
                 ${renderNatureEffectBadges(selectedNature, locale)}
               </div>
             </div>
-            ${isTeamMode ? `<p class="detail-nature-hint">${t.modal.teamNatureNotice}</p>` : (!captured ? `<p class="detail-hint" data-capture-hint>${t.modal.captureHint}</p>` : "")}
+            ${isTeamMode ? `<p class="detail-nature-hint">${t.modal.teamNatureNotice}</p>` : !captured ? `<p class="detail-hint" data-capture-hint>${t.modal.captureHint}</p>` : ""}
           </div>
           ${footerActionsHtml}
         </div>
@@ -174,16 +259,27 @@ export function updateHeaderCapturedState(captured: boolean): void {
 
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
-  const captureBtn = bodyEl.querySelector<HTMLButtonElement>("[data-modal-capture-btn]");
+  const captureBtn = bodyEl.querySelector<HTMLButtonElement>(
+    "[data-modal-capture-btn]",
+  );
   if (captureBtn) {
     captureBtn.classList.toggle("btn--primary", !captured);
+    captureBtn.classList.toggle("btn--captured", captured);
     captureBtn.innerHTML = `<i data-lucide="${captured ? "check" : "circle-dot"}"></i> ${captured ? t.pokedex.caught : t.pokedex.catch}`;
   }
-  bodyEl.querySelectorAll<HTMLInputElement>("[data-stat-input]").forEach((input) => {
-    input.disabled = !captured;
-  });
-  const natureSelect = bodyEl.querySelector<HTMLSelectElement>("[data-nature-select]");
+  bodyEl
+    .querySelectorAll<HTMLInputElement>("[data-stat-input]")
+    .forEach((input) => {
+      input.disabled = !captured;
+    });
+  const natureSelect = bodyEl.querySelector<HTMLSelectElement>(
+    "[data-nature-select]",
+  );
   if (natureSelect) natureSelect.disabled = !captured;
+  const abilitySelect = bodyEl.querySelector<HTMLSelectElement>(
+    "[data-ability-select]",
+  );
+  if (abilitySelect) abilitySelect.disabled = !captured;
   const hint = bodyEl.querySelector<HTMLElement>("[data-capture-hint]");
   if (hint) hint.hidden = captured;
   refreshIcons();

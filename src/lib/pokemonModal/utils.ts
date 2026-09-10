@@ -24,3 +24,16 @@ export function typeBadgesHtml(types: string[], small = false): string {
 export function formatGeneration(gen: unknown): string {
   return String(gen ?? "").replace(/^(Generación|Generation)\s*/i, "").trim();
 }
+
+export function getDefaultAbility(detail?: { abilities?: { name: string; isHidden: boolean }[] } | null): string | null {
+  const abilities = detail?.abilities ?? [];
+  const nonHidden = abilities.filter((a) => !a.isHidden);
+  if (nonHidden.length === 0) {
+    return abilities[0]?.name ?? null;
+  }
+  if (nonHidden.length === 1) {
+    return nonHidden[0].name;
+  }
+  const idx = Math.floor(Math.random() * nonHidden.length);
+  return nonHidden[idx].name;
+}

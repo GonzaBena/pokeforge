@@ -49,6 +49,7 @@ const counts = {
   curiosidades: sortedPosts.filter((p) => p.data.category === "curiosidades").length,
   competitivo: sortedPosts.filter((p) => p.data.category === "competitivo").length,
   novedades: sortedPosts.filter((p) => p.data.category === "novedades").length,
+  recursos: sortedPosts.filter((p) => p.data.category === "recursos").length
 };
 
 function formatDate(date: Date): string {
@@ -289,6 +290,11 @@ const searchManifest = sortedPosts.map((p) => {
           <i data-lucide="shield-check"></i>
           <span>{t.blog.categories.competitivo}</span>
           <span class="blog-tab-btn__count" data-filter-count="competitivo">{counts.competitivo}</span>
+        </button>
+        <button class="blog-tab-btn" data-filter="recursos">
+          <i data-lucide="file"></i>
+          <span>{t.blog.categories.recursos}</span>
+          <span class="blog-tab-btn__count" data-filter-count="recursos">{counts.recursos}</span>
         </button>
         {counts.novedades > 0 && (
           <button class="blog-tab-btn" data-filter="novedades">
@@ -731,6 +737,7 @@ const searchManifest = sortedPosts.map((p) => {
           curiosidades: 0,
           competitivo: 0,
           novedades: 0,
+          recursos: 0,
         };
 
         allPosts.forEach((post) => {
@@ -783,7 +790,9 @@ const searchManifest = sortedPosts.map((p) => {
             !activeTag ||
             post.tags.some((t) => t.toLowerCase() === activeTag) ||
             post.searchText.includes(activeTag);
-          const matchesCategory = activeFilter === "all" || post.category === activeFilter;
+          const matchesCategory =
+            activeFilter === "all" ||
+            post.category?.toLowerCase() === activeFilter.toLowerCase();
           return matchesSearch && matchesTag && matchesCategory;
         });
 

@@ -264,6 +264,13 @@ export interface Translations {
     savedToPokedex: string;
     noPokedexData: string;
     teamNatureNotice: string;
+    abilities: string;
+    ability: string;
+    hiddenAbility: string;
+    hiddenBadge: string;
+    activeAbility: string;
+    probability: string;
+    noAbilities: string;
   };
   sync: {
     title: string;
@@ -353,6 +360,7 @@ export interface Translations {
       curiosidades: string;
       competitivo: string;
       novedades: string;
+      recursos: string;
     };
     featuredBadge: string;
     readArticle: string;
@@ -387,6 +395,9 @@ export interface Translations {
     guideNextChapterPendingDesc: string;
     guideChapterPlanned: string;
     guideChapterPlannedDesc: string;
+    downloadsTitle: string;
+    downloadsSubtitle: string;
+    downloadAction: string;
     paginationPrev: string;
     paginationNext: string;
     paginationPage: string;
@@ -626,6 +637,13 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       savedToPokedex: "Team slot data saved to Pokédex.",
       noPokedexData: "No custom stats or nature in Pokédex.",
       teamNatureNotice: "Customizing stats and nature for this team member.",
+      abilities: "Abilities",
+      ability: "Ability",
+      hiddenAbility: "Hidden Ability",
+      hiddenBadge: "Hidden",
+      activeAbility: "Active",
+      probability: "Probability",
+      noAbilities: "No ability data available.",
     },
     sync: {
       title: "Sync Devices",
@@ -730,6 +748,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         curiosidades: "Curiosities",
         competitivo: "Competitive",
         novedades: "News",
+        recursos: "Resources",
       },
       featuredBadge: "Featured",
       readArticle: "Read article",
@@ -767,6 +786,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         "The next chapter will be published soon. Stay tuned!",
       guideChapterPlanned: "Coming Soon",
       guideChapterPlannedDesc: "Chapter currently in preparation",
+      downloadsTitle: "Downloads & Resources",
+      downloadsSubtitle:
+        "Downloadable files, guides, and companion material for this article.",
+      downloadAction: "Download",
       paginationPrev: "Previous",
       paginationNext: "Next",
       paginationPage: "Page",
@@ -1011,6 +1034,13 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         "No hay estadísticas ni naturaleza personalizadas en la Pokédex.",
       teamNatureNotice:
         "Personalizando stats y naturaleza para este miembro del equipo.",
+      abilities: "Habilidades",
+      ability: "Habilidad",
+      hiddenAbility: "Habilidad Oculta",
+      hiddenBadge: "Oculta",
+      activeAbility: "Activa",
+      probability: "Probabilidad",
+      noAbilities: "Sin datos de habilidades.",
     },
     sync: {
       title: "Sincronizar Dispositivos",
@@ -1118,6 +1148,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         curiosidades: "Curiosidades",
         competitivo: "Competitivo",
         novedades: "Novedades",
+        recursos: "Recursos",
       },
       featuredBadge: "Destacado",
       readArticle: "Leer artículo",
@@ -1156,6 +1187,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         "El siguiente capítulo se publicará próximamente. ¡Vuelve a consultar pronto!",
       guideChapterPlanned: "Próximamente",
       guideChapterPlannedDesc: "Capítulo en preparación",
+      downloadsTitle: "Descargas y Recursos",
+      downloadsSubtitle:
+        "Archivos, guías y material descargable complementario para este artículo.",
+      downloadAction: "Descargar",
       paginationPrev: "Anterior",
       paginationNext: "Siguiente",
       paginationPage: "Página",

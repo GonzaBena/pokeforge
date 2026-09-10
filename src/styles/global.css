@@ -41,6 +41,10 @@
 @import "./features/blog/blog.css";
 @import "./features/blog/article.css";
 
+.capitalize {
+  text-transform: capitalize;
+}
+
 /* Transiciones entre páginas MPA fluidas */
 @media (prefers-reduced-motion: no-preference) {
   @view-transition {

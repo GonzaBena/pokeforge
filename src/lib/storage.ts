@@ -34,8 +34,12 @@ export function isCaptured(id: number): boolean {
 
 export function setCaptured(id: number, captured: boolean): Set<number> {
   const ids = getCapturedIds();
-  if (captured) ids.add(id);
-  else ids.delete(id);
+  if (captured) {
+    ids.add(id);
+  } else {
+    ids.delete(id);
+    deletePokemonOverrides(id);
+  }
 
   writeJson(CAPTURED_KEY, [...ids]);
   window.dispatchEvent(new CustomEvent(CAPTURED_CHANGED_EVENT, { detail: { ids, changedId: id, captured } }));
@@ -49,6 +53,7 @@ const DEFAULT_SLOTS: TeamSlotState[] = Array.from({ length: TEAM_FIXED_SIZE }, (
   pokemonId: null,
   moves: [null, null, null, null],
   nature: null,
+  ability: null,
   stats: {},
   usePokedexData: false,
 }));
@@ -62,15 +67,17 @@ function normalizeTeam(team: TeamState): TeamState {
         pokemonId: null,
         moves: [null, null, null, null],
         nature: null,
+        ability: null,
         stats: {},
         usePokedexData: false,
       };
     }
     const moves = Array.from({ length: 4 }, (_, mIdx) => raw.moves?.[mIdx] ?? null);
     const nature = typeof raw.nature === "string" ? raw.nature : null;
+    const ability = typeof raw.ability === "string" ? raw.ability : null;
     const stats = raw.stats && typeof raw.stats === "object" ? { ...raw.stats } : {};
     const usePokedexData = Boolean(raw.usePokedexData);
-    return { pokemonId: raw.pokemonId, moves, nature, stats, usePokedexData };
+    return { pokemonId: raw.pokemonId, moves, nature, ability, stats, usePokedexData };
   });
   return { size: TEAM_FIXED_SIZE, slots };
 }
@@ -94,7 +101,8 @@ export function setTeamSlot(
   index: number,
   pokemonId: number | null,
   initialStats?: Partial<PokemonStats>,
-  initialNature?: string | null
+  initialNature?: string | null,
+  initialAbility?: string | null
 ): TeamState {
   const current = getTeam();
   const slots = [...current.slots];
@@ -104,6 +112,7 @@ export function setTeamSlot(
         pokemonId: null,
         moves: [null, null, null, null],
         nature: null,
+        ability: null,
         stats: {},
         usePokedexData: false,
       };
@@ -112,6 +121,7 @@ export function setTeamSlot(
         pokemonId,
         moves: [null, null, null, null],
         nature: initialNature ?? null,
+        ability: initialAbility ?? null,
         stats: initialStats ? { ...initialStats } : {},
         usePokedexData: false,
       };
@@ -169,6 +179,19 @@ export function setTeamSlotNature(slotIndex: number, nature: string | null): Tea
   return setTeam({ ...current, slots });
 }
 
+export function setTeamSlotAbility(slotIndex: number, ability: string | null): TeamState {
+  const current = getTeam();
+  const slots = [...current.slots];
+  const targetSlot = slots[slotIndex];
+  if (!targetSlot || targetSlot.pokemonId === null) return current;
+
+  slots[slotIndex] = {
+    ...targetSlot,
+    ability,
+  };
+  return setTeam({ ...current, slots });
+}
+
 export function setTeamSlotStats(slotIndex: number, stats: Partial<PokemonStats>): TeamState {
   const current = getTeam();
   const slots = [...current.slots];
@@ -205,6 +228,7 @@ export function copyPokedexToSlot(slotIndex: number): TeamState {
   slots[slotIndex] = {
     ...targetSlot,
     nature: pokedexOverrides.nature,
+    ability: pokedexOverrides.ability ?? null,
     stats: { ...pokedexOverrides.stats },
     usePokedexData: false,
   };
@@ -218,6 +242,7 @@ export function copySlotToPokedex(slotIndex: number): void {
 
   setPokemonOverrides(targetSlot.pokemonId, {
     nature: targetSlot.nature ?? null,
+    ability: targetSlot.ability ?? null,
     stats: targetSlot.stats ? { ...targetSlot.stats } : {},
   });
 }
@@ -227,30 +252,34 @@ export function getTeamSlotEffectiveOverrides(slot: TeamSlotState, baseStats?: P
     const pOverrides = getPokemonOverrides(slot.pokemonId);
     return {
       nature: pOverrides.nature ?? null,
+      ability: pOverrides.ability ?? null,
       stats: { ...(baseStats ?? {}), ...(pOverrides.stats ?? {}) },
     };
   }
 
   return {
     nature: slot.nature ?? null,
+    ability: slot.ability ?? null,
     stats: { ...(baseStats ?? {}), ...(slot.stats ?? {}) },
   };
 }
 
-// --- Per-pokemon detail overrides (stats/nature, informational only) ----
+// --- Per-pokemon detail overrides (stats/nature/ability, informational only) ----
 
 export interface PokemonOverrides {
   stats: Partial<PokemonStats>;
   nature: string | null;
+  ability?: string | null;
 }
 
-const DEFAULT_OVERRIDES: PokemonOverrides = { stats: {}, nature: null };
+const DEFAULT_OVERRIDES: PokemonOverrides = { stats: {}, nature: null, ability: null };
 
 export function getPokemonOverrides(id: number): PokemonOverrides {
   const stored = readJson<PokemonOverrides>(overridesKey(id), DEFAULT_OVERRIDES);
   return {
     stats: stored && typeof stored.stats === "object" && stored.stats !== null ? stored.stats : {},
     nature: stored?.nature ?? null,
+    ability: stored?.ability ?? null,
   };
 }
 
@@ -258,9 +287,13 @@ export function setPokemonOverrides(id: number, overrides: PokemonOverrides): vo
   writeJson(overridesKey(id), overrides);
 }
 
+export function deletePokemonOverrides(id: number): void {
+  localStorage.removeItem(overridesKey(id));
+}
+
 // --- Modal section order -------------------------------------------------
 
-export const DEFAULT_SECTION_ORDER = ["effectiveness", "location", "moves", "evolutions"];
+export const DEFAULT_SECTION_ORDER = ["effectiveness", "abilities", "location", "moves", "evolutions"];
 
 export function getSectionOrder(): string[] {
   const stored = readJson<string[]>(SECTION_ORDER_KEY, DEFAULT_SECTION_ORDER);

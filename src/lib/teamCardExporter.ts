@@ -21,6 +21,9 @@ export function generateShowdownText(team: TeamState, pokemonMap: Map<number, Po
 
     const lines: string[] = [];
     lines.push(`${capitalize(p.name)}`);
+    if (slot.ability) {
+      lines.push(`Ability: ${slot.ability.split("-").map(capitalize).join(" ")}`);
+    }
     lines.push(`Types: ${p.types.map(capitalize).join(" / ")}`);
     if (slot.nature) {
       lines.push(`Nature: ${capitalize(slot.nature)}`);

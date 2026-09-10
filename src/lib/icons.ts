@@ -13,6 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  ChevronsDown,
+  ChevronsUp,
   CircleCheck,
   CircleDot,
   CircleX,
@@ -23,6 +25,7 @@ import {
   Copy,
   Download,
   Filter,
+  File,
   Flame,
   Gamepad2,
   Grid,
@@ -58,6 +61,7 @@ import {
   Volume2,
   VolumeX,
   X,
+  Zap,
 } from "lucide";
 
 export function refreshIcons(): void {
@@ -76,6 +80,8 @@ export function refreshIcons(): void {
       ChevronLeft,
       ChevronRight,
       ChevronUp,
+      ChevronsDown,
+      ChevronsUp,
       CircleCheck,
       CircleDot,
       CircleX,
@@ -86,6 +92,7 @@ export function refreshIcons(): void {
       Copy,
       Download,
       Filter,
+      File,
       Flame,
       Gamepad2,
       Grid,
@@ -121,6 +128,7 @@ export function refreshIcons(): void {
       Volume2,
       VolumeX,
       X,
+      Zap,
     },
   });
 }
