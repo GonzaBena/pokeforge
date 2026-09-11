@@ -189,10 +189,21 @@ const t = getTranslations(currentLocale);
       </div>
       <div class="picker-panel__body" data-move-picker-body>
         <div class="picker-panel__filters">
-          <label class="picker-input-wrap">
-            <i data-lucide="search" class="picker-input-icon"></i>
-            <input class="picker-input" type="search" placeholder={t.team.filterByMove} data-move-picker-search />
-          </label>
+          <div class="search-with-help">
+            <label class="picker-input-wrap">
+              <i data-lucide="search" class="picker-input-icon"></i>
+              <input class="picker-input" type="search" placeholder={t.team.filterByMove} data-move-picker-search />
+            </label>
+            <button
+              class="filter-help-btn"
+              type="button"
+              data-open-move-filter-guide
+              title={t.moveFilterGuide.buttonTitle}
+              aria-label={t.moveFilterGuide.buttonTitle}
+            >
+              <i data-lucide="help-circle"></i>
+            </button>
+          </div>
           <div class="picker-panel__container">
             <div class="picker-panel__filter-section">
               <span class="picker-panel__section-title">{t.team.category}</span>

@@ -18,6 +18,7 @@ import { refreshIcons } from "../lib/icons";
 import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, Pokemon } from "../lib/types";
+import { matchesMoveFilter, parseMoveQuery, type MoveFilterItem } from "../lib/moveFilters";
 
 const PAGE_SIZE = 24;
 
@@ -298,10 +299,47 @@ function updateMoveCountMap(): void {
 }
 
 function filterMoves(query: string): MoveData[] {
-  const q = normalize(query);
-  if (!q) return [];
+  const trimmed = query.trim();
+  if (!trimmed) return [];
   const allMoves = Object.values(moveDetailsMap);
   const locale = getCurrentLocale();
+  const parsed = parseMoveQuery(trimmed);
+
+  const hasAdvancedFilter =
+    parsed.types.length > 0 ||
+    parsed.negatedTypes.length > 0 ||
+    parsed.categories.length > 0 ||
+    parsed.negatedCategories.length > 0 ||
+    parsed.methods.length > 0 ||
+    parsed.negatedMethods.length > 0 ||
+    parsed.numericFilters.length > 0;
+
+  if (hasAdvancedFilter) {
+    const matched = allMoves.filter((move) => {
+      const item: MoveFilterItem = {
+        name: move.name,
+        nameEs: move.nameEs,
+        nameEn: move.nameEn,
+        type: move.type,
+        category: move.category,
+        power: move.power,
+        pp: move.pp,
+        accuracy: move.accuracy,
+      };
+      return matchesMoveFilter(item, parsed, locale);
+    });
+
+    matched.sort((a, b) => {
+      const countA = moveCountMap.get(a.name) ?? 0;
+      const countB = moveCountMap.get(b.name) ?? 0;
+      if (countB !== countA) return countB - countA;
+      return a.name.localeCompare(b.name);
+    });
+
+    return matched.slice(0, 15);
+  }
+
+  const q = normalize(query);
 
   interface ScoredMove {
     move: MoveData;

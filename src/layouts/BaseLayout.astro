@@ -3,6 +3,7 @@ import Nav from "../components/Nav.astro";
 import NavProgress from "../components/NavProgress.astro";
 import ToastContainer from "../components/ToastContainer.astro";
 import SyncModal from "../components/SyncModal.astro";
+import MoveFilterHelpModal from "../components/MoveFilterHelpModal.astro";
 import type { Locale } from "../lib/i18n/translations";
 import "../styles/global.css";
 
@@ -37,6 +38,7 @@ const currentLocale = Astro.currentLocale ?? "en";
     <Nav alternateUrls={alternateUrls} />
     <slot />
     <SyncModal />
+    <MoveFilterHelpModal />
     <ToastContainer />
     <script>
       import { refreshIcons } from "../lib/icons";

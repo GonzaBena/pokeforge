@@ -1,0 +1,236 @@
+---
+import { getTranslations, type Locale } from "../lib/i18n/translations";
+import "../styles/components/modal.css";
+import "../styles/components/move-filter-guide.css";
+
+const currentLocale = (Astro.currentLocale ?? "en") as Locale;
+const t = getTranslations(currentLocale);
+---
+
+<div
+  class="modal-overlay move-filter-guide-overlay"
+  data-move-filter-guide-overlay
+  data-filter-applied-msg={t.moveFilterGuide.filterApplied}
+  data-copied-msg={t.moveFilterGuide.copied}
+  hidden
+>
+  <div class="modal-panel move-filter-guide-panel" role="dialog" aria-modal="true" aria-labelledby="move-filter-guide-title">
+    <div class="modal-panel__header">
+      <div class="picker-panel__header-info">
+        <h2 id="move-filter-guide-title">
+          <i data-lucide="help-circle"></i>
+          <span>{t.moveFilterGuide.modalTitle}</span>
+        </h2>
+        <span class="type-matrix-modal__subtitle">{t.moveFilterGuide.modalSubtitle}</span>
+      </div>
+      <button class="modal-panel__close" type="button" data-move-filter-guide-close aria-label={t.moveFilterGuide.close}>
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <div class="move-filter-guide__body">
+      <div class="move-filter-guide__tip">
+        <span>{t.moveFilterGuide.tip}</span>
+      </div>
+
+      <div class="move-filter-guide__grid">
+        <!-- Tipos -->
+        <div class="move-filter-guide__card">
+          <div class="move-filter-guide__card-header">
+            <span class="move-filter-guide__card-title">
+              <i data-lucide="flame"></i>
+              {t.moveFilterGuide.sectionTypes}
+            </span>
+            <span class="move-filter-guide__card-desc">{t.moveFilterGuide.sectionTypesDesc}</span>
+          </div>
+          <div class="move-filter-guide__chips">
+            {t.moveFilterGuide.examples.types.map((ex) => (
+              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+                <code>{ex}</code>
+                <i data-lucide="copy"></i>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Categoría -->
+        <div class="move-filter-guide__card">
+          <div class="move-filter-guide__card-header">
+            <span class="move-filter-guide__card-title">
+              <i data-lucide="target"></i>
+              {t.moveFilterGuide.sectionCategories}
+            </span>
+            <span class="move-filter-guide__card-desc">{t.moveFilterGuide.sectionCategoriesDesc}</span>
+          </div>
+          <div class="move-filter-guide__chips">
+            {t.moveFilterGuide.examples.categories.map((ex) => (
+              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+                <code>{ex}</code>
+                <i data-lucide="copy"></i>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Potencia -->
+        <div class="move-filter-guide__card">
+          <div class="move-filter-guide__card-header">
+            <span class="move-filter-guide__card-title">
+              <i data-lucide="zap"></i>
+              {t.moveFilterGuide.sectionPower}
+            </span>
+            <span class="move-filter-guide__card-desc">{t.moveFilterGuide.sectionPowerDesc}</span>
+          </div>
+          <div class="move-filter-guide__chips">
+            {t.moveFilterGuide.examples.power.map((ex) => (
+              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+                <code>{ex}</code>
+                <i data-lucide="copy"></i>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- PP y Precisión -->
+        <div class="move-filter-guide__card">
+          <div class="move-filter-guide__card-header">
+            <span class="move-filter-guide__card-title">
+              <i data-lucide="crosshair"></i>
+              {t.moveFilterGuide.sectionPP} / {t.moveFilterGuide.sectionAccuracy}
+            </span>
+            <span class="move-filter-guide__card-desc">{t.moveFilterGuide.sectionPPDesc} {t.moveFilterGuide.sectionAccuracyDesc}</span>
+          </div>
+          <div class="move-filter-guide__chips">
+            {t.moveFilterGuide.examples.ppAcc.map((ex) => (
+              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+                <code>{ex}</code>
+                <i data-lucide="copy"></i>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Método y Nivel -->
+        <div class="move-filter-guide__card">
+          <div class="move-filter-guide__card-header">
+            <span class="move-filter-guide__card-title">
+              <i data-lucide="book-open"></i>
+              {t.moveFilterGuide.sectionMethod}
+            </span>
+            <span class="move-filter-guide__card-desc">{t.moveFilterGuide.sectionMethodDesc}</span>
+          </div>
+          <div class="move-filter-guide__chips">
+            {t.moveFilterGuide.examples.methodLevel.map((ex) => (
+              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+                <code>{ex}</code>
+                <i data-lucide="copy"></i>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Ejemplos Combinados -->
+        <div class="move-filter-guide__card">
+          <div class="move-filter-guide__card-header">
+            <span class="move-filter-guide__card-title">
+              <i data-lucide="sparkles"></i>
+              {t.moveFilterGuide.sectionCombos}
+            </span>
+            <span class="move-filter-guide__card-desc">{t.moveFilterGuide.sectionCombosDesc}</span>
+          </div>
+          <div class="move-filter-guide__chips">
+            {t.moveFilterGuide.examples.combos.map((ex) => (
+              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+                <code>{ex}</code>
+                <i data-lucide="copy"></i>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="move-filter-guide__footer">
+      <button class="btn btn--primary" type="button" data-move-filter-guide-close>
+        {t.moveFilterGuide.close}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { refreshIcons } from "../lib/icons";
+  import { toast } from "../lib/toast";
+
+  let lastActiveInput: HTMLInputElement | null = null;
+  const overlay = document.querySelector<HTMLElement>("[data-move-filter-guide-overlay]");
+
+  function openGuide(fromInput?: HTMLInputElement | null) {
+    if (fromInput) {
+      lastActiveInput = fromInput;
+    }
+    if (!lastActiveInput || lastActiveInput.offsetParent === null) {
+      const movePickerInput = document.querySelector<HTMLInputElement>("[data-move-picker-search]");
+      const modalInput = document.querySelector<HTMLInputElement>("[data-move-search-input]");
+      const dexInput = document.querySelector<HTMLInputElement>("[data-moves-input]");
+      if (movePickerInput && movePickerInput.offsetParent !== null) lastActiveInput = movePickerInput;
+      else if (modalInput && modalInput.offsetParent !== null) lastActiveInput = modalInput;
+      else if (dexInput && dexInput.offsetParent !== null) lastActiveInput = dexInput;
+    }
+    if (overlay) {
+      overlay.hidden = false;
+      refreshIcons();
+    }
+  }
+
+  function closeGuide() {
+    if (overlay) {
+      overlay.hidden = true;
+    }
+  }
+
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    const openBtn = target.closest<HTMLElement>("[data-open-move-filter-guide]");
+    if (openBtn) {
+      const parentRow = openBtn.closest(".search-with-help, .picker-panel__filters, .move-table-toolbar, .moves-filter-input-wrap, .move-table-search-row");
+      const input = parentRow?.querySelector<HTMLInputElement>("input[type='search'], input[type='text']");
+      openGuide(input);
+      return;
+    }
+
+    if (target.closest("[data-move-filter-guide-close]")) {
+      closeGuide();
+      return;
+    }
+
+    if (e.target === overlay) {
+      closeGuide();
+      return;
+    }
+
+    const chip = target.closest<HTMLElement>("[data-filter-chip]");
+    if (chip && chip.dataset.filterChip) {
+      const text = chip.dataset.filterChip;
+      navigator.clipboard?.writeText(text).catch(() => {});
+      const appliedTemplate = overlay?.dataset.filterAppliedMsg ?? "Filter applied: {text}";
+      const copiedText = overlay?.dataset.copiedMsg ?? "Copied!";
+
+      if (lastActiveInput) {
+        lastActiveInput.value = text;
+        lastActiveInput.dispatchEvent(new Event("input", { bubbles: true }));
+        toast.info(appliedTemplate.replace("{text}", text), { duration: 2000 });
+        closeGuide();
+        lastActiveInput.focus();
+      } else {
+        toast.success(copiedText, { duration: 1800 });
+      }
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay && !overlay.hidden) {
+      closeGuide();
+    }
+  });
+</script>

@@ -9,6 +9,7 @@ import { buildMoveTableRows, getLocationColumns, getMoveColumns } from "./sectio
 import { modalState } from "./state";
 import { updateTocMenu } from "./toc";
 import type { RenderContext } from "./types";
+import { matchesMoveFilter, parseMoveQuery, type MoveFilterItem } from "../moveFilters";
 
 function normalizeSearch(str: string): string {
   return str
@@ -73,12 +74,39 @@ export function render(ctx: RenderContext): void {
             : "← Scroll horizontally to see all details →",
         noMatchMessage: t.modal.noMovesMatch,
         globalFilterFn: (row, _colId, filterVal) => {
-          const q = normalizeSearch(String(filterVal));
-          if (!q) return true;
-          const name = normalizeSearch(row.original.name);
-          const type = normalizeSearch(row.original.typeName || row.original.type || "");
-          const method = normalizeSearch(row.original.methodLabel || row.original.method || "");
-          return name.includes(q) || type.includes(q) || method.includes(q);
+          const rawFilter = String(filterVal ?? "").trim();
+          if (!rawFilter) return true;
+          const item: MoveFilterItem = {
+            name: row.original.rawName ?? row.original.name,
+            nameEs: row.original.nameEs ?? row.original.name,
+            nameEn: row.original.nameEn,
+            type: row.original.type,
+            category: row.original.category,
+            power: row.original.power,
+            pp: row.original.pp,
+            accuracy: row.original.accuracy,
+            method: row.original.method,
+            level: row.original.level,
+          };
+          if (matchesMoveFilter(item, rawFilter, locale)) {
+            return true;
+          }
+          // Fallback for simple free-text queries matching type name or method label
+          const parsed = parseMoveQuery(rawFilter);
+          if (
+            parsed.types.length === 0 &&
+            parsed.categories.length === 0 &&
+            parsed.methods.length === 0 &&
+            parsed.numericFilters.length === 0 &&
+            parsed.textTerms.length > 0
+          ) {
+            const q = normalizeSearch(rawFilter);
+            const type = normalizeSearch(row.original.typeName || row.original.type || "");
+            const method = normalizeSearch(row.original.methodLabel || row.original.method || "");
+            const cat = normalizeSearch(row.original.categoryLabel || row.original.category || "");
+            return type.includes(q) || method.includes(q) || cat.includes(q);
+          }
+          return false;
         },
         onRowCountChange: (filteredCount, totalCount) => {
           if (!countEl) return;

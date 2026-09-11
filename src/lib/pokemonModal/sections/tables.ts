@@ -25,6 +25,9 @@ export function buildMoveTableRows(
     const type = meta?.type ?? null;
     return {
       name: getMoveName(m.name, locale, meta),
+      rawName: m.name,
+      nameEs: meta?.nameEs,
+      nameEn: meta?.nameEn,
       type,
       typeName: type ? getTypeName(type, locale) : "",
       category,

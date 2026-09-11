@@ -524,6 +524,38 @@ export interface Translations {
     paginationPage: string;
     paginationOf: string;
   };
+  moveFilterGuide: {
+    buttonTitle: string;
+    modalTitle: string;
+    modalSubtitle: string;
+    tip: string;
+    sectionTypes: string;
+    sectionTypesDesc: string;
+    sectionCategories: string;
+    sectionCategoriesDesc: string;
+    sectionPower: string;
+    sectionPowerDesc: string;
+    sectionPP: string;
+    sectionPPDesc: string;
+    sectionAccuracy: string;
+    sectionAccuracyDesc: string;
+    sectionMethod: string;
+    sectionMethodDesc: string;
+    sectionCombos: string;
+    sectionCombosDesc: string;
+    clickToCopy: string;
+    copied: string;
+    filterApplied: string;
+    close: string;
+    examples: {
+      types: string[];
+      categories: string[];
+      power: string[];
+      ppAcc: string[];
+      methodLevel: string[];
+      combos: string[];
+    };
+  };
 }
 
 export const UI_TRANSLATIONS: Record<Locale, Translations> = {
@@ -643,7 +675,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       choosePokemon: "Choose Pokémon",
       selectMove: "Select Move",
       searchByNameOrNum: "Search by name or #...",
-      filterByMove: "Filter by move...",
+      filterByMove: "Filter by move (e.g. type:fire pow:>30)...",
       category: "Category",
       allCategories: "All",
       physical: "Physical",
@@ -862,7 +894,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       activeAbility: "Active",
       probability: "Probability",
       noAbilities: "No ability data available.",
-      searchMovesPlaceholder: "Search moves...",
+      searchMovesPlaceholder: "Search moves (e.g. type:fire pow:>30)...",
       noMovesMatch: "No moves match your search.",
       movesCount: "{filtered} of {total} moves",
       clearSearch: "Clear search",
@@ -1024,6 +1056,38 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       paginationPage: "Page",
       paginationOf: "of",
     },
+    moveFilterGuide: {
+      buttonTitle: "Filter syntax and search guide",
+      modalTitle: "Move Search & Filter Guide",
+      modalSubtitle: "Smart commands to quickly find any attack in English or Spanish.",
+      tip: "💡 You can type any normal move name, or combine multiple smart ':' filter tags separated by spaces.",
+      sectionTypes: "Types (tipo: / type: / t:)",
+      sectionTypesDesc: "Filter by elemental type. Supports comma-separated types (OR) and negation (! or -).",
+      sectionCategories: "Category (categoria: / category: / cat: / c:)",
+      sectionCategoriesDesc: "Filter physical, special, or status moves.",
+      sectionPower: "Power (potencia: / pot: / power: / pow:)",
+      sectionPowerDesc: "Compare move power using =, >, >=, <, <=, or pot:null for status moves.",
+      sectionPP: "Power Points (pp: / puntos:)",
+      sectionPPDesc: "Compare move PP using =, >, >=, <, <=.",
+      sectionAccuracy: "Accuracy (precision: / prec: / accuracy: / acc:)",
+      sectionAccuracyDesc: "Compare move accuracy percentage.",
+      sectionMethod: "Learn Method & Level (metodo: / nivel:)",
+      sectionMethodDesc: "Filter how and when this Pokémon learns the move (level, machine/tm, tutor, egg).",
+      sectionCombos: "Combined Examples",
+      sectionCombosDesc: "Combine multiple tags and text together.",
+      clickToCopy: "Click to copy",
+      copied: "Copied!",
+      filterApplied: "Filter applied: {text}",
+      close: "Got it",
+      examples: {
+        types: ["type:fire", "type:water", "t:electric", "type:grass,ice", "!type:normal"],
+        categories: ["category:special", "cat:physical", "cat:phys", "c:status", "!cat:status"],
+        power: ["power:>30", "pow:>=90", "pwr:10", "power:<60", "power:null"],
+        ppAcc: ["pp:10", "pp:>=30", "accuracy:100", "acc:>80", "acc:>=90"],
+        methodLevel: ["method:level", "method:tm", "m:tutor", "level:<=25", "lvl:>40"],
+        combos: ["type:fire pow:>80 cat:special", "flamethrower type:fire", "type:water !cat:status pow:>=90"],
+      },
+    },
   },
   es: {
     nav: {
@@ -1144,7 +1208,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       choosePokemon: "Elegir Pokémon",
       selectMove: "Seleccionar ataque",
       searchByNameOrNum: "Buscar por nombre o #...",
-      filterByMove: "Filtrar por movimiento...",
+      filterByMove: "Filtrar por movimiento (ej. tipo:fuego pot:>30)...",
       category: "Categoría",
       allCategories: "Todas",
       physical: "Físico",
@@ -1367,7 +1431,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       activeAbility: "Activa",
       probability: "Probabilidad",
       noAbilities: "Sin datos de habilidades.",
-      searchMovesPlaceholder: "Buscar movimientos...",
+      searchMovesPlaceholder: "Buscar movimientos (ej. tipo:fuego pot:>30)...",
       noMovesMatch: "No se encontraron movimientos que coincidan.",
       movesCount: "{filtered} de {total} movimientos",
       clearSearch: "Limpiar búsqueda",
@@ -1532,6 +1596,38 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       paginationNext: "Siguiente",
       paginationPage: "Página",
       paginationOf: "de",
+    },
+    moveFilterGuide: {
+      buttonTitle: "Guía de filtros y sintaxis de búsqueda",
+      modalTitle: "Guía de Filtros y Búsqueda de Ataques",
+      modalSubtitle: "Comandos inteligentes para encontrar cualquier movimiento al instante en español o inglés.",
+      tip: "💡 Podés escribir texto normal para buscar por nombre, o usar filtros con ':' (en español o inglés) separados por espacios.",
+      sectionTypes: "Tipos (tipo: / type: / t:)",
+      sectionTypesDesc: "Filtra por tipo elemental. Admite varios tipos separados por coma (O lógico) y negación (! o -).",
+      sectionCategories: "Categoría (categoria: / category: / cat: / c:)",
+      sectionCategoriesDesc: "Filtra ataques físicos, especiales o de estado.",
+      sectionPower: "Potencia (potencia: / pot: / power: / pow:)",
+      sectionPowerDesc: "Compara la potencia usando =, >, >=, <, <=, o pot:null para movimientos de estado.",
+      sectionPP: "Puntos de Poder (pp: / puntos:)",
+      sectionPPDesc: "Compara los PP usando =, >, >=, <, <=.",
+      sectionAccuracy: "Precisión (precision: / prec: / accuracy: / acc:)",
+      sectionAccuracyDesc: "Compara el porcentaje de precisión del ataque.",
+      sectionMethod: "Método de Aprendizaje y Nivel (metodo: / nivel:)",
+      sectionMethodDesc: "Filtra cómo y cuándo aprende el ataque este Pokémon (nivel, mt/máquina, tutor, huevo).",
+      sectionCombos: "Ejemplos Combinados",
+      sectionCombosDesc: "Combiná filtros y texto libre en una sola búsqueda.",
+      clickToCopy: "Clic para copiar",
+      copied: "¡Copiado!",
+      filterApplied: "Filtro aplicado: {text}",
+      close: "Entendido",
+      examples: {
+        types: ["tipo:fuego", "tipo:agua", "t:electrico", "tipo:planta,hielo", "!tipo:normal"],
+        categories: ["categoria:especial", "cat:fisico", "cat:esp", "c:estado", "!cat:estado"],
+        power: ["pot:>30", "pot:>=90", "pot:10", "pot:<60", "pot:null"],
+        ppAcc: ["pp:10", "pp:>=30", "prec:100", "prec:>80", "precision:>=90"],
+        methodLevel: ["metodo:nivel", "metodo:mt", "m:tutor", "nivel:<=25", "nv:>40"],
+        combos: ["tipo:fuego pot:>80 cat:especial", "lanzallamas tipo:fuego", "tipo:agua !cat:estado pot:>=90"],
+      },
     },
   },
 };

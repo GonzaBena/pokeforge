@@ -16,6 +16,9 @@ export interface PokemonModalOptions {
 
 export interface MoveTableRow {
   name: string;
+  rawName?: string;
+  nameEs?: string;
+  nameEn?: string;
   type: string | null;
   typeName: string;
   category: "physical" | "special" | "status" | null;

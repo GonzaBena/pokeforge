@@ -20,21 +20,32 @@ export const SECTION_CONTENT: Record<string, (ctx: RenderContext) => string> = {
     const t = getTranslations(locale);
     return `
       <div class="move-table-toolbar" data-move-table-toolbar>
-        <search class="move-table-search" role="search">
-          <i data-lucide="search" class="move-table-search__icon"></i>
-          <input
-            type="search"
-            class="move-table-search__input"
-            data-move-search-input
-            placeholder="${t.modal.searchMovesPlaceholder}"
-            aria-label="${t.modal.searchMovesPlaceholder}"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <button type="button" class="move-table-search__clear" data-move-search-clear aria-label="${t.modal.clearSearch}" hidden>
-            <i data-lucide="x"></i>
+        <div class="search-with-help">
+          <search class="move-table-search" role="search">
+            <i data-lucide="search" class="move-table-search__icon"></i>
+            <input
+              type="search"
+              class="move-table-search__input"
+              data-move-search-input
+              placeholder="${t.modal.searchMovesPlaceholder}"
+              aria-label="${t.modal.searchMovesPlaceholder}"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button type="button" class="move-table-search__clear" data-move-search-clear aria-label="${t.modal.clearSearch}" hidden>
+              <i data-lucide="x"></i>
+            </button>
+          </search>
+          <button
+            type="button"
+            class="filter-help-btn"
+            data-open-move-filter-guide
+            title="${t.moveFilterGuide.buttonTitle}"
+            aria-label="${t.moveFilterGuide.buttonTitle}"
+          >
+            <i data-lucide="help-circle"></i>
           </button>
-        </search>
+        </div>
         <span class="move-table-count" data-move-table-count hidden></span>
       </div>
       <div data-table-mount="moves"></div>

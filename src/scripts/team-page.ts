@@ -38,6 +38,7 @@ import { getCurrentLocale, getNatureName, getTranslations, getTypeName, getGameT
 import { computeTeamSynergy } from "../lib/teamSynergy";
 import { filterItems, getItemById, getItemDisplayName, renderItemIconHTML } from "../lib/items";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamSlotState, TeamState, TypeChart } from "../lib/types";
+import { matchesMoveFilter, parseMoveQuery, type MoveFilterItem } from "../lib/moveFilters";
 const slotsEl = document.querySelector<HTMLElement>("[data-team-slots]")!;
 const sidePanelEl = document.querySelector<HTMLElement>("[data-strengths-panel]");
 const densitySwitchEl = document.querySelector<HTMLButtonElement>("[data-density-switch]");
@@ -1747,7 +1748,8 @@ function clearMovePickerFilters(): void {
 function renderMovePickerTable(): void {
   const locale = getCurrentLocale();
   const t = getTranslations(locale);
-  const search = movePickerSearchEl.value.trim().toLowerCase();
+  const searchRaw = movePickerSearchEl.value.trim();
+  const parsedQuery = searchRaw ? parseMoveQuery(searchRaw) : null;
 
   const filtered = currentMoveRows.filter((r) => {
     // 1. Method filter
@@ -1769,15 +1771,23 @@ function renderMovePickerTable(): void {
       if (!meta || meta.type !== activeMoveTypeFilter) return false;
     }
 
-    // 4. Search query filter
-    const moveNameLocalized = getMoveName(r.name, locale, meta);
-    if (
-      search &&
-      !r.name.toLowerCase().includes(search) &&
-      !formatLabel(r.name).toLowerCase().includes(search) &&
-      !moveNameLocalized.toLowerCase().includes(search)
-    ) {
-      return false;
+    // 4. Advanced & multilingual search query filter
+    if (parsedQuery) {
+      const item: MoveFilterItem = {
+        name: r.name,
+        nameEs: meta?.nameEs,
+        nameEn: meta?.nameEn,
+        type: meta?.type,
+        category: meta?.category,
+        power: meta?.power,
+        pp: meta?.pp,
+        accuracy: meta?.accuracy,
+        method: r.method,
+        level: r.level,
+      };
+      if (!matchesMoveFilter(item, parsedQuery, locale)) {
+        return false;
+      }
     }
 
     return true;
