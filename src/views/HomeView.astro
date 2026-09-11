@@ -6,7 +6,7 @@ import "../styles/features/home/home.css";
 const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
 const pokedexHref = getLocalizedPath("/pokedex/", currentLocale);
-const equipoHref = getLocalizedPath("/equipo/", currentLocale);
+const teamHref = getLocalizedPath("/team/", currentLocale);
 const blogHref = getLocalizedPath("/blog/", currentLocale);
 ---
 
@@ -39,7 +39,7 @@ const blogHref = getLocalizedPath("/blog/", currentLocale);
           <i data-lucide="arrow-right" class="hero__card-arrow"></i>
         </a>
 
-        <a class="hero__card hero__card--equipo" href={equipoHref} data-astro-prefetch>
+        <a class="hero__card hero__card--equipo" href={teamHref} data-astro-prefetch>
           <div class="hero__card-icon">
             <i data-lucide="swords"></i>
           </div>

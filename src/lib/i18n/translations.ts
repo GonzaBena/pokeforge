@@ -1664,7 +1664,7 @@ export function getEvolutionTriggerName(
 
 /**
  * Transforma una ruta al idioma objetivo para la Opción A:
- * - 'en' (default): sin prefijo (/pokedex/, /equipo/, /)
+ * - 'en' (default): sin prefijo (/pokedex/, /team/, /)
  * - 'es': con prefijo /es (/es/pokedex/, /es/equipo/, /es/)
  */
 export function getLocalizedPath(
@@ -1679,6 +1679,26 @@ export function getLocalizedPath(
   }
 
   if (!cleanPath.startsWith("/")) cleanPath = "/" + cleanPath;
+
+  // Manejo de la ruta de equipo: /team/ en inglés y /es/equipo/ en español
+  if (
+    cleanPath === "/equipo" ||
+    cleanPath === "/equipo/" ||
+    cleanPath === "/team" ||
+    cleanPath === "/team/"
+  ) {
+    return targetLocale === "en" ? "/team/" : "/es/equipo/";
+  }
+
+  if (cleanPath.startsWith("/equipo/")) {
+    const sub = cleanPath.slice("/equipo/".length);
+    return targetLocale === "en" ? `/team/${sub}` : `/es/equipo/${sub}`;
+  }
+
+  if (cleanPath.startsWith("/team/")) {
+    const sub = cleanPath.slice("/team/".length);
+    return targetLocale === "en" ? `/team/${sub}` : `/es/equipo/${sub}`;
+  }
 
   if (targetLocale === "en") {
     return cleanPath;

@@ -7,7 +7,7 @@ const currentLocale = (Astro.currentLocale ?? "en") as Locale;
 const t = getTranslations(currentLocale);
 const pokedexHref = getLocalizedPath("/pokedex/", currentLocale);
 const homeHref = getLocalizedPath("/", currentLocale);
-const teamHref = getLocalizedPath("/equipo/", currentLocale);
+const teamHref = getLocalizedPath("/team/", currentLocale);
 ---
 
 <BaseLayout title={t.sync.title}>
@@ -138,7 +138,7 @@ const teamHref = getLocalizedPath("/equipo/", currentLocale);
     if (!card) return;
 
     const page = document.querySelector<HTMLElement>(".sync-page");
-    const teamHref = page?.dataset.teamHref || "/equipo/";
+    const teamHref = page?.dataset.teamHref || (document.documentElement.lang === "es" ? "/es/equipo/" : "/team/");
 
     const loadingState = card.querySelector<HTMLDivElement>('[data-sync-state="loading"]');
     const emptyState = card.querySelector<HTMLDivElement>('[data-sync-state="empty"]');

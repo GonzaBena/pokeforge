@@ -8,9 +8,14 @@
   status = 200
 
 [[redirects]]
-  from = "/equipo"
-  to = "/equipo/index.html"
+  from = "/team"
+  to = "/team/index.html"
   status = 200
+
+[[redirects]]
+  from = "/equipo"
+  to = "/team"
+  status = 301
 
 [[headers]]
   for = "/sw.js"

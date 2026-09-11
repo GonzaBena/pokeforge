@@ -37,4 +37,5 @@ obsidian-templates/
 
 # agents
 .agents/
+.claude/
 

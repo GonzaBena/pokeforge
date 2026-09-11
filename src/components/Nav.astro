@@ -14,7 +14,7 @@ const t = getTranslations(currentLocale);
 
 const homePath = getLocalizedPath("/", currentLocale);
 const pokedexPath = getLocalizedPath("/pokedex/", currentLocale);
-const equipoPath = getLocalizedPath("/equipo/", currentLocale);
+const teamPath = getLocalizedPath("/team/", currentLocale);
 const blogPath = getLocalizedPath("/blog/", currentLocale);
 
 const enHref = alternateUrls?.en ?? getLocalizedPath(path, "en");
@@ -22,7 +22,7 @@ const esHref = alternateUrls?.es ?? getLocalizedPath(path, "es");
 
 const isHome = currentLocale === "es" ? (path === "/es" || path === "/es/") : (path === "/" || path === "");
 const isPokedex = currentLocale === "es" ? path.startsWith("/es/pokedex") : path.startsWith("/pokedex");
-const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : path.startsWith("/equipo");
+const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : (path.startsWith("/team") || path.startsWith("/equipo"));
 const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.startsWith("/blog");
 const isMinimal = variant === "minimal" || isBlog;
 ---
@@ -38,7 +38,7 @@ const isMinimal = variant === "minimal" || isBlog;
         <i data-lucide="book-open"></i>
         {t.nav.pokedex}
       </a>
-      <a class="nav__link" href={equipoPath} data-astro-prefetch aria-current={isEquipo ? "page" : undefined}>
+      <a class="nav__link" href={teamPath} data-astro-prefetch aria-current={isEquipo ? "page" : undefined}>
         <i data-lucide="users"></i>
         {t.nav.team}
       </a>
@@ -197,7 +197,7 @@ const isMinimal = variant === "minimal" || isBlog;
     <i data-lucide="book-open"></i>
     <span>{t.nav.pokedex}</span>
   </a>
-  <a class="bottom-nav__link" href={equipoPath} data-astro-prefetch aria-current={isEquipo ? "page" : undefined}>
+  <a class="bottom-nav__link" href={teamPath} data-astro-prefetch aria-current={isEquipo ? "page" : undefined}>
     <i data-lucide="users"></i>
     <span>{t.nav.team}</span>
   </a>
