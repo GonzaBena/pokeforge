@@ -37,7 +37,13 @@ export function render(ctx: RenderContext): void {
       movesMount,
       getMoveColumns(locale),
       buildMoveTableRows(ctx.detail.moveDetails, locale, ctx.moveDetailsMap),
-      locale === "es" ? "Sin datos de movimientos." : "No move data available."
+      locale === "es" ? "Sin datos de movimientos." : "No move data available.",
+      {
+        scrollHint:
+          locale === "es"
+            ? "← Deslizá horizontalmente para ver todos los detalles →"
+            : "← Scroll horizontally to see all details →",
+      },
     );
   }
 

@@ -1,7 +1,17 @@
 import { createTable, getCoreRowModel, getSortedRowModel } from "@tanstack/table-core";
 import type { ColumnDef, SortingState, TableOptionsResolved } from "@tanstack/table-core";
 
-export function renderDataTable<T>(container: HTMLElement, columns: ColumnDef<T, unknown>[], data: T[], emptyMessage: string): void {
+export interface RenderDataTableOptions {
+  scrollHint?: string;
+}
+
+export function renderDataTable<T>(
+  container: HTMLElement,
+  columns: ColumnDef<T, unknown>[],
+  data: T[],
+  emptyMessage: string,
+  tableOptions?: RenderDataTableOptions,
+): void {
   let sorting: SortingState = [];
 
   // table-core's features (pinning, visibility, etc.) each expect their own
@@ -75,7 +85,11 @@ export function renderDataTable<T>(container: HTMLElement, columns: ColumnDef<T,
       .map((h) => `<col style="width:${h.column.getSize()}px" />`)
       .join("")}</colgroup>`;
 
-    container.innerHTML = `<div class="data-table-wrap"><table class="data-table">${colgroupHtml}<thead>${theadHtml}</thead><tbody>${tbodyHtml}</tbody></table></div>`;
+    const hintHtml = tableOptions?.scrollHint && rows.length
+      ? `<div class="table-scroll-hint" aria-hidden="true"><span>${tableOptions.scrollHint}</span></div>`
+      : "";
+
+    container.innerHTML = `${hintHtml}<div class="data-table-wrap"><table class="data-table">${colgroupHtml}<thead>${theadHtml}</thead><tbody>${tbodyHtml}</tbody></table></div>`;
 
     container.querySelectorAll<HTMLElement>("[data-sort-col]").forEach((th) => {
       if (!th.classList.contains("sortable")) return;

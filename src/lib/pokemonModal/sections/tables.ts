@@ -1,5 +1,13 @@
 import type { ColumnDef } from "@tanstack/table-core";
-import { getTranslations, getGameTitle, getMoveName, type Locale } from "../../i18n/translations";
+import {
+  getCategoryName,
+  getGameTitle,
+  getMoveName,
+  getTranslations,
+  getTypeName,
+  type Locale,
+} from "../../i18n/translations";
+import { typeColor } from "../../typeColors";
 import type { AcquisitionRow, MoveData, MoveDetail } from "../../types";
 import { METHOD_LABELS } from "../constants";
 import type { MoveTableRow } from "../types";
@@ -13,8 +21,17 @@ export function buildMoveTableRows(
   const methodMap = METHOD_LABELS[locale] ?? METHOD_LABELS.en;
   return moveDetails.map((m) => {
     const meta = moveDetailsMap?.[m.name];
+    const category = meta?.category ?? null;
+    const type = meta?.type ?? null;
     return {
       name: getMoveName(m.name, locale, meta),
+      type,
+      typeName: type ? getTypeName(type, locale) : "",
+      category,
+      categoryLabel: category ? getCategoryName(category, locale) : "",
+      power: meta?.power ?? null,
+      pp: meta?.pp ?? null,
+      accuracy: meta?.accuracy ?? null,
       method: m.method,
       methodLabel: methodMap[m.method] ?? formatLabel(m.method),
       level: m.level,
@@ -54,14 +71,108 @@ export function getLocationColumns(locale: Locale): ColumnDef<AcquisitionRow, un
 export function getMoveColumns(locale: Locale): ColumnDef<MoveTableRow, unknown>[] {
   const t = getTranslations(locale);
   return [
-    { accessorKey: "name", header: t.modal.move, size: 220, cell: (info) => String(info.getValue()) },
-    { accessorKey: "methodLabel", header: t.modal.method, size: 70 },
+    {
+      accessorKey: "name",
+      header: t.modal.move,
+      size: 160,
+      cell: (info) => `<span class="move-table__name">${String(info.getValue())}</span>`,
+    },
+    {
+      accessorKey: "typeName",
+      header: t.modal.type,
+      size: 85,
+      cell: (info) => {
+        const type = info.row.original.type;
+        const typeName = String(info.getValue());
+        return type
+          ? `<span class="type-badge type-badge--sm" data-type="${type}" style="--badge-bg:${typeColor(type)}">${typeName}</span>`
+          : "-";
+      },
+    },
+    {
+      accessorKey: "categoryLabel",
+      header: t.modal.category,
+      size: 90,
+      cell: (info) => {
+        const category = info.row.original.category;
+        const categoryLabel = String(info.getValue());
+        return category
+          ? `<span class="move-category-badge move-category-badge--${category}">${categoryLabel}</span>`
+          : "-";
+      },
+    },
+    {
+      accessorKey: "power",
+      header: t.modal.power,
+      size: 55,
+      sortingFn: (rowA, rowB, colId) => {
+        const a = rowA.getValue<number | null>(colId);
+        const b = rowB.getValue<number | null>(colId);
+        const valA = a === null || a === undefined ? -1 : a;
+        const valB = b === null || b === undefined ? -1 : b;
+        return valA - valB;
+      },
+      cell: (info) => {
+        const val = info.getValue<number | null>();
+        return val !== null && val !== undefined ? `<span class="move-table__stat">${val}</span>` : "-";
+      },
+    },
+    {
+      accessorKey: "pp",
+      header: t.modal.pp,
+      size: 45,
+      sortingFn: (rowA, rowB, colId) => {
+        const a = rowA.getValue<number | null>(colId);
+        const b = rowB.getValue<number | null>(colId);
+        const valA = a === null || a === undefined ? -1 : a;
+        const valB = b === null || b === undefined ? -1 : b;
+        return valA - valB;
+      },
+      cell: (info) => {
+        const val = info.getValue<number | null>();
+        return val !== null && val !== undefined ? `<span class="move-table__stat">${val}</span>` : "-";
+      },
+    },
+    {
+      accessorKey: "accuracy",
+      header: t.modal.accuracy,
+      size: 55,
+      sortingFn: (rowA, rowB, colId) => {
+        const a = rowA.getValue<number | null>(colId);
+        const b = rowB.getValue<number | null>(colId);
+        const valA = a === null || a === undefined ? -1 : a;
+        const valB = b === null || b === undefined ? -1 : b;
+        return valA - valB;
+      },
+      cell: (info) => {
+        const val = info.getValue<number | null>();
+        return val !== null && val !== undefined ? `<span class="move-table__stat">${val}%</span>` : "-";
+      },
+    },
+    {
+      accessorKey: "methodLabel",
+      header: t.modal.method,
+      size: 85,
+      cell: (info) => {
+        const method = info.row.original.method;
+        const methodLabel = String(info.getValue());
+        return `<span class="move-method-badge move-method-badge--${method}">${methodLabel}</span>`;
+      },
+    },
     {
       accessorFn: (row) => row.level,
       id: "level",
       header: t.modal.level,
-      size: 50,
-      cell: (info) => (info.row.original.method === "level-up" ? `${locale === "es" ? "Nv." : "Lv."} ${info.getValue()}` : "-"),
+      size: 55,
+      sortingFn: (rowA, rowB) => {
+        const a = rowA.original.method === "level-up" ? rowA.original.level : 999;
+        const b = rowB.original.method === "level-up" ? rowB.original.level : 999;
+        return a - b;
+      },
+      cell: (info) =>
+        info.row.original.method === "level-up"
+          ? `<span class="move-table__cell-level">${locale === "es" ? "Nv." : "Lv."} ${info.getValue()}</span>`
+          : "-",
     },
   ];
 }

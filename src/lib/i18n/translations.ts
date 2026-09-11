@@ -335,6 +335,11 @@ export interface Translations {
     level: string;
     method: string;
     move: string;
+    type: string;
+    category: string;
+    power: string;
+    pp: string;
+    accuracy: string;
     game: string;
     location: string;
     generation: string;
@@ -797,6 +802,11 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       level: "Level",
       method: "Method",
       move: "Move",
+      type: "Type",
+      category: "Category",
+      power: "PWR",
+      pp: "PP",
+      accuracy: "Acc.",
       game: "Game",
       location: "Location",
       generation: "Generation",
@@ -1281,6 +1291,11 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       level: "Nivel",
       method: "Método",
       move: "Movimiento",
+      type: "Tipo",
+      category: "Categoría",
+      power: "POT",
+      pp: "PP",
+      accuracy: "Prec.",
       game: "Juego",
       location: "Lugar",
       generation: "Generación",
@@ -1672,5 +1687,17 @@ export function getNatureName(
     return locale === "es" ? match.es : match.en;
   }
   return natureKey.charAt(0).toUpperCase() + natureKey.slice(1);
+}
+
+export function getCategoryName(
+  category: string | null | undefined,
+  locale: Locale = "es",
+): string {
+  if (!category) return "";
+  const t = getTranslations(locale);
+  if (category === "physical") return t.team.physical;
+  if (category === "special") return t.team.special;
+  if (category === "status") return t.team.status;
+  return category;
 }
 
