@@ -14,6 +14,18 @@
   flex-direction: column;
 }
 
+.pokedex-loading {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
 .table-scroll-hint {
   display: none;
   align-items: center;
