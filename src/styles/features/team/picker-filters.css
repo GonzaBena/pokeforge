@@ -8,11 +8,6 @@
   align-items: flex-start;
 }
 
-.picker-panel__filter-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
 
 .picker-panel__filters {
   padding: 16px 20px;
@@ -102,6 +97,67 @@
   justify-content: center;
   white-space: nowrap;
   line-height: 1;
+}
+
+.filters-panel__game-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.picker-panel__filters .filters-panel__game-row .select-wrapper {
+  flex: 1 1 220px;
+  min-width: 180px;
+  max-width: 320px;
+}
+
+.picker-panel__filters .game-select {
+  height: 38px;
+  padding: 0 34px 0 36px;
+  font-size: 13px;
+  border-radius: var(--radius-pill);
+}
+
+.picker-panel__filters .select-wrapper__icon {
+  left: 12px;
+  width: 15px;
+  height: 15px;
+}
+
+.picker-panel__filters .select-wrapper__arrow {
+  right: 12px;
+  width: 15px;
+  height: 15px;
+}
+
+.picker-panel__filters .view-toggle__btn {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .filters-panel__game-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .picker-panel__filters .filters-panel__game-row .select-wrapper {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .picker-panel__filters .filters-panel__game-row .view-toggle {
+    display: flex;
+    width: 100%;
+  }
+
+  .picker-panel__filters .filters-panel__game-row .view-toggle__btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
 }
 
 .picker-modal-panel {

@@ -352,44 +352,6 @@
   flex-shrink: 0;
 }
 
-/* Modal Customization Grid */
-
-.detail-custom-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.detail-item__select-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.detail-item__label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  min-width: 60px;
-}
-
-.detail-item__select-row select {
-  flex: 1;
-  min-width: 0;
-  padding: 4px 8px;
-  font-size: 12px;
-  background: var(--bg-elevated);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-}
 
 .detail-stat__mod--item {
   color: #34d399;

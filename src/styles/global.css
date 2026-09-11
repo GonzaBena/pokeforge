@@ -9,6 +9,10 @@
 @import "./components/buttons.css";
 @import "./components/badges.css";
 @import "./components/toast.css";
+@import "./components/modal.css";
+@import "./components/select.css";
+@import "./components/view-toggle.css";
+@import "./components/filter-chip.css";
 
 .capitalize {
   text-transform: capitalize;

@@ -1,0 +1,108 @@
+/* ------------------------------------------------------------- select */
+
+.select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 280px;
+}
+
+.select-wrapper__icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.select-wrapper__arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.select-wrapper:focus-within .select-wrapper__arrow {
+  transform: translateY(-50%) rotate(180deg);
+  color: var(--accent);
+}
+
+.game-select {
+  width: 100%;
+  padding: 10px 38px 10px 38px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
+}
+
+.game-select:hover {
+  border-color: var(--border-hover, var(--text-faint));
+  background: var(--bg-card-hover);
+}
+
+.game-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.game-select optgroup {
+  background: var(--bg-card);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.game-select option {
+  background: var(--bg-card);
+  color: var(--text);
+  font-weight: 400;
+}
+
+.select-wrapper--compact {
+  flex: 0 1 auto;
+  min-width: 180px;
+  max-width: 260px;
+}
+
+.select-wrapper--compact .game-select {
+  padding: 8px 32px 8px 34px;
+  font-size: 13px;
+  border-radius: var(--radius-md);
+}
+
+.select-wrapper--compact .select-wrapper__icon {
+  left: 10px;
+  width: 14px;
+  height: 14px;
+}
+
+.select-wrapper--compact .select-wrapper__arrow {
+  right: 10px;
+  width: 14px;
+  height: 14px;
+}
