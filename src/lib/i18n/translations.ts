@@ -143,6 +143,11 @@ export interface Translations {
     searchPlaceholder: string;
     allGames: string;
     filterByType: string;
+    typeMatchMode: string;
+    typeMatchOr: string;
+    typeMatchAnd: string;
+    typeMatchOrDesc: string;
+    typeMatchAndDesc: string;
     filterByGen: string;
     empty: string;
     loadMore: string;
@@ -195,6 +200,11 @@ export interface Translations {
     clearTeam: string;
     teamSizeLabel: string;
     typesSection: string;
+    typeMatchMode: string;
+    typeMatchOr: string;
+    typeMatchAnd: string;
+    typeMatchOrDesc: string;
+    typeMatchAndDesc: string;
     gensSection: string;
     gameSection: string;
     item: string;
@@ -588,6 +598,11 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       searchPlaceholder: "Search by name or number...",
       allGames: "All games",
       filterByType: "Filter by type",
+      typeMatchMode: "Type match mode",
+      typeMatchOr: "OR",
+      typeMatchAnd: "AND",
+      typeMatchOrDesc: "Match any selected type (OR)",
+      typeMatchAndDesc: "Match all selected types (AND)",
       filterByGen: "Filter by generation",
       empty: "No Pokémon found matching those filters.",
       loadMore: "Load more Pokémon",
@@ -640,6 +655,11 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       clearTeam: "Clear team",
       teamSizeLabel: "Team size:",
       typesSection: "Types",
+      typeMatchMode: "Type match mode",
+      typeMatchOr: "OR",
+      typeMatchAnd: "AND",
+      typeMatchOrDesc: "Match any selected type (OR)",
+      typeMatchAndDesc: "Match all selected types (AND)",
       gensSection: "Generations",
       gameSection: "Game",
       item: "Item",
@@ -1073,6 +1093,11 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       searchPlaceholder: "Buscar por nombre o número...",
       allGames: "Todos los juegos",
       filterByType: "Filtrar por tipo",
+      typeMatchMode: "Modo de filtro de tipos",
+      typeMatchOr: "OR",
+      typeMatchAnd: "AND",
+      typeMatchOrDesc: "Coincidir con cualquiera de los tipos (OR)",
+      typeMatchAndDesc: "Coincidir con ambos tipos seleccionados (AND)",
       filterByGen: "Filtrar por generación",
       empty: "No se encontraron Pokémon con esos filtros.",
       loadMore: "Cargar más Pokémon",
@@ -1127,6 +1152,11 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       clearTeam: "Limpiar equipo",
       teamSizeLabel: "Tamaño:",
       typesSection: "Tipos",
+      typeMatchMode: "Modo de filtro de tipos",
+      typeMatchOr: "OR",
+      typeMatchAnd: "AND",
+      typeMatchOrDesc: "Coincidir con cualquiera de los tipos (OR)",
+      typeMatchAndDesc: "Coincidir con ambos tipos seleccionados (AND)",
       gensSection: "Generaciones",
       gameSection: "Juego",
       item: "Objeto",

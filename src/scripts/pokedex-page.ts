@@ -30,6 +30,7 @@ const gameFilterEl = document.querySelector<HTMLSelectElement>("[data-game-filte
 const gameModeToggleEl = document.querySelector<HTMLElement>("[data-game-mode-toggle]");
 const exclusiveToggleEl = document.querySelector<HTMLElement>("[data-exclusive-toggle]");
 const typeFilterEl = document.querySelector<HTMLElement>("[data-type-filter]")!;
+const typeModeToggleEl = document.querySelector<HTMLElement>("[data-type-mode-toggle]");
 const genFilterEl = document.querySelector<HTMLElement>("[data-generation-filter]")!;
 const viewToggleEl = document.querySelector<HTMLElement>("[data-view-toggle]")!;
 const capturedCountEl = document.querySelector<HTMLElement>("[data-captured-count]")!;
@@ -61,6 +62,7 @@ let gameDexData: GameDexData | null = null;
 let activeExclusivesMap = new Map<number, GameVersionMeta>();
 const gameSpeciesSets = new Map<string, { regional: Set<number>; obtainable: Set<number> }>();
 const selectedTypes = new Set<string>();
+let selectedTypeMode: "or" | "and" = "or";
 const selectedGenerations = new Set<string>();
 const selectedMoves = new Set<string>();
 let moveDetailsMap: Record<string, MoveData> = {};
@@ -545,7 +547,15 @@ function computeFiltered(source: Pokemon[]): Pokemon[] {
   return source.filter((p) => {
     if (view === "captured" && !capturedIds.has(p.id)) return false;
     if (search && !p.name.includes(search) && !String(p.id).includes(search)) return false;
-    if (selectedTypes.size && !p.types.some((t) => selectedTypes.has(t))) return false;
+    if (selectedTypes.size) {
+      if (selectedTypeMode === "and") {
+        for (const t of selectedTypes) {
+          if (!p.types.includes(t)) return false;
+        }
+      } else {
+        if (!p.types.some((t) => selectedTypes.has(t))) return false;
+      }
+    }
     if (selectedGenerations.size && !selectedGenerations.has(p.generation)) return false;
     if (gameSpeciesSet && !gameSpeciesSet.has(p.id)) return false;
 
@@ -738,6 +748,14 @@ function clearAllFilters(): void {
     changed = true;
   }
 
+  if (selectedTypeMode !== "or") {
+    selectedTypeMode = "or";
+    typeModeToggleEl?.querySelectorAll<HTMLButtonElement>("[data-type-mode]").forEach((btn) => {
+      btn.setAttribute("aria-pressed", String(btn.dataset.typeMode === "or"));
+    });
+    changed = true;
+  }
+
   if (selectedGenerations.size > 0) {
     selectedGenerations.clear();
     genFilterEl.querySelectorAll<HTMLButtonElement>("[data-generation]").forEach((btn) => {
@@ -826,6 +844,18 @@ typeFilterEl.addEventListener("click", (e) => {
   if (pressed) selectedTypes.delete(t);
   else selectedTypes.add(t);
   updateActiveFilterBadge();
+  applyFilters();
+});
+
+typeModeToggleEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-type-mode]");
+  if (!btn) return;
+  const mode = btn.dataset.typeMode as "or" | "and";
+  if (!mode || mode === selectedTypeMode) return;
+  selectedTypeMode = mode;
+  typeModeToggleEl.querySelectorAll<HTMLButtonElement>("[data-type-mode]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b === btn));
+  });
   applyFilters();
 });
 

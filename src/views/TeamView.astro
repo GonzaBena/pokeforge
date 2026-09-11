@@ -140,7 +140,13 @@ const t = getTranslations(currentLocale);
             </label>
           </div>
           <div class="picker-panel__filter-section">
-            <span class="picker-panel__section-title">{t.team.typesSection}</span>
+            <div class="filter-section__header">
+              <span class="picker-panel__section-title">{t.team.typesSection}</span>
+              <div class="view-toggle view-toggle--compact" data-picker-type-mode-toggle aria-label={t.team.typeMatchMode}>
+                <button class="view-toggle__btn" type="button" data-picker-type-mode="or" aria-pressed="true" title={t.team.typeMatchOrDesc}>{t.team.typeMatchOr}</button>
+                <button class="view-toggle__btn" type="button" data-picker-type-mode="and" aria-pressed="false" title={t.team.typeMatchAndDesc}>{t.team.typeMatchAnd}</button>
+              </div>
+            </div>
             <div class="filter-group filter-group--compact" data-picker-type-filter aria-label={t.team.typesSection}></div>
           </div>
           <div class="picker-panel__filter-section">

@@ -119,7 +119,13 @@ const t = getTranslations(currentLocale);
                 </div>
               </div>
               <div class="filter-section">
-                <span class="filter-section__label">{t.pokedex.filterByType}</span>
+                <div class="filter-section__header">
+                  <span class="filter-section__label">{t.pokedex.filterByType}</span>
+                  <div class="view-toggle view-toggle--compact" data-type-mode-toggle aria-label={t.pokedex.typeMatchMode}>
+                    <button class="view-toggle__btn" type="button" data-type-mode="or" aria-pressed="true" title={t.pokedex.typeMatchOrDesc}>{t.pokedex.typeMatchOr}</button>
+                    <button class="view-toggle__btn" type="button" data-type-mode="and" aria-pressed="false" title={t.pokedex.typeMatchAndDesc}>{t.pokedex.typeMatchAnd}</button>
+                  </div>
+                </div>
                 <div class="filter-group" data-type-filter aria-label={t.pokedex.filterByType}></div>
               </div>
               <div class="filter-section">

@@ -92,6 +92,7 @@ const pickerBodyEl = document.querySelector<HTMLElement>("[data-picker-body]");
 const pickerResultsEl = document.querySelector<HTMLElement>("[data-picker-results]")!;
 const pickerSearchEl = document.querySelector<HTMLInputElement>("[data-picker-search]")!;
 const pickerTypeFilterEl = document.querySelector<HTMLElement>("[data-picker-type-filter]")!;
+const pickerTypeModeToggleEl = document.querySelector<HTMLElement>("[data-picker-type-mode-toggle]");
 const pickerGenFilterEl = document.querySelector<HTMLElement>("[data-picker-generation-filter]")!;
 const pickerGameFilterEl = document.querySelector<HTMLSelectElement>("[data-picker-game-filter]");
 const teamHeaderGameSelectEl = document.querySelector<HTMLSelectElement>("[data-team-header-game-select]");
@@ -153,6 +154,7 @@ const gameSpeciesSets = new Map<string, { regional: Set<number>; obtainable: Set
 const pickerState = {
   search: "",
   types: new Set<string>(),
+  typeMode: "or" as "or" | "and",
   generations: new Set<string>(),
   move: "",
   game: getSelectedGame(),
@@ -1401,7 +1403,15 @@ function computePickerFiltered(): Pokemon[] {
 
   return allPokemon.filter((p) => {
     if (pickerState.search && !p.name.includes(pickerState.search) && !String(p.id).includes(pickerState.search)) return false;
-    if (pickerState.types.size && !p.types.some((t) => pickerState.types.has(t))) return false;
+    if (pickerState.types.size) {
+      if (pickerState.typeMode === "and") {
+        for (const t of pickerState.types) {
+          if (!p.types.includes(t)) return false;
+        }
+      } else {
+        if (!p.types.some((t) => pickerState.types.has(t))) return false;
+      }
+    }
     if (pickerState.generations.size && !pickerState.generations.has(p.generation)) return false;
     if (pickerState.move && !p.moves.includes(pickerState.move)) return false;
     if (gameSpeciesSet && !gameSpeciesSet.has(p.id)) return false;
@@ -1461,6 +1471,7 @@ function renderEmptyState(opts: EmptyStateOptions): string {
 function clearPokemonPickerFilters(): void {
   pickerState.search = "";
   pickerState.types.clear();
+  pickerState.typeMode = "or";
   pickerState.generations.clear();
   pickerState.move = "";
   pickerState.exclusive = new Set(["all"]);
@@ -1470,6 +1481,9 @@ function clearPokemonPickerFilters(): void {
 
   overlayEl.querySelectorAll<HTMLButtonElement>("[data-type], [data-generation]").forEach((b) => {
     b.setAttribute("aria-pressed", "false");
+  });
+  pickerTypeModeToggleEl?.querySelectorAll<HTMLButtonElement>("[data-picker-type-mode]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.pickerTypeMode === "or"));
   });
   updatePickerExclusiveToggleUI();
   renderPickerResults();
@@ -1573,6 +1587,7 @@ function openPicker(index: number): void {
   document.body.style.overflow = "hidden";
   pickerState.search = "";
   pickerState.types.clear();
+  pickerState.typeMode = "or";
   pickerState.generations.clear();
   pickerState.move = "";
   pickerState.game = getSelectedGame();
@@ -1584,6 +1599,9 @@ function openPicker(index: number): void {
   updatePickerGameModeToggleUI();
   updatePickerExclusiveToggleUI();
   pickerTypeFilterEl.querySelectorAll("[data-type]").forEach((b) => b.setAttribute("aria-pressed", "false"));
+  pickerTypeModeToggleEl?.querySelectorAll<HTMLButtonElement>("[data-picker-type-mode]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.pickerTypeMode === "or"));
+  });
   pickerGenFilterEl.querySelectorAll("[data-generation]").forEach((b) => b.setAttribute("aria-pressed", "false"));
   renderPickerResults();
   pickerSearchEl.focus();
@@ -3282,9 +3300,14 @@ moveCategoryFilterEl?.addEventListener("click", (e) => {
 moveTypeFilterEl?.addEventListener("click", (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-move-type]");
   if (!btn) return;
-  activeMoveTypeFilter = btn.dataset.moveType!;
+  const targetType = btn.dataset.moveType!;
+  if (targetType !== "all" && activeMoveTypeFilter === targetType) {
+    activeMoveTypeFilter = "all";
+  } else {
+    activeMoveTypeFilter = targetType;
+  }
   moveTypeFilterEl.querySelectorAll<HTMLButtonElement>("[data-move-type]").forEach((b) => {
-    b.setAttribute("aria-pressed", String(b === btn));
+    b.setAttribute("aria-pressed", String(b.dataset.moveType === activeMoveTypeFilter));
   });
   renderMovePickerTable();
 });
@@ -3325,6 +3348,18 @@ pickerTypeFilterEl.addEventListener("click", (e) => {
   btn.setAttribute("aria-pressed", String(!pressed));
   if (pressed) pickerState.types.delete(t);
   else pickerState.types.add(t);
+  renderPickerResults();
+});
+
+pickerTypeModeToggleEl?.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-picker-type-mode]");
+  if (!btn) return;
+  const mode = btn.dataset.pickerTypeMode as "or" | "and";
+  if (!mode || mode === pickerState.typeMode) return;
+  pickerState.typeMode = mode;
+  pickerTypeModeToggleEl.querySelectorAll<HTMLButtonElement>("[data-picker-type-mode]").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b === btn));
+  });
   renderPickerResults();
 });
 
