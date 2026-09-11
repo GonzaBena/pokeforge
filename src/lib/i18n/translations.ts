@@ -381,6 +381,10 @@ export interface Translations {
     activeAbility: string;
     probability: string;
     noAbilities: string;
+    searchMovesPlaceholder: string;
+    noMovesMatch: string;
+    movesCount: string;
+    clearSearch: string;
   };
   sync: {
     title: string;
@@ -858,6 +862,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       activeAbility: "Active",
       probability: "Probability",
       noAbilities: "No ability data available.",
+      searchMovesPlaceholder: "Search moves...",
+      noMovesMatch: "No moves match your search.",
+      movesCount: "{filtered} of {total} moves",
+      clearSearch: "Clear search",
     },
     sync: {
       title: "Sync Devices",
@@ -1359,6 +1367,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       activeAbility: "Activa",
       probability: "Probabilidad",
       noAbilities: "Sin datos de habilidades.",
+      searchMovesPlaceholder: "Buscar movimientos...",
+      noMovesMatch: "No se encontraron movimientos que coincidan.",
+      movesCount: "{filtered} de {total} movimientos",
+      clearSearch: "Limpiar búsqueda",
     },
     sync: {
       title: "Sincronizar Dispositivos",

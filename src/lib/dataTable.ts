@@ -1,8 +1,17 @@
-import { createTable, getCoreRowModel, getSortedRowModel } from "@tanstack/table-core";
-import type { ColumnDef, SortingState, TableOptionsResolved } from "@tanstack/table-core";
+import { createTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from "@tanstack/table-core";
+import type { ColumnDef, FilterFn, SortingState, TableOptionsResolved } from "@tanstack/table-core";
 
-export interface RenderDataTableOptions {
+export interface RenderDataTableOptions<T = unknown> {
   scrollHint?: string;
+  noMatchMessage?: string;
+  globalFilterFn?: FilterFn<T>;
+  onRowCountChange?: (filteredCount: number, totalCount: number) => void;
+}
+
+export interface DataTableHandle {
+  setGlobalFilter: (query: string) => void;
+  getFilteredRowCount: () => number;
+  getTotalRowCount: () => number;
 }
 
 export function renderDataTable<T>(
@@ -10,9 +19,10 @@ export function renderDataTable<T>(
   columns: ColumnDef<T, unknown>[],
   data: T[],
   emptyMessage: string,
-  tableOptions?: RenderDataTableOptions,
-): void {
+  tableOptions?: RenderDataTableOptions<T>,
+): DataTableHandle {
   let sorting: SortingState = [];
+  let globalFilter = "";
 
   // table-core's features (pinning, visibility, etc.) each expect their own
   // state slice to exist even when unused — createTable alone won't fill
@@ -26,17 +36,24 @@ export function renderDataTable<T>(
     state: {},
     onStateChange: () => {},
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    globalFilterFn: tableOptions?.globalFilterFn,
     renderFallbackValue: null,
   };
 
   const table = createTable(options);
   table.setOptions((prev) => ({
     ...prev,
-    state: { ...table.initialState, sorting },
+    state: { ...table.initialState, sorting, globalFilter },
     onSortingChange: (updater) => {
       sorting = typeof updater === "function" ? updater(sorting) : updater;
       table.setOptions((p) => ({ ...p, state: { ...p.state, sorting } }));
+      draw();
+    },
+    onGlobalFilterChange: (updater) => {
+      globalFilter = typeof updater === "function" ? updater(globalFilter) : updater;
+      table.setOptions((p) => ({ ...p, state: { ...p.state, globalFilter } }));
       draw();
     },
   }));
@@ -59,6 +76,11 @@ export function renderDataTable<T>(
       )
       .join("");
 
+    const isFiltered = Boolean(globalFilter.trim());
+    const displayEmpty = isFiltered && tableOptions?.noMatchMessage
+      ? tableOptions.noMatchMessage
+      : emptyMessage;
+
     const tbodyHtml = rows.length
       ? rows
           .map(
@@ -74,7 +96,7 @@ export function renderDataTable<T>(
                 .join("")}</tr>`,
           )
           .join("")
-      : `<tr><td class="detail-empty" colspan="${columns.length}">${emptyMessage}</td></tr>`;
+      : `<tr><td class="detail-empty" colspan="${columns.length}">${displayEmpty}</td></tr>`;
 
     // table-layout:fixed (set in CSS) treats these <col> widths as ratios of
     // the table's own 100% width, not literal pixel targets — good enough to
@@ -97,7 +119,17 @@ export function renderDataTable<T>(
         table.getColumn(th.dataset.sortCol!)?.toggleSorting(undefined, false);
       });
     });
+
+    tableOptions?.onRowCountChange?.(rows.length, data.length);
   }
 
   draw();
+
+  return {
+    setGlobalFilter: (query: string) => {
+      table.setGlobalFilter(query);
+    },
+    getFilteredRowCount: () => table.getRowModel().rows.length,
+    getTotalRowCount: () => data.length,
+  };
 }

@@ -37,6 +37,17 @@ export function bindModalEvents(): void {
 
   document.addEventListener("input", (e) => {
     const target = e.target as HTMLInputElement;
+
+    if (target.matches("[data-move-search-input]")) {
+      const toolbar = target.closest("[data-move-table-toolbar]");
+      const clearBtn = toolbar?.querySelector<HTMLButtonElement>("[data-move-search-clear]");
+      if (clearBtn) {
+        clearBtn.hidden = !target.value;
+      }
+      modalState.moveTableHandle?.setGlobalFilter(target.value);
+      return;
+    }
+
     if (!target.matches("[data-stat-input]") || modalState.currentId === null || !modalState.lastContext) return;
 
     const key = target.dataset.statKey as keyof PokemonStats;
@@ -265,6 +276,19 @@ export function bindModalEvents(): void {
 
     if (target.closest("[data-detail-close]")) {
       closeModal();
+      return;
+    }
+
+    const clearBtn = target.closest<HTMLElement>("[data-move-search-clear]");
+    if (clearBtn) {
+      const toolbar = clearBtn.closest("[data-move-table-toolbar]");
+      const input = toolbar?.querySelector<HTMLInputElement>("[data-move-search-input]");
+      if (input) {
+        input.value = "";
+        clearBtn.hidden = true;
+        modalState.moveTableHandle?.setGlobalFilter("");
+        input.focus();
+      }
       return;
     }
 
@@ -500,6 +524,16 @@ export function bindModalEvents(): void {
   document.addEventListener("keydown", (e) => {
     const { overlayEl, tocMenu } = getModalElements();
     if (e.key === "Escape") {
+      const target = e.target as HTMLElement;
+      if (target && target.matches("[data-move-search-input]") && (target as HTMLInputElement).value) {
+        (target as HTMLInputElement).value = "";
+        const toolbar = target.closest("[data-move-table-toolbar]");
+        const clearBtn = toolbar?.querySelector<HTMLButtonElement>("[data-move-search-clear]");
+        if (clearBtn) clearBtn.hidden = true;
+        modalState.moveTableHandle?.setGlobalFilter("");
+        return;
+      }
+
       const openTooltips = document.querySelectorAll(".detail-help-tooltip.is-open");
       if (openTooltips.length > 0) {
         openTooltips.forEach((el) => el.classList.remove("is-open"));

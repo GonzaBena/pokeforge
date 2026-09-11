@@ -1,3 +1,4 @@
+import type { DataTableHandle } from "../dataTable";
 import type { RenderContext } from "./types";
 
 interface ModalState {
@@ -5,6 +6,7 @@ interface ModalState {
   currentSlotIndex: number | null;
   lastContext: RenderContext | null;
   showHexagonChart: boolean;
+  moveTableHandle: DataTableHandle | null;
 }
 
 export const modalState: ModalState = {
@@ -12,4 +14,5 @@ export const modalState: ModalState = {
   currentSlotIndex: null,
   lastContext: null,
   showHexagonChart: false,
+  moveTableHandle: null,
 };

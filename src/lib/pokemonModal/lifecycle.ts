@@ -13,6 +13,7 @@ import type { PokemonModalOptions } from "./types";
 export function closeModal(): void {
   modalState.currentId = null;
   modalState.currentSlotIndex = null;
+  modalState.moveTableHandle = null;
   closeTocMenu();
   const { overlayEl, panelEl, fabContainer } = getModalElements();
   if (fabContainer) fabContainer.hidden = true;
