@@ -108,6 +108,7 @@ const movePickerTitleEl = document.querySelector<HTMLElement>("[data-move-picker
 const moveMethodFilterEl = document.querySelector<HTMLElement>("[data-move-method-filter]");
 const moveCategoryFilterEl = document.querySelector<HTMLElement>("[data-move-category-filter]");
 const moveTypeFilterEl = document.querySelector<HTMLElement>("[data-move-type-filter]");
+const movePickerBodyEl = document.querySelector<HTMLElement>("[data-move-picker-body]");
 
 const itemPickerOverlayEl = document.querySelector<HTMLElement>("[data-item-picker-overlay]");
 const itemPickerBodyEl = document.querySelector<HTMLElement>("[data-item-picker-body]");
@@ -1427,6 +1428,53 @@ function updatePickerGameModeToggleUI(): void {
   });
 }
 
+interface EmptyStateOptions {
+  icon?: string;
+  title: string;
+  description: string;
+  actionText?: string;
+  actionAttr?: string;
+}
+
+function renderEmptyState(opts: EmptyStateOptions): string {
+  const icon = opts.icon ?? "search-x";
+  const actionHtml = opts.actionText && opts.actionAttr
+    ? `<button class="btn btn--sm btn--primary empty-state__btn" type="button" ${opts.actionAttr}>
+        <i data-lucide="rotate-ccw"></i>
+        <span>${opts.actionText}</span>
+      </button>`
+    : "";
+
+  return `
+    <div class="empty-state">
+      <div class="empty-state__icon-wrap" aria-hidden="true">
+        <div class="empty-state__icon-glow"></div>
+        <i data-lucide="${icon}" class="empty-state__icon"></i>
+      </div>
+      <h3 class="empty-state__title">${opts.title}</h3>
+      <p class="empty-state__desc">${opts.description}</p>
+      ${actionHtml}
+    </div>
+  `;
+}
+
+function clearPokemonPickerFilters(): void {
+  pickerState.search = "";
+  pickerState.types.clear();
+  pickerState.generations.clear();
+  pickerState.move = "";
+  pickerState.exclusive = new Set(["all"]);
+
+  if (pickerSearchEl) pickerSearchEl.value = "";
+  if (pickerMoveFilterEl) pickerMoveFilterEl.value = "";
+
+  overlayEl.querySelectorAll<HTMLButtonElement>("[data-type], [data-generation]").forEach((b) => {
+    b.setAttribute("aria-pressed", "false");
+  });
+  updatePickerExclusiveToggleUI();
+  renderPickerResults();
+}
+
 function dexNumber(id: number): string {
   return `#${String(id).padStart(4, "0")}`;
 }
@@ -1439,7 +1487,16 @@ function renderPickerBatch(append = false): void {
   const exclusivesMap = getPickerExclusiveMap();
 
   if (!currentPickerResults.length) {
-    pickerResultsEl.innerHTML = `<p class="pokedex-empty">${t.pokedex.empty}</p>`;
+    pickerResultsEl.innerHTML = renderEmptyState({
+      icon: "search-x",
+      title: locale === "es" ? "No se encontraron Pokémon" : "No Pokémon found",
+      description: locale === "es"
+        ? "No hay Pokémon que coincidan con la búsqueda o los filtros seleccionados."
+        : "No Pokémon match the search or selected filters.",
+      actionText: locale === "es" ? "Restablecer filtros" : "Reset filters",
+      actionAttr: "data-clear-pokemon-filters",
+    });
+    refreshIcons();
     return;
   }
 
@@ -1606,6 +1663,9 @@ async function openMovePicker(slotIndex: number, moveIndex: number): Promise<voi
   }
   movePickerSearchEl.value = "";
   movePickerOverlayEl.hidden = false;
+  if (movePickerBodyEl) {
+    movePickerBodyEl.scrollTop = 0;
+  }
   document.body.style.overflow = "hidden";
 
   const methodChips = moveMethodFilterEl?.querySelectorAll<HTMLButtonElement>("[data-method]");
@@ -1645,6 +1705,25 @@ function closeMovePicker(): void {
   activeMoveSlotIndex = null;
   activeMoveIndex = null;
   currentMoveRows = [];
+}
+
+function clearMovePickerFilters(): void {
+  activeMethodFilter = "all";
+  activeCategoryFilter = "all";
+  activeMoveTypeFilter = "all";
+  if (movePickerSearchEl) movePickerSearchEl.value = "";
+
+  moveMethodFilterEl?.querySelectorAll<HTMLButtonElement>("[data-method]").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.method === "all"));
+  });
+  moveCategoryFilterEl?.querySelectorAll<HTMLButtonElement>("[data-category]").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.category === "all"));
+  });
+  moveTypeFilterEl?.querySelectorAll<HTMLButtonElement>("[data-move-type]").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.moveType === "all"));
+  });
+
+  renderMovePickerTable();
 }
 
 function renderMovePickerTable(): void {
@@ -1692,7 +1771,16 @@ function renderMovePickerTable(): void {
   }
 
   if (!filtered.length) {
-    movePickerResultsEl.innerHTML = `<p class="pokedex-empty">${locale === "es" ? "No se encontraron movimientos con los filtros seleccionados." : "No moves found matching the selected filters."}</p>`;
+    movePickerResultsEl.innerHTML = renderEmptyState({
+      icon: "swords",
+      title: locale === "es" ? "No se encontraron movimientos" : "No moves found",
+      description: locale === "es"
+        ? "Probá cambiando la categoría, el método de aprendizaje o quitando los filtros aplicados."
+        : "Try changing the category, learn method, or clearing the applied filters.",
+      actionText: locale === "es" ? "Restablecer filtros" : "Reset filters",
+      actionAttr: "data-clear-move-filters",
+    });
+    refreshIcons();
     return;
   }
 
@@ -1801,6 +1889,19 @@ function closeItemPicker(): void {
   activeItemSlotIndex = null;
 }
 
+function clearItemPickerFilters(): void {
+  activeItemCategory = "all";
+  if (itemPickerSearchEl) itemPickerSearchEl.value = "";
+
+  if (itemCategoryFilterEl) {
+    itemCategoryFilterEl.querySelectorAll<HTMLButtonElement>("[data-item-category]").forEach((btn) => {
+      btn.setAttribute("aria-pressed", String(btn.dataset.itemCategory === "all"));
+    });
+  }
+
+  renderItemPickerResults();
+}
+
 function renderItemPickerResults(): void {
   if (!itemPickerResultsEl) return;
   const locale = getCurrentLocale();
@@ -1834,7 +1935,15 @@ function renderItemPickerResults(): void {
   }
 
   if (!filtered.length) {
-    html += `<p class="pokedex-empty">${locale === "es" ? "No se encontraron objetos con los filtros seleccionados." : "No items found matching the selected filters."}</p>`;
+    html += renderEmptyState({
+      icon: "backpack",
+      title: locale === "es" ? "No se encontraron objetos" : "No items found",
+      description: locale === "es"
+        ? "No hay objetos que coincidan con la búsqueda o la categoría seleccionada."
+        : "No items match the search or selected category.",
+      actionText: locale === "es" ? "Restablecer filtros" : "Reset filters",
+      actionAttr: "data-clear-item-filters",
+    });
     itemPickerResultsEl.innerHTML = html;
     refreshIcons();
     return;
@@ -3107,6 +3216,12 @@ itemCategoryFilterEl?.addEventListener("click", (e) => {
 itemPickerResultsEl?.addEventListener("click", (e) => {
   const target = e.target as HTMLElement;
 
+  const clearBtn = target.closest<HTMLButtonElement>("[data-clear-item-filters]");
+  if (clearBtn) {
+    clearItemPickerFilters();
+    return;
+  }
+
   const removeBtn = target.closest<HTMLButtonElement>("[data-remove-item-picker]");
   if (removeBtn) {
     if (activeItemSlotIndex !== null) {
@@ -3175,6 +3290,12 @@ moveTypeFilterEl?.addEventListener("click", (e) => {
 });
 
 movePickerResultsEl.addEventListener("click", (e) => {
+  const clearBtn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-clear-move-filters]");
+  if (clearBtn) {
+    clearMovePickerFilters();
+    return;
+  }
+
   const target = (e.target as HTMLElement).closest<HTMLElement>("[data-pick-move]");
   if (!target || activeMoveSlotIndex === null || activeMoveIndex === null) return;
   const moveName = target.dataset.pickMove!;
@@ -3324,6 +3445,12 @@ window.addEventListener(GAME_DEX_MODE_CHANGED_EVENT, (e) => {
 });
 
 pickerResultsEl.addEventListener("click", async (e) => {
+  const clearBtn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-clear-pokemon-filters]");
+  if (clearBtn) {
+    clearPokemonPickerFilters();
+    return;
+  }
+
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-picker-pick]");
   if (!btn || activeSlotIndex === null) return;
   const id = Number(btn.dataset.pokemonId);

@@ -13,6 +13,7 @@
 @import "./components/select.css";
 @import "./components/view-toggle.css";
 @import "./components/filter-chip.css";
+@import "./components/empty-state.css";
 
 .capitalize {
   text-transform: capitalize;

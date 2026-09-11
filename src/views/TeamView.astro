@@ -181,38 +181,40 @@ const t = getTranslations(currentLocale);
           <i data-lucide="x"></i>
         </button>
       </div>
-      <div class="picker-panel__filters">
-        <label class="picker-input-wrap">
-          <i data-lucide="search" class="picker-input-icon"></i>
-          <input class="picker-input" type="search" placeholder={t.team.filterByMove} data-move-picker-search />
-        </label>
-        <div class="picker-panel__container">
-          <div class="picker-panel__filter-section">
-            <span class="picker-panel__section-title">{t.team.category}</span>
-            <div class="filter-group filter-group--compact" data-move-category-filter aria-label={t.team.category}>
-              <button class="filter-chip" type="button" data-category="all" aria-pressed="true">{t.team.allCategories}</button>
-              <button class="filter-chip" type="button" data-category="physical" aria-pressed="false">{t.team.physical}</button>
-              <button class="filter-chip" type="button" data-category="special" aria-pressed="false">{t.team.special}</button>
-              <button class="filter-chip" type="button" data-category="status" aria-pressed="false">{t.team.status}</button>
+      <div class="picker-panel__body" data-move-picker-body>
+        <div class="picker-panel__filters">
+          <label class="picker-input-wrap">
+            <i data-lucide="search" class="picker-input-icon"></i>
+            <input class="picker-input" type="search" placeholder={t.team.filterByMove} data-move-picker-search />
+          </label>
+          <div class="picker-panel__container">
+            <div class="picker-panel__filter-section">
+              <span class="picker-panel__section-title">{t.team.category}</span>
+              <div class="filter-group filter-group--compact" data-move-category-filter aria-label={t.team.category}>
+                <button class="filter-chip" type="button" data-category="all" aria-pressed="true">{t.team.allCategories}</button>
+                <button class="filter-chip" type="button" data-category="physical" aria-pressed="false">{t.team.physical}</button>
+                <button class="filter-chip" type="button" data-category="special" aria-pressed="false">{t.team.special}</button>
+                <button class="filter-chip" type="button" data-category="status" aria-pressed="false">{t.team.status}</button>
+              </div>
+            </div>
+            <div class="picker-panel__filter-section">
+              <span class="picker-panel__section-title">{t.team.learnMethod}</span>
+              <div class="filter-group filter-group--compact" data-move-method-filter aria-label={t.team.learnMethod}>
+                <button class="filter-chip" type="button" data-method="all" aria-pressed="true">{t.team.allMethods}</button>
+                <button class="filter-chip" type="button" data-method="level-up" aria-pressed="false">{t.team.levelUp}</button>
+                <button class="filter-chip" type="button" data-method="machine" aria-pressed="false">{t.team.machine}</button>
+                <button class="filter-chip" type="button" data-method="tutor" aria-pressed="false">{t.team.tutor}</button>
+                <button class="filter-chip" type="button" data-method="egg" aria-pressed="false">{t.team.egg}</button>
+              </div>
             </div>
           </div>
           <div class="picker-panel__filter-section">
-            <span class="picker-panel__section-title">{t.team.learnMethod}</span>
-            <div class="filter-group filter-group--compact" data-move-method-filter aria-label={t.team.learnMethod}>
-              <button class="filter-chip" type="button" data-method="all" aria-pressed="true">{t.team.allMethods}</button>
-              <button class="filter-chip" type="button" data-method="level-up" aria-pressed="false">{t.team.levelUp}</button>
-              <button class="filter-chip" type="button" data-method="machine" aria-pressed="false">{t.team.machine}</button>
-              <button class="filter-chip" type="button" data-method="tutor" aria-pressed="false">{t.team.tutor}</button>
-              <button class="filter-chip" type="button" data-method="egg" aria-pressed="false">{t.team.egg}</button>
-            </div>
+            <span class="picker-panel__section-title">{t.team.attackType}</span>
+            <div class="filter-group filter-group--compact" data-move-type-filter aria-label={t.team.attackType}></div>
           </div>
         </div>
-        <div class="picker-panel__filter-section">
-          <span class="picker-panel__section-title">{t.team.attackType}</span>
-          <div class="filter-group filter-group--compact" data-move-type-filter aria-label={t.team.attackType}></div>
-        </div>
+        <div class="move-picker__results" data-move-picker-results></div>
       </div>
-      <div class="move-picker__results" data-move-picker-results></div>
     </div>
   </div>
 
