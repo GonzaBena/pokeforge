@@ -174,13 +174,11 @@ self.addEventListener('fetch', (event) => {
         }
 
         try {
-          const networkResponse = await fetch(event.request)
-          if (
-            networkResponse &&
-            (networkResponse.status === 200 ||
-              networkResponse.type === 'opaque' ||
-              networkResponse.type === 'cors')
-          ) {
+          // Fetched in explicit CORS mode (both hosts send Access-Control-Allow-Origin: *)
+          // so failures come back as readable 4xx/5xx instead of an opaque response that
+          // would otherwise report ok/fail identically and let an error get cached forever.
+          const networkResponse = await fetch(event.request.url, { mode: 'cors' })
+          if (networkResponse && networkResponse.ok) {
             cache.put(event.request, networkResponse.clone())
           }
           return networkResponse

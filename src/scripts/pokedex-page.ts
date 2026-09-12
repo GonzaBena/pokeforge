@@ -136,7 +136,7 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
         ${exclusiveBadgeHtml}
       </div>
       <div class="pokemon-card__sprite-wrap">
-        <img class="pokemon-card__sprite" src="${sprite}" alt="${p.name}" loading="lazy" decoding="async" width="120" height="120" onerror="this.onerror=null;this.src='/icons/pokemon-fallback.svg';" />
+        <img class="pokemon-card__sprite" data-sprite-src="${sprite}" alt="${p.name}" decoding="async" width="120" height="120" />
       </div>
       <div class="captured-badge"><i data-lucide="circle-dot"></i></div>
       <div class="pokemon-card__name">${p.name}</div>

@@ -219,7 +219,7 @@ export function renderHeader(ctx: RenderContext): string {
     <div class="detail-header ${isTeamMode ? 'is-team-mode' : ''}">
       <div class="detail-header__aside">
         <div class="detail-header__sprite">
-          <img src="${sprite}" alt="${pokemon.name}" onerror="this.onerror=null;this.src='/icons/pokemon-fallback.svg';" />
+          <img data-sprite-src="${sprite}" alt="${pokemon.name}" />
           ${medalHtml}
         </div>
         <div class="detail-header__aside-actions">

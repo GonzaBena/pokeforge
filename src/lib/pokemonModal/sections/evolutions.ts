@@ -47,7 +47,7 @@ export function renderEvolutionsContent(
       <div class="detail-evolution-card${isCurrent ? ' current' : ''}"${
         isCurrent ? '' : ` data-evolution-pick data-pokemon-id="${node.speciesId}"`
       }>
-        <img src="${p.sprites.officialArtwork ?? p.sprites.default ?? ''}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='/icons/pokemon-fallback.svg';" />
+        <img data-sprite-src="${p.sprites.officialArtwork ?? p.sprites.default ?? ''}" alt="${p.name}" />
         <span class="detail-evolution-card__id">${dexNumber(p.id)}</span>
         <span class="detail-evolution-card__name">${p.name}</span>
         <div class="detail-evolution-card__types">${typeBadgesHtml(p.types, true)}</div>
