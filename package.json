@@ -10,6 +10,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "tsx --test tests/**/*.test.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:all": "pnpm test && pnpm run test:e2e",
     "check": "astro check",
     "astro": "astro",
     "fetch:pokedex": "tsx scripts/fetch-pokedex.ts",
@@ -33,6 +36,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@types/animejs": "^3.1.13",
     "@types/node": "^22.10.7",
     "@types/qrcode": "^1.5.6",

@@ -91,21 +91,30 @@ export function getPickerExclusiveMap(
 }
 
 export interface PokemonFilterCriteria {
-  search: string;
-  types: Set<string>;
-  typeMode: "or" | "and";
-  generations: Set<string>;
-  move: string;
-  gameSpeciesSet: Set<number> | null;
-  exclusivesMap: Map<number, GameVersionMeta>;
-  exclusiveFilter: Set<string>;
+  search?: string;
+  types?: Set<string>;
+  typeMode?: "or" | "and";
+  generations?: Set<string>;
+  move?: string;
+  gameSpeciesSet?: Set<number> | null;
+  exclusivesMap?: Map<number, GameVersionMeta>;
+  exclusiveFilter?: Set<string>;
 }
 
 export function filterPokemonList(
   allPokemon: Pokemon[],
   criteria: PokemonFilterCriteria
 ): Pokemon[] {
-  const { search, types, typeMode, generations, move, gameSpeciesSet, exclusivesMap, exclusiveFilter } = criteria;
+  const {
+    search = "",
+    types = new Set<string>(),
+    typeMode = "or",
+    generations = new Set<string>(),
+    move = "",
+    gameSpeciesSet = null,
+    exclusivesMap = new Map<number, GameVersionMeta>(),
+    exclusiveFilter = new Set<string>(["all"]),
+  } = criteria;
 
   return allPokemon.filter((p) => {
     if (search && !p.name.includes(search) && !String(p.id).includes(search)) return false;

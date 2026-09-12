@@ -39,3 +39,8 @@ obsidian-templates/
 .agents/
 .claude/
 
+# test artifacts
+test-results/
+playwright-report/
+
+
