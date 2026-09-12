@@ -1,5 +1,5 @@
 ---
-title: "Tabla de Tipos: Conoce las debilidades de tu oponente"
+title: 'Tabla de Tipos: Conoce las debilidades de tu oponente'
 description: Ayuda para la creación de tus equipos
 pubDate: 2026-09-08
 category: recursos
@@ -12,12 +12,12 @@ author: gonzo
 isGuideHub: false
 inProgress: false
 coverImageFit: cover
-translation: "types-table"
+translation: 'types-table'
 downloads:
-  - text: "Tabla de Tipos"
-    path: "/downloads/TabladeTipos.webp"
-    size: "292 KB"
-    description: "Tabla de Tipos en excelente calidad para su disfrute"
+  - text: 'Tabla de Tipos'
+    path: '/downloads/TabladeTipos.webp'
+    size: '292 KB'
+    description: 'Tabla de Tipos en excelente calidad para su disfrute'
 ---
 
 # Tabla de tipos

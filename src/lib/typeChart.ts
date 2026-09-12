@@ -1,37 +1,37 @@
-import type { TypeChart } from "./types";
-import { getItemById, getItemTypeEffect } from "./items";
+import type { TypeChart } from './types'
+import { getItemById, getItemTypeEffect } from './items'
 
 export interface TeamMember {
-  name: string;
-  types: string[];
-  speciesId?: number;
-  item?: string | null;
-  ability?: string | null;
+  name: string
+  types: string[]
+  speciesId?: number
+  item?: string | null
+  ability?: string | null
 }
 
 export interface MemberDefenseImpact {
-  name: string;
-  multiplier: number;
-  itemEffectNote?: string;
+  name: string
+  multiplier: number
+  itemEffectNote?: string
 }
 
-export type DefenseThreatLevel = "critical" | "exposed" | "covered";
+export type DefenseThreatLevel = 'critical' | 'exposed' | 'covered'
 
 export interface TeamDefenseEntry {
-  type: string;
-  averageMultiplier: number;
-  weakDetails: MemberDefenseImpact[];
-  resistDetails: MemberDefenseImpact[];
-  immuneDetails: MemberDefenseImpact[];
-  neutralDetails: MemberDefenseImpact[];
-  weakMembers: string[];
-  resistMembers: string[];
-  immuneMembers: string[];
-  weakCount: number;
-  resistCount: number;
-  immuneCount: number;
-  threatLevel: DefenseThreatLevel;
-  netScore: number;
+  type: string
+  averageMultiplier: number
+  weakDetails: MemberDefenseImpact[]
+  resistDetails: MemberDefenseImpact[]
+  immuneDetails: MemberDefenseImpact[]
+  neutralDetails: MemberDefenseImpact[]
+  weakMembers: string[]
+  resistMembers: string[]
+  immuneMembers: string[]
+  weakCount: number
+  resistCount: number
+  immuneCount: number
+  threatLevel: DefenseThreatLevel
+  netScore: number
 }
 
 export function getEffectiveTypeMultiplier(
@@ -39,117 +39,123 @@ export function getEffectiveTypeMultiplier(
   attackingType: string,
   defendingTypes: string[],
   options?: {
-    item?: string | null;
-    speciesId?: number;
-    ability?: string | null;
-  }
+    item?: string | null
+    speciesId?: number
+    ability?: string | null
+  },
 ): { multiplier: number; itemEffectNote?: string } {
-  let types = [...defendingTypes];
-  const item = getItemById(options?.item);
+  let types = [...defendingTypes]
+  const item = getItemById(options?.item)
 
   if (item && options?.speciesId) {
-    const typeEffect = getItemTypeEffect(item, options.speciesId);
+    const typeEffect = getItemTypeEffect(item, options.speciesId)
     if (typeEffect.overrideType) {
-      types = [typeEffect.overrideType];
+      types = [typeEffect.overrideType]
     }
   }
 
-  let baseMult = types.reduce((mult, def) => mult * (chart.chart[attackingType]?.[def] ?? 1), 1);
-  let itemEffectNote: string | undefined = undefined;
+  let baseMult = types.reduce((mult, def) => mult * (chart.chart[attackingType]?.[def] ?? 1), 1)
+  let itemEffectNote: string | undefined = undefined
 
   if (item) {
-    const typeEffect = getItemTypeEffect(item, options?.speciesId ?? 0);
+    const typeEffect = getItemTypeEffect(item, options?.speciesId ?? 0)
     // Air balloon or other immunity grant
     if (typeEffect.grantsImmunities.includes(attackingType)) {
-      baseMult = 0;
-      itemEffectNote = item.id;
+      baseMult = 0
+      itemEffectNote = item.id
     } else if (typeEffect.revokesImmunities && baseMult === 0) {
       // Ring target converts immunities to 1x
-      baseMult = 1;
-      itemEffectNote = item.id;
-    } else if (item.id === "iron-ball" && attackingType === "ground") {
+      baseMult = 1
+      itemEffectNote = item.id
+    } else if (item.id === 'iron-ball' && attackingType === 'ground') {
       // Iron ball removes ground immunity from Flying
-      if (baseMult === 0 && types.includes("flying")) {
-        const nonFlying = types.filter((t) => t !== "flying");
+      if (baseMult === 0 && types.includes('flying')) {
+        const nonFlying = types.filter((t) => t !== 'flying')
         baseMult = nonFlying.length
-          ? nonFlying.reduce((mult, def) => mult * (chart.chart["ground"]?.[def] ?? 1), 1)
-          : 1;
-        itemEffectNote = item.id;
+          ? nonFlying.reduce((mult, def) => mult * (chart.chart['ground']?.[def] ?? 1), 1)
+          : 1
+        itemEffectNote = item.id
       }
     }
   }
 
-  return { multiplier: baseMult, itemEffectNote };
+  return { multiplier: baseMult, itemEffectNote }
 }
 
 export function getTypeMultiplier(
   chart: TypeChart,
   attackingType: string,
   defendingTypes: string[],
-  options?: { item?: string | null; speciesId?: number; ability?: string | null }
+  options?: { item?: string | null; speciesId?: number; ability?: string | null },
 ): number {
-  return getEffectiveTypeMultiplier(chart, attackingType, defendingTypes, options).multiplier;
+  return getEffectiveTypeMultiplier(chart, attackingType, defendingTypes, options).multiplier
 }
 
 export function computeTeamDefense(chart: TypeChart, team: TeamMember[]): TeamDefenseEntry[] {
   return chart.types.map((attackingType): TeamDefenseEntry => {
-    const weakDetails: MemberDefenseImpact[] = [];
-    const resistDetails: MemberDefenseImpact[] = [];
-    const immuneDetails: MemberDefenseImpact[] = [];
-    const neutralDetails: MemberDefenseImpact[] = [];
-    const weakMembers: string[] = [];
-    const resistMembers: string[] = [];
-    const immuneMembers: string[] = [];
-    let product = 1;
+    const weakDetails: MemberDefenseImpact[] = []
+    const resistDetails: MemberDefenseImpact[] = []
+    const immuneDetails: MemberDefenseImpact[] = []
+    const neutralDetails: MemberDefenseImpact[] = []
+    const weakMembers: string[] = []
+    const resistMembers: string[] = []
+    const immuneMembers: string[] = []
+    let product = 1
 
     for (const member of team) {
-      const { multiplier: mult, itemEffectNote } = getEffectiveTypeMultiplier(chart, attackingType, member.types, {
-        item: member.item,
-        speciesId: member.speciesId,
-        ability: member.ability,
-      });
-      product *= mult;
-      const impact: MemberDefenseImpact = { name: member.name, multiplier: mult, itemEffectNote };
+      const { multiplier: mult, itemEffectNote } = getEffectiveTypeMultiplier(
+        chart,
+        attackingType,
+        member.types,
+        {
+          item: member.item,
+          speciesId: member.speciesId,
+          ability: member.ability,
+        },
+      )
+      product *= mult
+      const impact: MemberDefenseImpact = { name: member.name, multiplier: mult, itemEffectNote }
 
       if (mult === 0) {
-        immuneDetails.push(impact);
-        immuneMembers.push(member.name);
+        immuneDetails.push(impact)
+        immuneMembers.push(member.name)
       } else if (mult > 1) {
-        weakDetails.push(impact);
-        weakMembers.push(member.name);
+        weakDetails.push(impact)
+        weakMembers.push(member.name)
       } else if (mult < 1) {
-        resistDetails.push(impact);
-        resistMembers.push(member.name);
+        resistDetails.push(impact)
+        resistMembers.push(member.name)
       } else {
-        neutralDetails.push(impact);
+        neutralDetails.push(impact)
       }
     }
 
-    weakDetails.sort((a, b) => b.multiplier - a.multiplier);
-    resistDetails.sort((a, b) => a.multiplier - b.multiplier);
+    weakDetails.sort((a, b) => b.multiplier - a.multiplier)
+    resistDetails.sort((a, b) => a.multiplier - b.multiplier)
 
-    const weakCount = weakDetails.length;
-    const resistCount = resistDetails.length;
-    const immuneCount = immuneDetails.length;
+    const weakCount = weakDetails.length
+    const resistCount = resistDetails.length
+    const immuneCount = immuneDetails.length
 
     // Severity weighting: 4x counts 2 points, 2x counts 1 point
-    const weakPoints = weakDetails.reduce((acc, m) => acc + (m.multiplier >= 4 ? 2 : 1), 0);
-    const resistPoints = resistDetails.reduce((acc, m) => acc + (m.multiplier <= 0.25 ? 2 : 1), 0) + (immuneCount * 2);
-    const netScore = weakPoints - resistPoints;
+    const weakPoints = weakDetails.reduce((acc, m) => acc + (m.multiplier >= 4 ? 2 : 1), 0)
+    const resistPoints =
+      resistDetails.reduce((acc, m) => acc + (m.multiplier <= 0.25 ? 2 : 1), 0) + immuneCount * 2
+    const netScore = weakPoints - resistPoints
 
-    let threatLevel: DefenseThreatLevel = "covered";
+    let threatLevel: DefenseThreatLevel = 'covered'
     if (
       weakCount >= 3 ||
       (weakDetails.some((m) => m.multiplier >= 4) && resistCount === 0 && immuneCount === 0) ||
       (weakCount >= 2 && resistCount === 0 && immuneCount === 0)
     ) {
-      threatLevel = "critical";
+      threatLevel = 'critical'
     } else if (weakCount > 0 && resistCount === 0 && immuneCount === 0) {
-      threatLevel = "exposed";
+      threatLevel = 'exposed'
     }
 
-    const rawAvg = team.length ? Math.pow(product, 1 / team.length) : 1;
-    const averageMultiplier = Math.round(rawAvg * 100) / 100;
+    const rawAvg = team.length ? Math.pow(product, 1 / team.length) : 1
+    const averageMultiplier = Math.round(rawAvg * 100) / 100
 
     return {
       type: attackingType,
@@ -166,8 +172,8 @@ export function computeTeamDefense(chart: TypeChart, team: TeamMember[]): TeamDe
       immuneCount,
       threatLevel,
       netScore,
-    };
-  });
+    }
+  })
 }
 
 export function splitWeaknessesAndResistances(entries: TeamDefenseEntry[]) {
@@ -175,81 +181,81 @@ export function splitWeaknessesAndResistances(entries: TeamDefenseEntry[]) {
     critical: 0,
     exposed: 1,
     covered: 2,
-  };
+  }
 
   const weaknesses = entries
     .filter((e) => e.weakCount > 0)
     .sort((a, b) => {
       if (threatOrder[a.threatLevel] !== threatOrder[b.threatLevel]) {
-        return threatOrder[a.threatLevel] - threatOrder[b.threatLevel];
+        return threatOrder[a.threatLevel] - threatOrder[b.threatLevel]
       }
       if (b.netScore !== a.netScore) {
-        return b.netScore - a.netScore;
+        return b.netScore - a.netScore
       }
-      return b.weakCount - a.weakCount;
-    });
+      return b.weakCount - a.weakCount
+    })
 
   const resistances = entries
     .filter((e) => e.weakCount === 0 && e.resistCount > 0)
-    .sort((a, b) => b.resistCount - a.resistCount || a.type.localeCompare(b.type));
+    .sort((a, b) => b.resistCount - a.resistCount || a.type.localeCompare(b.type))
 
   const immunities = entries
     .filter((e) => e.immuneCount > 0)
-    .sort((a, b) => b.immuneCount - a.immuneCount || a.type.localeCompare(b.type));
+    .sort((a, b) => b.immuneCount - a.immuneCount || a.type.localeCompare(b.type))
 
-  return { weaknesses, resistances, immunities };
+  return { weaknesses, resistances, immunities }
 }
 
 export interface OffensiveAttacker {
-  pokemonName: string;
-  attackingType: string;
-  moveName?: string;
-  multiplier: number;
+  pokemonName: string
+  attackingType: string
+  moveName?: string
+  multiplier: number
 }
 
 export interface TeamOffenseEntry {
-  targetType: string;
-  attackers: OffensiveAttacker[];
-  isCovered: boolean;
+  targetType: string
+  attackers: OffensiveAttacker[]
+  isCovered: boolean
 }
 
 export interface TeamOffenseSummary {
-  coveredTypes: TeamOffenseEntry[];
-  blindSpots: TeamOffenseEntry[];
-  coveredCount: number;
-  totalTypes: number;
-  coveragePercentage: number;
+  coveredTypes: TeamOffenseEntry[]
+  blindSpots: TeamOffenseEntry[]
+  coveredCount: number
+  totalTypes: number
+  coveragePercentage: number
 }
 
 export interface AttackSource {
-  pokemonName: string;
-  type: string;
-  moveName?: string;
+  pokemonName: string
+  type: string
+  moveName?: string
 }
 
 export function computeTeamOffense(
   chart: TypeChart,
-  attackSources: AttackSource[]
+  attackSources: AttackSource[],
 ): TeamOffenseSummary {
-  const coveredTypes: TeamOffenseEntry[] = [];
-  const blindSpots: TeamOffenseEntry[] = [];
+  const coveredTypes: TeamOffenseEntry[] = []
+  const blindSpots: TeamOffenseEntry[] = []
 
   for (const targetType of chart.types) {
-    const attackers: OffensiveAttacker[] = [];
-    const seenCombos = new Set<string>();
+    const attackers: OffensiveAttacker[] = []
+    const seenCombos = new Set<string>()
 
     for (const source of attackSources) {
-      const mult = chart.chart[source.type]?.[targetType] ?? 1;
+      const mult = chart.chart[source.type]?.[targetType] ?? 1
       if (mult > 1) {
-        const comboKey = `${source.pokemonName}|${source.type}|${source.moveName ?? ""}`;
+        const comboKey = `${source.pokemonName}|${source.type}|${source.moveName ?? ''}`
         if (!seenCombos.has(comboKey)) {
-          seenCombos.add(comboKey);
+          seenCombos.add(comboKey)
           attackers.push({
             pokemonName: source.pokemonName,
             attackingType: source.type,
             moveName: source.moveName,
             multiplier: mult,
-          });
+          })
         }
       }
     }
@@ -258,21 +264,23 @@ export function computeTeamOffense(
       targetType,
       attackers,
       isCovered: attackers.length > 0,
-    };
+    }
 
     if (entry.isCovered) {
-      coveredTypes.push(entry);
+      coveredTypes.push(entry)
     } else {
-      blindSpots.push(entry);
+      blindSpots.push(entry)
     }
   }
 
-  coveredTypes.sort((a, b) => b.attackers.length - a.attackers.length || a.targetType.localeCompare(b.targetType));
-  blindSpots.sort((a, b) => a.targetType.localeCompare(b.targetType));
+  coveredTypes.sort(
+    (a, b) => b.attackers.length - a.attackers.length || a.targetType.localeCompare(b.targetType),
+  )
+  blindSpots.sort((a, b) => a.targetType.localeCompare(b.targetType))
 
-  const totalTypes = chart.types.length;
-  const coveredCount = coveredTypes.length;
-  const coveragePercentage = totalTypes ? Math.round((coveredCount / totalTypes) * 100) : 0;
+  const totalTypes = chart.types.length
+  const coveredCount = coveredTypes.length
+  const coveragePercentage = totalTypes ? Math.round((coveredCount / totalTypes) * 100) : 0
 
   return {
     coveredTypes,
@@ -280,6 +288,5 @@ export function computeTeamOffense(
     coveredCount,
     totalTypes,
     coveragePercentage,
-  };
+  }
 }
-

@@ -41,7 +41,7 @@
   border-color: var(--text-faint);
 }
 
-.filter-chip[aria-pressed="true"] {
+.filter-chip[aria-pressed='true'] {
   background: var(--badge-bg, var(--accent));
   border-color: var(--badge-bg, var(--accent));
   color: white;

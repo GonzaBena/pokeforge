@@ -8,7 +8,6 @@
   align-items: flex-start;
 }
 
-
 .picker-panel__filters {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
@@ -160,7 +159,10 @@
     width: 100%;
   }
 
-  .picker-panel__filters .filters-panel__game-row .view-toggle:not(.exclusive-toggle) .view-toggle__btn {
+  .picker-panel__filters
+    .filters-panel__game-row
+    .view-toggle:not(.exclusive-toggle)
+    .view-toggle__btn {
     flex: 1;
     text-align: center;
     justify-content: center;
@@ -263,4 +265,3 @@
   box-shadow: 0 0 5px var(--version-color);
   flex-shrink: 0;
 }
-

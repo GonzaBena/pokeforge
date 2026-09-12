@@ -1,15 +1,15 @@
 ---
-title: "The Essential Guide to Type Coverage and Team Balance"
-description: "Master defensive resistances and offensive coverage so your Pokémon team never gets caught with glaring blind spots."
+title: 'The Essential Guide to Type Coverage and Team Balance'
+description: 'Master defensive resistances and offensive coverage so your Pokémon team never gets caught with glaring blind spots.'
 pubDate: 2026-02-24
-category: "guias"
-tags: ["Teambuilding", "Strategy", "Types", "Guide"]
-coverImage: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png"
-coverImageFit: "contain"
+category: 'guias'
+tags: ['Teambuilding', 'Strategy', 'Types', 'Guide']
+coverImage: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png'
+coverImageFit: 'contain'
 featured: true
-readingTime: "6 min"
-author: "gonzo"
-translation: "guia-coberturas-de-tipos"
+readingTime: '6 min'
+author: 'gonzo'
+translation: 'guia-coberturas-de-tipos'
 ---
 
 Crafting a championship Pokémon team involves far more than picking your six favorite monsters. The defining trait separating novice players from seasoned strategists is **defensive and offensive type coverage**.
@@ -22,11 +22,11 @@ In this guide, we break down the foundational principles to design balanced rost
 
 The **Fire-Water-Grass** (FWG) triangle is the most battle-tested synergy in competitive history:
 
-| Type | Resists | Super Effective Against |
-| :--- | :--- | :--- |
-| **Water** | Fire, Water, Ice, Steel | Fire, Ground, Rock |
-| **Fire** | Fire, Grass, Ice, Bug, Steel, Fairy | Grass, Ice, Bug, Steel |
-| **Grass** | Water, Grass, Electric, Ground | Water, Ground, Rock |
+| Type      | Resists                             | Super Effective Against |
+| :-------- | :---------------------------------- | :---------------------- |
+| **Water** | Fire, Water, Ice, Steel             | Fire, Ground, Rock      |
+| **Fire**  | Fire, Grass, Ice, Bug, Steel, Fairy | Grass, Ice, Bug, Steel  |
+| **Grass** | Water, Grass, Electric, Ground      | Water, Ground, Rock     |
 
 When your opponent brings an Electric or Grass attacker against your Water Pokémon, you can pivot cleanly into Grass or Fire to absorb the damage.
 
@@ -36,11 +36,11 @@ When your opponent brings an Electric or Grass attacker against your Water Poké
 
 For contemporary competitive battling, the **Dragon - Fairy - Steel** triad is revered as the ultimate defensive powerhouse:
 
-* **Steel** is universally the best defensive type, resisting 10 types and completely immune to Poison.
-* **Fairy** is immune to Dragon and neutralizes Fighting and Dark threats.
-* **Dragon** brings raw offensive stats and elemental resistances against Fire, Water, Grass, and Electric.
+- **Steel** is universally the best defensive type, resisting 10 types and completely immune to Poison.
+- **Fairy** is immune to Dragon and neutralizes Fighting and Dark threats.
+- **Dragon** brings raw offensive stats and elemental resistances against Fire, Water, Grass, and Electric.
 
-> **PokeForge Tip**: Monitor the *Weaknesses & Resistances* chart closely. If more than two teammates share a common weakness to Ground or Fairy, consider adding a Flying-type or Levitate user immediately.
+> **PokeForge Tip**: Monitor the _Weaknesses & Resistances_ chart closely. If more than two teammates share a common weakness to Ground or Fairy, consider adding a Flying-type or Levitate user immediately.
 
 ---
 
@@ -49,7 +49,7 @@ For contemporary competitive battling, the **Dragon - Fairy - Steel** triad is r
 Don't confuse defensive typings with offensive coverage moves:
 
 1. **Defensive Typing**: Determined by the Pokémon's innate elements when receiving hits.
-2. **Offensive Coverage**: Determined by learnable movesets. For instance, Lucario (Fighting/Steel) can run *Shadow Ball* or *Stone Edge* to catch Ghost and Flying threats off guard.
+2. **Offensive Coverage**: Determined by learnable movesets. For instance, Lucario (Fighting/Steel) can run _Shadow Ball_ or _Stone Edge_ to catch Ghost and Flying threats off guard.
 
 ---
 

@@ -33,7 +33,7 @@
   transform: scale(0.95);
 }
 
-.view-toggle__btn[aria-pressed="true"] {
+.view-toggle__btn[aria-pressed='true'] {
   background: var(--btn-color, var(--accent));
   color: var(--btn-text, white);
   box-shadow:
@@ -59,19 +59,19 @@
 }
 
 /* Consecutive active buttons merge with springy elastic corners */
-.view-toggle__btn[aria-pressed="true"]:has(+ .view-toggle__btn[aria-pressed="true"]) {
+.view-toggle__btn[aria-pressed='true']:has(+ .view-toggle__btn[aria-pressed='true']) {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.view-toggle__btn[aria-pressed="true"] + .view-toggle__btn[aria-pressed="true"] {
+.view-toggle__btn[aria-pressed='true'] + .view-toggle__btn[aria-pressed='true'] {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
 
 /* Liquid fusion bridge (meniscus highlight) between consecutive active buttons */
-.view-toggle__btn[aria-pressed="true"] + .view-toggle__btn[aria-pressed="true"]::before {
-  content: "";
+.view-toggle__btn[aria-pressed='true'] + .view-toggle__btn[aria-pressed='true']::before {
+  content: '';
   position: absolute;
   left: -1px;
   top: 1px;
@@ -98,7 +98,7 @@
   gap: 6px;
 }
 
-.view-toggle__btn[aria-pressed="true"] .exclusive-dot {
+.view-toggle__btn[aria-pressed='true'] .exclusive-dot {
   background: white;
   box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
 }
@@ -156,15 +156,19 @@
   }
 
   /* Reset corner merging for 2x2 grid */
-  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed="true"],
-  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed="true"]:has(+ .view-toggle__btn[aria-pressed="true"]),
-  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed="true"] + .view-toggle__btn[aria-pressed="true"] {
+  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed='true'],
+  .view-toggle.exclusive-toggle
+    .view-toggle__btn[aria-pressed='true']:has(+ .view-toggle__btn[aria-pressed='true']),
+  .view-toggle.exclusive-toggle
+    .view-toggle__btn[aria-pressed='true']
+    + .view-toggle__btn[aria-pressed='true'] {
     border-radius: var(--radius-sm, 6px);
   }
 
   /* Disable single-row horizontal liquid fusion bridge between 2x2 rows */
-  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed="true"] + .view-toggle__btn[aria-pressed="true"]::before {
+  .view-toggle.exclusive-toggle
+    .view-toggle__btn[aria-pressed='true']
+    + .view-toggle__btn[aria-pressed='true']::before {
     display: none;
   }
 }
-

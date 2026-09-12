@@ -20,7 +20,7 @@
 }
 
 .modal-panel,
-[class*="modal-panel"] {
+[class*='modal-panel'] {
   opacity: 1;
   transform: scale(1) translateY(0);
   will-change: transform, opacity;
@@ -36,7 +36,7 @@
   }
 
   .modal-panel,
-  [class*="modal-panel"] {
+  [class*='modal-panel'] {
     opacity: 0;
     transform: scale(0.98) translateY(4px);
   }
@@ -50,7 +50,7 @@
 }
 
 .modal-overlay:where([hidden]) .modal-panel,
-.modal-overlay:where([hidden]) [class*="modal-panel"] {
+.modal-overlay:where([hidden]) [class*='modal-panel'] {
   opacity: 0;
   transform: scale(0.98) translateY(4px);
 }
@@ -172,7 +172,7 @@
   }
 
   .modal-panel,
-  [class*="modal-panel"] {
+  [class*='modal-panel'] {
     height: auto !important;
     max-height: 92vh !important;
     border-bottom-left-radius: 0 !important;
@@ -190,14 +190,14 @@
 
   @starting-style {
     .modal-panel,
-    [class*="modal-panel"] {
+    [class*='modal-panel'] {
       opacity: 0;
       transform: translateY(100%);
     }
   }
 
   .modal-overlay:where([hidden]) .modal-panel,
-  .modal-overlay:where([hidden]) [class*="modal-panel"] {
+  .modal-overlay:where([hidden]) [class*='modal-panel'] {
     opacity: 0;
     transform: translateY(100%);
   }
@@ -206,7 +206,7 @@
 @media (prefers-reduced-motion: reduce) {
   .modal-overlay,
   .modal-panel,
-  [class*="modal-panel"] {
+  [class*='modal-panel'] {
     transition: none !important;
     transform: none !important;
   }

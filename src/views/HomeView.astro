@@ -1,16 +1,16 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
-import "../styles/features/home/home.css";
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getTranslations, getLocalizedPath, type Locale } from '../lib/i18n/translations'
+import '../styles/features/home/home.css'
 
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
-const pokedexHref = getLocalizedPath("/pokedex/", currentLocale);
-const teamHref = getLocalizedPath("/team/", currentLocale);
-const blogHref = getLocalizedPath("/blog/", currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+const pokedexHref = getLocalizedPath('/pokedex/', currentLocale)
+const teamHref = getLocalizedPath('/team/', currentLocale)
+const blogHref = getLocalizedPath('/blog/', currentLocale)
 ---
 
-<BaseLayout title={currentLocale === "es" ? "Inicio" : "Home"}>
+<BaseLayout title={currentLocale === 'es' ? 'Inicio' : 'Home'}>
   <div class="hero-container">
     <div class="hero-ambient-glow" aria-hidden="true"></div>
     <section class="hero">
@@ -20,12 +20,12 @@ const blogHref = getLocalizedPath("/blog/", currentLocale);
       </div>
 
       <h1 class="hero__title">
-        {t.home.titlePrefix}<span class="hero__title-accent">{t.home.titleAccent}</span>{t.home.titleSuffix}
+        {t.home.titlePrefix}
+        <span class="hero__title-accent">{t.home.titleAccent}</span>
+        {t.home.titleSuffix}
       </h1>
 
-      <p class="hero__subtitle">
-        {t.home.subtitle}
-      </p>
+      <p class="hero__subtitle">{t.home.subtitle}</p>
 
       <div class="hero__actions">
         <a class="hero__card hero__card--pokedex" href={pokedexHref} data-astro-prefetch>

@@ -900,7 +900,7 @@
 
 .sync-modal__divider::before,
 .sync-modal__divider::after {
-  content: "";
+  content: '';
   flex: 1;
   border-bottom: 1px solid var(--border);
 }
@@ -1034,4 +1034,3 @@
   background: #dc2626 !important;
   color: white !important;
 }
-

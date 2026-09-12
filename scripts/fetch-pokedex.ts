@@ -1,38 +1,39 @@
-import { buildGenerations } from "./lib/buildGenerations.ts";
-import { buildTypeChart } from "./lib/buildTypeChart.ts";
-import { buildMovesIndex } from "./lib/buildMovesIndex.ts";
-import { buildMoveDetails } from "./lib/buildMoveDetails.ts";
-import { buildNatures } from "./lib/buildNatures.ts";
-import { buildAbilities } from "./lib/buildAbilities.ts";
-import { buildPokedex } from "./lib/buildPokedex.ts";
-import { buildSpeciesInfo } from "./lib/buildSpeciesInfo.ts";
-import { buildEvolutionChains } from "./lib/buildEvolutionChains.ts";
-import { buildPokemonDetails } from "./lib/buildPokemonDetails.ts";
-import { buildGamePokedex } from "./lib/buildGamePokedex.ts";
+import { buildGenerations } from './lib/buildGenerations.ts'
+import { buildTypeChart } from './lib/buildTypeChart.ts'
+import { buildMovesIndex } from './lib/buildMovesIndex.ts'
+import { buildMoveDetails } from './lib/buildMoveDetails.ts'
+import { buildNatures } from './lib/buildNatures.ts'
+import { buildAbilities } from './lib/buildAbilities.ts'
+import { buildPokedex } from './lib/buildPokedex.ts'
+import { buildSpeciesInfo } from './lib/buildSpeciesInfo.ts'
+import { buildEvolutionChains } from './lib/buildEvolutionChains.ts'
+import { buildPokemonDetails } from './lib/buildPokemonDetails.ts'
+import { buildGamePokedex } from './lib/buildGamePokedex.ts'
 
 async function main() {
-  const force = process.argv.includes("--force");
-  if (force) console.log("fetch-pokedex: --force set, ignoring disk cache");
+  const force = process.argv.includes('--force')
+  if (force) console.log('fetch-pokedex: --force set, ignoring disk cache')
 
-  const { generations, speciesToGeneration, versionToGroup, groupToGeneration } = await buildGenerations(force);
-  await buildTypeChart(force);
-  await buildMovesIndex(force);
-  await buildMoveDetails(force);
-  await buildNatures(force);
-  const abilitiesMap = await buildAbilities(force);
-  const pokedexResult = await buildPokedex(speciesToGeneration, force);
+  const { generations, speciesToGeneration, versionToGroup, groupToGeneration } =
+    await buildGenerations(force)
+  await buildTypeChart(force)
+  await buildMovesIndex(force)
+  await buildMoveDetails(force)
+  await buildNatures(force)
+  const abilitiesMap = await buildAbilities(force)
+  const pokedexResult = await buildPokedex(speciesToGeneration, force)
 
   if (pokedexResult.failedIds.length > 0) {
     console.error(
-      `fetch-pokedex: ${pokedexResult.failedIds.length} pokemon failed: ${pokedexResult.failedIds.join(", ")}`,
-    );
-    console.error("Re-run `pnpm fetch:pokedex` to retry only the failed ids.");
-    process.exitCode = 1;
-    return;
+      `fetch-pokedex: ${pokedexResult.failedIds.length} pokemon failed: ${pokedexResult.failedIds.join(', ')}`,
+    )
+    console.error('Re-run `pnpm fetch:pokedex` to retry only the failed ids.')
+    process.exitCode = 1
+    return
   }
 
-  const speciesResult = await buildSpeciesInfo(pokedexResult.totalCount, force);
-  const chainsResult = await buildEvolutionChains(speciesResult.evolutionChainIds, force);
+  const speciesResult = await buildSpeciesInfo(pokedexResult.totalCount, force)
+  const chainsResult = await buildEvolutionChains(speciesResult.evolutionChainIds, force)
   const detailsResult = await buildPokemonDetails(
     pokedexResult.totalCount,
     speciesResult.speciesInfoById,
@@ -44,25 +45,26 @@ async function main() {
     groupToGeneration,
     abilitiesMap,
     force,
-  );
+  )
 
-  const failedTotal = speciesResult.failedIds.length + chainsResult.failedIds.length + detailsResult.failedIds.length;
+  const failedTotal =
+    speciesResult.failedIds.length + chainsResult.failedIds.length + detailsResult.failedIds.length
   if (failedTotal > 0) {
     console.error(
       `fetch-pokedex: ${speciesResult.failedIds.length} species, ${chainsResult.failedIds.length} evolution chains ` +
         `and ${detailsResult.failedIds.length} pokemon details failed.`,
-    );
-    console.error("Re-run `pnpm fetch:pokedex` to retry only the failed ones.");
-    process.exitCode = 1;
-    return;
+    )
+    console.error('Re-run `pnpm fetch:pokedex` to retry only the failed ones.')
+    process.exitCode = 1
+    return
   }
 
-  await buildGamePokedex();
+  await buildGamePokedex()
 
-  console.log("fetch-pokedex: done.");
+  console.log('fetch-pokedex: done.')
 }
 
 main().catch((err) => {
-  console.error(err);
-  process.exitCode = 1;
-});
+  console.error(err)
+  process.exitCode = 1
+})

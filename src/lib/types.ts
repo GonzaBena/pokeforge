@@ -1,217 +1,232 @@
 export interface PokemonSprites {
-  default: string | null;
-  officialArtwork: string | null;
+  default: string | null
+  officialArtwork: string | null
 }
 
 export interface Pokemon {
-  id: number;
-  name: string;
-  types: string[];
-  sprites: PokemonSprites;
-  generation: string;
-  moves: string[];
+  id: number
+  name: string
+  types: string[]
+  sprites: PokemonSprites
+  generation: string
+  moves: string[]
 }
 
 export interface PokedexChunk {
-  chunkIndex: number;
-  idRange: [number, number];
-  pokemon: Pokemon[];
+  chunkIndex: number
+  idRange: [number, number]
+  pokemon: Pokemon[]
 }
 
 export interface PokedexManifestEntry {
-  index: number;
-  file: string;
-  idRange: [number, number];
-  count: number;
+  index: number
+  file: string
+  idRange: [number, number]
+  count: number
 }
 
 export interface PokedexManifest {
-  totalCount: number;
-  chunkSize: number;
-  chunkCount: number;
-  generatedAt: string;
-  chunks: PokedexManifestEntry[];
+  totalCount: number
+  chunkSize: number
+  chunkCount: number
+  generatedAt: string
+  chunks: PokedexManifestEntry[]
 }
 
 export interface VersionGroupInfo {
-  name: string;
-  displayName: string;
+  name: string
+  displayName: string
 }
 
 export interface GenerationInfo {
-  id: number;
-  name: string;
-  displayName: string;
-  region: string;
-  speciesIdRange: [number, number];
-  versionGroups: VersionGroupInfo[];
+  id: number
+  name: string
+  displayName: string
+  region: string
+  speciesIdRange: [number, number]
+  versionGroups: VersionGroupInfo[]
 }
 
-export type GameDexMode = "regional" | "obtainable";
+export type GameDexMode = 'regional' | 'obtainable'
 
 export interface GameVersionMeta {
-  id: string;
-  name: string;
-  nameEs: string;
-  color: string;
+  id: string
+  name: string
+  nameEs: string
+  color: string
 }
 
 export interface GameDexEntry {
-  regional: number[];
-  obtainable: number[];
-  versions?: GameVersionMeta[];
-  exclusives?: Record<string, number[]>;
+  regional: number[]
+  obtainable: number[]
+  versions?: GameVersionMeta[]
+  exclusives?: Record<string, number[]>
 }
 
-export type GameDexData = Record<string, GameDexEntry>;
+export type GameDexData = Record<string, GameDexEntry>
 
 export type TypeName =
-  | "normal" | "fighting" | "flying" | "poison" | "ground" | "rock"
-  | "bug" | "ghost" | "steel" | "fire" | "water" | "grass"
-  | "electric" | "psychic" | "ice" | "dragon" | "dark" | "fairy";
+  | 'normal'
+  | 'fighting'
+  | 'flying'
+  | 'poison'
+  | 'ground'
+  | 'rock'
+  | 'bug'
+  | 'ghost'
+  | 'steel'
+  | 'fire'
+  | 'water'
+  | 'grass'
+  | 'electric'
+  | 'psychic'
+  | 'ice'
+  | 'dragon'
+  | 'dark'
+  | 'fairy'
 
 export interface TypeChart {
-  types: TypeName[];
-  chart: Record<string, Record<string, number>>;
+  types: TypeName[]
+  chart: Record<string, Record<string, number>>
 }
 
 export interface MovesIndex {
-  moves: string[];
+  moves: string[]
 }
 
 export interface MoveData {
-  name: string;
-  type: string;
-  category: "physical" | "special" | "status";
-  power: number | null;
-  pp: number | null;
-  accuracy: number | null;
-  nameEs?: string;
-  nameEn?: string;
-  descriptionEs?: string;
-  descriptionEn?: string;
+  name: string
+  type: string
+  category: 'physical' | 'special' | 'status'
+  power: number | null
+  pp: number | null
+  accuracy: number | null
+  nameEs?: string
+  nameEn?: string
+  descriptionEs?: string
+  descriptionEn?: string
 }
 
 export interface PokemonAbilityInfo {
-  name: string;
-  nameEs?: string;
-  nameEn?: string;
-  isHidden: boolean;
-  slot: number;
-  probability: number;
-  descriptionEs?: string;
-  descriptionEn?: string;
+  name: string
+  nameEs?: string
+  nameEn?: string
+  isHidden: boolean
+  slot: number
+  probability: number
+  descriptionEs?: string
+  descriptionEn?: string
 }
 
-export type MovesDetailsMap = Record<string, MoveData>;
+export type MovesDetailsMap = Record<string, MoveData>
 
 export interface TeamSlotState {
-  pokemonId: number | null;
-  moves?: (string | null)[];
-  nature?: string | null;
-  ability?: string | null;
-  item?: string | null;
-  stats?: Partial<PokemonStats>;
-  usePokedexData?: boolean;
+  pokemonId: number | null
+  moves?: (string | null)[]
+  nature?: string | null
+  ability?: string | null
+  item?: string | null
+  stats?: Partial<PokemonStats>
+  usePokedexData?: boolean
 }
 
 export interface TeamState {
-  size: number;
-  slots: TeamSlotState[];
+  size: number
+  slots: TeamSlotState[]
 }
 
 export interface PokemonStats {
-  hp: number;
-  attack: number;
-  defense: number;
-  specialAttack: number;
-  specialDefense: number;
-  speed: number;
+  hp: number
+  attack: number
+  defense: number
+  specialAttack: number
+  specialDefense: number
+  speed: number
 }
 
 export interface MoveDetail {
-  name: string;
-  method: string;
-  level: number;
+  name: string
+  method: string
+  level: number
 }
 
 export interface AcquisitionRow {
-  generation: string;
-  game: string;
-  location: string;
-  method: string;
+  generation: string
+  game: string
+  location: string
+  method: string
 }
 
 export interface PokemonDetail {
-  id: number;
-  stats: PokemonStats;
-  abilities: PokemonAbilityInfo[];
-  moveDetails: MoveDetail[];
-  evolvesFrom: string | null;
-  evolutionChainId: number | null;
-  acquisitions: AcquisitionRow[];
+  id: number
+  stats: PokemonStats
+  abilities: PokemonAbilityInfo[]
+  moveDetails: MoveDetail[]
+  evolvesFrom: string | null
+  evolutionChainId: number | null
+  acquisitions: AcquisitionRow[]
+  isOfflineFallback?: boolean
 }
 
 export interface EvolutionNode {
-  speciesId: number;
-  speciesName: string;
-  evolvesFromSpecies: string | null;
-  trigger: string | null;
-  minLevel: number | null;
-  item: string | null;
-  itemDisplay: string | null;
+  speciesId: number
+  speciesName: string
+  evolvesFromSpecies: string | null
+  trigger: string | null
+  minLevel: number | null
+  item: string | null
+  itemDisplay: string | null
 }
 
 export interface EvolutionChain {
-  chainId: number;
-  nodes: EvolutionNode[];
+  chainId: number
+  nodes: EvolutionNode[]
 }
 
 export interface Nature {
-  name: string;
-  increasedStat: string | null;
-  decreasedStat: string | null;
+  name: string
+  increasedStat: string | null
+  decreasedStat: string | null
 }
 
 export interface NaturesIndex {
-  natures: Nature[];
+  natures: Nature[]
 }
 
 export type ItemCategory =
-  | "competitive"
-  | "stat-boost"
-  | "type-boost"
-  | "defensive"
-  | "berries"
-  | "species-specific"
-  | "utility";
+  | 'competitive'
+  | 'stat-boost'
+  | 'type-boost'
+  | 'defensive'
+  | 'berries'
+  | 'species-specific'
+  | 'utility'
 
 export interface ItemEffect {
-  statMultipliers?: Partial<Record<keyof PokemonStats, number>>;
+  statMultipliers?: Partial<Record<keyof PokemonStats, number>>
   statCondition?: {
-    speciesIds?: number[];
-    requiresUnevolved?: boolean;
-  };
-  grantsImmunities?: string[];
-  revokesImmunities?: boolean;
-  changesPokemonType?: string;
-  boostedType?: string;
-  boostMultiplier?: number;
-  resistBerryType?: string;
-  descriptionEs: string;
-  descriptionEn: string;
+    speciesIds?: number[]
+    requiresUnevolved?: boolean
+  }
+  grantsImmunities?: string[]
+  revokesImmunities?: boolean
+  changesPokemonType?: string
+  boostedType?: string
+  boostMultiplier?: number
+  resistBerryType?: string
+  descriptionEs: string
+  descriptionEn: string
 }
 
 export interface ItemData {
-  id: string;
-  name: string;
-  nameEs: string;
-  nameEn: string;
-  category: ItemCategory;
-  icon?: string;
-  sprite?: string | null;
-  effect?: ItemEffect;
-  shortDescEs: string;
-  shortDescEn: string;
+  id: string
+  name: string
+  nameEs: string
+  nameEn: string
+  category: ItemCategory
+  icon?: string
+  sprite?: string | null
+  effect?: ItemEffect
+  shortDescEs: string
+  shortDescEn: string
 }
-

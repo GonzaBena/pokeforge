@@ -68,7 +68,7 @@ import {
   Maximize,
   X,
   Zap,
-} from "lucide";
+} from 'lucide'
 
 export function refreshIcons(): void {
   createIcons({
@@ -142,5 +142,5 @@ export function refreshIcons(): void {
       X,
       Zap,
     },
-  });
+  })
 }

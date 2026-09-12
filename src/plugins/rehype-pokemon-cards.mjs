@@ -4,9 +4,9 @@
  * @returns {string}
  */
 function capitalize(str) {
-  if (!str) return '';
-  const trimmed = str.trim();
-  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  if (!str) return ''
+  const trimmed = str.trim()
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
 }
 
 /**
@@ -16,12 +16,12 @@ function capitalize(str) {
  * @returns {'es' | 'en'}
  */
 function detectLocale(file, attrs = {}) {
-  if (attrs.lang) return String(attrs.lang).toLowerCase() === 'en' ? 'en' : 'es';
-  if (attrs.locale) return String(attrs.locale).toLowerCase() === 'en' ? 'en' : 'es';
-  const filePath = file?.history?.[0] || file?.path || file?.filename || '';
-  if (/(?:^|[\\/])en(?:[\\/]|$)/i.test(filePath)) return 'en';
-  if (/(?:^|[\\/])es(?:[\\/]|$)/i.test(filePath)) return 'es';
-  return 'es';
+  if (attrs.lang) return String(attrs.lang).toLowerCase() === 'en' ? 'en' : 'es'
+  if (attrs.locale) return String(attrs.locale).toLowerCase() === 'en' ? 'en' : 'es'
+  const filePath = file?.history?.[0] || file?.path || file?.filename || ''
+  if (/(?:^|[\\/])en(?:[\\/]|$)/i.test(filePath)) return 'en'
+  if (/(?:^|[\\/])es(?:[\\/]|$)/i.test(filePath)) return 'es'
+  return 'es'
 }
 
 /**
@@ -30,13 +30,13 @@ function detectLocale(file, attrs = {}) {
  * @returns {Record<string, any>}
  */
 function parseCardAttrs(attrsStr) {
-  const attrs = {};
-  const attrRegex = /([a-zA-Z0-9_-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^>\s]+)))?/g;
-  let m;
+  const attrs = {}
+  const attrRegex = /([a-zA-Z0-9_-]+)(?:=(?:"([^"]*)"|'([^']*)'|([^>\s]+)))?/g
+  let m
   while ((m = attrRegex.exec(attrsStr)) !== null) {
-    attrs[m[1]] = m[2] ?? m[3] ?? m[4] ?? true;
+    attrs[m[1]] = m[2] ?? m[3] ?? m[4] ?? true
   }
-  return attrs;
+  return attrs
 }
 
 /**
@@ -46,34 +46,34 @@ function parseCardAttrs(attrsStr) {
  * @param {'es' | 'en'} [locale]
  */
 function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
-  const isEn = locale === 'en';
-  const name = attrs.name || attrs.nombre || 'Pokémon';
+  const isEn = locale === 'en'
+  const name = attrs.name || attrs.nombre || 'Pokémon'
 
   // Nivel
-  let level = attrs.level || attrs.nivel || attrs.lvl ? String(attrs.level || attrs.nivel || attrs.lvl).trim() : '';
+  let level =
+    attrs.level || attrs.nivel || attrs.lvl
+      ? String(attrs.level || attrs.nivel || attrs.lvl).trim()
+      : ''
   if (/^\d+(-\d+)?$/.test(level)) {
-    level = isEn ? `Lv. ${level}` : `Nv. ${level}`;
+    level = isEn ? `Lv. ${level}` : `Nv. ${level}`
   } else if (!level) {
-    level = isEn ? 'Lv. ?' : 'Nv. ?';
+    level = isEn ? 'Lv. ?' : 'Nv. ?'
   } else if (isEn && /^nv\.\s*/i.test(level)) {
-    level = level.replace(/^nv\.\s*/i, 'Lv. ');
+    level = level.replace(/^nv\.\s*/i, 'Lv. ')
   } else if (!isEn && /^lv\.\s*/i.test(level)) {
-    level = level.replace(/^lv\.\s*/i, 'Nv. ');
+    level = level.replace(/^lv\.\s*/i, 'Nv. ')
   }
 
   // Género (por defecto masculino U+2642)
   const rawGender = String(
-    attrs.genero ||
-    attrs.genre ||
-    attrs.gender ||
-    attrs.sex ||
-    attrs.sexo ||
-    ''
-  ).trim().toLowerCase();
+    attrs.genero || attrs.genre || attrs.gender || attrs.sex || attrs.sexo || '',
+  )
+    .trim()
+    .toLowerCase()
 
-  let genderSymbol = '\u2642'; // U+2642 (♂)
-  let genderClass = 'male';
-  let genderLabel = isEn ? 'Male' : 'Macho';
+  let genderSymbol = '\u2642' // U+2642 (♂)
+  let genderClass = 'male'
+  let genderLabel = isEn ? 'Male' : 'Macho'
 
   if (
     rawGender === 'none' ||
@@ -83,7 +83,7 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
     rawGender === '-' ||
     rawGender === 'false'
   ) {
-    genderSymbol = '';
+    genderSymbol = ''
   } else if (
     rawGender === 'f' ||
     rawGender === 'female' ||
@@ -91,38 +91,41 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
     rawGender === 'hembra' ||
     rawGender === 'h'
   ) {
-    genderSymbol = '\u2640'; // U+2640 (♀)
-    genderClass = 'female';
-    genderLabel = isEn ? 'Female' : 'Hembra';
+    genderSymbol = '\u2640' // U+2640 (♀)
+    genderClass = 'female'
+    genderLabel = isEn ? 'Female' : 'Hembra'
   }
 
   const genderHtml = genderSymbol
     ? `<span class="starter-card__gender starter-card__gender--${genderClass}" title="${genderLabel}" aria-label="${genderLabel}">${genderSymbol}</span>`
-    : '';
+    : ''
 
   // Tipos
   const types = (attrs.types || attrs.type || 'normal')
     .split(',')
     .map((t) => t.trim())
-    .filter(Boolean);
-  const primaryType = (types[0] || 'normal').toLowerCase();
+    .filter(Boolean)
+  const primaryType = (types[0] || 'normal').toLowerCase()
   const typeBadges = types
     .map((t) => {
-      const cap = capitalize(t);
-      return `<span class="type-badge" data-type="${t.toLowerCase()}">${cap}</span>`;
+      const cap = capitalize(t)
+      return `<span class="type-badge" data-type="${t.toLowerCase()}">${cap}</span>`
     })
-    .join('\n    ');
+    .join('\n    ')
 
   // Variante compacta: para listar pokemon salvajes de una zona (sprite de fondo, sin detalles)
-  const isCompact = attrs.compact === true || attrs.compact === 'true';
+  const isCompact = attrs.compact === true || attrs.compact === 'true'
   if (isCompact) {
     const wildTypeBadges = types
-      .map((t) => `<span class="type-badge type-badge--sm" data-type="${t.toLowerCase()}">${capitalize(t)}</span>`)
-      .join('\n      ');
+      .map(
+        (t) =>
+          `<span class="type-badge type-badge--sm" data-type="${t.toLowerCase()}">${capitalize(t)}</span>`,
+      )
+      .join('\n      ')
 
     const beforeImg = `
 <div class="wild-card" data-type="${primaryType}" title="${name} — ${level}">
-  <div class="wild-card__sprite-wrap">`;
+  <div class="wild-card__sprite-wrap">`
 
     const afterImg = `  </div>
   <div class="wild-card__footer">
@@ -134,31 +137,31 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
     </div>
     <span class="wild-card__level">${level}</span>
   </div>
-</div>`;
+</div>`
 
-    return { beforeImg, afterImg, sprite: attrs.sprite || attrs.image || fallbackSprite, name };
+    return { beforeImg, afterImg, sprite: attrs.sprite || attrs.image || fallbackSprite, name }
   }
 
   // Habilidad y Objeto
-  const ability = attrs.ability || attrs.habilidad;
+  const ability = attrs.ability || attrs.habilidad
   const abilityLabel =
     attrs['ability-label'] ||
     attrs.abilityLabel ||
     attrs['habilidad-label'] ||
     attrs.habilidadLabel ||
-    (isEn ? 'Ability' : 'Habilidad');
+    (isEn ? 'Ability' : 'Habilidad')
 
-  const item = attrs.item || attrs.objeto || attrs['held-item'] || attrs.heldItem;
+  const item = attrs.item || attrs.objeto || attrs['held-item'] || attrs.heldItem
   const itemLabel =
     attrs['item-label'] ||
     attrs.itemLabel ||
     attrs['objeto-label'] ||
     attrs.objetoLabel ||
-    (isEn ? 'Item' : 'Objeto');
+    (isEn ? 'Item' : 'Objeto')
 
-  let traitsHtml = '';
+  let traitsHtml = ''
   if (ability || item) {
-    let traitItems = '';
+    let traitItems = ''
     if (ability) {
       traitItems += `
     <div class="starter-card__trait" title="${abilityLabel}: ${ability}">
@@ -167,7 +170,7 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
         <span>${abilityLabel}</span>
       </span>
       <span class="starter-card__trait-val">${ability}</span>
-    </div>`;
+    </div>`
     }
     if (item) {
       traitItems += `
@@ -177,29 +180,30 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
         <span>${itemLabel}</span>
       </span>
       <span class="starter-card__trait-val">${item}</span>
-    </div>`;
+    </div>`
     }
 
     traitsHtml = `
   <div class="starter-card__traits">${traitItems}
-  </div>`;
+  </div>`
   }
 
   // Movimientos
-  let movesHtml = '';
-  const movesAttr = attrs.moves || attrs.ataques || attrs.movimientos;
+  let movesHtml = ''
+  const movesAttr = attrs.moves || attrs.ataques || attrs.movimientos
   if (movesAttr) {
     let moveList = String(movesAttr)
       .split(',')
-      .map((m) => m.trim());
+      .map((m) => m.trim())
 
     // Padding opcional para rellenar hasta N ataques (por defecto 4 si se pasa pad-moves como booleano)
     const padCount =
       attrs['pad-moves'] === true || attrs.padMoves === true
         ? 4
-        : Number(attrs['pad-moves'] || attrs.padMoves || attrs['fill-moves'] || attrs.fillMoves) || 0;
+        : Number(attrs['pad-moves'] || attrs.padMoves || attrs['fill-moves'] || attrs.fillMoves) ||
+          0
     while (padCount > 0 && moveList.length < padCount) {
-      moveList.push('-');
+      moveList.push('-')
     }
 
     if (moveList.length > 0 && moveList.some((m) => m !== '')) {
@@ -208,7 +212,7 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
         attrs.movesLabel ||
         attrs['ataques-label'] ||
         attrs.ataquesLabel ||
-        (isEn ? 'Moves' : 'Ataques');
+        (isEn ? 'Moves' : 'Ataques')
 
       const items = moveList
         .map((m) => {
@@ -221,50 +225,50 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
             m.toLowerCase() === 'vacio' ||
             m.toLowerCase() === 'vacío' ||
             m.toLowerCase() === 'empty' ||
-            m.toLowerCase() === 'none';
+            m.toLowerCase() === 'none'
 
           if (isEmpty) {
             return `
     <div class="starter-card__move-item starter-card__move-item--empty">
       <span class="starter-card__move-dot starter-card__move-dot--empty"></span>
       <span class="starter-card__move-name">—</span>
-    </div>`;
+    </div>`
           }
 
           return `
     <div class="starter-card__move-item" title="${m}">
       <span class="starter-card__move-dot"></span>
       <span class="starter-card__move-name">${m}</span>
-    </div>`;
+    </div>`
         })
-        .join('');
+        .join('')
 
       movesHtml = `
   <div class="starter-card__moves">
     <span class="starter-card__moves-label">${movesLabel}</span>${items}
-  </div>`;
+  </div>`
     }
   }
 
   // Clases y atributos
-  const cardClasses = ['starter-card'];
+  const cardClasses = ['starter-card']
   const forStarter =
-    attrs.for || attrs.forStarter || attrs['for-starter'] || attrs['data-for-starter'];
+    attrs.for || attrs.forStarter || attrs['for-starter'] || attrs['data-for-starter']
   const isActive =
     attrs.active === true ||
     attrs.active === 'true' ||
-    (forStarter && String(forStarter).toLowerCase() === 'bulbasaur');
+    (forStarter && String(forStarter).toLowerCase() === 'bulbasaur')
   if (isActive) {
-    cardClasses.push('is-active');
+    cardClasses.push('is-active')
   }
 
-  const forAttr = forStarter ? ` data-for-starter="${String(forStarter).toLowerCase()}"` : '';
+  const forAttr = forStarter ? ` data-for-starter="${String(forStarter).toLowerCase()}"` : ''
 
   const beforeImg = `
 <div class="${cardClasses.join(' ')}" data-type="${primaryType}"${forAttr}>
   <div class="starter-card__side">
     <div class="starter-card__sprite-wrap">
-      <div class="starter-card__sprite-bg"></div>`;
+      <div class="starter-card__sprite-bg"></div>`
 
   const afterImg = `    </div>
     <div class="starter-card__types">
@@ -277,9 +281,9 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
       <span class="starter-card__level">${level}</span>
     </div>${traitsHtml}${movesHtml}
   </div>
-</div>`;
+</div>`
 
-  return { beforeImg, afterImg, sprite: attrs.sprite || attrs.image || fallbackSprite, name };
+  return { beforeImg, afterImg, sprite: attrs.sprite || attrs.image || fallbackSprite, name }
 }
 
 /**
@@ -289,16 +293,18 @@ function buildCardParts(attrs, fallbackSprite = '', locale = 'es') {
  */
 function extractExtension(rawUrl) {
   try {
-    const clean = String(rawUrl).split('?')[0].split('#')[0];
-    const parts = clean.split('.');
+    const clean = String(rawUrl).split('?')[0].split('#')[0]
+    const parts = clean.split('.')
     if (parts.length > 1) {
-      const ext = parts.pop()?.trim().toUpperCase() || '';
+      const ext = parts.pop()?.trim().toUpperCase() || ''
       if (ext.length >= 1 && ext.length <= 5 && !ext.includes('/')) {
-        return ext;
+        return ext
       }
     }
-  } catch {}
-  return 'FILE';
+  } catch {
+    // ignore malformed URLs, fall back to default extension
+  }
+  return 'FILE'
 }
 
 /**
@@ -309,7 +315,7 @@ function extractExtension(rawUrl) {
 function getDownloadFileInfo(ext) {
   switch (ext) {
     case 'PDF':
-      return { icon: 'file-text', badgeClass: 'badge-pdf' };
+      return { icon: 'file-text', badgeClass: 'badge-pdf' }
     case 'PNG':
     case 'JPG':
     case 'JPEG':
@@ -317,27 +323,27 @@ function getDownloadFileInfo(ext) {
     case 'SVG':
     case 'GIF':
     case 'AVIF':
-      return { icon: 'image', badgeClass: 'badge-image' };
+      return { icon: 'image', badgeClass: 'badge-image' }
     case 'ZIP':
     case 'RAR':
     case '7Z':
     case 'TAR':
     case 'GZ':
-      return { icon: 'archive', badgeClass: 'badge-archive' };
+      return { icon: 'archive', badgeClass: 'badge-archive' }
     case 'SAV':
     case 'DAT':
     case 'BIN':
     case 'PKM':
     case 'PK9':
-      return { icon: 'hard-drive', badgeClass: 'badge-save' };
+      return { icon: 'hard-drive', badgeClass: 'badge-save' }
     case 'JSON':
     case 'CSV':
     case 'XLSX':
     case 'XLS':
     case 'TXT':
-      return { icon: 'file-spreadsheet', badgeClass: 'badge-data' };
+      return { icon: 'file-spreadsheet', badgeClass: 'badge-data' }
     default:
-      return { icon: 'file-down', badgeClass: 'badge-default' };
+      return { icon: 'file-down', badgeClass: 'badge-default' }
   }
 }
 
@@ -348,15 +354,20 @@ function getDownloadFileInfo(ext) {
  * @returns {string}
  */
 function renderDownloadCardHtml(attrs, locale = 'es') {
-  const isEn = locale === 'en';
-  const fileUrl = attrs.path || attrs.url || attrs.src || attrs.href || '#';
-  const fileTitle = attrs.text || attrs.title || attrs.name || fileUrl.split('/').pop() || (isEn ? 'Download' : 'Descarga');
-  const description = attrs.description || attrs.desc || '';
-  const size = attrs.size || attrs.tamano || '';
-  const detectedExt = (attrs.format || extractExtension(fileUrl)).toUpperCase();
-  const { icon, badgeClass } = getDownloadFileInfo(detectedExt);
-  const actionLabel = attrs.btnText || attrs.buttonText || (isEn ? 'Download' : 'Descargar');
-  const fileNameAttr = attrs.fileName ? ` download="${attrs.fileName}"` : ' download';
+  const isEn = locale === 'en'
+  const fileUrl = attrs.path || attrs.url || attrs.src || attrs.href || '#'
+  const fileTitle =
+    attrs.text ||
+    attrs.title ||
+    attrs.name ||
+    fileUrl.split('/').pop() ||
+    (isEn ? 'Download' : 'Descarga')
+  const description = attrs.description || attrs.desc || ''
+  const size = attrs.size || attrs.tamano || ''
+  const detectedExt = (attrs.format || extractExtension(fileUrl)).toUpperCase()
+  const { icon, badgeClass } = getDownloadFileInfo(detectedExt)
+  const actionLabel = attrs.btnText || attrs.buttonText || (isEn ? 'Download' : 'Descargar')
+  const fileNameAttr = attrs.fileName ? ` download="${attrs.fileName}"` : ' download'
 
   return `<div class="download-card">
   <div class="download-card__icon ${badgeClass}" aria-hidden="true">
@@ -376,7 +387,7 @@ function renderDownloadCardHtml(attrs, locale = 'es') {
       <span>${actionLabel}</span>
     </a>
   </div>
-</div>`;
+</div>`
 }
 
 /**
@@ -386,12 +397,12 @@ function renderDownloadCardHtml(attrs, locale = 'es') {
  * @returns {string}
  */
 function replaceContainers(str, locale = 'es') {
-  const isEn = locale === 'en';
-  let output = str;
+  const isEn = locale === 'en'
+  let output = str
 
   // 1. Selector de Rival
   output = output.replace(/<rival-selector\b[^>]*>(?:<\/rival-selector>)?/gi, () => {
-    const label = isEn ? 'Which was your starter?' : '¿Cuál fue tu inicial?';
+    const label = isEn ? 'Which was your starter?' : '¿Cuál fue tu inicial?'
     return `<div class="rival-starter-selector">
   <span class="rival-starter-selector__label">${label}</span>
   <div class="rival-starter-selector__options">
@@ -408,30 +419,30 @@ function replaceContainers(str, locale = 'es') {
       <span>Squirtle</span>
     </button>
   </div>
-</div>`;
-  });
+</div>`
+  })
 
   // 2. Ranuras de rival
-  output = output.replace(/<rival-slot\b[^>]*>/gi, '<div class="rival-slot-container">');
-  output = output.replace(/<\/rival-slot>/gi, '</div>');
+  output = output.replace(/<rival-slot\b[^>]*>/gi, '<div class="rival-slot-container">')
+  output = output.replace(/<\/rival-slot>/gi, '</div>')
 
   // 3. Showcase
   output = output.replace(
     /<(?:pokemon-showcase|showcase)\b[^>]*>/gi,
-    '<div class="starter-showcase">\n<div class="starter-showcase__grid">'
-  );
-  output = output.replace(/<\/(?:pokemon-showcase|showcase)>/gi, '</div>\n</div>');
+    '<div class="starter-showcase">\n<div class="starter-showcase__grid">',
+  )
+  output = output.replace(/<\/(?:pokemon-showcase|showcase)>/gi, '</div>\n</div>')
 
   // 4. Download Card
   output = output.replace(
     /<(?:download-card|download)\b([^>]*)>(?:<\/(?:download-card|download)>)?|<(?:download-card|download)\b([^/>]*)\/>/gi,
     (_match, attrs1, attrs2) => {
-      const attrs = parseCardAttrs(attrs1 || attrs2 || '');
-      return renderDownloadCardHtml(attrs, locale);
-    }
-  );
+      const attrs = parseCardAttrs(attrs1 || attrs2 || '')
+      return renderDownloadCardHtml(attrs, locale)
+    },
+  )
 
-  return output;
+  return output
 }
 
 /**
@@ -441,54 +452,54 @@ function replaceContainers(str, locale = 'es') {
  * @returns {any[]}
  */
 function transformCardsToNodes(text, locale = 'es') {
-  const prepared = replaceContainers(text, locale);
+  const prepared = replaceContainers(text, locale)
   const cardRegex =
-    /<(?:pokemon-card|card)\b([^>]*)>([\s\S]*?)<\/(?:pokemon-card|card)>|<(?:pokemon-card|card)\b([^/>]*)\/>/gi;
+    /<(?:pokemon-card|card)\b([^>]*)>([\s\S]*?)<\/(?:pokemon-card|card)>|<(?:pokemon-card|card)\b([^/>]*)\/>/gi
 
-  const nodes = [];
-  let lastIndex = 0;
-  let match;
+  const nodes = []
+  let lastIndex = 0
+  let match
 
   while ((match = cardRegex.exec(prepared)) !== null) {
     if (match.index > lastIndex) {
       nodes.push({
         type: 'html',
-        value: prepared.slice(lastIndex, match.index)
-      });
+        value: prepared.slice(lastIndex, match.index),
+      })
     }
 
-    const attrsStr = match[1] || match[3] || '';
-    const content = match[2] || '';
-    const attrs = parseCardAttrs(attrsStr);
-    const cardLocale = attrs.lang || attrs.locale || locale;
+    const attrsStr = match[1] || match[3] || ''
+    const content = match[2] || ''
+    const attrs = parseCardAttrs(attrsStr)
+    const cardLocale = attrs.lang || attrs.locale || locale
 
-    let sprite = '';
+    let sprite = ''
     if (content) {
-      const imgMatch = /!\[([^\]]*)\]\(([^)]+)\)/.exec(content);
+      const imgMatch = /!\[([^\]]*)\]\(([^)]+)\)/.exec(content)
       if (imgMatch) {
-        sprite = imgMatch[2].trim();
+        sprite = imgMatch[2].trim()
       }
     }
 
-    const { beforeImg, afterImg, name } = buildCardParts(attrs, '', cardLocale);
+    const { beforeImg, afterImg, name } = buildCardParts(attrs, '', cardLocale)
 
-    nodes.push({ type: 'html', value: beforeImg });
+    nodes.push({ type: 'html', value: beforeImg })
     if (sprite) {
-      nodes.push({ type: 'image', url: sprite, alt: name });
+      nodes.push({ type: 'image', url: sprite, alt: name })
     }
-    nodes.push({ type: 'html', value: afterImg });
+    nodes.push({ type: 'html', value: afterImg })
 
-    lastIndex = match.index + match[0].length;
+    lastIndex = match.index + match[0].length
   }
 
   if (lastIndex < prepared.length) {
     nodes.push({
       type: 'html',
-      value: prepared.slice(lastIndex)
-    });
+      value: prepared.slice(lastIndex),
+    })
   }
 
-  return nodes;
+  return nodes
 }
 
 /**
@@ -498,65 +509,69 @@ function transformCardsToNodes(text, locale = 'es') {
  * @returns {any[]}
  */
 function processParagraph(paraNode, locale = 'es') {
-  const result = [];
-  let currentCard = null;
+  const result = []
+  let currentCard = null
 
   for (const child of paraNode.children) {
     if (child.type === 'html') {
-      let val = child.value;
+      let val = child.value
 
       // Check for opening card tag
-      const openMatch = /<(?:pokemon-card|card)\b([^>]*)>/i.exec(val);
+      const openMatch = /<(?:pokemon-card|card)\b([^>]*)>/i.exec(val)
       if (openMatch) {
-        const before = val.slice(0, openMatch.index);
+        const before = val.slice(0, openMatch.index)
         if (before.trim()) {
-          result.push({ type: 'html', value: replaceContainers(before, locale) });
+          result.push({ type: 'html', value: replaceContainers(before, locale) })
         }
-        const attrs = parseCardAttrs(openMatch[1]);
-        currentCard = { attrs, imageNode: null };
-        val = val.slice(openMatch.index + openMatch[0].length);
+        const attrs = parseCardAttrs(openMatch[1])
+        currentCard = { attrs, imageNode: null }
+        val = val.slice(openMatch.index + openMatch[0].length)
       }
 
       // Check for closing card tag
-      const closeMatch = /<\/(?:pokemon-card|card)>/i.exec(val);
+      const closeMatch = /<\/(?:pokemon-card|card)>/i.exec(val)
       if (closeMatch && currentCard) {
-        const cardLocale = currentCard.attrs.lang || currentCard.attrs.locale || locale;
-        const { beforeImg, afterImg, sprite, name } = buildCardParts(currentCard.attrs, '', cardLocale);
-        result.push({ type: 'html', value: beforeImg });
+        const cardLocale = currentCard.attrs.lang || currentCard.attrs.locale || locale
+        const { beforeImg, afterImg, sprite, name } = buildCardParts(
+          currentCard.attrs,
+          '',
+          cardLocale,
+        )
+        result.push({ type: 'html', value: beforeImg })
         if (currentCard.imageNode) {
-          result.push(currentCard.imageNode);
+          result.push(currentCard.imageNode)
         } else if (sprite) {
-          result.push({ type: 'image', url: sprite, alt: name });
+          result.push({ type: 'image', url: sprite, alt: name })
         }
-        result.push({ type: 'html', value: afterImg });
-        currentCard = null;
+        result.push({ type: 'html', value: afterImg })
+        currentCard = null
 
-        const after = val.slice(closeMatch.index + closeMatch[0].length);
+        const after = val.slice(closeMatch.index + closeMatch[0].length)
         if (after.trim()) {
-          result.push({ type: 'html', value: replaceContainers(after, locale) });
+          result.push({ type: 'html', value: replaceContainers(after, locale) })
         }
-        continue;
+        continue
       }
 
       if (val.trim()) {
-        result.push({ type: 'html', value: replaceContainers(val, locale) });
+        result.push({ type: 'html', value: replaceContainers(val, locale) })
       }
     } else if (child.type === 'image') {
       if (currentCard) {
-        currentCard.imageNode = child;
+        currentCard.imageNode = child
       } else {
-        result.push(child);
+        result.push(child)
       }
     } else if (child.type === 'text') {
       if (!currentCard && child.value.trim()) {
-        result.push(child);
+        result.push(child)
       }
     } else {
-      result.push(child);
+      result.push(child)
     }
   }
 
-  return result;
+  return result
 }
 
 /**
@@ -564,23 +579,23 @@ function processParagraph(paraNode, locale = 'es') {
  */
 export function remarkPokemonCards() {
   return (tree, file) => {
-    const locale = detectLocale(file);
+    const locale = detectLocale(file)
     function processChildren(parent) {
-      if (!parent || !Array.isArray(parent.children)) return;
+      if (!parent || !Array.isArray(parent.children)) return
 
-      const newChildren = [];
+      const newChildren = []
       for (const child of parent.children) {
         if ((child.type === 'html' || child.type === 'code') && typeof child.value === 'string') {
-          const val = child.value;
+          const val = child.value
           if (
             val.includes('pokemon-') ||
             val.includes('rival-') ||
             val.includes('card') ||
             val.includes('showcase')
           ) {
-            const transformed = transformCardsToNodes(val, locale);
-            newChildren.push(...transformed);
-            continue;
+            const transformed = transformCardsToNodes(val, locale)
+            newChildren.push(...transformed)
+            continue
           }
         }
 
@@ -592,25 +607,25 @@ export function remarkPokemonCards() {
               (c.value.includes('pokemon-') ||
                 c.value.includes('rival-') ||
                 c.value.includes('card') ||
-                c.value.includes('showcase'))
-          );
+                c.value.includes('showcase')),
+          )
           if (hasPokemon) {
-            const transformed = processParagraph(child, locale);
-            newChildren.push(...transformed);
-            continue;
+            const transformed = processParagraph(child, locale)
+            newChildren.push(...transformed)
+            continue
           }
         }
 
         if (child.children) {
-          processChildren(child);
+          processChildren(child)
         }
-        newChildren.push(child);
+        newChildren.push(child)
       }
-      parent.children = newChildren;
+      parent.children = newChildren
     }
 
-    processChildren(tree);
-  };
+    processChildren(tree)
+  }
 }
 
 /**
@@ -618,31 +633,35 @@ export function remarkPokemonCards() {
  */
 export function rehypePokemonCards() {
   return (tree, file) => {
-    const locale = detectLocale(file);
+    const locale = detectLocale(file)
     function walkRehype(node) {
-      if (!node || typeof node !== 'object') return;
-      if (node.type === 'element' && node.tagName === 'input' && node.properties?.type === 'checkbox') {
+      if (!node || typeof node !== 'object') return
+      if (
+        node.type === 'element' &&
+        node.tagName === 'input' &&
+        node.properties?.type === 'checkbox'
+      ) {
         if ('disabled' in node.properties) {
-          delete node.properties.disabled;
+          delete node.properties.disabled
         }
       }
       if (node.type === 'raw' && typeof node.value === 'string') {
-        const val = node.value;
+        const val = node.value
         if (
           val.includes('pokemon-') ||
           val.includes('rival-') ||
           val.includes('card') ||
           val.includes('showcase')
         ) {
-          node.value = replaceContainers(val, locale);
+          node.value = replaceContainers(val, locale)
         }
       }
       if (Array.isArray(node.children)) {
         for (const child of node.children) {
-          walkRehype(child);
+          walkRehype(child)
         }
       }
     }
-    walkRehype(tree);
-  };
+    walkRehype(tree)
+  }
 }

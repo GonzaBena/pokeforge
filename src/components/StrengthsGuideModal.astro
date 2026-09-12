@@ -1,13 +1,18 @@
 ---
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-import "../styles/components/modal.css";
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import '../styles/components/modal.css'
 
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 ---
 
 <div class="modal-overlay" data-strengths-guide-overlay hidden>
-  <div class="modal-panel guide-modal-panel" role="dialog" aria-modal="true" aria-labelledby="strengths-guide-modal-title">
+  <div
+    class="modal-panel guide-modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="strengths-guide-modal-title"
+  >
     <div class="modal-panel__header">
       <div class="picker-panel__header-info">
         <h2 id="strengths-guide-modal-title">
@@ -16,21 +21,41 @@ const t = getTranslations(currentLocale);
         </h2>
         <span class="type-matrix-modal__subtitle">{t.strengthsWeaknesses.guideModalSubtitle}</span>
       </div>
-      <button class="modal-panel__close" type="button" data-strengths-guide-close aria-label={t.modal.close}>
+      <button
+        class="modal-panel__close"
+        type="button"
+        data-strengths-guide-close
+        aria-label={t.modal.close}
+      >
         <i data-lucide="x"></i>
       </button>
     </div>
 
     <div class="guide-modal__nav" data-guide-nav>
-      <button class="guide-modal__tab-btn is-active" type="button" data-guide-tab="defense" aria-selected="true">
+      <button
+        class="guide-modal__tab-btn is-active"
+        type="button"
+        data-guide-tab="defense"
+        aria-selected="true"
+      >
         <i data-lucide="shield"></i>
         <span>{t.strengthsWeaknesses.guideTabDefense}</span>
       </button>
-      <button class="guide-modal__tab-btn" type="button" data-guide-tab="offense" aria-selected="false">
+      <button
+        class="guide-modal__tab-btn"
+        type="button"
+        data-guide-tab="offense"
+        aria-selected="false"
+      >
         <i data-lucide="swords"></i>
         <span>{t.strengthsWeaknesses.guideTabOffense}</span>
       </button>
-      <button class="guide-modal__tab-btn" type="button" data-guide-tab="modes" aria-selected="false">
+      <button
+        class="guide-modal__tab-btn"
+        type="button"
+        data-guide-tab="modes"
+        aria-selected="false"
+      >
         <i data-lucide="layout-grid"></i>
         <span>{t.strengthsWeaknesses.guideTabModes}</span>
       </button>

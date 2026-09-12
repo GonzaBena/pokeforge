@@ -1,7 +1,7 @@
 ---
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 ---
 
 <aside class="side-panel" data-strengths-panel>
@@ -113,8 +113,12 @@ const t = getTranslations(currentLocale);
         <div class="offense-header">
           <div class="coverage-score-card">
             <div class="coverage-score-card__top">
-              <span class="coverage-score-card__label" data-offense-score-label>{t.strengthsWeaknesses.coverageScore}</span>
-              <span class="coverage-score-card__pct" data-offense-pct>0%</span>
+              <span class="coverage-score-card__label" data-offense-score-label>
+                {t.strengthsWeaknesses.coverageScore}
+              </span>
+              <span class="coverage-score-card__pct" data-offense-pct>
+                0%
+              </span>
             </div>
             <div class="coverage-meter">
               <div class="coverage-meter__fill" data-offense-meter style="width: 0%;"></div>
@@ -122,11 +126,21 @@ const t = getTranslations(currentLocale);
           </div>
 
           <div class="offense-mode-toggle" data-offense-mode-toggle>
-            <button class="offense-mode-btn" type="button" data-offense-mode="moves" aria-pressed="true">
+            <button
+              class="offense-mode-btn"
+              type="button"
+              data-offense-mode="moves"
+              aria-pressed="true"
+            >
               <i data-lucide="swords"></i>
               <span>{t.strengthsWeaknesses.offenseModeMoves}</span>
             </button>
-            <button class="offense-mode-btn" type="button" data-offense-mode="stab" aria-pressed="false">
+            <button
+              class="offense-mode-btn"
+              type="button"
+              data-offense-mode="stab"
+              aria-pressed="false"
+            >
               <i data-lucide="sparkles"></i>
               <span>{t.strengthsWeaknesses.offenseModeStab}</span>
             </button>

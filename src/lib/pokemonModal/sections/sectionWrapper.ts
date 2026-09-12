@@ -1,23 +1,23 @@
-import { getCurrentLocale, getTranslations } from "../../i18n/translations";
-import { isSectionCollapsed } from "../../storage";
-import { getCurrentEffectiveOverrides } from "../overrides";
-import type { RenderContext } from "../types";
-import { capitalize, getDefaultAbility } from "../utils";
-import { renderAbilitiesContent } from "./abilities";
-import { renderEffectivenessContent } from "./effectiveness";
-import { renderEvolutionsContent } from "./evolutions";
+import { getCurrentLocale, getTranslations } from '../../i18n/translations'
+import { isSectionCollapsed } from '../../storage'
+import { getCurrentEffectiveOverrides } from '../overrides'
+import type { RenderContext } from '../types'
+import { capitalize, getDefaultAbility } from '../utils'
+import { renderAbilitiesContent } from './abilities'
+import { renderEffectivenessContent } from './effectiveness'
+import { renderEvolutionsContent } from './evolutions'
 
 export const SECTION_CONTENT: Record<string, (ctx: RenderContext) => string> = {
   effectiveness: (ctx) => renderEffectivenessContent(ctx.pokemon, ctx.typeChart),
   abilities: (ctx) => {
-    const overrides = getCurrentEffectiveOverrides();
-    const activeAbility = overrides.ability ?? getDefaultAbility(ctx.detail);
-    return renderAbilitiesContent(ctx.detail, activeAbility);
+    const overrides = getCurrentEffectiveOverrides()
+    const activeAbility = overrides.ability ?? getDefaultAbility(ctx.detail)
+    return renderAbilitiesContent(ctx.detail, activeAbility)
   },
   location: () => `<div data-table-mount="location"></div>`,
   moves: () => {
-    const locale = getCurrentLocale();
-    const t = getTranslations(locale);
+    const locale = getCurrentLocale()
+    const t = getTranslations(locale)
     return `
       <div class="move-table-toolbar" data-move-table-toolbar>
         <div class="search-with-help">
@@ -49,25 +49,30 @@ export const SECTION_CONTENT: Record<string, (ctx: RenderContext) => string> = {
         <span class="move-table-count" data-move-table-count hidden></span>
       </div>
       <div data-table-mount="moves"></div>
-    `;
+    `
   },
   evolutions: (ctx) => renderEvolutionsContent(ctx.chain, ctx.pokemon.id, ctx.allById),
-};
+}
 
-export function renderSection(id: string, index: number, total: number, ctx: RenderContext): string {
-  const locale = getCurrentLocale();
-  const t = getTranslations(locale);
+export function renderSection(
+  id: string,
+  index: number,
+  total: number,
+  ctx: RenderContext,
+): string {
+  const locale = getCurrentLocale()
+  const t = getTranslations(locale)
   const titles: Record<string, string> = {
     effectiveness: t.modal.effectiveness,
     abilities: t.modal.abilities,
     location: t.modal.acquisition,
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
-  };
-  const isCollapsed = isSectionCollapsed(id);
+  }
+  const isCollapsed = isSectionCollapsed(id)
 
   return `
-    <section class="detail-section${isCollapsed ? " is-collapsed" : ""}" data-section-id="${id}">
+    <section class="detail-section${isCollapsed ? ' is-collapsed' : ''}" data-section-id="${id}">
       <div
         class="detail-section__header"
         data-section-toggle="${id}"
@@ -83,21 +88,21 @@ export function renderSection(id: string, index: number, total: number, ctx: Ren
           <h4 class="detail-section__title">${titles[id] ?? capitalize(id)}</h4>
         </div>
         <div class="detail-section__reorder">
-          <button type="button" data-move-top data-section-id="${id}" ${index === 0 ? "disabled" : ""} aria-label="${locale === "es" ? "Mover arriba del todo" : "Move to top"}">
+          <button type="button" data-move-top data-section-id="${id}" ${index === 0 ? 'disabled' : ''} aria-label="${locale === 'es' ? 'Mover arriba del todo' : 'Move to top'}">
             <i data-lucide="chevrons-up"></i>
           </button>
-          <button type="button" data-move-up data-section-id="${id}" ${index === 0 ? "disabled" : ""} aria-label="${locale === "es" ? "Subir una posición" : "Move section up"}">
+          <button type="button" data-move-up data-section-id="${id}" ${index === 0 ? 'disabled' : ''} aria-label="${locale === 'es' ? 'Subir una posición' : 'Move section up'}">
             <i data-lucide="chevron-up"></i>
           </button>
-          <button type="button" data-move-down data-section-id="${id}" ${index === total - 1 ? "disabled" : ""} aria-label="${locale === "es" ? "Bajar una posición" : "Move section down"}">
+          <button type="button" data-move-down data-section-id="${id}" ${index === total - 1 ? 'disabled' : ''} aria-label="${locale === 'es' ? 'Bajar una posición' : 'Move section down'}">
             <i data-lucide="chevron-down"></i>
           </button>
-          <button type="button" data-move-bottom data-section-id="${id}" ${index === total - 1 ? "disabled" : ""} aria-label="${locale === "es" ? "Mover abajo del todo" : "Move to bottom"}">
+          <button type="button" data-move-bottom data-section-id="${id}" ${index === total - 1 ? 'disabled' : ''} aria-label="${locale === 'es' ? 'Mover abajo del todo' : 'Move to bottom'}">
             <i data-lucide="chevrons-down"></i>
           </button>
         </div>
       </div>
-      <div class="detail-section__content" ${isCollapsed ? "hidden" : ""}>${SECTION_CONTENT[id] ? SECTION_CONTENT[id](ctx) : ""}</div>
+      <div class="detail-section__content" ${isCollapsed ? 'hidden' : ''}>${SECTION_CONTENT[id] ? SECTION_CONTENT[id](ctx) : ''}</div>
     </section>
-  `;
+  `
 }

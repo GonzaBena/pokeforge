@@ -1,103 +1,138 @@
-import type { APIRoute } from "astro";
-import { getTursoClient, isTursoConfigured } from "../../lib/turso";
+import type { APIRoute } from 'astro'
+import { getTursoClient, isTursoConfigured } from '../../lib/turso'
 
-export const prerender = false;
+export const prerender = false
 
-const CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+const CODE_CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'
 
 function generateCode(): string {
-  let code = "PK-";
+  let code = 'PK-'
   for (let i = 0; i < 4; i++) {
-    code += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length));
+    code += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length))
   }
-  return code;
+  return code
 }
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-store, max-age=0",
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, max-age=0',
     },
-  });
+  })
 }
 
 // GET: Consultar el estado de una bóveda por código
 export const GET: APIRoute = async ({ url }) => {
   if (!isTursoConfigured()) {
     return jsonResponse(
-      { success: false, error: "DB_NOT_CONFIGURED", message: "La base de datos no está configurada en las variables de entorno." },
-      503
-    );
+      {
+        success: false,
+        error: 'DB_NOT_CONFIGURED',
+        message: 'La base de datos no está configurada en las variables de entorno.',
+      },
+      503,
+    )
   }
 
-  const code = url.searchParams.get("code")?.toUpperCase().trim();
+  const code = url.searchParams.get('code')?.toUpperCase().trim()
   if (!code) {
-    return jsonResponse({ success: false, error: "MISSING_CODE", message: "Código de bóveda requerido." }, 400);
+    return jsonResponse(
+      { success: false, error: 'MISSING_CODE', message: 'Código de bóveda requerido.' },
+      400,
+    )
   }
 
-  const client = getTursoClient();
+  const client = getTursoClient()
   if (!client) {
-    return jsonResponse({ success: false, error: "DB_CLIENT_ERROR", message: "Error al conectar con la base de datos." }, 500);
+    return jsonResponse(
+      {
+        success: false,
+        error: 'DB_CLIENT_ERROR',
+        message: 'Error al conectar con la base de datos.',
+      },
+      500,
+    )
   }
 
   try {
     const rs = await client.execute({
-      sql: "SELECT payload, updated_at FROM sync_vaults WHERE code = ?",
+      sql: 'SELECT payload, updated_at FROM sync_vaults WHERE code = ?',
       args: [code],
-    });
+    })
 
     if (rs.rows.length === 0) {
-      return jsonResponse({ success: false, error: "VAULT_NOT_FOUND", message: "No existe ninguna bóveda con este código." }, 404);
+      return jsonResponse(
+        {
+          success: false,
+          error: 'VAULT_NOT_FOUND',
+          message: 'No existe ninguna bóveda con este código.',
+        },
+        404,
+      )
     }
 
-    const row = rs.rows[0];
+    const row = rs.rows[0]
     return jsonResponse({
       success: true,
       code,
       payload: row.payload,
       updatedAt: Number(row.updated_at),
-    });
+    })
   } catch (err) {
-    console.error("Error al consultar bóveda en la base de datos:", err);
-    return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al consultar la base de datos." }, 500);
+    console.error('Error al consultar bóveda en la base de datos:', err)
+    return jsonResponse(
+      { success: false, error: 'DATABASE_ERROR', message: 'Error al consultar la base de datos.' },
+      500,
+    )
   }
-};
+}
 
 // POST: Crear una nueva bóveda en la nube
 export const POST: APIRoute = async ({ request }) => {
   if (!isTursoConfigured()) {
     return jsonResponse(
-      { success: false, error: "DB_NOT_CONFIGURED", message: "La base de datos no está configurada en las variables de entorno." },
-      503
-    );
+      {
+        success: false,
+        error: 'DB_NOT_CONFIGURED',
+        message: 'La base de datos no está configurada en las variables de entorno.',
+      },
+      503,
+    )
   }
 
-  const client = getTursoClient();
+  const client = getTursoClient()
   if (!client) {
-    return jsonResponse({ success: false, error: "DB_CLIENT_ERROR", message: "Error al conectar con la base de datos." }, 500);
+    return jsonResponse(
+      {
+        success: false,
+        error: 'DB_CLIENT_ERROR',
+        message: 'Error al conectar con la base de datos.',
+      },
+      500,
+    )
   }
 
-  let body: { payload?: string } = {};
+  let body: { payload?: string }
   try {
-    body = await request.json();
+    body = await request.json()
   } catch {
-    body = {};
+    body = {}
   }
 
-  const payload = typeof body.payload === "string" ? body.payload : "";
-  const secretKey = crypto.randomUUID();
-  const now = Date.now();
+  const payload = typeof body.payload === 'string' ? body.payload : ''
+  const secretKey = crypto.randomUUID()
+  const now = Date.now()
 
   // Intentar crear un código único con reintentos en caso de colisión
   for (let attempt = 0; attempt < 5; attempt++) {
-    const code = generateCode();
+    const code = generateCode()
     try {
       await client.execute({
-        sql: "INSERT INTO sync_vaults (code, secret_key, payload, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+        sql: 'INSERT INTO sync_vaults (code, secret_key, payload, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
         args: [code, secretKey, payload, now, now],
-      });
+      })
 
       return jsonResponse(
         {
@@ -106,119 +141,189 @@ export const POST: APIRoute = async ({ request }) => {
           secretKey,
           updatedAt: now,
         },
-        201
-      );
+        201,
+      )
     } catch (err: unknown) {
-      const errStr = String(err);
-      if (errStr.includes("UNIQUE") || errStr.includes("PRIMARY KEY")) {
-        continue;
+      const errStr = String(err)
+      if (errStr.includes('UNIQUE') || errStr.includes('PRIMARY KEY')) {
+        continue
       }
-      console.error("Error al insertar bóveda en la base de datos:", err);
-      return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al guardar en la base de datos." }, 500);
+      console.error('Error al insertar bóveda en la base de datos:', err)
+      return jsonResponse(
+        {
+          success: false,
+          error: 'DATABASE_ERROR',
+          message: 'Error al guardar en la base de datos.',
+        },
+        500,
+      )
     }
   }
 
-  return jsonResponse({ success: false, error: "COLLISION_ERROR", message: "No se pudo generar un código disponible." }, 500);
-};
+  return jsonResponse(
+    {
+      success: false,
+      error: 'COLLISION_ERROR',
+      message: 'No se pudo generar un código disponible.',
+    },
+    500,
+  )
+}
 
 // PUT: Actualizar una bóveda existente
 export const PUT: APIRoute = async ({ request }) => {
   if (!isTursoConfigured()) {
     return jsonResponse(
-      { success: false, error: "DB_NOT_CONFIGURED", message: "La base de datos no está configurada en las variables de entorno." },
-      503
-    );
+      {
+        success: false,
+        error: 'DB_NOT_CONFIGURED',
+        message: 'La base de datos no está configurada en las variables de entorno.',
+      },
+      503,
+    )
   }
 
-  const client = getTursoClient();
+  const client = getTursoClient()
   if (!client) {
-    return jsonResponse({ success: false, error: "DB_CLIENT_ERROR", message: "Error al conectar con la base de datos." }, 500);
+    return jsonResponse(
+      {
+        success: false,
+        error: 'DB_CLIENT_ERROR',
+        message: 'Error al conectar con la base de datos.',
+      },
+      500,
+    )
   }
 
-  let body: { code?: string; secretKey?: string; payload?: string } = {};
+  let body: { code?: string; secretKey?: string; payload?: string }
   try {
-    body = await request.json();
+    body = await request.json()
   } catch {
-    return jsonResponse({ success: false, error: "INVALID_JSON", message: "Cuerpo de solicitud no válido." }, 400);
+    return jsonResponse(
+      { success: false, error: 'INVALID_JSON', message: 'Cuerpo de solicitud no válido.' },
+      400,
+    )
   }
 
-  const code = body.code?.toUpperCase().trim();
-  const secretKey = body.secretKey?.trim();
-  const payload = body.payload;
+  const code = body.code?.toUpperCase().trim()
+  const secretKey = body.secretKey?.trim()
+  const payload = body.payload
 
-  if (!code || !secretKey || typeof payload !== "string") {
-    return jsonResponse({ success: false, error: "MISSING_FIELDS", message: "code, secretKey y payload requeridos." }, 400);
+  if (!code || !secretKey || typeof payload !== 'string') {
+    return jsonResponse(
+      { success: false, error: 'MISSING_FIELDS', message: 'code, secretKey y payload requeridos.' },
+      400,
+    )
   }
 
-  const now = Date.now();
+  const now = Date.now()
 
   try {
     const rs = await client.execute({
-      sql: "UPDATE sync_vaults SET payload = ?, updated_at = ? WHERE code = ? AND secret_key = ?",
+      sql: 'UPDATE sync_vaults SET payload = ?, updated_at = ? WHERE code = ? AND secret_key = ?',
       args: [payload, now, code, secretKey],
-    });
+    })
 
     if (rs.rowsAffected === 0) {
       return jsonResponse(
-        { success: false, error: "UNAUTHORIZED", message: "Bóveda no encontrada o clave no válida." },
-        403
-      );
+        {
+          success: false,
+          error: 'UNAUTHORIZED',
+          message: 'Bóveda no encontrada o clave no válida.',
+        },
+        403,
+      )
     }
 
-    return jsonResponse({ success: true, code, updatedAt: now });
+    return jsonResponse({ success: true, code, updatedAt: now })
   } catch (err) {
-    console.error("Error al actualizar bóveda en la base de datos:", err);
-    return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al actualizar en la base de datos." }, 500);
+    console.error('Error al actualizar bóveda en la base de datos:', err)
+    return jsonResponse(
+      {
+        success: false,
+        error: 'DATABASE_ERROR',
+        message: 'Error al actualizar en la base de datos.',
+      },
+      500,
+    )
   }
-};
+}
 
 // DELETE: Eliminar permanentemente una bóveda de la DB
 export const DELETE: APIRoute = async ({ request }) => {
   if (!isTursoConfigured()) {
     return jsonResponse(
-      { success: false, error: "DB_NOT_CONFIGURED", message: "La base de datos no está configurada en las variables de entorno." },
-      503
-    );
+      {
+        success: false,
+        error: 'DB_NOT_CONFIGURED',
+        message: 'La base de datos no está configurada en las variables de entorno.',
+      },
+      503,
+    )
   }
 
-  const client = getTursoClient();
+  const client = getTursoClient()
   if (!client) {
-    return jsonResponse({ success: false, error: "DB_CLIENT_ERROR", message: "Error al conectar con la base de datos." }, 500);
+    return jsonResponse(
+      {
+        success: false,
+        error: 'DB_CLIENT_ERROR',
+        message: 'Error al conectar con la base de datos.',
+      },
+      500,
+    )
   }
 
-  let body: { code?: string; secretKey?: string } = {};
+  let body: { code?: string; secretKey?: string }
   try {
-    body = await request.json();
+    body = await request.json()
   } catch {
-    return jsonResponse({ success: false, error: "INVALID_JSON", message: "Cuerpo de solicitud no válido." }, 400);
+    return jsonResponse(
+      { success: false, error: 'INVALID_JSON', message: 'Cuerpo de solicitud no válido.' },
+      400,
+    )
   }
 
-  const code = body.code?.toUpperCase().trim();
-  const secretKey = body.secretKey?.trim();
+  const code = body.code?.toUpperCase().trim()
+  const secretKey = body.secretKey?.trim()
 
   if (!code || !secretKey) {
-    return jsonResponse({ success: false, error: "MISSING_FIELDS", message: "code y secretKey requeridos." }, 400);
+    return jsonResponse(
+      { success: false, error: 'MISSING_FIELDS', message: 'code y secretKey requeridos.' },
+      400,
+    )
   }
 
   try {
     const rs = await client.execute({
-      sql: "DELETE FROM sync_vaults WHERE code = ? AND secret_key = ?",
+      sql: 'DELETE FROM sync_vaults WHERE code = ? AND secret_key = ?',
       args: [code, secretKey],
-    });
+    })
 
     if (rs.rowsAffected === 0) {
       return jsonResponse(
-        { success: false, error: "UNAUTHORIZED", message: "Bóveda no encontrada o clave no válida." },
-        403
-      );
+        {
+          success: false,
+          error: 'UNAUTHORIZED',
+          message: 'Bóveda no encontrada o clave no válida.',
+        },
+        403,
+      )
     }
 
     return jsonResponse({
       success: true,
-      message: "Bóveda eliminada permanentemente de la DB.",
-    });
+      message: 'Bóveda eliminada permanentemente de la DB.',
+    })
   } catch (err) {
-    console.error("Error al eliminar bóveda en la base de datos:", err);
-    return jsonResponse({ success: false, error: "DATABASE_ERROR", message: "Error al eliminar en la base de datos." }, 500);
+    console.error('Error al eliminar bóveda en la base de datos:', err)
+    return jsonResponse(
+      {
+        success: false,
+        error: 'DATABASE_ERROR',
+        message: 'Error al eliminar en la base de datos.',
+      },
+      500,
+    )
   }
-};
+}

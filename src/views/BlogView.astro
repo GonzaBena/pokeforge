@@ -1,40 +1,40 @@
 ---
-import BlogLayout from "../layouts/BlogLayout.astro";
-import type { Page } from "astro";
-import { getCollection, type CollectionEntry } from "astro:content";
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-import { getAuthor } from "../lib/authors";
-import { getPostUrl, getCoverImageSrc } from "../lib/guides";
-import "../styles/features/home/home.css";
-import "../styles/features/blog/blog.css";
+import BlogLayout from '../layouts/BlogLayout.astro'
+import type { Page } from 'astro'
+import { getCollection, type CollectionEntry } from 'astro:content'
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import { getAuthor } from '../lib/authors'
+import { getPostUrl, getCoverImageSrc } from '../lib/guides'
+import '../styles/features/home/home.css'
+import '../styles/features/blog/blog.css'
 
 interface Props {
-  page?: Page<CollectionEntry<"blog">>;
+  page?: Page<CollectionEntry<'blog'>>
 }
 
-const { page } = Astro.props;
+const { page } = Astro.props
 
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 
 // Obtener todas las entradas correspondientes al locale actual (excluyendo capítulos secundarios de guías)
-const allPosts = await getCollection("blog", ({ id, data }) => {
-  return id.startsWith(`${currentLocale}/`) && !data.parentGuide;
-});
+const allPosts = await getCollection('blog', ({ id, data }) => {
+  return id.startsWith(`${currentLocale}/`) && !data.parentGuide
+})
 
 // Ordenar por fecha descendente
-const sortedPosts = allPosts.sort(
-  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
-);
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
 
-const POSTS_PER_PAGE = 12;
+const POSTS_PER_PAGE = 12
 
-const currentPage = page ? page.currentPage : 1;
-const totalPages = page ? page.lastPage : Math.max(1, Math.ceil(sortedPosts.length / POSTS_PER_PAGE));
-const displayPosts = page ? page.data : sortedPosts.slice(0, POSTS_PER_PAGE);
+const currentPage = page ? page.currentPage : 1
+const totalPages = page
+  ? page.lastPage
+  : Math.max(1, Math.ceil(sortedPosts.length / POSTS_PER_PAGE))
+const displayPosts = page ? page.data : sortedPosts.slice(0, POSTS_PER_PAGE)
 
 // El carrusel hero solo se muestra en la página 1
-const featuredPosts = sortedPosts.filter((p) => p.data.featured);
+const featuredPosts = sortedPosts.filter((p) => p.data.featured)
 const heroPosts =
   currentPage === 1
     ? featuredPosts.length > 0
@@ -42,68 +42,68 @@ const heroPosts =
       : sortedPosts.length > 0
         ? [sortedPosts[0]]
         : []
-    : [];
+    : []
 
 // Conteo por categorías sobre todo el catálogo
 const counts = {
   all: sortedPosts.length,
-  guias: sortedPosts.filter((p) => p.data.category === "guias").length,
-  curiosidades: sortedPosts.filter((p) => p.data.category === "curiosidades").length,
-  competitivo: sortedPosts.filter((p) => p.data.category === "competitivo").length,
-  novedades: sortedPosts.filter((p) => p.data.category === "novedades").length,
-  recursos: sortedPosts.filter((p) => p.data.category === "recursos").length
-};
+  guias: sortedPosts.filter((p) => p.data.category === 'guias').length,
+  curiosidades: sortedPosts.filter((p) => p.data.category === 'curiosidades').length,
+  competitivo: sortedPosts.filter((p) => p.data.category === 'competitivo').length,
+  novedades: sortedPosts.filter((p) => p.data.category === 'novedades').length,
+  recursos: sortedPosts.filter((p) => p.data.category === 'recursos').length,
+}
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString(currentLocale === "es" ? "es-ES" : "en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    timeZone: "UTC",
-  });
+  return date.toLocaleDateString(currentLocale === 'es' ? 'es-ES' : 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
 }
 
 function getPageUrl(pageNum: number, locale: Locale): string {
   if (pageNum === 1) {
-    return locale === "es" ? "/es/blog/" : "/blog/";
+    return locale === 'es' ? '/es/blog/' : '/blog/'
   }
-  return locale === "es" ? `/es/blog/page/${pageNum}/` : `/blog/page/${pageNum}/`;
+  return locale === 'es' ? `/es/blog/page/${pageNum}/` : `/blog/page/${pageNum}/`
 }
 
 function getPageRange(current: number, total: number): (number | string)[] {
   if (total <= 7) {
-    return Array.from({ length: total }, (_, i) => i + 1);
+    return Array.from({ length: total }, (_, i) => i + 1)
   }
   if (current <= 4) {
-    return [1, 2, 3, 4, 5, "...", total];
+    return [1, 2, 3, 4, 5, '...', total]
   }
   if (current >= total - 3) {
-    return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
+    return [1, '...', total - 4, total - 3, total - 2, total - 1, total]
   }
-  return [1, "...", current - 1, current, current + 1, "...", total];
+  return [1, '...', current - 1, current, current + 1, '...', total]
 }
 
-const pageRange = getPageRange(currentPage, totalPages);
-const prevUrl = currentPage > 1 ? getPageUrl(currentPage - 1, currentLocale) : undefined;
-const nextUrl = currentPage < totalPages ? getPageUrl(currentPage + 1, currentLocale) : undefined;
+const pageRange = getPageRange(currentPage, totalPages)
+const prevUrl = currentPage > 1 ? getPageUrl(currentPage - 1, currentLocale) : undefined
+const nextUrl = currentPage < totalPages ? getPageUrl(currentPage + 1, currentLocale) : undefined
 
 const pageTitle =
   currentPage > 1
-    ? currentLocale === "es"
+    ? currentLocale === 'es'
       ? `Blog & Estrategia · ${t.blog.paginationPage} ${currentPage}`
       : `Blog & Strategy · ${t.blog.paginationPage} ${currentPage}`
-    : currentLocale === "es"
-      ? "Blog & Estrategia"
-      : "Blog & Strategy";
+    : currentLocale === 'es'
+      ? 'Blog & Estrategia'
+      : 'Blog & Strategy'
 
 const alternateUrls = {
-  en: getPageUrl(currentPage, "en"),
-  es: getPageUrl(currentPage, "es"),
-};
+  en: getPageUrl(currentPage, 'en'),
+  es: getPageUrl(currentPage, 'es'),
+}
 
 // Preparar índice liviano para búsqueda global instantánea
 const searchManifest = sortedPosts.map((p) => {
-  const author = getAuthor(p.data.author);
+  const author = getAuthor(p.data.author)
   return {
     id: p.id,
     url: getPostUrl(p.id, currentLocale),
@@ -114,17 +114,17 @@ const searchManifest = sortedPosts.map((p) => {
       t.blog.categories[p.data.category as keyof typeof t.blog.categories] ?? p.data.category,
     tags: p.data.tags ?? [],
     coverImage: getCoverImageSrc(p.data.coverImage),
-    coverImageFit: p.data.coverImageFit ?? "contain",
+    coverImageFit: p.data.coverImageFit ?? 'contain',
     featured: p.data.featured ?? false,
     isGuideHub: p.data.isGuideHub ?? false,
     inProgress: p.data.inProgress ?? false,
-    readingTime: p.data.readingTime ?? "",
+    readingTime: p.data.readingTime ?? '',
     pubDateStr: formatDate(p.data.pubDate),
     authorName: author.name,
     authorAvatar: author.avatar,
-    searchText: `${p.data.title.toLowerCase()} ${p.data.description.toLowerCase()} ${(p.data.tags ?? []).join(" ").toLowerCase()}`,
-  };
-});
+    searchText: `${p.data.title.toLowerCase()} ${p.data.description.toLowerCase()} ${(p.data.tags ?? []).join(' ').toLowerCase()}`,
+  }
+})
 ---
 
 <BlogLayout title={pageTitle} alternateUrls={alternateUrls}>
@@ -137,12 +137,12 @@ const searchManifest = sortedPosts.map((p) => {
       </div>
 
       <h1 class="hero__title">
-        {t.blog.titlePrefix}<span class="hero__title-accent">{t.blog.titleAccent}</span>{t.blog.titleSuffix}
+        {t.blog.titlePrefix}
+        <span class="hero__title-accent">{t.blog.titleAccent}</span>
+        {t.blog.titleSuffix}
       </h1>
 
-      <p class="hero__subtitle">
-        {t.blog.subtitle}
-      </p>
+      <p class="hero__subtitle">{t.blog.subtitle}</p>
     </section>
   </div>
 
@@ -151,14 +151,20 @@ const searchManifest = sortedPosts.map((p) => {
       <section class="blog-carousel" data-blog-carousel>
         <div class="blog-carousel__track">
           {heroPosts.map((post, index) => {
-            const heroAuthor = getAuthor(post.data.author);
+            const heroAuthor = getAuthor(post.data.author)
             return (
               <div
-                class={`blog-carousel__slide ${index === 0 ? "active" : ""}`}
+                class={`blog-carousel__slide ${index === 0 ? 'active' : ''}`}
                 data-carousel-slide={index}
               >
-                <a href={getPostUrl(post.id, currentLocale)} class="blog-featured-card" data-astro-prefetch>
-                  <div class={`blog-featured-card__media ${post.data.coverImageFit === "cover" ? "blog-featured-card__media--cover" : ""}`}>
+                <a
+                  href={getPostUrl(post.id, currentLocale)}
+                  class="blog-featured-card"
+                  data-astro-prefetch
+                >
+                  <div
+                    class={`blog-featured-card__media ${post.data.coverImageFit === 'cover' ? 'blog-featured-card__media--cover' : ''}`}
+                  >
                     <div class="blog-featured-card__flags">
                       {post.data.isGuideHub && (
                         <span class="blog-featured-card__flag blog-featured-card__flag--guide">
@@ -182,7 +188,7 @@ const searchManifest = sortedPosts.map((p) => {
                     <img
                       src={getCoverImageSrc(post.data.coverImage)}
                       alt={post.data.title}
-                      loading={index === 0 ? "eager" : "lazy"}
+                      loading={index === 0 ? 'eager' : 'lazy'}
                       decoding="async"
                       width="800"
                       height="450"
@@ -191,7 +197,8 @@ const searchManifest = sortedPosts.map((p) => {
                   <div class="blog-featured-card__body">
                     <div class="blog-featured-card__meta">
                       <span class={`blog-badge blog-badge--${post.data.category}`}>
-                        {t.blog.categories[post.data.category as keyof typeof t.blog.categories] ?? post.data.category}
+                        {t.blog.categories[post.data.category as keyof typeof t.blog.categories] ??
+                          post.data.category}
                       </span>
                       {post.data.readingTime && (
                         <span class="blog-read-time">
@@ -226,7 +233,7 @@ const searchManifest = sortedPosts.map((p) => {
                   </div>
                 </a>
               </div>
-            );
+            )
           })}
         </div>
 
@@ -243,7 +250,7 @@ const searchManifest = sortedPosts.map((p) => {
             <div class="blog-carousel__dots" data-carousel-dots>
               {heroPosts.map((_, index) => (
                 <button
-                  class={`blog-carousel__dot ${index === 0 ? "active" : ""}`}
+                  class={`blog-carousel__dot ${index === 0 ? 'active' : ''}`}
                   type="button"
                   aria-label={`Slide ${index + 1}`}
                   data-carousel-dot={index}
@@ -279,33 +286,45 @@ const searchManifest = sortedPosts.map((p) => {
       <nav class="blog-categories" aria-label="Categorías del blog">
         <button class="blog-tab-btn active" data-filter="all">
           <span>{t.blog.allCategories}</span>
-          <span class="blog-tab-btn__count" data-filter-count="all">{counts.all}</span>
+          <span class="blog-tab-btn__count" data-filter-count="all">
+            {counts.all}
+          </span>
         </button>
         <button class="blog-tab-btn" data-filter="guias">
           <i data-lucide="swords"></i>
           <span>{t.blog.categories.guias}</span>
-          <span class="blog-tab-btn__count" data-filter-count="guias">{counts.guias}</span>
+          <span class="blog-tab-btn__count" data-filter-count="guias">
+            {counts.guias}
+          </span>
         </button>
         <button class="blog-tab-btn" data-filter="curiosidades">
           <i data-lucide="sparkles"></i>
           <span>{t.blog.categories.curiosidades}</span>
-          <span class="blog-tab-btn__count" data-filter-count="curiosidades">{counts.curiosidades}</span>
+          <span class="blog-tab-btn__count" data-filter-count="curiosidades">
+            {counts.curiosidades}
+          </span>
         </button>
         <button class="blog-tab-btn" data-filter="competitivo">
           <i data-lucide="shield-check"></i>
           <span>{t.blog.categories.competitivo}</span>
-          <span class="blog-tab-btn__count" data-filter-count="competitivo">{counts.competitivo}</span>
+          <span class="blog-tab-btn__count" data-filter-count="competitivo">
+            {counts.competitivo}
+          </span>
         </button>
         <button class="blog-tab-btn" data-filter="recursos">
           <i data-lucide="file"></i>
           <span>{t.blog.categories.recursos}</span>
-          <span class="blog-tab-btn__count" data-filter-count="recursos">{counts.recursos}</span>
+          <span class="blog-tab-btn__count" data-filter-count="recursos">
+            {counts.recursos}
+          </span>
         </button>
         {counts.novedades > 0 && (
           <button class="blog-tab-btn" data-filter="novedades">
             <i data-lucide="sparkles"></i>
             <span>{t.blog.categories.novedades}</span>
-            <span class="blog-tab-btn__count" data-filter-count="novedades">{counts.novedades}</span>
+            <span class="blog-tab-btn__count" data-filter-count="novedades">
+              {counts.novedades}
+            </span>
           </button>
         )}
       </nav>
@@ -339,19 +358,25 @@ const searchManifest = sortedPosts.map((p) => {
       {displayPosts.map((post) => {
         const categoryLabel =
           t.blog.categories[post.data.category as keyof typeof t.blog.categories] ??
-          post.data.category;
-        const postTags = (post.data.tags ?? []).join(" ").toLowerCase();
-        const postAuthor = getAuthor(post.data.author);
+          post.data.category
+        const postTags = (post.data.tags ?? []).join(' ').toLowerCase()
+        const postAuthor = getAuthor(post.data.author)
 
         return (
           <article
-            class={`post-card ${post.data.featured ? "post-card--featured" : ""}`}
+            class={`post-card ${post.data.featured ? 'post-card--featured' : ''}`}
             data-category={post.data.category}
-            data-tags={(post.data.tags ?? []).join(",").toLowerCase()}
+            data-tags={(post.data.tags ?? []).join(',').toLowerCase()}
             data-search-text={`${post.data.title.toLowerCase()} ${post.data.description.toLowerCase()} ${postTags}`}
           >
-            <a href={getPostUrl(post.id, currentLocale)} class="post-card__link" data-astro-prefetch>
-              <div class={`post-card__media ${post.data.coverImageFit === "cover" ? "post-card__media--cover" : ""}`}>
+            <a
+              href={getPostUrl(post.id, currentLocale)}
+              class="post-card__link"
+              data-astro-prefetch
+            >
+              <div
+                class={`post-card__media ${post.data.coverImageFit === 'cover' ? 'post-card__media--cover' : ''}`}
+              >
                 <div class="post-card__badge-wrap">
                   <span class={`blog-badge blog-badge--${post.data.category}`}>
                     {categoryLabel}
@@ -413,7 +438,7 @@ const searchManifest = sortedPosts.map((p) => {
               </div>
             </a>
           </article>
-        );
+        )
       })}
     </section>
 
@@ -439,10 +464,7 @@ const searchManifest = sortedPosts.map((p) => {
               <span>{t.blog.paginationPrev}</span>
             </a>
           ) : (
-            <span
-              class="blog-pagination__btn blog-pagination__btn--disabled"
-              aria-disabled="true"
-            >
+            <span class="blog-pagination__btn blog-pagination__btn--disabled" aria-disabled="true">
               <i data-lucide="chevron-left"></i>
               <span>{t.blog.paginationPrev}</span>
             </span>
@@ -450,8 +472,8 @@ const searchManifest = sortedPosts.map((p) => {
 
           <div class="blog-pagination__numbers">
             {pageRange.map((item) => {
-              if (typeof item === "number") {
-                const isCurrent = item === currentPage;
+              if (typeof item === 'number') {
+                const isCurrent = item === currentPage
                 return isCurrent ? (
                   <span class="blog-pagination__page active" aria-current="page">
                     {item}
@@ -464,13 +486,13 @@ const searchManifest = sortedPosts.map((p) => {
                   >
                     {item}
                   </a>
-                );
+                )
               }
               return (
                 <span class="blog-pagination__page ellipsis" aria-hidden="true">
                   …
                 </span>
-              );
+              )
             })}
           </div>
 
@@ -485,10 +507,7 @@ const searchManifest = sortedPosts.map((p) => {
               <i data-lucide="chevron-right"></i>
             </a>
           ) : (
-            <span
-              class="blog-pagination__btn blog-pagination__btn--disabled"
-              aria-disabled="true"
-            >
+            <span class="blog-pagination__btn blog-pagination__btn--disabled" aria-disabled="true">
               <span>{t.blog.paginationNext}</span>
               <i data-lucide="chevron-right"></i>
             </span>
@@ -503,8 +522,7 @@ const searchManifest = sortedPosts.map((p) => {
       type="application/json"
       is:inline
       set:html={JSON.stringify(searchManifest)}
-    />
-
+    ></script>
     <!-- Estado vacío cuando la búsqueda o filtro no da resultados -->
     <div class="blog-empty" data-blog-empty hidden>
       <i data-lucide="search"></i>
@@ -518,112 +536,113 @@ const searchManifest = sortedPosts.map((p) => {
   </main>
 
   <script>
-    import { refreshIcons } from "../lib/icons";
+    import { refreshIcons } from '../lib/icons'
 
     interface SearchManifestItem {
-      id: string;
-      url: string;
-      title: string;
-      description: string;
-      category: string;
-      categoryLabel: string;
-      tags: string[];
-      coverImage: string;
-      coverImageFit?: string;
-      featured: boolean;
-      isGuideHub: boolean;
-      inProgress: boolean;
-      readingTime: string;
-      pubDateStr: string;
-      authorName: string;
-      authorAvatar: string;
-      searchText: string;
+      id: string
+      url: string
+      title: string
+      description: string
+      category: string
+      categoryLabel: string
+      tags: string[]
+      coverImage: string
+      coverImageFit?: string
+      featured: boolean
+      isGuideHub: boolean
+      inProgress: boolean
+      readingTime: string
+      pubDateStr: string
+      authorName: string
+      authorAvatar: string
+      searchText: string
     }
 
     function escapeHtml(str: string): string {
       return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
     }
 
     function setupBlogInteractions() {
-      const searchInput = document.querySelector<HTMLInputElement>("[data-blog-search]");
-      const filterBtns = document.querySelectorAll<HTMLButtonElement>("[data-filter]");
-      const grid = document.querySelector<HTMLElement>("[data-blog-grid]");
-      const emptyState = document.querySelector<HTMLElement>("[data-blog-empty]");
-      const resetBtn = document.querySelector<HTMLButtonElement>("[data-reset-filters]");
-      const tagBanner = document.querySelector<HTMLElement>("[data-active-tag-banner]");
-      const tagText = document.querySelector<HTMLElement>("[data-active-tag-text]");
-      const clearTagBtn = document.querySelector<HTMLButtonElement>("[data-clear-tag]");
-      const countBadges = document.querySelectorAll<HTMLElement>("[data-filter-count]");
-      const paginationNav = document.querySelector<HTMLElement>("[data-blog-pagination]");
+      const searchInput = document.querySelector<HTMLInputElement>('[data-blog-search]')
+      const filterBtns = document.querySelectorAll<HTMLButtonElement>('[data-filter]')
+      const grid = document.querySelector<HTMLElement>('[data-blog-grid]')
+      const emptyState = document.querySelector<HTMLElement>('[data-blog-empty]')
+      const resetBtn = document.querySelector<HTMLButtonElement>('[data-reset-filters]')
+      const tagBanner = document.querySelector<HTMLElement>('[data-active-tag-banner]')
+      const tagText = document.querySelector<HTMLElement>('[data-active-tag-text]')
+      const clearTagBtn = document.querySelector<HTMLButtonElement>('[data-clear-tag]')
+      const countBadges = document.querySelectorAll<HTMLElement>('[data-filter-count]')
+      const paginationNav = document.querySelector<HTMLElement>('[data-blog-pagination]')
 
-      if (!grid) return;
-      const blogGrid: HTMLElement = grid;
+      if (!grid) return
+      const blogGrid: HTMLElement = grid
 
-      const featuredBadge = blogGrid.dataset.featuredBadge || "Destacado";
-      const inProgressBadge = blogGrid.dataset.inProgressBadge || "En progreso";
+      const featuredBadge = blogGrid.dataset.featuredBadge || 'Destacado'
+      const inProgressBadge = blogGrid.dataset.inProgressBadge || 'En progreso'
 
       // Guardar el HTML original estático de la cuadrícula y de la paginación
-      const initialGridHtml = blogGrid.innerHTML;
-      const initialPaginationHtml = paginationNav ? paginationNav.innerHTML : "";
-      const initialPaginationHidden = paginationNav ? paginationNav.hidden : true;
+      const initialGridHtml = blogGrid.innerHTML
+      const initialPaginationHtml = paginationNav ? paginationNav.innerHTML : ''
+      const initialPaginationHidden = paginationNav ? paginationNav.hidden : true
 
-      const PAGE_SIZE = 12;
-      let filteredCurrentPage = 1;
-      let currentFilteredPosts: SearchManifestItem[] = [];
+      const PAGE_SIZE = 12
+      let filteredCurrentPage = 1
+      let currentFilteredPosts: SearchManifestItem[] = []
 
       function getPageRange(current: number, total: number): (number | string)[] {
         if (total <= 7) {
-          return Array.from({ length: total }, (_, i) => i + 1);
+          return Array.from({ length: total }, (_, i) => i + 1)
         }
         if (current <= 4) {
-          return [1, 2, 3, 4, 5, "...", total];
+          return [1, 2, 3, 4, 5, '...', total]
         }
         if (current >= total - 3) {
-          return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
+          return [1, '...', total - 4, total - 3, total - 2, total - 1, total]
         }
-        return [1, "...", current - 1, current, current + 1, "...", total];
+        return [1, '...', current - 1, current, current + 1, '...', total]
       }
 
       function scrollToGridTop() {
-        const controls = document.querySelector<HTMLElement>(".blog-controls");
+        const controls = document.querySelector<HTMLElement>('.blog-controls')
         if (controls) {
-          const targetY = controls.getBoundingClientRect().top + window.scrollY - 80;
+          const targetY = controls.getBoundingClientRect().top + window.scrollY - 80
           if (window.scrollY > targetY) {
-            window.scrollTo({ top: targetY, behavior: "smooth" });
+            window.scrollTo({ top: targetY, behavior: 'smooth' })
           }
         }
       }
 
       function renderFilteredPage(pageNum: number) {
-        filteredCurrentPage = pageNum;
-        const totalFilteredPages = Math.ceil(currentFilteredPosts.length / PAGE_SIZE);
+        filteredCurrentPage = pageNum
+        const totalFilteredPages = Math.ceil(currentFilteredPosts.length / PAGE_SIZE)
 
-        const start = (filteredCurrentPage - 1) * PAGE_SIZE;
-        const end = start + PAGE_SIZE;
-        const pageItems = currentFilteredPosts.slice(start, end);
+        const start = (filteredCurrentPage - 1) * PAGE_SIZE
+        const end = start + PAGE_SIZE
+        const pageItems = currentFilteredPosts.slice(start, end)
 
         // Renderizar las tarjetas de la página actual filtrada
         blogGrid.innerHTML = pageItems
-          .map((post) => `
-            <article class="post-card ${post.featured ? "post-card--featured" : ""}" data-category="${post.category}">
+          .map(
+            (post) => `
+            <article class="post-card ${post.featured ? 'post-card--featured' : ''}" data-category="${post.category}">
               <a href="${post.url}" class="post-card__link" data-astro-prefetch>
-                <div class="post-card__media ${post.coverImageFit === "cover" ? "post-card__media--cover" : ""}">
+                <div class="post-card__media ${post.coverImageFit === 'cover' ? 'post-card__media--cover' : ''}">
                   <div class="post-card__badge-wrap">
                     <span class="blog-badge blog-badge--${post.category}">${escapeHtml(post.categoryLabel)}</span>
-                    ${post.featured ? `<span class="blog-featured-pill"><i data-lucide="flame"></i>${escapeHtml(featuredBadge)}</span>` : ""}
-                    ${post.inProgress ? `<span class="blog-featured-pill blog-featured-pill--wip"><i data-lucide="clock"></i>${escapeHtml(inProgressBadge)}</span>` : ""}
+                    ${post.featured ? `<span class="blog-featured-pill"><i data-lucide="flame"></i>${escapeHtml(featuredBadge)}</span>` : ''}
+                    ${post.inProgress ? `<span class="blog-featured-pill blog-featured-pill--wip"><i data-lucide="clock"></i>${escapeHtml(inProgressBadge)}</span>` : ''}
                   </div>
                   <img src="${post.coverImage}" alt="${escapeHtml(post.title)}" loading="lazy" />
                 </div>
                 <div class="post-card__body">
                   <div class="post-card__meta-top">
                     <span class="article-date"><i data-lucide="calendar"></i>${escapeHtml(post.pubDateStr)}</span>
-                    ${post.readingTime ? `<span class="blog-read-time"><i data-lucide="clock"></i>${escapeHtml(post.readingTime)}</span>` : ""}
+                    ${post.readingTime ? `<span class="blog-read-time"><i data-lucide="clock"></i>${escapeHtml(post.readingTime)}</span>` : ''}
                   </div>
                   <h3 class="post-card__title">${escapeHtml(post.title)}</h3>
                   <p class="post-card__desc">${escapeHtml(post.description)}</p>
@@ -637,25 +656,26 @@ const searchManifest = sortedPosts.map((p) => {
                 </div>
               </a>
             </article>
-          `)
-          .join("");
+          `,
+          )
+          .join('')
 
         // Renderizar controles de paginación interactivos para resultados filtrados
         if (paginationNav) {
           if (totalFilteredPages <= 1) {
-            paginationNav.hidden = true;
+            paginationNav.hidden = true
           } else {
-            paginationNav.hidden = false;
-            const prevLabel = paginationNav.dataset.prevLabel || "Previous";
-            const nextLabel = paginationNav.dataset.nextLabel || "Next";
-            const range = getPageRange(filteredCurrentPage, totalFilteredPages);
+            paginationNav.hidden = false
+            const prevLabel = paginationNav.dataset.prevLabel || 'Previous'
+            const nextLabel = paginationNav.dataset.nextLabel || 'Next'
+            const range = getPageRange(filteredCurrentPage, totalFilteredPages)
 
             paginationNav.innerHTML = `
               <button
                 type="button"
                 class="blog-pagination__btn blog-pagination__btn--prev"
                 data-filtered-btn="prev"
-                ${filteredCurrentPage === 1 ? "disabled" : ""}
+                ${filteredCurrentPage === 1 ? 'disabled' : ''}
                 aria-label="${escapeHtml(prevLabel)}"
               >
                 <i data-lucide="chevron-left"></i>
@@ -663,80 +683,90 @@ const searchManifest = sortedPosts.map((p) => {
               </button>
 
               <div class="blog-pagination__numbers">
-                ${range.map((item) => {
-                  if (typeof item === "number") {
-                    const isCurrent = item === filteredCurrentPage;
-                    return isCurrent
-                      ? `<span class="blog-pagination__page active" aria-current="page">${item}</span>`
-                      : `<button type="button" class="blog-pagination__page" data-filtered-page="${item}">${item}</button>`;
-                  }
-                  return `<span class="blog-pagination__page ellipsis" aria-hidden="true">…</span>`;
-                }).join("")}
+                ${range
+                  .map((item) => {
+                    if (typeof item === 'number') {
+                      const isCurrent = item === filteredCurrentPage
+                      return isCurrent
+                        ? `<span class="blog-pagination__page active" aria-current="page">${item}</span>`
+                        : `<button type="button" class="blog-pagination__page" data-filtered-page="${item}">${item}</button>`
+                    }
+                    return `<span class="blog-pagination__page ellipsis" aria-hidden="true">…</span>`
+                  })
+                  .join('')}
               </div>
 
               <button
                 type="button"
                 class="blog-pagination__btn blog-pagination__btn--next"
                 data-filtered-btn="next"
-                ${filteredCurrentPage === totalFilteredPages ? "disabled" : ""}
+                ${filteredCurrentPage === totalFilteredPages ? 'disabled' : ''}
                 aria-label="${escapeHtml(nextLabel)}"
               >
                 <span>${escapeHtml(nextLabel)}</span>
                 <i data-lucide="chevron-right"></i>
               </button>
-            `;
+            `
 
             // Escuchadores de eventos para los botones dinámicos de paginación
-            paginationNav.querySelector('[data-filtered-btn="prev"]')?.addEventListener("click", () => {
-              if (filteredCurrentPage > 1) {
-                renderFilteredPage(filteredCurrentPage - 1);
-                scrollToGridTop();
-              }
-            });
-
-            paginationNav.querySelector('[data-filtered-btn="next"]')?.addEventListener("click", () => {
-              if (filteredCurrentPage < totalFilteredPages) {
-                renderFilteredPage(filteredCurrentPage + 1);
-                scrollToGridTop();
-              }
-            });
-
-            paginationNav.querySelectorAll<HTMLButtonElement>("[data-filtered-page]").forEach((btn) => {
-              btn.addEventListener("click", () => {
-                const targetPage = parseInt(btn.dataset.filteredPage || "1", 10);
-                if (targetPage !== filteredCurrentPage) {
-                  renderFilteredPage(targetPage);
-                  scrollToGridTop();
+            paginationNav
+              .querySelector('[data-filtered-btn="prev"]')
+              ?.addEventListener('click', () => {
+                if (filteredCurrentPage > 1) {
+                  renderFilteredPage(filteredCurrentPage - 1)
+                  scrollToGridTop()
                 }
-              });
-            });
+              })
+
+            paginationNav
+              .querySelector('[data-filtered-btn="next"]')
+              ?.addEventListener('click', () => {
+                if (filteredCurrentPage < totalFilteredPages) {
+                  renderFilteredPage(filteredCurrentPage + 1)
+                  scrollToGridTop()
+                }
+              })
+
+            paginationNav
+              .querySelectorAll<HTMLButtonElement>('[data-filtered-page]')
+              .forEach((btn) => {
+                btn.addEventListener('click', () => {
+                  const targetPage = parseInt(btn.dataset.filteredPage || '1', 10)
+                  if (targetPage !== filteredCurrentPage) {
+                    renderFilteredPage(targetPage)
+                    scrollToGridTop()
+                  }
+                })
+              })
           }
         }
 
-        refreshIcons();
+        refreshIcons()
       }
 
       // Leer índice global de búsqueda
-      const manifestEl = document.getElementById("blog-search-manifest");
-      const allPosts: SearchManifestItem[] = manifestEl ? JSON.parse(manifestEl.textContent || "[]") : [];
+      const manifestEl = document.getElementById('blog-search-manifest')
+      const allPosts: SearchManifestItem[] = manifestEl
+        ? JSON.parse(manifestEl.textContent || '[]')
+        : []
 
-      let activeFilter = "all";
-      let searchQuery = "";
-      let activeTag = "";
+      let activeFilter = 'all'
+      let searchQuery = ''
+      let activeTag = ''
 
       // Leer parámetro ?tag= de la URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const initialTag = urlParams.get("tag");
+      const urlParams = new URLSearchParams(window.location.search)
+      const initialTag = urlParams.get('tag')
       if (initialTag) {
-        activeTag = initialTag.trim().toLowerCase();
+        activeTag = initialTag.trim().toLowerCase()
         if (tagBanner && tagText) {
-          tagText.textContent = `#${initialTag.trim()}`;
-          tagBanner.hidden = false;
+          tagText.textContent = `#${initialTag.trim()}`
+          tagBanner.hidden = false
         }
       }
 
       function filterArticles() {
-        const isFiltering = Boolean(searchQuery || activeTag || activeFilter !== "all");
+        const isFiltering = Boolean(searchQuery || activeTag || activeFilter !== 'all')
 
         // Actualizar contadores de categorías sobre todo el catálogo
         const dynamicCounts: Record<string, number> = {
@@ -746,186 +776,185 @@ const searchManifest = sortedPosts.map((p) => {
           competitivo: 0,
           novedades: 0,
           recursos: 0,
-        };
+        }
 
         allPosts.forEach((post) => {
-          const matchesSearch = !searchQuery || post.searchText.includes(searchQuery);
+          const matchesSearch = !searchQuery || post.searchText.includes(searchQuery)
           const matchesTag =
             !activeTag ||
             post.tags.some((t) => t.toLowerCase() === activeTag) ||
-            post.searchText.includes(activeTag);
+            post.searchText.includes(activeTag)
 
           if (matchesSearch && matchesTag) {
-            dynamicCounts.all++;
+            dynamicCounts.all++
             if (dynamicCounts[post.category] !== undefined) {
-              dynamicCounts[post.category]++;
+              dynamicCounts[post.category]++
             }
           }
-        });
+        })
 
         countBadges.forEach((badge) => {
-          const cat = badge.dataset.filterCount;
+          const cat = badge.dataset.filterCount
           if (cat && dynamicCounts[cat] !== undefined) {
-            const count = dynamicCounts[cat];
-            badge.textContent = String(count);
-            const parentBtn = badge.closest<HTMLButtonElement>(".blog-tab-btn");
+            const count = dynamicCounts[cat]
+            badge.textContent = String(count)
+            const parentBtn = badge.closest<HTMLButtonElement>('.blog-tab-btn')
             if (parentBtn) {
               if (count === 0) {
-                parentBtn.setAttribute("data-empty", "true");
+                parentBtn.setAttribute('data-empty', 'true')
               } else {
-                parentBtn.removeAttribute("data-empty");
+                parentBtn.removeAttribute('data-empty')
               }
             }
           }
-        });
+        })
 
         if (!isFiltering) {
           // Estado por defecto: restaurar los artículos estáticos de esta página y la paginación original
-          blogGrid.innerHTML = initialGridHtml;
+          blogGrid.innerHTML = initialGridHtml
           if (paginationNav) {
-            paginationNav.innerHTML = initialPaginationHtml;
-            paginationNav.hidden = initialPaginationHidden;
+            paginationNav.innerHTML = initialPaginationHtml
+            paginationNav.hidden = initialPaginationHidden
           }
-          if (emptyState) emptyState.hidden = true;
-          refreshIcons();
-          return;
+          if (emptyState) emptyState.hidden = true
+          refreshIcons()
+          return
         }
 
         // Modo búsqueda / filtro activo: paginar los resultados que coincidan
         currentFilteredPosts = allPosts.filter((post) => {
-          const matchesSearch = !searchQuery || post.searchText.includes(searchQuery);
+          const matchesSearch = !searchQuery || post.searchText.includes(searchQuery)
           const matchesTag =
             !activeTag ||
             post.tags.some((t) => t.toLowerCase() === activeTag) ||
-            post.searchText.includes(activeTag);
+            post.searchText.includes(activeTag)
           const matchesCategory =
-            activeFilter === "all" ||
-            post.category?.toLowerCase() === activeFilter.toLowerCase();
-          return matchesSearch && matchesTag && matchesCategory;
-        });
+            activeFilter === 'all' || post.category?.toLowerCase() === activeFilter.toLowerCase()
+          return matchesSearch && matchesTag && matchesCategory
+        })
 
         if (currentFilteredPosts.length === 0) {
-          blogGrid.innerHTML = "";
-          if (paginationNav) paginationNav.hidden = true;
-          if (emptyState) emptyState.hidden = false;
-          return;
+          blogGrid.innerHTML = ''
+          if (paginationNav) paginationNav.hidden = true
+          if (emptyState) emptyState.hidden = false
+          return
         }
 
-        if (emptyState) emptyState.hidden = true;
-        renderFilteredPage(1);
+        if (emptyState) emptyState.hidden = true
+        renderFilteredPage(1)
       }
 
       // Si se cargó con etiqueta en la URL
       if (activeTag) {
-        filterArticles();
+        filterArticles()
       }
 
       if (clearTagBtn) {
-        clearTagBtn.addEventListener("click", () => {
-          activeTag = "";
-          if (tagBanner) tagBanner.hidden = true;
-          const url = new URL(window.location.href);
-          url.searchParams.delete("tag");
-          history.replaceState(null, "", url.toString());
-          filterArticles();
-        });
+        clearTagBtn.addEventListener('click', () => {
+          activeTag = ''
+          if (tagBanner) tagBanner.hidden = true
+          const url = new URL(window.location.href)
+          url.searchParams.delete('tag')
+          history.replaceState(null, '', url.toString())
+          filterArticles()
+        })
       }
 
       filterBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          filterBtns.forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-          activeFilter = btn.dataset.filter ?? "all";
-          filterArticles();
-        });
-      });
+        btn.addEventListener('click', () => {
+          filterBtns.forEach((b) => b.classList.remove('active'))
+          btn.classList.add('active')
+          activeFilter = btn.dataset.filter ?? 'all'
+          filterArticles()
+        })
+      })
 
       if (searchInput) {
-        searchInput.addEventListener("input", () => {
-          searchQuery = searchInput.value.trim().toLowerCase();
-          filterArticles();
-        });
+        searchInput.addEventListener('input', () => {
+          searchQuery = searchInput.value.trim().toLowerCase()
+          filterArticles()
+        })
       }
 
       if (resetBtn) {
-        resetBtn.addEventListener("click", () => {
-          activeFilter = "all";
-          searchQuery = "";
-          activeTag = "";
-          if (searchInput) searchInput.value = "";
-          if (tagBanner) tagBanner.hidden = true;
-          const url = new URL(window.location.href);
-          url.searchParams.delete("tag");
-          history.replaceState(null, "", url.toString());
+        resetBtn.addEventListener('click', () => {
+          activeFilter = 'all'
+          searchQuery = ''
+          activeTag = ''
+          if (searchInput) searchInput.value = ''
+          if (tagBanner) tagBanner.hidden = true
+          const url = new URL(window.location.href)
+          url.searchParams.delete('tag')
+          history.replaceState(null, '', url.toString())
           filterBtns.forEach((b) => {
-            if (b.dataset.filter === "all") b.classList.add("active");
-            else b.classList.remove("active");
-          });
-          filterArticles();
-        });
+            if (b.dataset.filter === 'all') b.classList.add('active')
+            else b.classList.remove('active')
+          })
+          filterArticles()
+        })
       }
 
       // 2. Carrusel de Artículos Destacados (solo activo si hay slides)
-      const carousel = document.querySelector<HTMLElement>("[data-blog-carousel]");
+      const carousel = document.querySelector<HTMLElement>('[data-blog-carousel]')
       if (carousel) {
-        const slides = carousel.querySelectorAll<HTMLElement>("[data-carousel-slide]");
-        const dots = carousel.querySelectorAll<HTMLButtonElement>("[data-carousel-dot]");
-        const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-carousel-prev]");
-        const nextBtn = carousel.querySelector<HTMLButtonElement>("[data-carousel-next]");
+        const slides = carousel.querySelectorAll<HTMLElement>('[data-carousel-slide]')
+        const dots = carousel.querySelectorAll<HTMLButtonElement>('[data-carousel-dot]')
+        const prevBtn = carousel.querySelector<HTMLButtonElement>('[data-carousel-prev]')
+        const nextBtn = carousel.querySelector<HTMLButtonElement>('[data-carousel-next]')
 
         if (slides.length > 1) {
-          let currentIndex = 0;
-          let autoplayInterval: number | null = null;
+          let currentIndex = 0
+          let autoplayInterval: number | null = null
 
           function goToSlide(index: number) {
-            slides.forEach((slide) => slide.classList.remove("active"));
-            dots.forEach((dot) => dot.classList.remove("active"));
+            slides.forEach((slide) => slide.classList.remove('active'))
+            dots.forEach((dot) => dot.classList.remove('active'))
 
-            currentIndex = (index + slides.length) % slides.length;
-            slides[currentIndex]?.classList.add("active");
-            dots[currentIndex]?.classList.add("active");
+            currentIndex = (index + slides.length) % slides.length
+            slides[currentIndex]?.classList.add('active')
+            dots[currentIndex]?.classList.add('active')
           }
 
           function startAutoplay() {
-            stopAutoplay();
+            stopAutoplay()
             autoplayInterval = window.setInterval(() => {
-              goToSlide(currentIndex + 1);
-            }, 6000);
+              goToSlide(currentIndex + 1)
+            }, 6000)
           }
 
           function stopAutoplay() {
             if (autoplayInterval !== null) {
-              clearInterval(autoplayInterval);
-              autoplayInterval = null;
+              clearInterval(autoplayInterval)
+              autoplayInterval = null
             }
           }
 
-          nextBtn?.addEventListener("click", () => {
-            goToSlide(currentIndex + 1);
-            startAutoplay();
-          });
+          nextBtn?.addEventListener('click', () => {
+            goToSlide(currentIndex + 1)
+            startAutoplay()
+          })
 
-          prevBtn?.addEventListener("click", () => {
-            goToSlide(currentIndex - 1);
-            startAutoplay();
-          });
+          prevBtn?.addEventListener('click', () => {
+            goToSlide(currentIndex - 1)
+            startAutoplay()
+          })
 
           dots.forEach((dot, idx) => {
-            dot.addEventListener("click", () => {
-              goToSlide(idx);
-              startAutoplay();
-            });
-          });
+            dot.addEventListener('click', () => {
+              goToSlide(idx)
+              startAutoplay()
+            })
+          })
 
-          carousel.addEventListener("mouseenter", stopAutoplay);
-          carousel.addEventListener("mouseleave", startAutoplay);
+          carousel.addEventListener('mouseenter', stopAutoplay)
+          carousel.addEventListener('mouseleave', startAutoplay)
 
-          startAutoplay();
+          startAutoplay()
         }
       }
     }
 
-    setupBlogInteractions();
-    document.addEventListener("astro:page-load", setupBlogInteractions);
+    setupBlogInteractions()
+    document.addEventListener('astro:page-load', setupBlogInteractions)
   </script>
 </BlogLayout>

@@ -1,31 +1,31 @@
-import { getCurrentLocale, getTranslations } from "../i18n/translations";
-import { refreshIcons } from "../icons";
-import { getSectionOrder, isSectionCollapsed } from "../storage";
-import { getModalElements } from "./dom";
-import { toggleSectionCollapse } from "./sections/actions";
-import { capitalize } from "./utils";
+import { getCurrentLocale, getTranslations } from '../i18n/translations'
+import { refreshIcons } from '../icons'
+import { getSectionOrder, isSectionCollapsed } from '../storage'
+import { getModalElements } from './dom'
+import { toggleSectionCollapse } from './sections/actions'
+import { capitalize } from './utils'
 
 export function updateTocMenu(): void {
-  const { fabContainer, tocList } = getModalElements();
-  if (!fabContainer || !tocList) return;
+  const { fabContainer, tocList } = getModalElements()
+  if (!fabContainer || !tocList) return
 
-  const order = getSectionOrder();
-  const locale = getCurrentLocale();
-  const t = getTranslations(locale);
+  const order = getSectionOrder()
+  const locale = getCurrentLocale()
+  const t = getTranslations(locale)
   const titles: Record<string, string> = {
     effectiveness: t.modal.effectiveness,
     abilities: t.modal.abilities,
     location: t.modal.acquisition,
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
-  };
+  }
   const icons: Record<string, string> = {
-    effectiveness: "shield-check",
-    abilities: "zap",
-    location: "gamepad-2",
-    moves: "swords",
-    evolutions: "sparkles",
-  };
+    effectiveness: 'shield-check',
+    abilities: 'zap',
+    location: 'gamepad-2',
+    moves: 'swords',
+    evolutions: 'sparkles',
+  }
 
   const topItem = `
     <button class="detail-toc-item" type="button" data-toc-target="header">
@@ -33,73 +33,73 @@ export function updateTocMenu(): void {
       <span class="detail-toc-item__title">${t.modal.top}</span>
     </button>
     <div class="detail-toc-divider"></div>
-  `;
+  `
 
   const sectionItems = order
     .map((id) => {
-      const isCollapsed = isSectionCollapsed(id);
+      const isCollapsed = isSectionCollapsed(id)
       return `
         <button class="detail-toc-item" type="button" data-toc-target="${id}">
-          <span class="detail-toc-item__icon"><i data-lucide="${icons[id] ?? "circle"}"></i></span>
+          <span class="detail-toc-item__icon"><i data-lucide="${icons[id] ?? 'circle'}"></i></span>
           <span class="detail-toc-item__title">${titles[id] ?? capitalize(id)}</span>
-          ${isCollapsed ? `<span class="detail-toc-item__status">${t.modal.collapsed}</span>` : ""}
+          ${isCollapsed ? `<span class="detail-toc-item__status">${t.modal.collapsed}</span>` : ''}
         </button>
-      `;
+      `
     })
-    .join("");
+    .join('')
 
-  tocList.innerHTML = topItem + sectionItems;
-  fabContainer.hidden = false;
-  refreshIcons();
+  tocList.innerHTML = topItem + sectionItems
+  fabContainer.hidden = false
+  refreshIcons()
 }
 
 export function closeTocMenu(): void {
-  const { fabBtn, tocMenu } = getModalElements();
-  if (!tocMenu || !fabBtn) return;
-  tocMenu.classList.remove("is-open");
-  tocMenu.setAttribute("aria-hidden", "true");
-  fabBtn.classList.remove("is-active");
-  fabBtn.setAttribute("aria-expanded", "false");
+  const { fabBtn, tocMenu } = getModalElements()
+  if (!tocMenu || !fabBtn) return
+  tocMenu.classList.remove('is-open')
+  tocMenu.setAttribute('aria-hidden', 'true')
+  fabBtn.classList.remove('is-active')
+  fabBtn.setAttribute('aria-expanded', 'false')
 }
 
 export function toggleTocMenu(): void {
-  const { fabBtn, tocMenu } = getModalElements();
-  if (!tocMenu || !fabBtn) return;
-  const isOpen = tocMenu.classList.toggle("is-open");
-  tocMenu.setAttribute("aria-hidden", String(!isOpen));
-  fabBtn.classList.toggle("is-active", isOpen);
-  fabBtn.setAttribute("aria-expanded", String(isOpen));
+  const { fabBtn, tocMenu } = getModalElements()
+  if (!tocMenu || !fabBtn) return
+  const isOpen = tocMenu.classList.toggle('is-open')
+  tocMenu.setAttribute('aria-hidden', String(!isOpen))
+  fabBtn.classList.toggle('is-active', isOpen)
+  fabBtn.setAttribute('aria-expanded', String(isOpen))
 }
 
 export function scrollToSection(targetId: string): void {
-  const { bodyEl } = getModalElements();
-  if (!bodyEl) return;
+  const { bodyEl } = getModalElements()
+  if (!bodyEl) return
 
-  closeTocMenu();
+  closeTocMenu()
 
-  if (targetId === "header") {
-    bodyEl.scrollTo({ top: 0, behavior: "smooth" });
-    const headerEl = bodyEl.querySelector<HTMLElement>(".detail-header");
+  if (targetId === 'header') {
+    bodyEl.scrollTo({ top: 0, behavior: 'smooth' })
+    const headerEl = bodyEl.querySelector<HTMLElement>('.detail-header')
     if (headerEl) {
-      headerEl.classList.remove("section-target-highlight");
-      void headerEl.offsetWidth;
-      headerEl.classList.add("section-target-highlight");
-      setTimeout(() => headerEl.classList.remove("section-target-highlight"), 1200);
+      headerEl.classList.remove('section-target-highlight')
+      void headerEl.offsetWidth
+      headerEl.classList.add('section-target-highlight')
+      setTimeout(() => headerEl.classList.remove('section-target-highlight'), 1200)
     }
-    return;
+    return
   }
 
-  const sectionEl = bodyEl.querySelector<HTMLElement>(`[data-section-id="${targetId}"]`);
-  if (!sectionEl) return;
+  const sectionEl = bodyEl.querySelector<HTMLElement>(`[data-section-id="${targetId}"]`)
+  if (!sectionEl) return
 
   if (isSectionCollapsed(targetId)) {
-    toggleSectionCollapse(targetId);
+    toggleSectionCollapse(targetId)
   }
 
-  sectionEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-  sectionEl.classList.remove("section-target-highlight");
-  void sectionEl.offsetWidth;
-  sectionEl.classList.add("section-target-highlight");
-  setTimeout(() => sectionEl.classList.remove("section-target-highlight"), 1200);
+  sectionEl.classList.remove('section-target-highlight')
+  void sectionEl.offsetWidth
+  sectionEl.classList.add('section-target-highlight')
+  setTimeout(() => sectionEl.classList.remove('section-target-highlight'), 1200)
 }

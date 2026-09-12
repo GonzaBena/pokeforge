@@ -1,6 +1,6 @@
 export interface LocalizedNameEntry {
-  name: string;
-  language: { name: string; url?: string };
+  name: string
+  language: { name: string; url?: string }
 }
 
 /**
@@ -9,14 +9,14 @@ export interface LocalizedNameEntry {
  */
 export function getLocalizedName(
   entries: LocalizedNameEntry[] | undefined | null,
-  targetLang = "es",
-  fallbackLang = "en",
-  defaultVal = "",
+  targetLang = 'es',
+  fallbackLang = 'en',
+  defaultVal = '',
 ): string {
-  if (!entries || !entries.length) return defaultVal;
-  const match = entries.find((e) => e.language.name === targetLang);
-  if (match?.name) return match.name;
-  const fallback = entries.find((e) => e.language.name === fallbackLang);
-  if (fallback?.name) return fallback.name;
-  return entries[0]?.name ?? defaultVal;
+  if (!entries || !entries.length) return defaultVal
+  const match = entries.find((e) => e.language.name === targetLang)
+  if (match?.name) return match.name
+  const fallback = entries.find((e) => e.language.name === fallbackLang)
+  if (fallback?.name) return fallback.name
+  return entries[0]?.name ?? defaultVal
 }

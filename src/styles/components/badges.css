@@ -21,24 +21,97 @@
 }
 
 /* --------------------------------------------------------------- Type Mappings (EN / ES) */
-.type-badge[data-type="normal"], .type-badge--normal { --badge-bg: var(--type-normal); }
-.type-badge[data-type="fighting"], .type-badge[data-type="lucha"], .type-badge--fighting { --badge-bg: var(--type-fighting); }
-.type-badge[data-type="flying"], .type-badge[data-type="volador"], .type-badge--flying { --badge-bg: var(--type-flying); }
-.type-badge[data-type="poison"], .type-badge[data-type="veneno"], .type-badge--poison { --badge-bg: var(--type-poison); }
-.type-badge[data-type="ground"], .type-badge[data-type="tierra"], .type-badge--ground { --badge-bg: var(--type-ground); }
-.type-badge[data-type="rock"], .type-badge[data-type="roca"], .type-badge--rock { --badge-bg: var(--type-rock); }
-.type-badge[data-type="bug"], .type-badge[data-type="bicho"], .type-badge--bug { --badge-bg: var(--type-bug); }
-.type-badge[data-type="ghost"], .type-badge[data-type="fantasma"], .type-badge--ghost { --badge-bg: var(--type-ghost); }
-.type-badge[data-type="steel"], .type-badge[data-type="acero"], .type-badge--steel { --badge-bg: var(--type-steel); }
-.type-badge[data-type="fire"], .type-badge[data-type="fuego"], .type-badge--fire { --badge-bg: var(--type-fire); }
-.type-badge[data-type="water"], .type-badge[data-type="agua"], .type-badge--water { --badge-bg: var(--type-water); }
-.type-badge[data-type="grass"], .type-badge[data-type="planta"], .type-badge--grass { --badge-bg: var(--type-grass); }
-.type-badge[data-type="electric"], .type-badge[data-type="electrico"], .type-badge[data-type="eléctrico"], .type-badge--electric { --badge-bg: var(--type-electric); }
-.type-badge[data-type="psychic"], .type-badge[data-type="psiquico"], .type-badge[data-type="psíquico"], .type-badge--psychic { --badge-bg: var(--type-psychic); }
-.type-badge[data-type="ice"], .type-badge[data-type="hielo"], .type-badge--ice { --badge-bg: var(--type-ice); }
-.type-badge[data-type="dragon"], .type-badge[data-type="dragón"], .type-badge--dragon { --badge-bg: var(--type-dragon); }
-.type-badge[data-type="dark"], .type-badge[data-type="siniestro"], .type-badge--dark { --badge-bg: var(--type-dark); }
-.type-badge[data-type="fairy"], .type-badge[data-type="hada"], .type-badge--fairy { --badge-bg: var(--type-fairy); }
+.type-badge[data-type='normal'],
+.type-badge--normal {
+  --badge-bg: var(--type-normal);
+}
+.type-badge[data-type='fighting'],
+.type-badge[data-type='lucha'],
+.type-badge--fighting {
+  --badge-bg: var(--type-fighting);
+}
+.type-badge[data-type='flying'],
+.type-badge[data-type='volador'],
+.type-badge--flying {
+  --badge-bg: var(--type-flying);
+}
+.type-badge[data-type='poison'],
+.type-badge[data-type='veneno'],
+.type-badge--poison {
+  --badge-bg: var(--type-poison);
+}
+.type-badge[data-type='ground'],
+.type-badge[data-type='tierra'],
+.type-badge--ground {
+  --badge-bg: var(--type-ground);
+}
+.type-badge[data-type='rock'],
+.type-badge[data-type='roca'],
+.type-badge--rock {
+  --badge-bg: var(--type-rock);
+}
+.type-badge[data-type='bug'],
+.type-badge[data-type='bicho'],
+.type-badge--bug {
+  --badge-bg: var(--type-bug);
+}
+.type-badge[data-type='ghost'],
+.type-badge[data-type='fantasma'],
+.type-badge--ghost {
+  --badge-bg: var(--type-ghost);
+}
+.type-badge[data-type='steel'],
+.type-badge[data-type='acero'],
+.type-badge--steel {
+  --badge-bg: var(--type-steel);
+}
+.type-badge[data-type='fire'],
+.type-badge[data-type='fuego'],
+.type-badge--fire {
+  --badge-bg: var(--type-fire);
+}
+.type-badge[data-type='water'],
+.type-badge[data-type='agua'],
+.type-badge--water {
+  --badge-bg: var(--type-water);
+}
+.type-badge[data-type='grass'],
+.type-badge[data-type='planta'],
+.type-badge--grass {
+  --badge-bg: var(--type-grass);
+}
+.type-badge[data-type='electric'],
+.type-badge[data-type='electrico'],
+.type-badge[data-type='eléctrico'],
+.type-badge--electric {
+  --badge-bg: var(--type-electric);
+}
+.type-badge[data-type='psychic'],
+.type-badge[data-type='psiquico'],
+.type-badge[data-type='psíquico'],
+.type-badge--psychic {
+  --badge-bg: var(--type-psychic);
+}
+.type-badge[data-type='ice'],
+.type-badge[data-type='hielo'],
+.type-badge--ice {
+  --badge-bg: var(--type-ice);
+}
+.type-badge[data-type='dragon'],
+.type-badge[data-type='dragón'],
+.type-badge--dragon {
+  --badge-bg: var(--type-dragon);
+}
+.type-badge[data-type='dark'],
+.type-badge[data-type='siniestro'],
+.type-badge--dark {
+  --badge-bg: var(--type-dark);
+}
+.type-badge[data-type='fairy'],
+.type-badge[data-type='hada'],
+.type-badge--fairy {
+  --badge-bg: var(--type-fairy);
+}
 
 /* --------------------------------------------------------------- Move Category Badges */
 .move-category-badge {
@@ -107,4 +180,3 @@
   border-color: rgba(236, 72, 153, 0.4);
   color: #f472b6;
 }
-

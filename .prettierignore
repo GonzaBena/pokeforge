@@ -1,0 +1,7 @@
+dist/
+.astro/
+.netlify/
+node_modules/
+public/data/
+scripts/.cache/
+pnpm-lock.yaml

@@ -1,13 +1,13 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
-import "../styles/features/sync/sync-page.css";
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getTranslations, getLocalizedPath, type Locale } from '../lib/i18n/translations'
+import '../styles/features/sync/sync-page.css'
 
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
-const pokedexHref = getLocalizedPath("/pokedex/", currentLocale);
-const homeHref = getLocalizedPath("/", currentLocale);
-const teamHref = getLocalizedPath("/team/", currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+const pokedexHref = getLocalizedPath('/pokedex/', currentLocale)
+const homeHref = getLocalizedPath('/', currentLocale)
+const teamHref = getLocalizedPath('/team/', currentLocale)
 ---
 
 <BaseLayout title={t.sync.title}>
@@ -25,9 +25,7 @@ const teamHref = getLocalizedPath("/team/", currentLocale);
           <i data-lucide="smartphone"></i>
         </div>
         <h1 class="sync-card__title">{t.sync.heroTitle}</h1>
-        <p class="sync-card__description">
-          {t.sync.heroDesc}
-        </p>
+        <p class="sync-card__description">{t.sync.heroDesc}</p>
         <ol class="sync-steps">
           <li>
             <span class="sync-step-number">1</span>
@@ -59,7 +57,9 @@ const teamHref = getLocalizedPath("/team/", currentLocale);
         <div class="sync-card__icon-badge sync-card__icon-badge--success" data-ready-badge>
           <i data-lucide="sparkles"></i>
         </div>
-        <h1 class="sync-card__title" data-ready-title>{t.sync.readyTitle}</h1>
+        <h1 class="sync-card__title" data-ready-title>
+          {t.sync.readyTitle}
+        </h1>
         <p class="sync-card__subtitle" data-ready-subtitle>
           {t.sync.readySubtitle}
         </p>
@@ -76,11 +76,15 @@ const teamHref = getLocalizedPath("/team/", currentLocale);
           <div class="sync-preview__comparison">
             <div class="sync-compare-box">
               <span class="sync-compare-box__label">{t.sync.incomingCaptures}</span>
-              <strong class="sync-compare-box__value" data-incoming-captures>0</strong>
+              <strong class="sync-compare-box__value" data-incoming-captures>
+                0
+              </strong>
             </div>
             <div class="sync-compare-box">
               <span class="sync-compare-box__label">{t.sync.currentCaptures}</span>
-              <strong class="sync-compare-box__value" data-current-captures>0</strong>
+              <strong class="sync-compare-box__value" data-current-captures>
+                0
+              </strong>
             </div>
           </div>
         </div>
@@ -108,7 +112,9 @@ const teamHref = getLocalizedPath("/team/", currentLocale);
             <i data-lucide="check"></i>
             <span data-confirm-text>{t.sync.confirmSave}</span>
           </button>
-          <a href={homeHref} class="btn btn--ghost" data-astro-prefetch>{t.sync.cancel}</a>
+          <a href={homeHref} class="btn btn--ghost" data-astro-prefetch>
+            {t.sync.cancel}
+          </a>
         </div>
       </div>
     </div>
@@ -123,158 +129,157 @@ const teamHref = getLocalizedPath("/team/", currentLocale);
     decodeCapturedIds,
     type SyncPayload,
     type CloudPairingInfo,
-  } from "../lib/sync";
-  import {
-    fetchCloudVault,
-    notifyStatusChange,
-  } from "../lib/cloudSync";
-  import { getCapturedIds } from "../lib/storage";
-  import { toast } from "../lib/toast";
-  import { refreshIcons } from "../lib/icons";
-  import { getCurrentLocale, getTranslations } from "../lib/i18n/translations";
+  } from '../lib/sync'
+  import { fetchCloudVault, notifyStatusChange } from '../lib/cloudSync'
+  import { getCapturedIds } from '../lib/storage'
+  import { toast } from '../lib/toast'
+  import { refreshIcons } from '../lib/icons'
+  import { getCurrentLocale, getTranslations } from '../lib/i18n/translations'
 
   async function initSyncPage() {
-    const card = document.querySelector<HTMLDivElement>("[data-sync-card]");
-    if (!card) return;
+    const card = document.querySelector<HTMLDivElement>('[data-sync-card]')
+    if (!card) return
 
-    const page = document.querySelector<HTMLElement>(".sync-page");
-    const teamHref = page?.dataset.teamHref || (document.documentElement.lang === "es" ? "/es/equipo/" : "/team/");
+    const page = document.querySelector<HTMLElement>('.sync-page')
+    const teamHref =
+      page?.dataset.teamHref || (document.documentElement.lang === 'es' ? '/es/equipo/' : '/team/')
 
-    const loadingState = card.querySelector<HTMLDivElement>('[data-sync-state="loading"]');
-    const emptyState = card.querySelector<HTMLDivElement>('[data-sync-state="empty"]');
-    const readyState = card.querySelector<HTMLDivElement>('[data-sync-state="ready"]');
-    const readyBadge = card.querySelector<HTMLDivElement>("[data-ready-badge]");
-    const readyTitle = card.querySelector<HTMLHeadingElement>("[data-ready-title]");
-    const readySubtitle = card.querySelector<HTMLParagraphElement>("[data-ready-subtitle]");
-    const confirmBtn = card.querySelector<HTMLButtonElement>("[data-confirm-sync]");
-    const confirmText = card.querySelector<HTMLElement>("[data-confirm-text]");
+    const loadingState = card.querySelector<HTMLDivElement>('[data-sync-state="loading"]')
+    const emptyState = card.querySelector<HTMLDivElement>('[data-sync-state="empty"]')
+    const readyState = card.querySelector<HTMLDivElement>('[data-sync-state="ready"]')
+    const readyBadge = card.querySelector<HTMLDivElement>('[data-ready-badge]')
+    const readyTitle = card.querySelector<HTMLHeadingElement>('[data-ready-title]')
+    const readySubtitle = card.querySelector<HTMLParagraphElement>('[data-ready-subtitle]')
+    const confirmBtn = card.querySelector<HTMLButtonElement>('[data-confirm-sync]')
+    const confirmText = card.querySelector<HTMLElement>('[data-confirm-text]')
 
-    const previewTeam = card.querySelector<HTMLDivElement>("[data-preview-team]");
-    const incomingCapturesEl = card.querySelector<HTMLElement>("[data-incoming-captures]");
-    const currentCapturesEl = card.querySelector<HTMLElement>("[data-current-captures]");
+    const previewTeam = card.querySelector<HTMLDivElement>('[data-preview-team]')
+    const incomingCapturesEl = card.querySelector<HTMLElement>('[data-incoming-captures]')
+    const currentCapturesEl = card.querySelector<HTMLElement>('[data-current-captures]')
 
-    let currentPayload: SyncPayload | null = null;
-    let cloudPairing: CloudPairingInfo | null = null;
-    let cloudUpdatedAt: number | undefined;
+    let currentPayload: SyncPayload | null = null
+    let cloudPairing: CloudPairingInfo | null = null
+    let cloudUpdatedAt: number | undefined
 
-    const t = getTranslations(getCurrentLocale());
+    const t = getTranslations(getCurrentLocale())
 
     // 1. Intentar leer credenciales de emparejamiento con la DB (#vault=PK-XXXX&key=...)
     try {
-      cloudPairing = parseCloudPairingFromHash();
+      cloudPairing = parseCloudPairingFromHash()
       if (cloudPairing) {
-        const vaultRes = await fetchCloudVault(cloudPairing.code);
+        const vaultRes = await fetchCloudVault(cloudPairing.code)
         if (vaultRes.success && vaultRes.payload) {
-          currentPayload = vaultRes.payload;
-          cloudUpdatedAt = vaultRes.updatedAt;
+          currentPayload = vaultRes.payload
+          cloudUpdatedAt = vaultRes.updatedAt
         } else {
-          toast.error(vaultRes.error || "No se pudo conectar a la bóveda en la nube");
+          toast.error(vaultRes.error || 'No se pudo conectar a la bóveda en la nube')
         }
       }
     } catch (err) {
-      console.error("Error parsing cloud pairing hash:", err);
+      console.error('Error parsing cloud pairing hash:', err)
     }
 
     // 2. Si no es bóveda en la nube, probar payload directo P2P (#d=...)
     if (!currentPayload) {
       try {
-        currentPayload = await parseSyncFromHash();
+        currentPayload = await parseSyncFromHash()
       } catch (err) {
-        console.error("Error parsing hash:", err);
+        console.error('Error parsing hash:', err)
       }
     }
 
-    if (loadingState) loadingState.hidden = true;
+    if (loadingState) loadingState.hidden = true
 
     if (!currentPayload) {
-      if (emptyState) emptyState.hidden = false;
-      refreshIcons();
-      return;
+      if (emptyState) emptyState.hidden = false
+      refreshIcons()
+      return
     }
 
     // Datos válidos detectados
-    if (readyState) readyState.hidden = false;
+    if (readyState) readyState.hidden = false
 
     // Adaptar textos si es vinculación de bóveda en la nube
     if (cloudPairing) {
       if (readyBadge) {
-        readyBadge.innerHTML = `<i data-lucide="cloud"></i>`;
+        readyBadge.innerHTML = `<i data-lucide="cloud"></i>`
       }
       if (readyTitle) {
-        readyTitle.textContent = t.sync.cloudLinkTitle;
+        readyTitle.textContent = t.sync.cloudLinkTitle
       }
       if (readySubtitle) {
         readySubtitle.textContent = cloudPairing.secretKey
-          ? t.sync.cloudLinkSubtitleRW.replace("{code}", cloudPairing.code)
-          : t.sync.cloudLinkSubtitleRO.replace("{code}", cloudPairing.code);
+          ? t.sync.cloudLinkSubtitleRW.replace('{code}', cloudPairing.code)
+          : t.sync.cloudLinkSubtitleRO.replace('{code}', cloudPairing.code)
       }
       if (confirmText) {
-        confirmText.textContent = t.sync.cloudLinkConfirmBtn;
+        confirmText.textContent = t.sync.cloudLinkConfirmBtn
       }
     }
 
-    const incomingCaptures = decodeCapturedIds(currentPayload.capturedBitset);
-    const localCaptures = getCapturedIds();
+    const incomingCaptures = decodeCapturedIds(currentPayload.capturedBitset)
+    const localCaptures = getCapturedIds()
 
-    if (incomingCapturesEl) incomingCapturesEl.textContent = String(incomingCaptures.size);
-    if (currentCapturesEl) currentCapturesEl.textContent = String(localCaptures.size);
+    if (incomingCapturesEl) incomingCapturesEl.textContent = String(incomingCaptures.size)
+    if (currentCapturesEl) currentCapturesEl.textContent = String(localCaptures.size)
 
     // Render team preview
     if (previewTeam) {
-      previewTeam.innerHTML = "";
-      const slots = currentPayload.team?.slots || [];
+      previewTeam.innerHTML = ''
+      const slots = currentPayload.team?.slots || []
       for (const slot of slots) {
-        const slotEl = document.createElement("div");
-        slotEl.className = "sync-team-preview-slot";
+        const slotEl = document.createElement('div')
+        slotEl.className = 'sync-team-preview-slot'
         if (slot.pokemonId) {
           slotEl.innerHTML = `
             <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${slot.pokemonId}.png" alt="Pokémon #${slot.pokemonId}" loading="lazy" />
-          `;
+          `
         } else {
-          slotEl.innerHTML = `<span class="sync-empty-slot">·</span>`;
+          slotEl.innerHTML = `<span class="sync-empty-slot">·</span>`
         }
-        previewTeam.appendChild(slotEl);
+        previewTeam.appendChild(slotEl)
       }
     }
 
-    refreshIcons();
+    refreshIcons()
 
-    confirmBtn?.addEventListener("click", () => {
-      if (!currentPayload) return;
-      const selectedMode = (card.querySelector<HTMLInputElement>('input[name="syncMode"]:checked')?.value || "merge") as "merge" | "replace";
+    confirmBtn?.addEventListener('click', () => {
+      if (!currentPayload) return
+      const selectedMode = (card.querySelector<HTMLInputElement>('input[name="syncMode"]:checked')
+        ?.value || 'merge') as 'merge' | 'replace'
 
-      const result = applySyncPayload(currentPayload, selectedMode);
+      const result = applySyncPayload(currentPayload, selectedMode)
 
       // Si es vinculación con la DB en la nube, guardar credenciales
       if (cloudPairing) {
-        localStorage.setItem("poketeam:cloud_code", cloudPairing.code);
+        localStorage.setItem('poketeam:cloud_code', cloudPairing.code)
         if (cloudPairing.secretKey) {
-          localStorage.setItem("poketeam:cloud_secret", cloudPairing.secretKey);
+          localStorage.setItem('poketeam:cloud_secret', cloudPairing.secretKey)
         }
         if (cloudUpdatedAt) {
-          localStorage.setItem("poketeam:cloud_last_sync", String(cloudUpdatedAt));
+          localStorage.setItem('poketeam:cloud_last_sync', String(cloudUpdatedAt))
         }
-        notifyStatusChange();
+        notifyStatusChange()
         toast.success(
           cloudPairing.secretKey
             ? t.sync.cloudLinkSuccessToast
-            : t.sync.successToast.replace("{total}", String(result.totalCaptures))
-        );
+            : t.sync.successToast.replace('{total}', String(result.totalCaptures)),
+        )
       } else {
-        toast.success(t.sync.successToast.replace("{total}", String(result.totalCaptures)));
+        toast.success(t.sync.successToast.replace('{total}', String(result.totalCaptures)))
       }
 
       // Limpiar hash de la URL
       if (window.history.replaceState) {
-        window.history.replaceState(null, "", window.location.pathname);
+        window.history.replaceState(null, '', window.location.pathname)
       }
 
       setTimeout(() => {
-        window.location.href = teamHref;
-      }, 800);
-    });
+        window.location.href = teamHref
+      }, 800)
+    })
   }
 
-  initSyncPage();
-  document.addEventListener("astro:after-swap", initSyncPage);
+  initSyncPage()
+  document.addEventListener('astro:after-swap', initSyncPage)
 </script>

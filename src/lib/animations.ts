@@ -1,19 +1,19 @@
-import anime from "animejs";
-import { playCoinSound, playStampSound } from "./sound";
+import anime from 'animejs'
+import { playCoinSound, playStampSound } from './sound'
 
 export function staggerCardsIn(targets: Element[] | NodeListOf<Element>): void {
-  const targetArray = Array.from(targets);
-  if (!targetArray.length) return;
+  const targetArray = Array.from(targets)
+  if (!targetArray.length) return
 
   // En celulares y lotes grandes, animar solo el lote inicial visible para no bloquear el hilo principal
-  const animated = targetArray.slice(0, 16);
-  const rest = targetArray.slice(16);
+  const animated = targetArray.slice(0, 16)
+  const rest = targetArray.slice(16)
 
   if (rest.length) {
-    anime.set(rest, { opacity: 1, translateY: 0, scale: 1 });
+    anime.set(rest, { opacity: 1, translateY: 0, scale: 1 })
   }
 
-  anime.set(animated, { opacity: 0, translateY: 14, scale: 0.97 });
+  anime.set(animated, { opacity: 0, translateY: 14, scale: 0.97 })
   anime({
     targets: animated,
     opacity: [0, 1],
@@ -21,38 +21,48 @@ export function staggerCardsIn(targets: Element[] | NodeListOf<Element>): void {
     scale: [0.97, 1],
     duration: 300,
     delay: anime.stagger(25),
-    easing: "easeOutQuad",
-  });
+    easing: 'easeOutQuad',
+  })
 }
 
 export function cardHoverTilt(gridEl: HTMLElement): void {
-  if (typeof window !== "undefined" && !window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    return;
+  if (
+    typeof window !== 'undefined' &&
+    !window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  ) {
+    return
   }
-  const MAX_DEG = 10;
+  const MAX_DEG = 10
 
-  gridEl.addEventListener("mousemove", (e) => {
-    const card = (e.target as HTMLElement).closest<HTMLElement>(".pokemon-card");
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width - 0.5;
-    const py = (e.clientY - rect.top) / rect.height - 0.5;
+  gridEl.addEventListener('mousemove', (e) => {
+    const card = (e.target as HTMLElement).closest<HTMLElement>('.pokemon-card')
+    if (!card) return
+    const rect = card.getBoundingClientRect()
+    const px = (e.clientX - rect.left) / rect.width - 0.5
+    const py = (e.clientY - rect.top) / rect.height - 0.5
     anime({
       targets: card,
       rotateY: px * MAX_DEG * 2,
       rotateX: -py * MAX_DEG * 2,
       scale: 1.04,
       duration: 150,
-      easing: "easeOutQuad",
-    });
-  });
+      easing: 'easeOutQuad',
+    })
+  })
 
-  gridEl.addEventListener("mouseout", (e) => {
-    const card = (e.target as HTMLElement).closest<HTMLElement>(".pokemon-card");
-    const toEl = e.relatedTarget as HTMLElement | null;
-    if (!card || (toEl && card.contains(toEl))) return;
-    anime({ targets: card, rotateX: 0, rotateY: 0, scale: 1, duration: 300, easing: "easeOutElastic(1, .6)" });
-  });
+  gridEl.addEventListener('mouseout', (e) => {
+    const card = (e.target as HTMLElement).closest<HTMLElement>('.pokemon-card')
+    const toEl = e.relatedTarget as HTMLElement | null
+    if (!card || (toEl && card.contains(toEl))) return
+    anime({
+      targets: card,
+      rotateX: 0,
+      rotateY: 0,
+      scale: 1,
+      duration: 300,
+      easing: 'easeOutElastic(1, .6)',
+    })
+  })
 }
 
 /**
@@ -63,48 +73,48 @@ export function cardHoverTilt(gridEl: HTMLElement): void {
  * place with a bounce. Resolves once the mini pokeball badge pops in.
  */
 export function animateCaptureReveal(cardEl: HTMLElement): Promise<void> {
-  const sprite = cardEl.querySelector<HTMLElement>(".pokemon-card__sprite-wrap");
-  const badge = cardEl.querySelector<HTMLElement>(".captured-badge");
-  if (!sprite) return Promise.resolve();
+  const sprite = cardEl.querySelector<HTMLElement>('.pokemon-card__sprite-wrap')
+  const badge = cardEl.querySelector<HTMLElement>('.captured-badge')
+  if (!sprite) return Promise.resolve()
 
-  const riseDuration = 320;
-  const fallDuration = 480;
+  const riseDuration = 320
+  const fallDuration = 480
 
-  playCoinSound();
+  playCoinSound()
 
   return new Promise((resolve) => {
     anime
-      .timeline({ easing: "linear" })
+      .timeline({ easing: 'linear' })
       .add({
         targets: sprite,
         translateY: [0, -28],
         scaleX: [1, 0],
         duration: riseDuration,
-        easing: "easeInQuad",
-        complete: () => cardEl.classList.add("captured"),
+        easing: 'easeInQuad',
+        complete: () => cardEl.classList.add('captured'),
       })
       .add({
         targets: sprite,
         translateY: [-28, 0],
         scaleX: [0, 1],
         duration: fallDuration,
-        easing: "easeOutBounce",
+        easing: 'easeOutBounce',
         complete: () => {
           if (badge) {
-            playStampSound();
-            anime.set(badge, { opacity: 0, scale: 0 });
+            playStampSound()
+            anime.set(badge, { opacity: 0, scale: 0 })
             anime({
               targets: badge,
               opacity: [0, 1],
               scale: [0, 1.2, 1],
               duration: 420,
-              easing: "easeOutElastic(1, .5)",
-            });
+              easing: 'easeOutElastic(1, .5)',
+            })
           }
-          resolve();
+          resolve()
         },
-      });
-  });
+      })
+  })
 }
 
 /**
@@ -116,34 +126,34 @@ export function animateCaptureReveal(cardEl: HTMLElement): Promise<void> {
  * overlap itself is positioning, handled in CSS).
  */
 export function animateMedalReveal(medalEl: HTMLElement, stampEl: HTMLElement): Promise<void> {
-  const riseDuration = 320;
-  const fallDuration = 420;
+  const riseDuration = 320
+  const fallDuration = 420
 
-  playCoinSound();
+  playCoinSound()
 
   return new Promise((resolve) => {
-    anime.set(medalEl, { translateY: 0, scaleX: 1, opacity: 1 });
-    anime.set(stampEl, { opacity: 0, scale: 1.5 });
+    anime.set(medalEl, { translateY: 0, scaleX: 1, opacity: 1 })
+    anime.set(stampEl, { opacity: 0, scale: 1.5 })
 
     anime
-      .timeline({ easing: "linear" })
+      .timeline({ easing: 'linear' })
       .add({
         targets: medalEl,
         translateY: [0, -14],
         scaleX: [1, 0],
         duration: riseDuration,
-        easing: "easeInQuad",
+        easing: 'easeInQuad',
       })
       .add({
         targets: medalEl,
         translateY: [-14, 0],
         scaleX: [0, 1],
         duration: fallDuration,
-        easing: "easeOutBounce",
+        easing: 'easeOutBounce',
         complete: () => {
           setTimeout(() => {
-            playStampSound();
-          }, 120);
+            playStampSound()
+          }, 120)
 
           anime({
             targets: stampEl,
@@ -151,48 +161,61 @@ export function animateMedalReveal(medalEl: HTMLElement, stampEl: HTMLElement): 
             scale: [1.5, 1],
             duration: 420,
             delay: 150,
-            easing: "easeOutElastic(1, .6)",
+            easing: 'easeOutElastic(1, .6)',
             complete: () => resolve(),
-          });
+          })
         },
-      });
-  });
+      })
+  })
 }
 
 export function slotPopIn(slotEl: HTMLElement): void {
-  anime.set(slotEl, { opacity: 0, scale: 0.7 });
+  anime.set(slotEl, { opacity: 0, scale: 0.7 })
   anime({
     targets: slotEl,
     opacity: [0, 1],
     scale: [0.7, 1],
     duration: 380,
-    easing: "easeOutElastic(1, .6)",
-  });
+    easing: 'easeOutElastic(1, .6)',
+  })
 }
 
 export function badgeBounceIn(badgeEls: Element[] | NodeListOf<Element>): void {
-  anime.set(badgeEls, { opacity: 0, scale: 0 });
+  anime.set(badgeEls, { opacity: 0, scale: 0 })
   anime({
     targets: Array.from(badgeEls),
     opacity: [0, 1],
     scale: [0, 1],
     duration: 480,
     delay: anime.stagger(60),
-    easing: "easeOutElastic(1, .6)",
-  });
+    easing: 'easeOutElastic(1, .6)',
+  })
 }
 
 export function modalIn(overlayEl: HTMLElement, panelEl: HTMLElement): void {
-  anime.set(overlayEl, { opacity: 0 });
-  anime.set(panelEl, { opacity: 0, scale: 0.92, translateY: 16 });
-  anime({ targets: overlayEl, opacity: 1, duration: 200, easing: "easeOutQuad" });
-  anime({ targets: panelEl, opacity: 1, scale: 1, translateY: 0, duration: 320, easing: "easeOutQuad" });
+  anime.set(overlayEl, { opacity: 0 })
+  anime.set(panelEl, { opacity: 0, scale: 0.92, translateY: 16 })
+  anime({ targets: overlayEl, opacity: 1, duration: 200, easing: 'easeOutQuad' })
+  anime({
+    targets: panelEl,
+    opacity: 1,
+    scale: 1,
+    translateY: 0,
+    duration: 320,
+    easing: 'easeOutQuad',
+  })
 }
 
 export function modalOut(overlayEl: HTMLElement, panelEl: HTMLElement): Promise<void> {
-  anime({ targets: overlayEl, opacity: 0, duration: 180, easing: "easeInQuad" });
-  return anime({ targets: panelEl, opacity: 0, scale: 0.94, translateY: 10, duration: 200, easing: "easeInQuad" })
-    .finished as unknown as Promise<void>;
+  anime({ targets: overlayEl, opacity: 0, duration: 180, easing: 'easeInQuad' })
+  return anime({
+    targets: panelEl,
+    opacity: 0,
+    scale: 0.94,
+    translateY: 10,
+    duration: 200,
+    easing: 'easeInQuad',
+  }).finished as unknown as Promise<void>
 }
 
 export function sectionSwap(el: HTMLElement): void {
@@ -201,24 +224,24 @@ export function sectionSwap(el: HTMLElement): void {
     translateY: [-6, 0],
     opacity: [0.4, 1],
     duration: 240,
-    easing: "easeOutQuad",
-  });
+    easing: 'easeOutQuad',
+  })
 }
 
 export function toastSlideIn(el: HTMLElement): Promise<void> {
-  anime.set(el, { opacity: 0, translateX: 40 });
-  return anime({ targets: el, opacity: 1, translateX: 0, duration: 320, easing: "easeOutQuad" })
-    .finished as unknown as Promise<void>;
+  anime.set(el, { opacity: 0, translateX: 40 })
+  return anime({ targets: el, opacity: 1, translateX: 0, duration: 320, easing: 'easeOutQuad' })
+    .finished as unknown as Promise<void>
 }
 
 export function toastSlideOut(el: HTMLElement): Promise<void> {
-  return anime({ targets: el, opacity: 0, translateX: 40, duration: 220, easing: "easeInQuad" })
-    .finished as unknown as Promise<void>;
+  return anime({ targets: el, opacity: 0, translateX: 40, duration: 220, easing: 'easeInQuad' })
+    .finished as unknown as Promise<void>
 }
 
 export function toastReflow(entries: { el: HTMLElement; deltaY: number }[]): void {
   for (const { el, deltaY } of entries) {
-    anime.set(el, { translateY: deltaY });
-    anime({ targets: el, translateY: 0, duration: 260, easing: "easeOutQuad" });
+    anime.set(el, { translateY: deltaY })
+    anime({ targets: el, translateY: 0, duration: 260, easing: 'easeOutQuad' })
   }
 }

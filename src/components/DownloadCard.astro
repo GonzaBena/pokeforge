@@ -1,18 +1,18 @@
 ---
-import { getTranslations, type Locale } from "../lib/i18n/translations";
+import { getTranslations, type Locale } from '../lib/i18n/translations'
 
 interface Props {
-  path?: string;
-  url?: string;
-  src?: string;
-  href?: string;
-  text?: string;
-  title?: string;
-  description?: string;
-  size?: string;
-  format?: string;
-  fileName?: string;
-  buttonText?: string;
+  path?: string
+  url?: string
+  src?: string
+  href?: string
+  text?: string
+  title?: string
+  description?: string
+  size?: string
+  format?: string
+  fileName?: string
+  buttonText?: string
 }
 
 const {
@@ -27,72 +27,72 @@ const {
   format: customFormat,
   fileName,
   buttonText,
-} = Astro.props;
+} = Astro.props
 
-const currentLocale = (Astro.currentLocale ?? "es") as Locale;
-const t = getTranslations(currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'es') as Locale
+const t = getTranslations(currentLocale)
 
 // Resolver ruta y título soportando aliases amigables
-const fileUrl = path || url || src || href || "#";
-const fileTitle = text || title || fileUrl.split("/").pop() || "Descarga";
+const fileUrl = path || url || src || href || '#'
+const fileTitle = text || title || fileUrl.split('/').pop() || 'Descarga'
 
 // Extraer automáticamente la extensión de la ruta
 function extractExtension(rawUrl: string): string {
   try {
-    const clean = rawUrl.split("?")[0].split("#")[0];
-    const parts = clean.split(".");
+    const clean = rawUrl.split('?')[0].split('#')[0]
+    const parts = clean.split('.')
     if (parts.length > 1) {
-      const ext = parts.pop()?.trim().toUpperCase() || "";
-      if (ext.length >= 1 && ext.length <= 5 && !ext.includes("/")) {
-        return ext;
+      const ext = parts.pop()?.trim().toUpperCase() || ''
+      if (ext.length >= 1 && ext.length <= 5 && !ext.includes('/')) {
+        return ext
       }
     }
-  } catch {}
-  return "FILE";
+  } catch {
+    // ignore malformed URLs, fall back to default extension
+  }
+  return 'FILE'
 }
 
-const detectedExt = customFormat
-  ? customFormat.toUpperCase()
-  : extractExtension(fileUrl);
+const detectedExt = customFormat ? customFormat.toUpperCase() : extractExtension(fileUrl)
 
 // Determinar icono y clase de color según el tipo de archivo
 function getFileInfo(ext: string): { icon: string; badgeClass: string } {
   switch (ext) {
-    case "PDF":
-      return { icon: "file-text", badgeClass: "badge-pdf" };
-    case "PNG":
-    case "JPG":
-    case "JPEG":
-    case "WEBP":
-    case "SVG":
-    case "GIF":
-    case "AVIF":
-      return { icon: "image", badgeClass: "badge-image" };
-    case "ZIP":
-    case "RAR":
-    case "7Z":
-    case "TAR":
-    case "GZ":
-      return { icon: "archive", badgeClass: "badge-archive" };
-    case "SAV":
-    case "DAT":
-    case "BIN":
-    case "PKM":
-    case "PK9":
-      return { icon: "hard-drive", badgeClass: "badge-save" };
-    case "JSON":
-    case "CSV":
-    case "XLSX":
-    case "XLS":
-    case "TXT":
-      return { icon: "file-spreadsheet", badgeClass: "badge-data" };
+    case 'PDF':
+      return { icon: 'file-text', badgeClass: 'badge-pdf' }
+    case 'PNG':
+    case 'JPG':
+    case 'JPEG':
+    case 'WEBP':
+    case 'SVG':
+    case 'GIF':
+    case 'AVIF':
+      return { icon: 'image', badgeClass: 'badge-image' }
+    case 'ZIP':
+    case 'RAR':
+    case '7Z':
+    case 'TAR':
+    case 'GZ':
+      return { icon: 'archive', badgeClass: 'badge-archive' }
+    case 'SAV':
+    case 'DAT':
+    case 'BIN':
+    case 'PKM':
+    case 'PK9':
+      return { icon: 'hard-drive', badgeClass: 'badge-save' }
+    case 'JSON':
+    case 'CSV':
+    case 'XLSX':
+    case 'XLS':
+    case 'TXT':
+      return { icon: 'file-spreadsheet', badgeClass: 'badge-data' }
     default:
-      return { icon: "file-down", badgeClass: "badge-default" };
+      return { icon: 'file-down', badgeClass: 'badge-default' }
   }
 }
 
-const { icon, badgeClass } = getFileInfo(detectedExt);
-const actionLabel = buttonText || t.blog?.downloadAction || "Descargar";
+const { icon, badgeClass } = getFileInfo(detectedExt)
+const actionLabel = buttonText || t.blog?.downloadAction || 'Descargar'
 ---
 
 <div class="download-card">

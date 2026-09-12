@@ -1,22 +1,24 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import CapturedCounter from "../components/CapturedCounter.astro";
-import LoadMoreButton from "../components/LoadMoreButton.astro";
-import PokemonDetailModal from "../components/PokemonDetailModal.astro";
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-import "../styles/features/pokedex/filters.css";
-import "../styles/features/pokedex/moves-filter.css";
-import "../styles/features/pokedex/grid.css";
+import BaseLayout from '../layouts/BaseLayout.astro'
+import CapturedCounter from '../components/CapturedCounter.astro'
+import LoadMoreButton from '../components/LoadMoreButton.astro'
+import PokemonDetailModal from '../components/PokemonDetailModal.astro'
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import '../styles/features/pokedex/filters.css'
+import '../styles/features/pokedex/moves-filter.css'
+import '../styles/features/pokedex/grid.css'
 
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 ---
 
 <BaseLayout title={t.pokedex.title}>
   <div class="page">
     <div class="page__header">
       <div>
-        <h1 class="page__title"><i data-lucide="book-open"></i> {t.pokedex.title}</h1>
+        <h1 class="page__title">
+          <i data-lucide="book-open"></i> {t.pokedex.title}
+        </h1>
         <p class="page__subtitle">{t.pokedex.subtitle}</p>
       </div>
       <CapturedCounter />
@@ -25,12 +27,21 @@ const t = getTranslations(currentLocale);
     <div class="pokedex-controls">
       <div class="filters-bar">
         <div class="view-toggle" data-view-toggle>
-          <button class="view-toggle__btn" type="button" data-view="all" aria-pressed="true">{t.pokedex.all}</button>
-          <button class="view-toggle__btn" type="button" data-view="captured" aria-pressed="false">{t.pokedex.captured}</button>
+          <button class="view-toggle__btn" type="button" data-view="all" aria-pressed="true">
+            {t.pokedex.all}
+          </button>
+          <button class="view-toggle__btn" type="button" data-view="captured" aria-pressed="false">
+            {t.pokedex.captured}
+          </button>
         </div>
         <label class="search-input-wrap">
           <i data-lucide="search" class="search-input-icon"></i>
-          <input class="search-input" type="search" placeholder={t.pokedex.searchPlaceholder} data-search-input />
+          <input
+            class="search-input"
+            type="search"
+            placeholder={t.pokedex.searchPlaceholder}
+            data-search-input
+          />
         </label>
         <button
           class="filter-toggle-btn"
@@ -43,7 +54,9 @@ const t = getTranslations(currentLocale);
         >
           <i data-lucide="sliders-horizontal" class="filter-toggle-btn__icon"></i>
           <span class="filter-toggle-btn__text">{t.pokedex.filters}</span>
-          <span class="filter-toggle-btn__badge" data-filter-active-count hidden>0</span>
+          <span class="filter-toggle-btn__badge" data-filter-active-count hidden>
+            0
+          </span>
           <i data-lucide="chevron-down" class="filter-toggle-btn__chevron"></i>
         </button>
       </div>
@@ -56,7 +69,13 @@ const t = getTranslations(currentLocale);
                 <i data-lucide="filter"></i>
                 <span>{t.pokedex.filters}</span>
               </div>
-              <button class="filter-clear-btn" type="button" data-clear-filters hidden title={t.pokedex.clearFilters}>
+              <button
+                class="filter-clear-btn"
+                type="button"
+                data-clear-filters
+                hidden
+                title={t.pokedex.clearFilters}
+              >
                 <i data-lucide="rotate-ccw"></i>
                 <span>{t.pokedex.clearFilters}</span>
               </button>
@@ -71,10 +90,29 @@ const t = getTranslations(currentLocale);
                 <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
               </div>
               <div class="view-toggle" data-game-mode-toggle aria-label={t.pokedex.dexMode} hidden>
-                <button class="view-toggle__btn" type="button" data-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
-                <button class="view-toggle__btn" type="button" data-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
+                <button
+                  class="view-toggle__btn"
+                  type="button"
+                  data-game-mode="regional"
+                  aria-pressed="true"
+                >
+                  {t.pokedex.regionalDex}
+                </button>
+                <button
+                  class="view-toggle__btn"
+                  type="button"
+                  data-game-mode="obtainable"
+                  aria-pressed="false"
+                >
+                  {t.pokedex.obtainable}
+                </button>
               </div>
-              <div class="view-toggle exclusive-toggle" data-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden></div>
+              <div
+                class="view-toggle exclusive-toggle"
+                data-exclusive-toggle
+                aria-label={t.pokedex.exclusiveFilter}
+                hidden
+              ></div>
             </div>
 
             <div class="filter-stacks">
@@ -132,16 +170,44 @@ const t = getTranslations(currentLocale);
               <div class="filter-section">
                 <div class="filter-section__header">
                   <span class="filter-section__label">{t.pokedex.filterByType}</span>
-                  <div class="view-toggle view-toggle--compact" data-type-mode-toggle aria-label={t.pokedex.typeMatchMode}>
-                    <button class="view-toggle__btn" type="button" data-type-mode="or" aria-pressed="true" title={t.pokedex.typeMatchOrDesc}>{t.pokedex.typeMatchOr}</button>
-                    <button class="view-toggle__btn" type="button" data-type-mode="and" aria-pressed="false" title={t.pokedex.typeMatchAndDesc}>{t.pokedex.typeMatchAnd}</button>
+                  <div
+                    class="view-toggle view-toggle--compact"
+                    data-type-mode-toggle
+                    aria-label={t.pokedex.typeMatchMode}
+                  >
+                    <button
+                      class="view-toggle__btn"
+                      type="button"
+                      data-type-mode="or"
+                      aria-pressed="true"
+                      title={t.pokedex.typeMatchOrDesc}
+                    >
+                      {t.pokedex.typeMatchOr}
+                    </button>
+                    <button
+                      class="view-toggle__btn"
+                      type="button"
+                      data-type-mode="and"
+                      aria-pressed="false"
+                      title={t.pokedex.typeMatchAndDesc}
+                    >
+                      {t.pokedex.typeMatchAnd}
+                    </button>
                   </div>
                 </div>
-                <div class="filter-group" data-type-filter aria-label={t.pokedex.filterByType}></div>
+                <div
+                  class="filter-group"
+                  data-type-filter
+                  aria-label={t.pokedex.filterByType}
+                ></div>
               </div>
               <div class="filter-section">
                 <span class="filter-section__label">{t.pokedex.filterByGen}</span>
-                <div class="filter-group" data-generation-filter aria-label={t.pokedex.filterByGen}></div>
+                <div
+                  class="filter-group"
+                  data-generation-filter
+                  aria-label={t.pokedex.filterByGen}
+                ></div>
               </div>
             </div>
 
@@ -157,13 +223,15 @@ const t = getTranslations(currentLocale);
     </div>
 
     <div class="pokedex-grid" data-pokedex-grid></div>
-    <p class="pokedex-empty" data-pokedex-empty hidden>{t.pokedex.empty}</p>
+    <p class="pokedex-empty" data-pokedex-empty hidden>
+      {t.pokedex.empty}
+    </p>
     <LoadMoreButton />
   </div>
 
   <PokemonDetailModal />
 
   <script>
-    import "../scripts/pokedex-page";
+    import '../scripts/pokedex-page'
   </script>
 </BaseLayout>

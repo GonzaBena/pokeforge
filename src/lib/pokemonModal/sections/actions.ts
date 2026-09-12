@@ -1,73 +1,73 @@
-import { sectionSwap } from "../../animations";
-import { getSectionOrder, setSectionCollapsed, setSectionOrder } from "../../storage";
-import { getModalElements } from "../dom";
-import { render } from "../render";
-import { modalState } from "../state";
-import { updateTocMenu } from "../toc";
+import { sectionSwap } from '../../animations'
+import { getSectionOrder, setSectionCollapsed, setSectionOrder } from '../../storage'
+import { getModalElements } from '../dom'
+import { render } from '../render'
+import { modalState } from '../state'
+import { updateTocMenu } from '../toc'
 
 export function swapSection(id: string, direction: -1 | 1): void {
-  const order = getSectionOrder();
-  const idx = order.indexOf(id);
-  const newIdx = idx + direction;
-  if (newIdx < 0 || newIdx >= order.length) return;
+  const order = getSectionOrder()
+  const idx = order.indexOf(id)
+  const newIdx = idx + direction
+  if (newIdx < 0 || newIdx >= order.length) return
 
-  [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
-  setSectionOrder(order);
-  if (modalState.lastContext) render(modalState.lastContext);
+  ;[order[idx], order[newIdx]] = [order[newIdx], order[idx]]
+  setSectionOrder(order)
+  if (modalState.lastContext) render(modalState.lastContext)
 
-  const { bodyEl } = getModalElements();
-  if (!bodyEl) return;
+  const { bodyEl } = getModalElements()
+  if (!bodyEl) return
 
   for (const sectionId of [id, order[idx]]) {
-    const el = bodyEl.querySelector<HTMLElement>(`[data-section-id="${sectionId}"]`);
-    if (el) sectionSwap(el);
+    const el = bodyEl.querySelector<HTMLElement>(`[data-section-id="${sectionId}"]`)
+    if (el) sectionSwap(el)
   }
 }
 
-export function moveSectionToEdge(id: string, edge: "top" | "bottom"): void {
-  const order = getSectionOrder();
-  const idx = order.indexOf(id);
-  if (idx === -1) return;
-  if (edge === "top" && idx === 0) return;
-  if (edge === "bottom" && idx === order.length - 1) return;
+export function moveSectionToEdge(id: string, edge: 'top' | 'bottom'): void {
+  const order = getSectionOrder()
+  const idx = order.indexOf(id)
+  if (idx === -1) return
+  if (edge === 'top' && idx === 0) return
+  if (edge === 'bottom' && idx === order.length - 1) return
 
-  order.splice(idx, 1);
-  if (edge === "top") {
-    order.unshift(id);
+  order.splice(idx, 1)
+  if (edge === 'top') {
+    order.unshift(id)
   } else {
-    order.push(id);
+    order.push(id)
   }
 
-  setSectionOrder(order);
-  if (modalState.lastContext) render(modalState.lastContext);
+  setSectionOrder(order)
+  if (modalState.lastContext) render(modalState.lastContext)
 
-  const { bodyEl } = getModalElements();
-  if (!bodyEl) return;
+  const { bodyEl } = getModalElements()
+  if (!bodyEl) return
 
-  const el = bodyEl.querySelector<HTMLElement>(`[data-section-id="${id}"]`);
-  if (el) sectionSwap(el);
+  const el = bodyEl.querySelector<HTMLElement>(`[data-section-id="${id}"]`)
+  if (el) sectionSwap(el)
 }
 
 export function toggleSectionCollapse(sectionId: string): void {
-  const { bodyEl } = getModalElements();
-  if (!bodyEl) return;
+  const { bodyEl } = getModalElements()
+  if (!bodyEl) return
 
-  const sectionEl = bodyEl.querySelector<HTMLElement>(`[data-section-id="${sectionId}"]`);
-  if (!sectionEl) return;
+  const sectionEl = bodyEl.querySelector<HTMLElement>(`[data-section-id="${sectionId}"]`)
+  if (!sectionEl) return
 
-  const willCollapse = !sectionEl.classList.contains("is-collapsed");
-  sectionEl.classList.toggle("is-collapsed", willCollapse);
+  const willCollapse = !sectionEl.classList.contains('is-collapsed')
+  sectionEl.classList.toggle('is-collapsed', willCollapse)
 
-  const headerEl = sectionEl.querySelector<HTMLElement>("[data-section-toggle]");
+  const headerEl = sectionEl.querySelector<HTMLElement>('[data-section-toggle]')
   if (headerEl) {
-    headerEl.setAttribute("aria-expanded", String(!willCollapse));
+    headerEl.setAttribute('aria-expanded', String(!willCollapse))
   }
 
-  const contentEl = sectionEl.querySelector<HTMLElement>(".detail-section__content");
+  const contentEl = sectionEl.querySelector<HTMLElement>('.detail-section__content')
   if (contentEl) {
-    contentEl.hidden = willCollapse;
+    contentEl.hidden = willCollapse
   }
 
-  setSectionCollapsed(sectionId, willCollapse);
-  updateTocMenu();
+  setSectionCollapsed(sectionId, willCollapse)
+  updateTocMenu()
 }

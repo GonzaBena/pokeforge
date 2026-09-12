@@ -1,7 +1,7 @@
 ---
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 ---
 
 <div class="load-more-wrap" data-load-more-wrap hidden>

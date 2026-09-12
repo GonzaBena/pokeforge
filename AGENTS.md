@@ -11,9 +11,11 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 ## Package Manager
 
 Always use `pnpm` instead of `npm`, and `pnpx` instead of `npx`.
+
 - `pnpm install`
 - `pnpm run <script>` (e.g. `pnpm run check`, `pnpm run build`)
 - `pnpx <command>`
+
 ## Documentation
 
 Full documentation: https://docs.astro.build
@@ -31,4 +33,3 @@ Consult these guides before working on related tasks:
 
 Design tokens and type color variables are defined in [`src/styles/tokens.css`](file:///Users/gonzo/Documents/workspace/poketeam/src/styles/tokens.css) (e.g. `var(--type-fire)`, `var(--type-water)`).
 Full reference guide: [`docs/GUIA_COLORES_TIPOS.md`](file:///Users/gonzo/Documents/workspace/poketeam/docs/GUIA_COLORES_TIPOS.md).
-

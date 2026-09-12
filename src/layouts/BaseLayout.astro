@@ -1,19 +1,19 @@
 ---
-import Nav from "../components/Nav.astro";
-import NavProgress from "../components/NavProgress.astro";
-import ToastContainer from "../components/ToastContainer.astro";
-import SyncModal from "../components/SyncModal.astro";
-import MoveFilterHelpModal from "../components/MoveFilterHelpModal.astro";
-import type { Locale } from "../lib/i18n/translations";
-import "../styles/global.css";
+import Nav from '../components/Nav.astro'
+import NavProgress from '../components/NavProgress.astro'
+import ToastContainer from '../components/ToastContainer.astro'
+import SyncModal from '../components/SyncModal.astro'
+import MoveFilterHelpModal from '../components/MoveFilterHelpModal.astro'
+import type { Locale } from '../lib/i18n/translations'
+import '../styles/global.css'
 
 interface Props {
-  title: string;
-  alternateUrls?: Partial<Record<Locale, string>>;
+  title: string
+  alternateUrls?: Partial<Record<Locale, string>>
 }
 
-const { title, alternateUrls } = Astro.props;
-const currentLocale = Astro.currentLocale ?? "en";
+const { title, alternateUrls } = Astro.props
+const currentLocale = Astro.currentLocale ?? 'en'
 ---
 
 <!doctype html>
@@ -41,30 +41,30 @@ const currentLocale = Astro.currentLocale ?? "en";
     <MoveFilterHelpModal />
     <ToastContainer />
     <script>
-      import { refreshIcons } from "../lib/icons";
-      import { initMoveTooltip } from "../lib/moveTooltip";
-      refreshIcons();
-      initMoveTooltip();
+      import { refreshIcons } from '../lib/icons'
+      import { initMoveTooltip } from '../lib/moveTooltip'
+      refreshIcons()
+      initMoveTooltip()
 
-      if ("serviceWorker" in navigator) {
+      if ('serviceWorker' in navigator) {
         if (import.meta.env.PROD) {
-          window.addEventListener("load", () => {
+          window.addEventListener('load', () => {
             navigator.serviceWorker
-              .register("/sw.js")
+              .register('/sw.js')
               .then((registration) => {
-                registration.update();
+                registration.update()
               })
               .catch((err) => {
-                console.warn("ServiceWorker error:", err);
-              });
-          });
+                console.warn('ServiceWorker error:', err)
+              })
+          })
         } else {
           // En desarrollo, desregistrar Service Workers para evitar colisiones con Vite HMR y caché de dependencias
           navigator.serviceWorker.getRegistrations().then((registrations) => {
             for (const registration of registrations) {
-              registration.unregister();
+              registration.unregister()
             }
-          });
+          })
         }
       }
     </script>

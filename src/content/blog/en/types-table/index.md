@@ -12,7 +12,7 @@ author: gonzo
 isGuideHub: false
 inProgress: false
 coverImageFit: cover
-translation: "tabla-tipos"
+translation: 'tabla-tipos'
 downloads:
   - text: Types Chart
     path: /downloads/TypesTable.webp

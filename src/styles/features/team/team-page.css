@@ -129,7 +129,6 @@
   width: 100%;
 }
 
-
 .team-slot__remove {
   position: absolute;
   margin-top: -70px;
@@ -146,7 +145,9 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
   border-radius: var(--radius-lg);
 }
 
@@ -173,7 +174,10 @@
 
 /* Cross-highlighting states */
 .team-slot-column {
-  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .team-slot-column.is-dimmed {
@@ -183,34 +187,43 @@
 
 .team-slot-column.is-highlighted-weak-4x .team-slot {
   border-color: #ef4444 !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4), 0 4px 14px rgba(239, 68, 68, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.4),
+    0 4px 14px rgba(239, 68, 68, 0.25);
   transform: translateY(-2px);
 }
 
 .team-slot-column.is-highlighted-weak-2x .team-slot {
   border-color: #f97316 !important;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4), 0 4px 14px rgba(249, 115, 22, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(249, 115, 22, 0.4),
+    0 4px 14px rgba(249, 115, 22, 0.25);
   transform: translateY(-2px);
 }
 
 .team-slot-column.is-highlighted-resist .team-slot {
   border-color: #22c55e !important;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.4), 0 4px 14px rgba(34, 197, 94, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(34, 197, 94, 0.4),
+    0 4px 14px rgba(34, 197, 94, 0.25);
   transform: translateY(-2px);
 }
 
 .team-slot-column.is-highlighted-immune .team-slot {
   border-color: #a855f7 !important;
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.4), 0 4px 14px rgba(168, 85, 247, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(168, 85, 247, 0.4),
+    0 4px 14px rgba(168, 85, 247, 0.25);
   transform: translateY(-2px);
 }
 
 .team-slot-column.is-highlighted-attacker .team-slot {
   border-color: #38bdf8 !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4), 0 4px 14px rgba(56, 189, 248, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(56, 189, 248, 0.4),
+    0 4px 14px rgba(56, 189, 248, 0.25);
   transform: translateY(-2px);
 }
-
 
 .team-slot-moves {
   display: flex;
@@ -454,4 +467,3 @@
   color: var(--text-muted);
   opacity: 0.7;
 }
-

@@ -1,49 +1,54 @@
 ---
-import Nav from "../components/Nav.astro";
-import NavProgress from "../components/NavProgress.astro";
-import type { Locale } from "../lib/i18n/translations";
-import "../styles/global.css";
+import Nav from '../components/Nav.astro'
+import NavProgress from '../components/NavProgress.astro'
+import type { Locale } from '../lib/i18n/translations'
+import '../styles/global.css'
 
 interface Props {
-  title: string;
-  description?: string;
-  image?: string;
-  pubDate?: Date;
-  author?: string;
-  alternateUrls?: Partial<Record<Locale, string>>;
-  type?: "website" | "article";
+  title: string
+  description?: string
+  image?: string
+  pubDate?: Date
+  author?: string
+  alternateUrls?: Partial<Record<Locale, string>>
+  type?: 'website' | 'article'
 }
 
 const {
   title,
-  description = "Guías, análisis competitivo, curiosidades y herramientas para Pokémon en PokeForge.",
-  image = "/favicon.png",
+  description = 'Guías, análisis competitivo, curiosidades y herramientas para Pokémon en PokeForge.',
+  image = '/favicon.png',
   pubDate,
-  author = "PokeForge Team",
+  author = 'PokeForge Team',
   alternateUrls,
-  type = "website",
-} = Astro.props;
+  type = 'website',
+} = Astro.props
 
-const currentLocale = Astro.currentLocale ?? "en";
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).href;
-const resolvedImageUrl = image.startsWith("http") ? image : new URL(image, Astro.site ?? Astro.url.origin).href;
+const currentLocale = Astro.currentLocale ?? 'en'
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).href
+const resolvedImageUrl = image.startsWith('http')
+  ? image
+  : new URL(image, Astro.site ?? Astro.url.origin).href
 
-const schemaData = type === "article" ? {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": title,
-  "description": description,
-  "image": resolvedImageUrl,
-  "datePublished": pubDate ? pubDate.toISOString() : undefined,
-  "author": {
-    "@type": "Person",
-    "name": author,
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": canonicalUrl,
-  },
-} : null;
+const schemaData =
+  type === 'article'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: title,
+        description: description,
+        image: resolvedImageUrl,
+        datePublished: pubDate ? pubDate.toISOString() : undefined,
+        author: {
+          '@type': 'Person',
+          name: author,
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': canonicalUrl,
+        },
+      }
+    : null
 ---
 
 <!doctype html>
@@ -71,7 +76,7 @@ const schemaData = type === "article" ? {
     <meta property="og:description" content={description} />
     <meta property="og:image" content={resolvedImageUrl} />
     <meta property="og:site_name" content="PokeForge" />
-    <meta property="og:locale" content={currentLocale === "es" ? "es_ES" : "en_US"} />
+    <meta property="og:locale" content={currentLocale === 'es' ? 'es_ES' : 'en_US'} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -81,7 +86,7 @@ const schemaData = type === "article" ? {
     <meta name="twitter:image" content={resolvedImageUrl} />
 
     {schemaData && (
-      <script type="application/ld+json" is:inline set:html={JSON.stringify(schemaData)} />
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(schemaData)}></script>
     )}
   </head>
   <body>
@@ -89,27 +94,27 @@ const schemaData = type === "article" ? {
     <Nav alternateUrls={alternateUrls} variant="minimal" />
     <slot />
     <script>
-      import { refreshIcons } from "../lib/icons";
-      refreshIcons();
+      import { refreshIcons } from '../lib/icons'
+      refreshIcons()
 
-      if ("serviceWorker" in navigator) {
+      if ('serviceWorker' in navigator) {
         if (import.meta.env.PROD) {
-          window.addEventListener("load", () => {
+          window.addEventListener('load', () => {
             navigator.serviceWorker
-              .register("/sw.js")
+              .register('/sw.js')
               .then((registration) => {
-                registration.update();
+                registration.update()
               })
               .catch((err) => {
-                console.warn("ServiceWorker error:", err);
-              });
-          });
+                console.warn('ServiceWorker error:', err)
+              })
+          })
         } else {
           navigator.serviceWorker.getRegistrations().then((registrations) => {
             for (const registration of registrations) {
-              registration.unregister();
+              registration.unregister()
             }
-          });
+          })
         }
       }
     </script>

@@ -1,27 +1,29 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import StrengthsWeaknessesPanel from "../components/StrengthsWeaknessesPanel.astro";
-import StrengthsGuideModal from "../components/StrengthsGuideModal.astro";
-import PokemonDetailModal from "../components/PokemonDetailModal.astro";
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-import "../styles/features/team/team-page.css";
-import "../styles/features/team/move-picker.css";
-import "../styles/features/team/item-picker.css";
-import "../styles/features/team/side-panel.css";
-import "../styles/features/team/graphic-modal.css";
-import "../styles/features/team/type-matrix.css";
-import "../styles/features/team/synergy.css";
-import "../styles/features/team/picker-filters.css";
+import BaseLayout from '../layouts/BaseLayout.astro'
+import StrengthsWeaknessesPanel from '../components/StrengthsWeaknessesPanel.astro'
+import StrengthsGuideModal from '../components/StrengthsGuideModal.astro'
+import PokemonDetailModal from '../components/PokemonDetailModal.astro'
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import '../styles/features/team/team-page.css'
+import '../styles/features/team/move-picker.css'
+import '../styles/features/team/item-picker.css'
+import '../styles/features/team/side-panel.css'
+import '../styles/features/team/graphic-modal.css'
+import '../styles/features/team/type-matrix.css'
+import '../styles/features/team/synergy.css'
+import '../styles/features/team/picker-filters.css'
 
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 ---
 
 <BaseLayout title={t.team.title}>
   <div class="page">
     <div class="page__header">
       <div>
-        <h1 class="page__title"><i data-lucide="users"></i> {t.team.title}</h1>
+        <h1 class="page__title">
+          <i data-lucide="users"></i> {t.team.title}
+        </h1>
         <p class="page__subtitle">{t.team.subtitle}</p>
       </div>
       <div class="page__header-actions">
@@ -32,7 +34,12 @@ const t = getTranslations(currentLocale);
           </select>
           <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
         </div>
-        <button class="btn" type="button" data-open-synergy title={t.strengthsWeaknesses.synergyTitle}>
+        <button
+          class="btn"
+          type="button"
+          data-open-synergy
+          title={t.strengthsWeaknesses.synergyTitle}
+        >
           <i data-lucide="sparkles"></i>
           <span>{t.strengthsWeaknesses.tabSynergy}</span>
         </button>
@@ -40,7 +47,12 @@ const t = getTranslations(currentLocale);
           <i data-lucide="grid"></i>
           <span>{t.team.typeMatrix}</span>
         </button>
-        <button class="btn btn--primary" type="button" data-open-team-card title={t.team.teamCardTitle}>
+        <button
+          class="btn btn--primary"
+          type="button"
+          data-open-team-card
+          title={t.team.teamCardTitle}
+        >
           <i data-lucide="share-2"></i>
           <span>{t.team.teamCard}</span>
         </button>
@@ -57,10 +69,17 @@ const t = getTranslations(currentLocale);
     <div class="modal-panel synergy-modal-panel">
       <div class="modal-panel__header">
         <div class="picker-panel__header-info">
-          <h2><i data-lucide="sparkles"></i> {t.strengthsWeaknesses.synergyTitle}</h2>
+          <h2>
+            <i data-lucide="sparkles"></i> {t.strengthsWeaknesses.synergyTitle}
+          </h2>
           <span class="type-matrix-modal__subtitle">{t.strengthsWeaknesses.synergySubtitle}</span>
         </div>
-        <button class="modal-panel__close" type="button" data-synergy-modal-close aria-label={t.modal.close}>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-synergy-modal-close
+          aria-label={t.modal.close}
+        >
           <i data-lucide="x"></i>
         </button>
       </div>
@@ -72,10 +91,17 @@ const t = getTranslations(currentLocale);
     <div class="modal-panel type-matrix-modal-panel">
       <div class="modal-panel__header">
         <div class="picker-panel__header-info">
-          <h2><i data-lucide="grid"></i> {t.team.typeMatrixTitle}</h2>
+          <h2>
+            <i data-lucide="grid"></i> {t.team.typeMatrixTitle}
+          </h2>
           <span class="type-matrix-modal__subtitle">{t.team.typeMatrixSubtitle}</span>
         </div>
-        <button class="modal-panel__close" type="button" data-type-matrix-close aria-label={t.modal.close}>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-type-matrix-close
+          aria-label={t.modal.close}
+        >
           <i data-lucide="x"></i>
         </button>
       </div>
@@ -87,9 +113,16 @@ const t = getTranslations(currentLocale);
     <div class="modal-panel team-card-modal-panel">
       <div class="modal-panel__header">
         <div class="picker-panel__header-info">
-          <h2><i data-lucide="image"></i> {t.team.teamCard}</h2>
+          <h2>
+            <i data-lucide="image"></i> {t.team.teamCard}
+          </h2>
         </div>
-        <button class="modal-panel__close" type="button" data-team-card-close aria-label={t.modal.close}>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-team-card-close
+          aria-label={t.modal.close}
+        >
           <i data-lucide="x"></i>
         </button>
       </div>
@@ -113,10 +146,17 @@ const t = getTranslations(currentLocale);
     <div class="modal-panel picker-modal-panel">
       <div class="modal-panel__header">
         <div class="picker-panel__header-info">
-          <h2><i data-lucide="sparkles"></i> {t.team.choosePokemon}</h2>
+          <h2>
+            <i data-lucide="sparkles"></i> {t.team.choosePokemon}
+          </h2>
           <span class="picker-panel__count" data-picker-count></span>
         </div>
-        <button class="modal-panel__close" type="button" data-picker-close aria-label={t.modal.close}>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-picker-close
+          aria-label={t.modal.close}
+        >
           <i data-lucide="x"></i>
         </button>
       </div>
@@ -125,7 +165,12 @@ const t = getTranslations(currentLocale);
           <div class="picker-panel__inputs-row">
             <label class="picker-input-wrap">
               <i data-lucide="search" class="picker-input-icon"></i>
-              <input class="picker-input" type="search" placeholder={t.team.searchByNameOrNum} data-picker-search />
+              <input
+                class="picker-input"
+                type="search"
+                placeholder={t.team.searchByNameOrNum}
+                data-picker-search
+              />
             </label>
             <label class="picker-input-wrap">
               <i data-lucide="swords" class="picker-input-icon"></i>
@@ -142,16 +187,44 @@ const t = getTranslations(currentLocale);
           <div class="picker-panel__filter-section">
             <div class="filter-section__header">
               <span class="picker-panel__section-title">{t.team.typesSection}</span>
-              <div class="view-toggle view-toggle--compact" data-picker-type-mode-toggle aria-label={t.team.typeMatchMode}>
-                <button class="view-toggle__btn" type="button" data-picker-type-mode="or" aria-pressed="true" title={t.team.typeMatchOrDesc}>{t.team.typeMatchOr}</button>
-                <button class="view-toggle__btn" type="button" data-picker-type-mode="and" aria-pressed="false" title={t.team.typeMatchAndDesc}>{t.team.typeMatchAnd}</button>
+              <div
+                class="view-toggle view-toggle--compact"
+                data-picker-type-mode-toggle
+                aria-label={t.team.typeMatchMode}
+              >
+                <button
+                  class="view-toggle__btn"
+                  type="button"
+                  data-picker-type-mode="or"
+                  aria-pressed="true"
+                  title={t.team.typeMatchOrDesc}
+                >
+                  {t.team.typeMatchOr}
+                </button>
+                <button
+                  class="view-toggle__btn"
+                  type="button"
+                  data-picker-type-mode="and"
+                  aria-pressed="false"
+                  title={t.team.typeMatchAndDesc}
+                >
+                  {t.team.typeMatchAnd}
+                </button>
               </div>
             </div>
-            <div class="filter-group filter-group--compact" data-picker-type-filter aria-label={t.team.typesSection}></div>
+            <div
+              class="filter-group filter-group--compact"
+              data-picker-type-filter
+              aria-label={t.team.typesSection}
+            ></div>
           </div>
           <div class="picker-panel__filter-section">
             <span class="picker-panel__section-title">{t.team.gensSection}</span>
-            <div class="filter-group filter-group--compact" data-picker-generation-filter aria-label={t.team.gensSection}></div>
+            <div
+              class="filter-group filter-group--compact"
+              data-picker-generation-filter
+              aria-label={t.team.gensSection}
+            ></div>
           </div>
           <div class="picker-panel__filter-section">
             <span class="picker-panel__section-title">{t.team.gameSection}</span>
@@ -163,11 +236,35 @@ const t = getTranslations(currentLocale);
                 </select>
                 <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
               </div>
-              <div class="view-toggle" data-picker-game-mode-toggle aria-label={t.pokedex.dexMode} hidden>
-                <button class="view-toggle__btn" type="button" data-picker-game-mode="regional" aria-pressed="true">{t.pokedex.regionalDex}</button>
-                <button class="view-toggle__btn" type="button" data-picker-game-mode="obtainable" aria-pressed="false">{t.pokedex.obtainable}</button>
+              <div
+                class="view-toggle"
+                data-picker-game-mode-toggle
+                aria-label={t.pokedex.dexMode}
+                hidden
+              >
+                <button
+                  class="view-toggle__btn"
+                  type="button"
+                  data-picker-game-mode="regional"
+                  aria-pressed="true"
+                >
+                  {t.pokedex.regionalDex}
+                </button>
+                <button
+                  class="view-toggle__btn"
+                  type="button"
+                  data-picker-game-mode="obtainable"
+                  aria-pressed="false"
+                >
+                  {t.pokedex.obtainable}
+                </button>
               </div>
-              <div class="view-toggle exclusive-toggle" data-picker-exclusive-toggle aria-label={t.pokedex.exclusiveFilter} hidden></div>
+              <div
+                class="view-toggle exclusive-toggle"
+                data-picker-exclusive-toggle
+                aria-label={t.pokedex.exclusiveFilter}
+                hidden
+              ></div>
             </div>
           </div>
         </div>
@@ -180,10 +277,17 @@ const t = getTranslations(currentLocale);
     <div class="modal-panel move-picker-modal-panel">
       <div class="modal-panel__header">
         <div class="picker-panel__header-info">
-          <h2><i data-lucide="swords"></i> <span data-move-picker-title>{t.team.selectMove}</span></h2>
+          <h2>
+            <i data-lucide="swords"></i> <span data-move-picker-title>{t.team.selectMove}</span>
+          </h2>
           <span class="picker-panel__count" data-move-picker-count></span>
         </div>
-        <button class="modal-panel__close" type="button" data-move-picker-close aria-label={t.modal.close}>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-move-picker-close
+          aria-label={t.modal.close}
+        >
           <i data-lucide="x"></i>
         </button>
       </div>
@@ -192,7 +296,12 @@ const t = getTranslations(currentLocale);
           <div class="search-with-help">
             <label class="picker-input-wrap">
               <i data-lucide="search" class="picker-input-icon"></i>
-              <input class="picker-input" type="search" placeholder={t.team.filterByMove} data-move-picker-search />
+              <input
+                class="picker-input"
+                type="search"
+                placeholder={t.team.filterByMove}
+                data-move-picker-search
+              />
             </label>
             <button
               class="filter-help-btn"
@@ -207,27 +316,82 @@ const t = getTranslations(currentLocale);
           <div class="picker-panel__container">
             <div class="picker-panel__filter-section">
               <span class="picker-panel__section-title">{t.team.category}</span>
-              <div class="filter-group filter-group--compact" data-move-category-filter aria-label={t.team.category}>
-                <button class="filter-chip" type="button" data-category="all" aria-pressed="true">{t.team.allCategories}</button>
-                <button class="filter-chip" type="button" data-category="physical" aria-pressed="false">{t.team.physical}</button>
-                <button class="filter-chip" type="button" data-category="special" aria-pressed="false">{t.team.special}</button>
-                <button class="filter-chip" type="button" data-category="status" aria-pressed="false">{t.team.status}</button>
+              <div
+                class="filter-group filter-group--compact"
+                data-move-category-filter
+                aria-label={t.team.category}
+              >
+                <button class="filter-chip" type="button" data-category="all" aria-pressed="true">
+                  {t.team.allCategories}
+                </button>
+                <button
+                  class="filter-chip"
+                  type="button"
+                  data-category="physical"
+                  aria-pressed="false"
+                >
+                  {t.team.physical}
+                </button>
+                <button
+                  class="filter-chip"
+                  type="button"
+                  data-category="special"
+                  aria-pressed="false"
+                >
+                  {t.team.special}
+                </button>
+                <button
+                  class="filter-chip"
+                  type="button"
+                  data-category="status"
+                  aria-pressed="false"
+                >
+                  {t.team.status}
+                </button>
               </div>
             </div>
             <div class="picker-panel__filter-section">
               <span class="picker-panel__section-title">{t.team.learnMethod}</span>
-              <div class="filter-group filter-group--compact" data-move-method-filter aria-label={t.team.learnMethod}>
-                <button class="filter-chip" type="button" data-method="all" aria-pressed="true">{t.team.allMethods}</button>
-                <button class="filter-chip" type="button" data-method="level-up" aria-pressed="false">{t.team.levelUp}</button>
-                <button class="filter-chip" type="button" data-method="machine" aria-pressed="false">{t.team.machine}</button>
-                <button class="filter-chip" type="button" data-method="tutor" aria-pressed="false">{t.team.tutor}</button>
-                <button class="filter-chip" type="button" data-method="egg" aria-pressed="false">{t.team.egg}</button>
+              <div
+                class="filter-group filter-group--compact"
+                data-move-method-filter
+                aria-label={t.team.learnMethod}
+              >
+                <button class="filter-chip" type="button" data-method="all" aria-pressed="true">
+                  {t.team.allMethods}
+                </button>
+                <button
+                  class="filter-chip"
+                  type="button"
+                  data-method="level-up"
+                  aria-pressed="false"
+                >
+                  {t.team.levelUp}
+                </button>
+                <button
+                  class="filter-chip"
+                  type="button"
+                  data-method="machine"
+                  aria-pressed="false"
+                >
+                  {t.team.machine}
+                </button>
+                <button class="filter-chip" type="button" data-method="tutor" aria-pressed="false">
+                  {t.team.tutor}
+                </button>
+                <button class="filter-chip" type="button" data-method="egg" aria-pressed="false">
+                  {t.team.egg}
+                </button>
               </div>
             </div>
           </div>
           <div class="picker-panel__filter-section">
             <span class="picker-panel__section-title">{t.team.attackType}</span>
-            <div class="filter-group filter-group--compact" data-move-type-filter aria-label={t.team.attackType}></div>
+            <div
+              class="filter-group filter-group--compact"
+              data-move-type-filter
+              aria-label={t.team.attackType}
+            ></div>
           </div>
         </div>
         <div class="move-picker__results" data-move-picker-results></div>
@@ -239,10 +403,17 @@ const t = getTranslations(currentLocale);
     <div class="modal-panel item-picker-modal-panel">
       <div class="modal-panel__header">
         <div class="picker-panel__header-info">
-          <h2><i data-lucide="backpack"></i> <span data-item-picker-title>{t.team.selectItem}</span></h2>
+          <h2>
+            <i data-lucide="backpack"></i> <span data-item-picker-title>{t.team.selectItem}</span>
+          </h2>
           <span class="picker-panel__count" data-item-picker-count></span>
         </div>
-        <button class="modal-panel__close" type="button" data-item-picker-close aria-label={t.modal.close}>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-item-picker-close
+          aria-label={t.modal.close}
+        >
           <i data-lucide="x"></i>
         </button>
       </div>
@@ -250,19 +421,84 @@ const t = getTranslations(currentLocale);
         <div class="picker-panel__filters">
           <label class="picker-input-wrap">
             <i data-lucide="search" class="picker-input-icon"></i>
-            <input class="picker-input" type="search" placeholder={t.team.searchItemPlaceholder} data-item-picker-search />
+            <input
+              class="picker-input"
+              type="search"
+              placeholder={t.team.searchItemPlaceholder}
+              data-item-picker-search
+            />
           </label>
           <div class="picker-panel__filter-section">
             <span class="picker-panel__section-title">{t.team.category}</span>
-            <div class="filter-group filter-group--compact" data-item-category-filter aria-label={t.team.category}>
-              <button class="filter-chip" type="button" data-item-category="all" aria-pressed="true">{t.team.itemCategories.all}</button>
-              <button class="filter-chip" type="button" data-item-category="competitive" aria-pressed="false">{t.team.itemCategories.competitive}</button>
-              <button class="filter-chip" type="button" data-item-category="stat-boost" aria-pressed="false">{t.team.itemCategories.statBoost}</button>
-              <button class="filter-chip" type="button" data-item-category="type-boost" aria-pressed="false">{t.team.itemCategories.typeBoost}</button>
-              <button class="filter-chip" type="button" data-item-category="defensive" aria-pressed="false">{t.team.itemCategories.defensive}</button>
-              <button class="filter-chip" type="button" data-item-category="berries" aria-pressed="false">{t.team.itemCategories.berries}</button>
-              <button class="filter-chip" type="button" data-item-category="species-specific" aria-pressed="false">{t.team.itemCategories.speciesSpecific}</button>
-              <button class="filter-chip" type="button" data-item-category="utility" aria-pressed="false">{t.team.itemCategories.utility}</button>
+            <div
+              class="filter-group filter-group--compact"
+              data-item-category-filter
+              aria-label={t.team.category}
+            >
+              <button
+                class="filter-chip"
+                type="button"
+                data-item-category="all"
+                aria-pressed="true"
+              >
+                {t.team.itemCategories.all}
+              </button>
+              <button
+                class="filter-chip"
+                type="button"
+                data-item-category="competitive"
+                aria-pressed="false"
+              >
+                {t.team.itemCategories.competitive}
+              </button>
+              <button
+                class="filter-chip"
+                type="button"
+                data-item-category="stat-boost"
+                aria-pressed="false"
+              >
+                {t.team.itemCategories.statBoost}
+              </button>
+              <button
+                class="filter-chip"
+                type="button"
+                data-item-category="type-boost"
+                aria-pressed="false"
+              >
+                {t.team.itemCategories.typeBoost}
+              </button>
+              <button
+                class="filter-chip"
+                type="button"
+                data-item-category="defensive"
+                aria-pressed="false"
+              >
+                {t.team.itemCategories.defensive}
+              </button>
+              <button
+                class="filter-chip"
+                type="button"
+                data-item-category="berries"
+                aria-pressed="false"
+              >
+                {t.team.itemCategories.berries}
+              </button>
+              <button
+                class="filter-chip"
+                type="button"
+                data-item-category="species-specific"
+                aria-pressed="false"
+              >
+                {t.team.itemCategories.speciesSpecific}
+              </button>
+              <button
+                class="filter-chip"
+                type="button"
+                data-item-category="utility"
+                aria-pressed="false"
+              >
+                {t.team.itemCategories.utility}
+              </button>
             </div>
           </div>
         </div>
@@ -275,6 +511,6 @@ const t = getTranslations(currentLocale);
   <PokemonDetailModal />
 
   <script>
-    import "../scripts/team-page";
+    import '../scripts/team-page'
   </script>
 </BaseLayout>

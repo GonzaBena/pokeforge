@@ -1,30 +1,35 @@
 ---
-import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
+import { getTranslations, getLocalizedPath, type Locale } from '../lib/i18n/translations'
 
 interface Props {
-  alternateUrls?: Partial<Record<Locale, string>>;
-  variant?: "default" | "minimal";
+  alternateUrls?: Partial<Record<Locale, string>>
+  variant?: 'default' | 'minimal'
 }
 
-const { alternateUrls, variant = "default" } = Astro.props;
+const { alternateUrls, variant = 'default' } = Astro.props
 
-const path = Astro.url.pathname;
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+const path = Astro.url.pathname
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 
-const homePath = getLocalizedPath("/", currentLocale);
-const pokedexPath = getLocalizedPath("/pokedex/", currentLocale);
-const teamPath = getLocalizedPath("/team/", currentLocale);
-const blogPath = getLocalizedPath("/blog/", currentLocale);
+const homePath = getLocalizedPath('/', currentLocale)
+const pokedexPath = getLocalizedPath('/pokedex/', currentLocale)
+const teamPath = getLocalizedPath('/team/', currentLocale)
+const blogPath = getLocalizedPath('/blog/', currentLocale)
 
-const enHref = alternateUrls?.en ?? getLocalizedPath(path, "en");
-const esHref = alternateUrls?.es ?? getLocalizedPath(path, "es");
+const enHref = alternateUrls?.en ?? getLocalizedPath(path, 'en')
+const esHref = alternateUrls?.es ?? getLocalizedPath(path, 'es')
 
-const isHome = currentLocale === "es" ? (path === "/es" || path === "/es/") : (path === "/" || path === "");
-const isPokedex = currentLocale === "es" ? path.startsWith("/es/pokedex") : path.startsWith("/pokedex");
-const isEquipo = currentLocale === "es" ? path.startsWith("/es/equipo") : (path.startsWith("/team") || path.startsWith("/equipo"));
-const isBlog = currentLocale === "es" ? path.startsWith("/es/blog") : path.startsWith("/blog");
-const isMinimal = variant === "minimal" || isBlog;
+const isHome =
+  currentLocale === 'es' ? path === '/es' || path === '/es/' : path === '/' || path === ''
+const isPokedex =
+  currentLocale === 'es' ? path.startsWith('/es/pokedex') : path.startsWith('/pokedex')
+const isEquipo =
+  currentLocale === 'es'
+    ? path.startsWith('/es/equipo')
+    : path.startsWith('/team') || path.startsWith('/equipo')
+const isBlog = currentLocale === 'es' ? path.startsWith('/es/blog') : path.startsWith('/blog')
+const isMinimal = variant === 'minimal' || isBlog
 ---
 
 <nav class="nav">
@@ -34,22 +39,49 @@ const isMinimal = variant === "minimal" || isBlog;
       <span>PokeForge</span>
     </a>
     <div class="nav__right">
-      <a class="nav__link" href={pokedexPath} data-astro-prefetch aria-current={isPokedex ? "page" : undefined}>
+      <a
+        class="nav__link"
+        href={pokedexPath}
+        data-astro-prefetch
+        aria-current={isPokedex ? 'page' : undefined}
+      >
         <i data-lucide="book-open"></i>
         {t.nav.pokedex}
       </a>
-      <a class="nav__link" href={teamPath} data-astro-prefetch aria-current={isEquipo ? "page" : undefined}>
+      <a
+        class="nav__link"
+        href={teamPath}
+        data-astro-prefetch
+        aria-current={isEquipo ? 'page' : undefined}
+      >
         <i data-lucide="users"></i>
         {t.nav.team}
       </a>
-      <a class="nav__link" href={blogPath} data-astro-prefetch aria-current={isBlog ? "page" : undefined}>
+      <a
+        class="nav__link"
+        href={blogPath}
+        data-astro-prefetch
+        aria-current={isBlog ? 'page' : undefined}
+      >
         <i data-lucide="book"></i>
         {t.nav.blog}
       </a>
       <div class="nav__lang-toggle" aria-label="Language selector">
-        <a href={enHref} class:list={["nav__lang-btn", { active: currentLocale === "en" }]} data-astro-prefetch>EN</a>
+        <a
+          href={enHref}
+          class:list={['nav__lang-btn', { active: currentLocale === 'en' }]}
+          data-astro-prefetch
+        >
+          EN
+        </a>
         <span class="nav__lang-divider">/</span>
-        <a href={esHref} class:list={["nav__lang-btn", { active: currentLocale === "es" }]} data-astro-prefetch>ES</a>
+        <a
+          href={esHref}
+          class:list={['nav__lang-btn', { active: currentLocale === 'es' }]}
+          data-astro-prefetch
+        >
+          ES
+        </a>
       </div>
       {!isMinimal && (
         <>
@@ -67,37 +99,58 @@ const isMinimal = variant === "minimal" || isBlog;
               <span class="nav__pwa-badge-dot" aria-hidden="true"></span>
             </button>
 
-            <div class="pwa-popover" id="pwa-install-popover" data-pwa-popover role="dialog" aria-modal="true" aria-labelledby="pwa-popover-title" hidden>
+            <div
+              class="pwa-popover"
+              id="pwa-install-popover"
+              data-pwa-popover
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="pwa-popover-title"
+              hidden
+            >
               <div class="pwa-popover__header">
                 <div class="pwa-popover__brand">
                   <img src="/favicon.png" alt="PokeForge Logo" class="pwa-popover__logo" />
                   <div>
-                    <h3 id="pwa-popover-title" class="pwa-popover__title">{t.nav.pwaPopoverTitle}</h3>
+                    <h3 id="pwa-popover-title" class="pwa-popover__title">
+                      {t.nav.pwaPopoverTitle}
+                    </h3>
                     <p class="pwa-popover__subtitle">{t.nav.pwaPopoverSubtitle}</p>
                   </div>
                 </div>
-                <button type="button" class="pwa-popover__close" data-pwa-close aria-label={t.nav.pwaClose}>
+                <button
+                  type="button"
+                  class="pwa-popover__close"
+                  data-pwa-close
+                  aria-label={t.nav.pwaClose}
+                >
                   <i data-lucide="x"></i>
                 </button>
               </div>
 
               <div class="pwa-popover__features">
                 <div class="pwa-popover__feature">
-                  <span class="pwa-popover__feature-icon"><i data-lucide="wifi-off"></i></span>
+                  <span class="pwa-popover__feature-icon">
+                    <i data-lucide="wifi-off"></i>
+                  </span>
                   <div class="pwa-popover__feature-text">
                     <strong>{t.nav.pwaFeatureOffline}</strong>
                     <span>{t.nav.pwaFeatureOfflineDesc}</span>
                   </div>
                 </div>
                 <div class="pwa-popover__feature">
-                  <span class="pwa-popover__feature-icon"><i data-lucide="maximize"></i></span>
+                  <span class="pwa-popover__feature-icon">
+                    <i data-lucide="maximize"></i>
+                  </span>
                   <div class="pwa-popover__feature-text">
                     <strong>{t.nav.pwaFeatureFast}</strong>
                     <span>{t.nav.pwaFeatureFastDesc}</span>
                   </div>
                 </div>
                 <div class="pwa-popover__feature">
-                  <span class="pwa-popover__feature-icon"><i data-lucide="cloud"></i></span>
+                  <span class="pwa-popover__feature-icon">
+                    <i data-lucide="cloud"></i>
+                  </span>
                   <div class="pwa-popover__feature-text">
                     <strong>{t.nav.pwaFeatureSafe}</strong>
                     <span>{t.nav.pwaFeatureSafeDesc}</span>
@@ -121,11 +174,17 @@ const isMinimal = variant === "minimal" || isBlog;
                 <ol class="pwa-popover__ios-steps">
                   <li>
                     <span class="pwa-popover__step-badge">1</span>
-                    <span>{t.nav.pwaIosStep1} <i data-lucide="share-2" class="pwa-popover__inline-icon"></i></span>
+                    <span>
+                      {t.nav.pwaIosStep1}{' '}
+                      <i data-lucide="share-2" class="pwa-popover__inline-icon"></i>
+                    </span>
                   </li>
                   <li>
                     <span class="pwa-popover__step-badge">2</span>
-                    <span>{t.nav.pwaIosStep2} <i data-lucide="plus-square" class="pwa-popover__inline-icon"></i></span>
+                    <span>
+                      {t.nav.pwaIosStep2}{' '}
+                      <i data-lucide="plus-square" class="pwa-popover__inline-icon"></i>
+                    </span>
                   </li>
                 </ol>
               </div>
@@ -147,21 +206,33 @@ const isMinimal = variant === "minimal" || isBlog;
           >
             <span class="nav__cloud-wrapper" aria-hidden="true">
               <!-- 1. Sincronizado / Guardado (Google Docs: Nube con check) -->
-              <span class="nav__cloud-icon nav__cloud-icon--synced" data-cloud-state="synced" hidden>
+              <span
+                class="nav__cloud-icon nav__cloud-icon--synced"
+                data-cloud-state="synced"
+                hidden
+              >
                 <i data-lucide="cloud"></i>
                 <span class="nav__cloud-badge nav__cloud-badge--check">
                   <i data-lucide="check"></i>
                 </span>
               </span>
               <!-- 2. Sincronizando / Guardando... (Nube con spinner) -->
-              <span class="nav__cloud-icon nav__cloud-icon--syncing" data-cloud-state="syncing" hidden>
+              <span
+                class="nav__cloud-icon nav__cloud-icon--syncing"
+                data-cloud-state="syncing"
+                hidden
+              >
                 <i data-lucide="cloud"></i>
                 <span class="nav__cloud-badge nav__cloud-badge--spin">
                   <i data-lucide="loader-2" class="spin"></i>
                 </span>
               </span>
               <!-- 3. Offline / Sin conexión (Nube tachada) -->
-              <span class="nav__cloud-icon nav__cloud-icon--offline" data-cloud-state="offline" hidden>
+              <span
+                class="nav__cloud-icon nav__cloud-icon--offline"
+                data-cloud-state="offline"
+                hidden
+              >
                 <i data-lucide="cloud-off"></i>
               </span>
               <!-- 4. Error al guardar (Nube con alerta) -->
@@ -178,7 +249,13 @@ const isMinimal = variant === "minimal" || isBlog;
             </span>
             <!--- <span class="nav__sync-text" data-cloud-text>{t.nav.sync}</span> --->
           </button>
-          <button class="nav__sound-btn" type="button" data-sound-toggle title={t.nav.soundTitle} aria-label={t.nav.soundTitle}>
+          <button
+            class="nav__sound-btn"
+            type="button"
+            data-sound-toggle
+            title={t.nav.soundTitle}
+            aria-label={t.nav.soundTitle}
+          >
             <i data-lucide="volume-2" data-sound-icon-on></i>
             <i data-lucide="volume-x" data-sound-icon-off hidden></i>
           </button>
@@ -189,264 +266,297 @@ const isMinimal = variant === "minimal" || isBlog;
 </nav>
 
 <nav class="bottom-nav" aria-label={t.nav.mobileNav}>
-  <a class="bottom-nav__link" href={homePath} data-astro-prefetch aria-current={isHome ? "page" : undefined}>
+  <a
+    class="bottom-nav__link"
+    href={homePath}
+    data-astro-prefetch
+    aria-current={isHome ? 'page' : undefined}
+  >
     <i data-lucide="sparkles"></i>
     <span>{t.nav.home}</span>
   </a>
-  <a class="bottom-nav__link" href={pokedexPath} data-astro-prefetch aria-current={isPokedex ? "page" : undefined}>
+  <a
+    class="bottom-nav__link"
+    href={pokedexPath}
+    data-astro-prefetch
+    aria-current={isPokedex ? 'page' : undefined}
+  >
     <i data-lucide="book-open"></i>
     <span>{t.nav.pokedex}</span>
   </a>
-  <a class="bottom-nav__link" href={teamPath} data-astro-prefetch aria-current={isEquipo ? "page" : undefined}>
+  <a
+    class="bottom-nav__link"
+    href={teamPath}
+    data-astro-prefetch
+    aria-current={isEquipo ? 'page' : undefined}
+  >
     <i data-lucide="users"></i>
     <span>{t.nav.team}</span>
   </a>
-  <a class="bottom-nav__link" href={blogPath} data-astro-prefetch aria-current={isBlog ? "page" : undefined}>
+  <a
+    class="bottom-nav__link"
+    href={blogPath}
+    data-astro-prefetch
+    aria-current={isBlog ? 'page' : undefined}
+  >
     <i data-lucide="book"></i>
     <span>{t.nav.blog}</span>
   </a>
 </nav>
 
 <script>
-  import { isSoundEnabled, setSoundEnabled } from "../lib/sound";
-  import { toast } from "../lib/toast";
-  import { getCurrentLocale, getTranslations } from "../lib/i18n/translations";
-  import { refreshIcons } from "../lib/icons";
+  import { isSoundEnabled, setSoundEnabled } from '../lib/sound'
+  import { toast } from '../lib/toast'
+  import { getCurrentLocale, getTranslations } from '../lib/i18n/translations'
+  import { refreshIcons } from '../lib/icons'
   import {
     getCloudState,
     initCloudSyncClient,
     CLOUD_STATUS_EVENT,
     type CloudState,
-  } from "../lib/cloudSync";
+  } from '../lib/cloudSync'
 
   function initSoundToggle() {
-    const soundBtn = document.querySelector<HTMLButtonElement>("[data-sound-toggle]");
-    if (!soundBtn) return;
+    const soundBtn = document.querySelector<HTMLButtonElement>('[data-sound-toggle]')
+    if (!soundBtn) return
 
-    const iconOn = soundBtn.querySelector<HTMLElement>("[data-sound-icon-on]");
-    const iconOff = soundBtn.querySelector<HTMLElement>("[data-sound-icon-off]");
+    const iconOn = soundBtn.querySelector<HTMLElement>('[data-sound-icon-on]')
+    const iconOff = soundBtn.querySelector<HTMLElement>('[data-sound-icon-off]')
 
     function updateIcons(enabled: boolean) {
-      if (iconOn) iconOn.hidden = !enabled;
-      if (iconOff) iconOff.hidden = enabled;
-      soundBtn?.classList.toggle("nav__sound-btn--muted", !enabled);
+      if (iconOn) iconOn.hidden = !enabled
+      if (iconOff) iconOff.hidden = enabled
+      soundBtn?.classList.toggle('nav__sound-btn--muted', !enabled)
     }
 
-    updateIcons(isSoundEnabled());
+    updateIcons(isSoundEnabled())
 
-    soundBtn.addEventListener("click", () => {
-      const nextState = !isSoundEnabled();
-      setSoundEnabled(nextState);
-      updateIcons(nextState);
-    });
+    soundBtn.addEventListener('click', () => {
+      const nextState = !isSoundEnabled()
+      setSoundEnabled(nextState)
+      updateIcons(nextState)
+    })
   }
 
-  let deferredPrompt: any = null;
+  interface BeforeInstallPromptEvent extends Event {
+    prompt(): Promise<void>
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+  }
+
+  let deferredPrompt: BeforeInstallPromptEvent | null = null
 
   function isAppInstalled(): boolean {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone === true;
-    const isInstalledStorage = localStorage.getItem("pokeforge_installed") === "true";
-    return isStandalone || isInstalledStorage;
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true
+    const isInstalledStorage = localStorage.getItem('pokeforge_installed') === 'true'
+    return isStandalone || isInstalledStorage
   }
 
   function initPwaInstall() {
-    const pwaWrapper = document.querySelector<HTMLElement>("[data-pwa-wrapper]");
-    const triggerBtn = document.querySelector<HTMLButtonElement>("[data-pwa-trigger]");
-    const popover = document.querySelector<HTMLElement>("[data-pwa-popover]");
-    const nativeBlock = document.querySelector<HTMLElement>("[data-pwa-native-block]");
-    const iosBlock = document.querySelector<HTMLElement>("[data-pwa-ios-block]");
-    const installActionBtn = document.querySelector<HTMLButtonElement>("[data-pwa-install-action]");
-    const closeBtns = document.querySelectorAll<HTMLElement>("[data-pwa-close]");
+    const pwaWrapper = document.querySelector<HTMLElement>('[data-pwa-wrapper]')
+    const triggerBtn = document.querySelector<HTMLButtonElement>('[data-pwa-trigger]')
+    const popover = document.querySelector<HTMLElement>('[data-pwa-popover]')
+    const nativeBlock = document.querySelector<HTMLElement>('[data-pwa-native-block]')
+    const iosBlock = document.querySelector<HTMLElement>('[data-pwa-ios-block]')
+    const installActionBtn = document.querySelector<HTMLButtonElement>('[data-pwa-install-action]')
+    const closeBtns = document.querySelectorAll<HTMLElement>('[data-pwa-close]')
 
-    if (!pwaWrapper || !triggerBtn || !popover) return;
+    if (!pwaWrapper || !triggerBtn || !popover) return
 
     function hideWrapper() {
-      if (pwaWrapper) pwaWrapper.hidden = true;
-      closePopover();
+      if (pwaWrapper) pwaWrapper.hidden = true
+      closePopover()
     }
 
     function showWrapper() {
       if (pwaWrapper && !isAppInstalled()) {
-        pwaWrapper.hidden = false;
-        refreshIcons();
+        pwaWrapper.hidden = false
+        refreshIcons()
       }
     }
 
     function openPopover() {
-      if (!popover || !triggerBtn) return;
-      popover.hidden = false;
-      triggerBtn.setAttribute("aria-expanded", "true");
-      triggerBtn.classList.add("nav__pwa-btn--active");
+      if (!popover || !triggerBtn) return
+      popover.hidden = false
+      triggerBtn.setAttribute('aria-expanded', 'true')
+      triggerBtn.classList.add('nav__pwa-btn--active')
 
-      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
       if (isIos) {
-        if (iosBlock) iosBlock.hidden = false;
-        if (nativeBlock) nativeBlock.hidden = true;
+        if (iosBlock) iosBlock.hidden = false
+        if (nativeBlock) nativeBlock.hidden = true
       } else {
-        if (iosBlock) iosBlock.hidden = true;
-        if (nativeBlock) nativeBlock.hidden = false;
+        if (iosBlock) iosBlock.hidden = true
+        if (nativeBlock) nativeBlock.hidden = false
       }
 
-      refreshIcons();
+      refreshIcons()
     }
 
     function closePopover() {
-      if (!popover || !triggerBtn) return;
-      popover.hidden = true;
-      triggerBtn.setAttribute("aria-expanded", "false");
-      triggerBtn.classList.remove("nav__pwa-btn--active");
+      if (!popover || !triggerBtn) return
+      popover.hidden = true
+      triggerBtn.setAttribute('aria-expanded', 'false')
+      triggerBtn.classList.remove('nav__pwa-btn--active')
     }
 
     if (isAppInstalled()) {
-      hideWrapper();
-      return;
+      hideWrapper()
+      return
     }
 
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      if (!isAppInstalled()) showWrapper();
-    });
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault()
+      deferredPrompt = e as BeforeInstallPromptEvent
+      if (!isAppInstalled()) showWrapper()
+    })
 
-    const isIosDevice = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isIosDevice = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
     if (isIosDevice && !isAppInstalled()) {
-      showWrapper();
+      showWrapper()
     }
 
-    window.addEventListener("appinstalled", () => {
-      localStorage.setItem("pokeforge_installed", "true");
-      hideWrapper();
-      const t = getTranslations(getCurrentLocale());
-      toast.success(t.nav.installedSuccess);
-    });
+    window.addEventListener('appinstalled', () => {
+      localStorage.setItem('pokeforge_installed', 'true')
+      hideWrapper()
+      const t = getTranslations(getCurrentLocale())
+      toast.success(t.nav.installedSuccess)
+    })
 
-    triggerBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
+    triggerBtn.addEventListener('click', (e) => {
+      e.stopPropagation()
       if (popover.hidden) {
-        openPopover();
+        openPopover()
       } else {
-        closePopover();
+        closePopover()
       }
-    });
+    })
 
     closeBtns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        closePopover();
-      });
-    });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        closePopover()
+      })
+    })
 
     if (installActionBtn) {
-      installActionBtn.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        const t = getTranslations(getCurrentLocale());
+      installActionBtn.addEventListener('click', async (e) => {
+        e.stopPropagation()
+        const t = getTranslations(getCurrentLocale())
         if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const choice = await deferredPrompt.userChoice;
-          if (choice && choice.outcome === "accepted") {
-            localStorage.setItem("pokeforge_installed", "true");
-            hideWrapper();
-            toast.success(t.nav.installedSuccess);
+          deferredPrompt.prompt()
+          const choice = await deferredPrompt.userChoice
+          if (choice && choice.outcome === 'accepted') {
+            localStorage.setItem('pokeforge_installed', 'true')
+            hideWrapper()
+            toast.success(t.nav.installedSuccess)
           }
-          deferredPrompt = null;
+          deferredPrompt = null
         } else {
-          toast.info(t.nav.pwaHint);
+          toast.info(t.nav.pwaHint)
         }
-      });
+      })
     }
 
     // Cerrar popover al hacer click afuera o presionar Escape
-    document.addEventListener("click", (e) => {
-      if (!popover.hidden && !popover.contains(e.target as Node) && !triggerBtn.contains(e.target as Node)) {
-        closePopover();
+    document.addEventListener('click', (e) => {
+      if (
+        !popover.hidden &&
+        !popover.contains(e.target as Node) &&
+        !triggerBtn.contains(e.target as Node)
+      ) {
+        closePopover()
       }
-    });
+    })
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !popover.hidden) {
-        closePopover();
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !popover.hidden) {
+        closePopover()
       }
-    });
+    })
   }
 
   function initCloudStatus() {
-    const cloudBtn = document.querySelector<HTMLButtonElement>("[data-cloud-btn]");
-    if (!cloudBtn) return;
+    const cloudBtn = document.querySelector<HTMLButtonElement>('[data-cloud-btn]')
+    if (!cloudBtn) return
 
-    const textEl = cloudBtn.querySelector<HTMLElement>("[data-cloud-text]");
-    const stateIcons = cloudBtn.querySelectorAll<HTMLElement>("[data-cloud-state]");
+    const textEl = cloudBtn.querySelector<HTMLElement>('[data-cloud-text]')
+    const stateIcons = cloudBtn.querySelectorAll<HTMLElement>('[data-cloud-state]')
 
     function updateCloudUI(state: CloudState) {
-      const locale = getCurrentLocale();
-      const t = getTranslations(locale);
-      const status = state.status;
+      const locale = getCurrentLocale()
+      const t = getTranslations(locale)
+      const status = state.status
 
-      cloudBtn?.setAttribute("data-status", status);
+      cloudBtn?.setAttribute('data-status', status)
 
       stateIcons.forEach((el) => {
-        el.hidden = el.dataset.cloudState !== status;
-      });
+        el.hidden = el.dataset.cloudState !== status
+      })
 
       cloudBtn?.classList.remove(
-        "nav__sync-btn--synced",
-        "nav__sync-btn--syncing",
-        "nav__sync-btn--offline",
-        "nav__sync-btn--error",
-        "nav__sync-btn--unlinked"
-      );
-      cloudBtn?.classList.add(`nav__sync-btn--${status}`);
+        'nav__sync-btn--synced',
+        'nav__sync-btn--syncing',
+        'nav__sync-btn--offline',
+        'nav__sync-btn--error',
+        'nav__sync-btn--unlinked',
+      )
+      cloudBtn?.classList.add(`nav__sync-btn--${status}`)
 
-      let label = t.nav.sync;
-      let tooltip = t.nav.cloudTooltipUnlinked;
+      let label: string
+      let tooltip: string
 
       switch (status) {
-        case "synced":
-          label = t.nav.cloudSynced;
-          tooltip = state.code ? `${t.nav.cloudTooltipSynced} (${state.code})` : t.nav.cloudTooltipSynced;
-          break;
-        case "syncing":
-          label = t.nav.cloudSyncing;
-          tooltip = t.nav.cloudTooltipSyncing;
-          break;
-        case "offline":
-          label = t.nav.cloudOffline;
-          tooltip = t.nav.cloudTooltipOffline;
-          break;
-        case "error":
-          label = t.nav.cloudError;
-          tooltip = state.lastError || t.nav.cloudTooltipError;
-          break;
-        case "unlinked":
+        case 'synced':
+          label = t.nav.cloudSynced
+          tooltip = state.code
+            ? `${t.nav.cloudTooltipSynced} (${state.code})`
+            : t.nav.cloudTooltipSynced
+          break
+        case 'syncing':
+          label = t.nav.cloudSyncing
+          tooltip = t.nav.cloudTooltipSyncing
+          break
+        case 'offline':
+          label = t.nav.cloudOffline
+          tooltip = t.nav.cloudTooltipOffline
+          break
+        case 'error':
+          label = t.nav.cloudError
+          tooltip = state.lastError || t.nav.cloudTooltipError
+          break
+        case 'unlinked':
         default:
-          label = t.nav.sync;
-          tooltip = t.nav.cloudTooltipUnlinked;
-          break;
+          label = t.nav.sync
+          tooltip = t.nav.cloudTooltipUnlinked
+          break
       }
 
-      if (textEl) textEl.textContent = label;
-      cloudBtn?.setAttribute("title", tooltip);
-      cloudBtn?.setAttribute("aria-label", tooltip);
+      if (textEl) textEl.textContent = label
+      cloudBtn?.setAttribute('title', tooltip)
+      cloudBtn?.setAttribute('aria-label', tooltip)
     }
 
-    initCloudSyncClient();
-    updateCloudUI(getCloudState());
-    refreshIcons();
+    initCloudSyncClient()
+    updateCloudUI(getCloudState())
+    refreshIcons()
 
     window.addEventListener(CLOUD_STATUS_EVENT, (e) => {
-      const detail = (e as CustomEvent<CloudState>).detail;
+      const detail = (e as CustomEvent<CloudState>).detail
       if (detail) {
-        updateCloudUI(detail);
-        refreshIcons();
+        updateCloudUI(detail)
+        refreshIcons()
       }
-    });
+    })
   }
 
-  initSoundToggle();
-  initPwaInstall();
-  initCloudStatus();
-  document.addEventListener("astro:after-swap", () => {
-    initSoundToggle();
-    initPwaInstall();
-    initCloudStatus();
-  });
+  initSoundToggle()
+  initPwaInstall()
+  initCloudStatus()
+  document.addEventListener('astro:after-swap', () => {
+    initSoundToggle()
+    initPwaInstall()
+    initCloudStatus()
+  })
 </script>

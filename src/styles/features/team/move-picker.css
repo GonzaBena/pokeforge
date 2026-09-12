@@ -253,7 +253,7 @@
 }
 
 .team-slot__remove-btn::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: -6px;
 }
@@ -262,4 +262,3 @@
   width: 14px;
   height: 14px;
 }
-

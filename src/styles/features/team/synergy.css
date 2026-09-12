@@ -251,11 +251,7 @@
   justify-content: space-between;
   width: 100%;
   padding: 9px 12px;
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.14) 0%,
-    rgba(245, 158, 11, 0.04) 100%
-  );
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(245, 158, 11, 0.04) 100%);
   border: 1px solid rgba(245, 158, 11, 0.32);
   border-radius: var(--radius-md);
   color: #fbbf24;
@@ -266,11 +262,7 @@
 }
 
 .side-panel__synergy-btn:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.22) 0%,
-    rgba(245, 158, 11, 0.08) 100%
-  );
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.08) 100%);
   border-color: rgba(245, 158, 11, 0.55);
   color: #fde68a;
   transform: translateY(-1px);
@@ -311,18 +303,14 @@
 }
 
 .team-card-graphic::before {
-  content: "";
+  content: '';
   position: absolute;
   top: -100px;
   left: 50%;
   transform: translateX(-50%);
   width: 400px;
   height: 400px;
-  background: radial-gradient(
-    circle,
-    rgba(239, 68, 68, 0.15) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -510,7 +498,3 @@
   color: var(--text-faint);
   margin-bottom: 12px;
 }
-
-
-
-

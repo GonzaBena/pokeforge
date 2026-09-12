@@ -85,7 +85,7 @@ input,
 select,
 textarea,
 label,
-[role="button"],
+[role='button'],
 .pokemon-card,
 .team-slot,
 .filter-chip,
@@ -97,7 +97,7 @@ label,
 
 /* Reconocimiento interactivo nativo inmediato en WebKit (iOS Safari) */
 button,
-[role="button"],
+[role='button'],
 .pokemon-card,
 .team-slot,
 .filter-chip,
@@ -107,4 +107,3 @@ button,
 [data-picker-pick] {
   cursor: pointer;
 }
-

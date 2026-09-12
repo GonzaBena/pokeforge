@@ -1,6 +1,6 @@
 ---
 title: Fundamentos de Teambuilding para Combates Dobles y VGC
-description: "Descubre cómo estructurar los roles de tu equipo: Control de velocidad, Redirección, Pivotes y atacantes clave."
+description: 'Descubre cómo estructurar los roles de tu equipo: Control de velocidad, Redirección, Pivotes y atacantes clave.'
 pubDate: 2026-02-18
 category: competitivo
 tags:
@@ -25,9 +25,9 @@ A continuación, repasamos los cuatro pilares fundamentales para armar un equipo
 
 Quien ataca primero suele imponer el ritmo del combate:
 
-* **Viento Afín (Tailwind)**: Duplica la velocidad de tus dos Pokémon durante 4 turnos (ej. Tornadus, Whimsicott).
-* **Espacio Raro (Trick Room)**: Invierte el orden de velocidad durante 5 turnos, haciendo que Pokémon lentos y extremadamente resistentes actúen primero (ej. Dusclops, Hatterene).
-* **Control por Estados**: *Onda Trueno*, *Viento Hielo* o *Electrotela* para reducir la velocidad del adversario mientras infliges daño.
+- **Viento Afín (Tailwind)**: Duplica la velocidad de tus dos Pokémon durante 4 turnos (ej. Tornadus, Whimsicott).
+- **Espacio Raro (Trick Room)**: Invierte el orden de velocidad durante 5 turnos, haciendo que Pokémon lentos y extremadamente resistentes actúen primero (ej. Dusclops, Hatterene).
+- **Control por Estados**: _Onda Trueno_, _Viento Hielo_ o _Electrotela_ para reducir la velocidad del adversario mientras infliges daño.
 
 ---
 
@@ -35,8 +35,8 @@ Quien ataca primero suele imponer el ritmo del combate:
 
 Proteger a tus atacantes principales (sweepers) mientras se colocan o ejecutan ataques decisivos:
 
-* **Señuelo / Polvo Ira (Follow Me / Rage Powder)**: Obliga a los ataques dirigidos a un solo objetivo a impactar en tu soporte (ej. Clefairy, Amoonguss).
-* **Sorpresa (Fake Out)**: Hace retroceder a un rival en el primer turno para neutralizar amenazas inmediatas.
+- **Señuelo / Polvo Ira (Follow Me / Rage Powder)**: Obliga a los ataques dirigidos a un solo objetivo a impactar en tu soporte (ej. Clefairy, Amoonguss).
+- **Sorpresa (Fake Out)**: Hace retroceder a un rival en el primer turno para neutralizar amenazas inmediatas.
 
 > "El mejor atacante del mundo no sirve de nada si cae debilitado antes de ejecutar su movimiento."
 
@@ -46,11 +46,11 @@ Proteger a tus atacantes principales (sweepers) mientras se colocan o ejecutan a
 
 La capacidad de entrar y salir del campo sin perder el tempo de la batalla:
 
-* **Ida y Vuelta (U-turn)** y **Voltiocambio (Volt Switch)**: Te permiten infligir daño residual y posicionar al compañero ideal frente a la jugada del rival.
-* **Habilidad Intimidación**: Reduce el ataque de ambos rivales al entrar en juego (ej. Incineroar, Landorus-T).
+- **Ida y Vuelta (U-turn)** y **Voltiocambio (Volt Switch)**: Te permiten infligir daño residual y posicionar al compañero ideal frente a la jugada del rival.
+- **Habilidad Intimidación**: Reduce el ataque de ambos rivales al entrar en juego (ej. Incineroar, Landorus-T).
 
 ---
 
 ## Conclusión
 
-Al diseñar tu estrategia en **PokeForge**, pregúntate siempre: *¿Cómo gano el control del mapa en el turno 1? ¿Tengo respuesta a Espacio Raro rival?* Utiliza los filtros avanzados para encontrar a los mejores portadores de cada rol.
+Al diseñar tu estrategia en **PokeForge**, pregúntate siempre: _¿Cómo gano el control del mapa en el turno 1? ¿Tengo respuesta a Espacio Raro rival?_ Utiliza los filtros avanzados para encontrar a los mejores portadores de cada rol.

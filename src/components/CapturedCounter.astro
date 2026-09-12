@@ -1,12 +1,16 @@
 ---
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-import "../styles/components/captured-counter.css";
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import '../styles/components/captured-counter.css'
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 ---
 
 <div class="captured-counter" data-captured-counter>
   <i data-lucide="circle-dot"></i>
-  <span class="captured-counter__count" data-captured-count>0</span>
-  <span class="captured-counter__total">/ <span data-total-count>&mdash;</span> {t.pokedex.captured.toLowerCase()}</span>
+  <span class="captured-counter__count" data-captured-count>
+    0
+  </span>
+  <span class="captured-counter__total">
+    / <span data-total-count>&mdash;</span> {t.pokedex.captured.toLowerCase()}
+  </span>
 </div>

@@ -1,10 +1,10 @@
 ---
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-import "../styles/components/modal.css";
-import "../styles/features/sync/sync-modal.css";
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import '../styles/components/modal.css'
+import '../styles/features/sync/sync-modal.css'
 
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 ---
 
 <div class="modal-overlay" data-sync-overlay hidden>
@@ -14,7 +14,12 @@ const t = getTranslations(currentLocale);
         <i data-lucide="cloud"></i>
         <h2>{t.syncModal.modalTitle}</h2>
       </div>
-      <button class="modal-panel__close" type="button" data-sync-close aria-label={t.syncModal.close}>
+      <button
+        class="modal-panel__close"
+        type="button"
+        data-sync-close
+        aria-label={t.syncModal.close}
+      >
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -40,9 +45,7 @@ const t = getTranslations(currentLocale);
             <i data-lucide="cloud"></i>
           </div>
           <h3 class="cloud-panel-title">{t.syncModal.cloudTitle}</h3>
-          <p class="cloud-panel-desc">
-            {t.syncModal.cloudDesc}
-          </p>
+          <p class="cloud-panel-desc">{t.syncModal.cloudDesc}</p>
 
           <button class="btn btn--primary cloud-primary-btn" type="button" data-cloud-create-btn>
             <i data-lucide="cloud"></i>
@@ -78,14 +81,23 @@ const t = getTranslations(currentLocale);
                 <span class="cloud-status-dot" data-cloud-status-dot></span>
                 <span data-cloud-status-text>{t.syncModal.cloudConnected}</span>
               </span>
-              <span class="cloud-last-sync" data-cloud-last-sync>{t.syncModal.cloudSynced}</span>
+              <span class="cloud-last-sync" data-cloud-last-sync>
+                {t.syncModal.cloudSynced}
+              </span>
             </div>
 
             <div class="cloud-code-display">
               <span class="cloud-code-label">{t.syncModal.cloudCodeLabel}</span>
               <div class="cloud-code-val-wrap">
-                <strong class="cloud-code-value" data-cloud-code-value>------</strong>
-                <button class="cloud-code-copy-btn" type="button" data-cloud-copy-code title={t.syncModal.cloudCopyTitle}>
+                <strong class="cloud-code-value" data-cloud-code-value>
+                  ------
+                </strong>
+                <button
+                  class="cloud-code-copy-btn"
+                  type="button"
+                  data-cloud-copy-code
+                  title={t.syncModal.cloudCopyTitle}
+                >
                   <i data-lucide="copy"></i>
                 </button>
               </div>
@@ -125,9 +137,7 @@ const t = getTranslations(currentLocale);
               </div>
             </div>
 
-            <p class="cloud-code-help">
-              {t.syncModal.cloudHelp}
-            </p>
+            <p class="cloud-code-help">{t.syncModal.cloudHelp}</p>
           </div>
 
           <!-- Sección QR de Vinculación para Celular (con permisos de lectura y escritura) -->
@@ -141,14 +151,23 @@ const t = getTranslations(currentLocale);
             </div>
 
             <div class="sync-modal__qr-wrapper cloud-pairing-qr-wrap">
-              <canvas id="cloud-pairing-qr-canvas" class="sync-modal__canvas" width="180" height="180"></canvas>
+              <canvas
+                id="cloud-pairing-qr-canvas"
+                class="sync-modal__canvas"
+                width="180"
+                height="180"
+              ></canvas>
               <div class="sync-modal__qr-loading" data-cloud-pairing-loading>
                 <i data-lucide="loader-2" class="spin"></i>
                 <span>{t.syncModal.qrGenerating}</span>
               </div>
             </div>
 
-            <button class="btn btn--secondary btn--sm cloud-copy-pairing-btn" type="button" data-cloud-copy-pairing-link>
+            <button
+              class="btn btn--secondary btn--sm cloud-copy-pairing-btn"
+              type="button"
+              data-cloud-copy-pairing-link
+            >
               <i data-lucide="copy"></i>
               <span>{t.syncModal.cloudCopyPairingLink}</span>
             </button>
@@ -168,9 +187,7 @@ const t = getTranslations(currentLocale);
               </div>
             </div>
 
-            <p class="cloud-readonly-desc">
-              {t.syncModal.cloudReadOnlyWarning}
-            </p>
+            <p class="cloud-readonly-desc">{t.syncModal.cloudReadOnlyWarning}</p>
 
             <div class="cloud-readonly-card">
               <label class="cloud-readonly-label" for="cloud-upgrade-key-input">
@@ -211,7 +228,11 @@ const t = getTranslations(currentLocale);
                 </button>
               </div>
 
-              <button class="btn btn--primary cloud-readonly-submit-btn" type="button" data-cloud-upgrade-key-btn>
+              <button
+                class="btn btn--primary cloud-readonly-submit-btn"
+                type="button"
+                data-cloud-upgrade-key-btn
+              >
                 <i data-lucide="unlock"></i>
                 <span>{t.syncModal.cloudUpgradeKeyBtn}</span>
               </button>
@@ -229,22 +250,39 @@ const t = getTranslations(currentLocale);
           </div>
 
           <div class="cloud-actions-grid">
-            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-sync-now>
+            <button
+              class="btn btn--secondary sync-modal__action-btn"
+              type="button"
+              data-cloud-sync-now
+            >
               <i data-lucide="upload"></i>
               <span>{t.syncModal.cloudSyncNow}</span>
             </button>
-            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-check-now>
+            <button
+              class="btn btn--secondary sync-modal__action-btn"
+              type="button"
+              data-cloud-check-now
+            >
               <i data-lucide="refresh-cw"></i>
               <span>{t.syncModal.cloudCheckUpdates}</span>
             </button>
-            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-cloud-unlink-btn style="grid-column: 1 / -1;">
+            <button
+              class="btn btn--secondary sync-modal__action-btn"
+              type="button"
+              data-cloud-unlink-btn
+              style="grid-column: 1 / -1;"
+            >
               <i data-lucide="unlink"></i>
               <span>{t.syncModal.cloudUnlink}</span>
             </button>
           </div>
 
           <div class="cloud-danger-box">
-            <button class="btn btn--danger-outline sync-modal__reset-trigger" type="button" data-cloud-delete-trigger>
+            <button
+              class="btn btn--danger-outline sync-modal__reset-trigger"
+              type="button"
+              data-cloud-delete-trigger
+            >
               <i data-lucide="trash-2"></i>
               <span>{t.syncModal.cloudDeleteVault}</span>
             </button>
@@ -254,9 +292,7 @@ const t = getTranslations(currentLocale);
                 <i data-lucide="alert-triangle"></i>
                 <strong>{t.syncModal.cloudDeleteConfirmTitle}</strong>
               </div>
-              <p class="sync-modal__confirm-text">
-                {t.syncModal.cloudDeleteConfirmDesc}
-              </p>
+              <p class="sync-modal__confirm-text">{t.syncModal.cloudDeleteConfirmDesc}</p>
               <div class="sync-modal__confirm-actions">
                 <button class="btn btn--danger btn--sm" type="button" data-cloud-confirm-delete>
                   <i data-lucide="trash-2"></i>
@@ -275,12 +311,15 @@ const t = getTranslations(currentLocale);
       <div class="sync-tab-panel" data-tab-panel="qr" hidden>
         <!-- Sección QR -->
         <div class="sync-modal__qr-section">
-          <p class="sync-modal__instructions">
-            {t.syncModal.qrInstructions}
-          </p>
+          <p class="sync-modal__instructions">{t.syncModal.qrInstructions}</p>
 
           <div class="sync-modal__qr-wrapper">
-            <canvas id="sync-qr-canvas" class="sync-modal__canvas" width="240" height="240"></canvas>
+            <canvas
+              id="sync-qr-canvas"
+              class="sync-modal__canvas"
+              width="240"
+              height="240"
+            ></canvas>
             <div class="sync-modal__qr-loading" data-sync-loading>
               <i data-lucide="loader-2" class="spin"></i>
               <span>{t.syncModal.qrGenerating}</span>
@@ -303,15 +342,30 @@ const t = getTranslations(currentLocale);
             <span>{t.syncModal.qrOrManual}</span>
           </div>
           <div class="sync-modal__actions-row">
-            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-export-btn>
+            <button
+              class="btn btn--secondary sync-modal__action-btn"
+              type="button"
+              data-sync-export-btn
+            >
               <i data-lucide="download"></i>
               <span>{t.syncModal.qrExportJson}</span>
             </button>
-            <button class="btn btn--secondary sync-modal__action-btn" type="button" data-sync-import-btn>
+            <button
+              class="btn btn--secondary sync-modal__action-btn"
+              type="button"
+              data-sync-import-btn
+            >
               <i data-lucide="upload"></i>
               <span>{t.syncModal.qrImportJson}</span>
             </button>
-            <input type="file" accept=".json" class="visually-hidden" data-sync-file-input hidden aria-hidden="true" />
+            <input
+              type="file"
+              accept=".json"
+              class="visually-hidden"
+              data-sync-file-input
+              hidden
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>
@@ -323,7 +377,11 @@ const t = getTranslations(currentLocale);
         </div>
 
         <div class="sync-modal__reset-wrapper" data-sync-reset-default>
-          <button class="btn btn--danger-outline sync-modal__reset-trigger" type="button" data-sync-reset-trigger>
+          <button
+            class="btn btn--danger-outline sync-modal__reset-trigger"
+            type="button"
+            data-sync-reset-trigger
+          >
             <i data-lucide="trash-2"></i>
             <span>{t.syncModal.dangerResetBtn}</span>
           </button>
@@ -359,8 +417,8 @@ const t = getTranslations(currentLocale);
     exportBackupFile,
     importBackupFile,
     generateCloudPairingUrl,
-  } from "../lib/sync";
-  import { getCapturedIds, getTeam, resetAllData } from "../lib/storage";
+  } from '../lib/sync'
+  import { getCapturedIds, getTeam, resetAllData } from '../lib/storage'
   import {
     getCloudState,
     createCloudVault,
@@ -374,511 +432,607 @@ const t = getTranslations(currentLocale);
     initCloudSyncClient,
     CLOUD_STATUS_EVENT,
     type CloudState,
-  } from "../lib/cloudSync";
-  import { toast } from "../lib/toast";
-  import { refreshIcons } from "../lib/icons";
-  import { getCurrentLocale, getTranslations } from "../lib/i18n/translations";
+  } from '../lib/cloudSync'
+  import { toast } from '../lib/toast'
+  import { refreshIcons } from '../lib/icons'
+  import { getCurrentLocale, getTranslations } from '../lib/i18n/translations'
 
   function initSyncModal() {
-    const overlay = document.querySelector<HTMLDivElement>("[data-sync-overlay]");
-    if (!overlay) return;
+    const overlay = document.querySelector<HTMLDivElement>('[data-sync-overlay]')
+    if (!overlay) return
 
     // Inicializar cliente global de sincronización
-    initCloudSyncClient();
+    initCloudSyncClient()
 
-    const closeBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-close]");
-    const tabBtns = overlay.querySelectorAll<HTMLButtonElement>("[data-tab-target]");
-    const tabPanels = overlay.querySelectorAll<HTMLDivElement>("[data-tab-panel]");
+    const closeBtn = overlay.querySelector<HTMLButtonElement>('[data-sync-close]')
+    const tabBtns = overlay.querySelectorAll<HTMLButtonElement>('[data-tab-target]')
+    const tabPanels = overlay.querySelectorAll<HTMLDivElement>('[data-tab-panel]')
 
     // Elementos QR
-    const canvas = overlay.querySelector<HTMLCanvasElement>("#sync-qr-canvas");
-    const loading = overlay.querySelector<HTMLDivElement>("[data-sync-loading]");
-    const statsEl = overlay.querySelector<HTMLDivElement>("[data-sync-stats]");
-    const copyBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-copy-link]");
-    const exportBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-export-btn]");
-    const importBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-import-btn]");
-    const fileInput = overlay.querySelector<HTMLInputElement>("[data-sync-file-input]");
+    const canvas = overlay.querySelector<HTMLCanvasElement>('#sync-qr-canvas')
+    const loading = overlay.querySelector<HTMLDivElement>('[data-sync-loading]')
+    const statsEl = overlay.querySelector<HTMLDivElement>('[data-sync-stats]')
+    const copyBtn = overlay.querySelector<HTMLButtonElement>('[data-sync-copy-link]')
+    const exportBtn = overlay.querySelector<HTMLButtonElement>('[data-sync-export-btn]')
+    const importBtn = overlay.querySelector<HTMLButtonElement>('[data-sync-import-btn]')
+    const fileInput = overlay.querySelector<HTMLInputElement>('[data-sync-file-input]')
 
     // Elementos Cloud
-    const cloudUnlinked = overlay.querySelector<HTMLDivElement>("[data-cloud-unlinked]");
-    const cloudLinked = overlay.querySelector<HTMLDivElement>("[data-cloud-linked]");
-    const cloudCreateBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-create-btn]");
-    const cloudJoinInput = overlay.querySelector<HTMLInputElement>("[data-cloud-join-input]");
-    const cloudJoinBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-join-btn]");
-    const cloudCodeValue = overlay.querySelector<HTMLElement>("[data-cloud-code-value]");
-    const cloudCopyCode = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-code]");
-    const cloudSecretWrap = overlay.querySelector<HTMLDivElement>("[data-cloud-secret-wrap]");
-    const cloudSecretInput = overlay.querySelector<HTMLInputElement>("[data-cloud-secret-input]");
-    const cloudToggleSecret = overlay.querySelector<HTMLButtonElement>("[data-cloud-toggle-secret]");
-    const cloudCopySecret = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-secret]");
-    const cloudLastSyncEl = overlay.querySelector<HTMLElement>("[data-cloud-last-sync]");
-    const cloudStatusDot = overlay.querySelector<HTMLElement>("[data-cloud-status-dot]");
-    const cloudStatusText = overlay.querySelector<HTMLElement>("[data-cloud-status-text]");
-    const cloudPairingCard = overlay.querySelector<HTMLDivElement>("[data-cloud-pairing-card]");
-    const cloudPairingCanvas = overlay.querySelector<HTMLCanvasElement>("#cloud-pairing-qr-canvas");
-    const cloudPairingLoading = overlay.querySelector<HTMLDivElement>("[data-cloud-pairing-loading]");
-    const cloudCopyPairingBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-copy-pairing-link]");
-    const cloudReadOnlyBox = overlay.querySelector<HTMLDivElement>("[data-cloud-readonly-box]");
-    const cloudUpgradeKeyInput = overlay.querySelector<HTMLInputElement>("[data-cloud-upgrade-key-input]");
-    const cloudToggleUpgradeVis = overlay.querySelector<HTMLButtonElement>("[data-cloud-toggle-upgrade-visibility]");
-    const cloudPasteUpgradeKey = overlay.querySelector<HTMLButtonElement>("[data-cloud-paste-upgrade-key]");
-    const cloudUpgradeKeyBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-upgrade-key-btn]");
-    const cloudSyncNowBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-sync-now]");
-    const cloudCheckNowBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-check-now]");
-    const cloudUnlinkBtn = overlay.querySelector<HTMLButtonElement>("[data-cloud-unlink-btn]");
-    const cloudDeleteTrigger = overlay.querySelector<HTMLButtonElement>("[data-cloud-delete-trigger]");
-    const cloudDeleteConfirm = overlay.querySelector<HTMLDivElement>("[data-cloud-delete-confirm]");
-    const cloudConfirmDelete = overlay.querySelector<HTMLButtonElement>("[data-cloud-confirm-delete]");
-    const cloudCancelDelete = overlay.querySelector<HTMLButtonElement>("[data-cloud-cancel-delete]");
+    const cloudUnlinked = overlay.querySelector<HTMLDivElement>('[data-cloud-unlinked]')
+    const cloudLinked = overlay.querySelector<HTMLDivElement>('[data-cloud-linked]')
+    const cloudCreateBtn = overlay.querySelector<HTMLButtonElement>('[data-cloud-create-btn]')
+    const cloudJoinInput = overlay.querySelector<HTMLInputElement>('[data-cloud-join-input]')
+    const cloudJoinBtn = overlay.querySelector<HTMLButtonElement>('[data-cloud-join-btn]')
+    const cloudCodeValue = overlay.querySelector<HTMLElement>('[data-cloud-code-value]')
+    const cloudCopyCode = overlay.querySelector<HTMLButtonElement>('[data-cloud-copy-code]')
+    const cloudSecretWrap = overlay.querySelector<HTMLDivElement>('[data-cloud-secret-wrap]')
+    const cloudSecretInput = overlay.querySelector<HTMLInputElement>('[data-cloud-secret-input]')
+    const cloudToggleSecret = overlay.querySelector<HTMLButtonElement>('[data-cloud-toggle-secret]')
+    const cloudCopySecret = overlay.querySelector<HTMLButtonElement>('[data-cloud-copy-secret]')
+    const cloudLastSyncEl = overlay.querySelector<HTMLElement>('[data-cloud-last-sync]')
+    const cloudStatusDot = overlay.querySelector<HTMLElement>('[data-cloud-status-dot]')
+    const cloudStatusText = overlay.querySelector<HTMLElement>('[data-cloud-status-text]')
+    const cloudPairingCard = overlay.querySelector<HTMLDivElement>('[data-cloud-pairing-card]')
+    const cloudPairingCanvas = overlay.querySelector<HTMLCanvasElement>('#cloud-pairing-qr-canvas')
+    const cloudPairingLoading = overlay.querySelector<HTMLDivElement>(
+      '[data-cloud-pairing-loading]',
+    )
+    const cloudCopyPairingBtn = overlay.querySelector<HTMLButtonElement>(
+      '[data-cloud-copy-pairing-link]',
+    )
+    const cloudReadOnlyBox = overlay.querySelector<HTMLDivElement>('[data-cloud-readonly-box]')
+    const cloudUpgradeKeyInput = overlay.querySelector<HTMLInputElement>(
+      '[data-cloud-upgrade-key-input]',
+    )
+    const cloudToggleUpgradeVis = overlay.querySelector<HTMLButtonElement>(
+      '[data-cloud-toggle-upgrade-visibility]',
+    )
+    const cloudPasteUpgradeKey = overlay.querySelector<HTMLButtonElement>(
+      '[data-cloud-paste-upgrade-key]',
+    )
+    const cloudUpgradeKeyBtn = overlay.querySelector<HTMLButtonElement>(
+      '[data-cloud-upgrade-key-btn]',
+    )
+    const cloudSyncNowBtn = overlay.querySelector<HTMLButtonElement>('[data-cloud-sync-now]')
+    const cloudCheckNowBtn = overlay.querySelector<HTMLButtonElement>('[data-cloud-check-now]')
+    const cloudUnlinkBtn = overlay.querySelector<HTMLButtonElement>('[data-cloud-unlink-btn]')
+    const cloudDeleteTrigger = overlay.querySelector<HTMLButtonElement>(
+      '[data-cloud-delete-trigger]',
+    )
+    const cloudDeleteConfirm = overlay.querySelector<HTMLDivElement>('[data-cloud-delete-confirm]')
+    const cloudConfirmDelete = overlay.querySelector<HTMLButtonElement>(
+      '[data-cloud-confirm-delete]',
+    )
+    const cloudCancelDelete = overlay.querySelector<HTMLButtonElement>('[data-cloud-cancel-delete]')
 
     // Elementos Reset Local
-    const resetTrigger = overlay.querySelector<HTMLButtonElement>("[data-sync-reset-trigger]");
-    const resetDefault = overlay.querySelector<HTMLDivElement>("[data-sync-reset-default]");
-    const resetConfirm = overlay.querySelector<HTMLDivElement>("[data-sync-reset-confirm]");
-    const confirmMsg = overlay.querySelector<HTMLParagraphElement>("[data-sync-confirm-msg]");
-    const confirmDeleteBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-confirm-delete]");
-    const cancelDeleteBtn = overlay.querySelector<HTMLButtonElement>("[data-sync-cancel-delete]");
+    const resetTrigger = overlay.querySelector<HTMLButtonElement>('[data-sync-reset-trigger]')
+    const resetDefault = overlay.querySelector<HTMLDivElement>('[data-sync-reset-default]')
+    const resetConfirm = overlay.querySelector<HTMLDivElement>('[data-sync-reset-confirm]')
+    const confirmMsg = overlay.querySelector<HTMLParagraphElement>('[data-sync-confirm-msg]')
+    const confirmDeleteBtn = overlay.querySelector<HTMLButtonElement>('[data-sync-confirm-delete]')
+    const cancelDeleteBtn = overlay.querySelector<HTMLButtonElement>('[data-sync-cancel-delete]')
 
-    let currentSyncUrl = "";
-    let currentPairingUrl = "";
+    let currentSyncUrl = ''
+    let currentPairingUrl = ''
 
     // Pestañas
     tabBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const target = btn.dataset.tabTarget;
-        tabBtns.forEach((b) => b.classList.toggle("is-active", b === btn));
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tabTarget
+        tabBtns.forEach((b) => b.classList.toggle('is-active', b === btn))
         tabPanels.forEach((p) => {
-          p.hidden = p.dataset.tabPanel !== target;
-        });
-        refreshIcons();
-      });
-    });
+          p.hidden = p.dataset.tabPanel !== target
+        })
+        refreshIcons()
+      })
+    })
 
     function formatTime(ts: number | null): string {
-      if (!ts) return "Pendiente";
-      const diffSec = Math.floor((Date.now() - ts) / 1000);
-      if (diffSec < 10) return "Recién actualizado";
-      if (diffSec < 60) return `Hace ${diffSec}s`;
-      const diffMin = Math.floor(diffSec / 60);
-      if (diffMin < 60) return `Hace ${diffMin} min`;
-      return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      if (!ts) return 'Pendiente'
+      const diffSec = Math.floor((Date.now() - ts) / 1000)
+      if (diffSec < 10) return 'Recién actualizado'
+      if (diffSec < 60) return `Hace ${diffSec}s`
+      const diffMin = Math.floor(diffSec / 60)
+      if (diffMin < 60) return `Hace ${diffMin} min`
+      return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
     async function renderCloudPairingQr(code: string, secretKey: string) {
-      if (!cloudPairingCanvas || !cloudPairingLoading) return;
-      cloudPairingLoading.style.display = "flex";
+      if (!cloudPairingCanvas || !cloudPairingLoading) return
+      cloudPairingLoading.style.display = 'flex'
       try {
-        currentPairingUrl = generateCloudPairingUrl(code, secretKey, window.location.origin, getCurrentLocale());
-        await renderQrCode(cloudPairingCanvas, currentPairingUrl);
-        cloudPairingLoading.style.display = "none";
+        currentPairingUrl = generateCloudPairingUrl(
+          code,
+          secretKey,
+          window.location.origin,
+          getCurrentLocale(),
+        )
+        await renderQrCode(cloudPairingCanvas, currentPairingUrl)
+        cloudPairingLoading.style.display = 'none'
       } catch (err) {
-        console.error("Error al generar QR de vinculación:", err);
-        cloudPairingLoading.innerHTML = `<span>Error QR</span>`;
+        console.error('Error al generar QR de vinculación:', err)
+        cloudPairingLoading.innerHTML = `<span>Error QR</span>`
       }
     }
 
     function renderCloudUI(state: CloudState) {
-      if (!cloudUnlinked || !cloudLinked) return;
-      const locale = getCurrentLocale();
-      const t = getTranslations(locale);
+      if (!cloudUnlinked || !cloudLinked) return
+      const locale = getCurrentLocale()
+      const t = getTranslations(locale)
 
       if (state.isLinked) {
-        cloudUnlinked.hidden = true;
-        cloudLinked.hidden = false;
-        if (cloudCodeValue) cloudCodeValue.textContent = state.code || "------";
-        if (cloudLastSyncEl) cloudLastSyncEl.textContent = formatTime(state.lastSync);
+        cloudUnlinked.hidden = true
+        cloudLinked.hidden = false
+        if (cloudCodeValue) cloudCodeValue.textContent = state.code || '------'
+        if (cloudLastSyncEl) cloudLastSyncEl.textContent = formatTime(state.lastSync)
 
         if (state.secretKey && state.code) {
-          if (cloudStatusDot) cloudStatusDot.classList.remove("cloud-status-dot--readonly");
-          if (cloudStatusText) cloudStatusText.textContent = t.syncModal.cloudStatusReadWrite;
-          if (cloudPairingCard) cloudPairingCard.hidden = false;
-          if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = true;
-          if (cloudSecretWrap) cloudSecretWrap.hidden = false;
+          if (cloudStatusDot) cloudStatusDot.classList.remove('cloud-status-dot--readonly')
+          if (cloudStatusText) cloudStatusText.textContent = t.syncModal.cloudStatusReadWrite
+          if (cloudPairingCard) cloudPairingCard.hidden = false
+          if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = true
+          if (cloudSecretWrap) cloudSecretWrap.hidden = false
           if (cloudSecretInput) {
-            cloudSecretInput.value = state.secretKey;
-            cloudSecretInput.type = "password";
+            cloudSecretInput.value = state.secretKey
+            cloudSecretInput.type = 'password'
           }
-          renderCloudPairingQr(state.code, state.secretKey);
+          renderCloudPairingQr(state.code, state.secretKey)
         } else {
-          if (cloudStatusDot) cloudStatusDot.classList.add("cloud-status-dot--readonly");
-          if (cloudStatusText) cloudStatusText.textContent = t.syncModal.cloudStatusReadOnly;
-          if (cloudPairingCard) cloudPairingCard.hidden = true;
-          if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = false;
-          if (cloudSecretWrap) cloudSecretWrap.hidden = true;
+          if (cloudStatusDot) cloudStatusDot.classList.add('cloud-status-dot--readonly')
+          if (cloudStatusText) cloudStatusText.textContent = t.syncModal.cloudStatusReadOnly
+          if (cloudPairingCard) cloudPairingCard.hidden = true
+          if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = false
+          if (cloudSecretWrap) cloudSecretWrap.hidden = true
         }
       } else {
-        cloudUnlinked.hidden = false;
-        cloudLinked.hidden = true;
-        if (cloudPairingCard) cloudPairingCard.hidden = true;
-        if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = true;
-        if (cloudSecretWrap) cloudSecretWrap.hidden = true;
+        cloudUnlinked.hidden = false
+        cloudLinked.hidden = true
+        if (cloudPairingCard) cloudPairingCard.hidden = true
+        if (cloudReadOnlyBox) cloudReadOnlyBox.hidden = true
+        if (cloudSecretWrap) cloudSecretWrap.hidden = true
       }
 
-      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = true;
-      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = false;
-      refreshIcons();
+      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = true
+      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = false
+      refreshIcons()
     }
 
     function hideResetConfirmation() {
-      if (resetConfirm) resetConfirm.hidden = true;
-      if (resetDefault) resetDefault.hidden = false;
+      if (resetConfirm) resetConfirm.hidden = true
+      if (resetDefault) resetDefault.hidden = false
     }
 
     function showResetConfirmation() {
-      const capturedCount = getCapturedIds().size;
-      const team = getTeam();
-      const activeMembers = team.slots.filter((s) => s.pokemonId !== null).length;
+      const capturedCount = getCapturedIds().size
+      const team = getTeam()
+      const activeMembers = team.slots.filter((s) => s.pokemonId !== null).length
       if (confirmMsg) {
-        confirmMsg.textContent = `Se borrarán tus ${capturedCount} Pokémon capturados y tu equipo actual (${activeMembers} miembros). Esta acción no se puede deshacer.`;
+        confirmMsg.textContent = `Se borrarán tus ${capturedCount} Pokémon capturados y tu equipo actual (${activeMembers} miembros). Esta acción no se puede deshacer.`
       }
-      if (resetDefault) resetDefault.hidden = true;
-      if (resetConfirm) resetConfirm.hidden = false;
-      refreshIcons();
+      if (resetDefault) resetDefault.hidden = true
+      if (resetConfirm) resetConfirm.hidden = false
+      refreshIcons()
     }
 
     async function openModal() {
-      overlay!.hidden = false;
-      document.body.style.overflow = "hidden";
-      hideResetConfirmation();
-      renderCloudUI(getCloudState());
-      refreshIcons();
+      overlay!.hidden = false
+      document.body.style.overflow = 'hidden'
+      hideResetConfirmation()
+      renderCloudUI(getCloudState())
+      refreshIcons()
 
       // Estadísticas actuales
-      const locale = getCurrentLocale();
-      const capturedCount = getCapturedIds().size;
-      const team = getTeam();
-      const activeMembers = team.slots.filter((s) => s.pokemonId !== null).length;
+      const locale = getCurrentLocale()
+      const capturedCount = getCapturedIds().size
+      const team = getTeam()
+      const activeMembers = team.slots.filter((s) => s.pokemonId !== null).length
       if (statsEl) {
         statsEl.innerHTML = `
           <div class="sync-stat-chip">
             <i data-lucide="users"></i>
-            <span>${activeMembers} ${locale === "es" ? "en equipo" : "in team"}</span>
+            <span>${activeMembers} ${locale === 'es' ? 'en equipo' : 'in team'}</span>
           </div>
           <div class="sync-stat-chip">
             <i data-lucide="check"></i>
-            <span>${capturedCount} ${locale === "es" ? "capturados" : "caught"}</span>
+            <span>${capturedCount} ${locale === 'es' ? 'capturados' : 'caught'}</span>
           </div>
-        `;
-        refreshIcons();
+        `
+        refreshIcons()
       }
 
       // Generación del código QR
       if (canvas && loading) {
-        loading.style.display = "flex";
+        loading.style.display = 'flex'
         try {
-          currentSyncUrl = await generateSyncUrl();
-          await renderQrCode(canvas, currentSyncUrl);
-          loading.style.display = "none";
+          currentSyncUrl = await generateSyncUrl()
+          await renderQrCode(canvas, currentSyncUrl)
+          loading.style.display = 'none'
         } catch (err) {
-          console.error("Error al generar QR:", err);
-          loading.innerHTML = `<span>${locale === "es" ? "Error al generar código QR" : "Error generating QR code"}</span>`;
+          console.error('Error al generar QR:', err)
+          loading.innerHTML = `<span>${locale === 'es' ? 'Error al generar código QR' : 'Error generating QR code'}</span>`
         }
       }
     }
 
     function closeModal() {
-      overlay!.hidden = true;
-      document.body.style.overflow = "";
-      hideResetConfirmation();
+      overlay!.hidden = true
+      document.body.style.overflow = ''
+      hideResetConfirmation()
     }
 
     // Escuchar triggers globales con [data-sync-open]
-    document.addEventListener("click", (e) => {
-      const target = (e.target as HTMLElement).closest("[data-sync-open]");
+    document.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement).closest('[data-sync-open]')
       if (target) {
-        e.preventDefault();
-        openModal();
+        e.preventDefault()
+        openModal()
       }
-    });
+    })
 
-    closeBtn?.addEventListener("click", closeModal);
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) closeModal();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !overlay.hidden) closeModal();
-    });
+    closeBtn?.addEventListener('click', closeModal)
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal()
+    })
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !overlay.hidden) closeModal()
+    })
 
     // Eventos Cloud
     window.addEventListener(CLOUD_STATUS_EVENT, (e) => {
-      const detail = (e as CustomEvent<CloudState>).detail;
-      if (detail) renderCloudUI(detail);
-    });
+      const detail = (e as CustomEvent<CloudState>).detail
+      if (detail) renderCloudUI(detail)
+    })
 
-    cloudCreateBtn?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      cloudCreateBtn.disabled = true;
-      toast.info(locale === "es" ? "Creando bóveda en la DB..." : "Creating vault in DB...");
-      const res = await createCloudVault();
-      cloudCreateBtn.disabled = false;
+    cloudCreateBtn?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      cloudCreateBtn.disabled = true
+      toast.info(locale === 'es' ? 'Creando bóveda en la DB...' : 'Creating vault in DB...')
+      const res = await createCloudVault()
+      cloudCreateBtn.disabled = false
       if (res.success) {
-        toast.success(locale === "es" ? `¡Bóveda creada! Tu código es: ${res.code}` : `Vault created! Your code is: ${res.code}`);
+        toast.success(
+          locale === 'es'
+            ? `¡Bóveda creada! Tu código es: ${res.code}`
+            : `Vault created! Your code is: ${res.code}`,
+        )
       } else {
-        toast.error(res.error || (locale === "es" ? "No se pudo conectar a la nube" : "Could not connect to the cloud"));
+        toast.error(
+          res.error ||
+            (locale === 'es' ? 'No se pudo conectar a la nube' : 'Could not connect to the cloud'),
+        )
       }
-    });
+    })
 
-    cloudJoinBtn?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      const rawInput = cloudJoinInput?.value?.trim();
+    cloudJoinBtn?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      const rawInput = cloudJoinInput?.value?.trim()
       if (!rawInput) {
-        toast.info(locale === "es" ? "Ingresa un código de 6 caracteres o enlace" : "Enter a 6-character code or link");
-        return;
+        toast.info(
+          locale === 'es'
+            ? 'Ingresa un código de 6 caracteres o enlace'
+            : 'Enter a 6-character code or link',
+        )
+        return
       }
 
-      let code = rawInput;
-      let secretKey: string | undefined;
+      let code = rawInput
+      let secretKey: string | undefined
 
-      const vaultMatch = rawInput.match(/vault=([^&]+)/i);
+      const vaultMatch = rawInput.match(/vault=([^&]+)/i)
       if (vaultMatch) {
-        code = decodeURIComponent(vaultMatch[1]).toUpperCase().trim();
-        const keyMatch = rawInput.match(/key=([^&]+)/i);
+        code = decodeURIComponent(vaultMatch[1]).toUpperCase().trim()
+        const keyMatch = rawInput.match(/key=([^&]+)/i)
         if (keyMatch) {
-          secretKey = decodeURIComponent(keyMatch[1]).trim();
+          secretKey = decodeURIComponent(keyMatch[1]).trim()
         }
       }
 
-      cloudJoinBtn.disabled = true;
-      toast.info(locale === "es" ? "Conectando con la DB..." : "Connecting to DB...");
-      const res = await joinCloudVault(code, secretKey);
-      cloudJoinBtn.disabled = false;
+      cloudJoinBtn.disabled = true
+      toast.info(locale === 'es' ? 'Conectando con la DB...' : 'Connecting to DB...')
+      const res = await joinCloudVault(code, secretKey)
+      cloudJoinBtn.disabled = false
       if (res.success) {
         toast.success(
           secretKey
-            ? (locale === "es" ? "¡Dispositivo vinculado con permisos de escritura!" : "Device linked with write permissions!")
-            : (locale === "es" ? "¡Dispositivo vinculado con éxito!" : "Device linked successfully!")
-        );
-        if (cloudJoinInput) cloudJoinInput.value = "";
+            ? locale === 'es'
+              ? '¡Dispositivo vinculado con permisos de escritura!'
+              : 'Device linked with write permissions!'
+            : locale === 'es'
+              ? '¡Dispositivo vinculado con éxito!'
+              : 'Device linked successfully!',
+        )
+        if (cloudJoinInput) cloudJoinInput.value = ''
       } else {
-        toast.error(res.error || (locale === "es" ? "Código no válido o no encontrado" : "Invalid or not found code"));
+        toast.error(
+          res.error ||
+            (locale === 'es' ? 'Código no válido o no encontrado' : 'Invalid or not found code'),
+        )
       }
-    });
+    })
 
-    cloudCopyPairingBtn?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      const t = getTranslations(locale);
-      const state = getCloudState();
-      if (!state.code || !state.secretKey) return;
+    cloudCopyPairingBtn?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      const t = getTranslations(locale)
+      const state = getCloudState()
+      if (!state.code || !state.secretKey) return
       if (!currentPairingUrl) {
-        currentPairingUrl = generateCloudPairingUrl(state.code, state.secretKey, window.location.origin, locale);
+        currentPairingUrl = generateCloudPairingUrl(
+          state.code,
+          state.secretKey,
+          window.location.origin,
+          locale,
+        )
       }
       try {
-        await navigator.clipboard.writeText(currentPairingUrl);
-        toast.success(t.syncModal.cloudPairingLinkCopied);
+        await navigator.clipboard.writeText(currentPairingUrl)
+        toast.success(t.syncModal.cloudPairingLinkCopied)
       } catch {
-        toast.info(t.syncModal.cloudCopyTitle + ": " + currentPairingUrl);
+        toast.info(t.syncModal.cloudCopyTitle + ': ' + currentPairingUrl)
       }
-    });
+    })
 
-    cloudToggleSecret?.addEventListener("click", () => {
-      if (!cloudSecretInput) return;
-      const isPassword = cloudSecretInput.type === "password";
-      cloudSecretInput.type = isPassword ? "text" : "password";
-      const icon = cloudToggleSecret.querySelector("i");
+    cloudToggleSecret?.addEventListener('click', () => {
+      if (!cloudSecretInput) return
+      const isPassword = cloudSecretInput.type === 'password'
+      cloudSecretInput.type = isPassword ? 'text' : 'password'
+      const icon = cloudToggleSecret.querySelector('i')
       if (icon) {
-        icon.setAttribute("data-lucide", isPassword ? "eye-off" : "eye");
-        refreshIcons();
+        icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye')
+        refreshIcons()
       }
-    });
+    })
 
-    cloudCopySecret?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      const t = getTranslations(locale);
-      const state = getCloudState();
-      if (!state.secretKey) return;
+    cloudCopySecret?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      const t = getTranslations(locale)
+      const state = getCloudState()
+      if (!state.secretKey) return
       try {
-        await navigator.clipboard.writeText(state.secretKey);
-        toast.success(t.syncModal.cloudSecretCopied);
+        await navigator.clipboard.writeText(state.secretKey)
+        toast.success(t.syncModal.cloudSecretCopied)
       } catch {
-        toast.info(t.syncModal.cloudCopySecret + ": " + state.secretKey);
+        toast.info(t.syncModal.cloudCopySecret + ': ' + state.secretKey)
       }
-    });
+    })
 
-    cloudToggleUpgradeVis?.addEventListener("click", () => {
-      if (!cloudUpgradeKeyInput) return;
-      const isPassword = cloudUpgradeKeyInput.type === "password";
-      cloudUpgradeKeyInput.type = isPassword ? "text" : "password";
-      const icon = cloudToggleUpgradeVis.querySelector("i");
+    cloudToggleUpgradeVis?.addEventListener('click', () => {
+      if (!cloudUpgradeKeyInput) return
+      const isPassword = cloudUpgradeKeyInput.type === 'password'
+      cloudUpgradeKeyInput.type = isPassword ? 'text' : 'password'
+      const icon = cloudToggleUpgradeVis.querySelector('i')
       if (icon) {
-        icon.setAttribute("data-lucide", isPassword ? "eye-off" : "eye");
-        refreshIcons();
+        icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye')
+        refreshIcons()
       }
-    });
+    })
 
-    cloudPasteUpgradeKey?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
+    cloudPasteUpgradeKey?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
       try {
-        const text = await navigator.clipboard.readText();
+        const text = await navigator.clipboard.readText()
         if (text && cloudUpgradeKeyInput) {
-          let keyToSet = text.trim();
-          const keyMatch = text.match(/key=([^&]+)/i);
+          let keyToSet = text.trim()
+          const keyMatch = text.match(/key=([^&]+)/i)
           if (keyMatch) {
-            keyToSet = decodeURIComponent(keyMatch[1]).trim();
+            keyToSet = decodeURIComponent(keyMatch[1]).trim()
           }
-          cloudUpgradeKeyInput.value = keyToSet;
-          cloudUpgradeKeyInput.focus();
-          toast.info(locale === "es" ? "Clave pegada del portapapeles" : "Key pasted from clipboard");
+          cloudUpgradeKeyInput.value = keyToSet
+          cloudUpgradeKeyInput.focus()
+          toast.info(
+            locale === 'es' ? 'Clave pegada del portapapeles' : 'Key pasted from clipboard',
+          )
         }
       } catch {
-        toast.info(locale === "es" ? "No se pudo leer el portapapeles. Pégala manualmente." : "Could not read clipboard. Paste manually.");
+        toast.info(
+          locale === 'es'
+            ? 'No se pudo leer el portapapeles. Pégala manualmente.'
+            : 'Could not read clipboard. Paste manually.',
+        )
       }
-    });
+    })
 
-    cloudUpgradeKeyInput?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        cloudUpgradeKeyBtn?.click();
+    cloudUpgradeKeyInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        cloudUpgradeKeyBtn?.click()
       }
-    });
+    })
 
-    cloudUpgradeKeyBtn?.addEventListener("click", () => {
-      const locale = getCurrentLocale();
-      const t = getTranslations(locale);
-      const rawVal = cloudUpgradeKeyInput?.value?.trim() || "";
+    cloudUpgradeKeyBtn?.addEventListener('click', () => {
+      const locale = getCurrentLocale()
+      const t = getTranslations(locale)
+      const rawVal = cloudUpgradeKeyInput?.value?.trim() || ''
       if (!rawVal) {
-        toast.info(locale === "es" ? "Ingresá tu clave secreta" : "Enter your secret key");
-        return;
+        toast.info(locale === 'es' ? 'Ingresá tu clave secreta' : 'Enter your secret key')
+        return
       }
-      let keyVal = rawVal;
-      const keyMatch = rawVal.match(/key=([^&]+)/i);
+      let keyVal = rawVal
+      const keyMatch = rawVal.match(/key=([^&]+)/i)
       if (keyMatch) {
-        keyVal = decodeURIComponent(keyMatch[1]).trim();
+        keyVal = decodeURIComponent(keyMatch[1]).trim()
       }
-      setCloudSecretKey(keyVal);
+      setCloudSecretKey(keyVal)
       if (cloudUpgradeKeyInput) {
-        cloudUpgradeKeyInput.value = "";
-        cloudUpgradeKeyInput.type = "password";
+        cloudUpgradeKeyInput.value = ''
+        cloudUpgradeKeyInput.type = 'password'
       }
-      toast.success(t.syncModal.cloudUpgradeSuccess);
-    });
+      toast.success(t.syncModal.cloudUpgradeSuccess)
+    })
 
-    cloudCopyCode?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      const state = getCloudState();
-      if (!state.code) return;
+    cloudCopyCode?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      const state = getCloudState()
+      if (!state.code) return
       try {
-        await navigator.clipboard.writeText(state.code);
-        toast.success(locale === "es" ? "¡Código copiado al portapapeles!" : "Code copied to clipboard!");
+        await navigator.clipboard.writeText(state.code)
+        toast.success(
+          locale === 'es' ? '¡Código copiado al portapapeles!' : 'Code copied to clipboard!',
+        )
       } catch {
-        toast.info(locale === "es" ? "Copia el código manualmente: " + state.code : "Copy the code manually: " + state.code);
+        toast.info(
+          locale === 'es'
+            ? 'Copia el código manualmente: ' + state.code
+            : 'Copy the code manually: ' + state.code,
+        )
       }
-    });
+    })
 
-    cloudSyncNowBtn?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      cloudSyncNowBtn.disabled = true;
-      toast.info(locale === "es" ? "Guardando en la nube..." : "Saving to cloud...");
-      const res = await syncToCloudNow();
-      cloudSyncNowBtn.disabled = false;
+    cloudSyncNowBtn?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      cloudSyncNowBtn.disabled = true
+      toast.info(locale === 'es' ? 'Guardando en la nube...' : 'Saving to cloud...')
+      const res = await syncToCloudNow()
+      cloudSyncNowBtn.disabled = false
       if (res.success) {
-        toast.success(locale === "es" ? "¡Datos guardados con éxito en la DB!" : "Data successfully saved to DB!");
+        toast.success(
+          locale === 'es'
+            ? '¡Datos guardados con éxito en la DB!'
+            : 'Data successfully saved to DB!',
+        )
       } else {
-        toast.error(res.error || (locale === "es" ? "Error al sincronizar" : "Error syncing"));
+        toast.error(res.error || (locale === 'es' ? 'Error al sincronizar' : 'Error syncing'))
       }
-    });
+    })
 
-    cloudCheckNowBtn?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      cloudCheckNowBtn.disabled = true;
-      toast.info(locale === "es" ? "Comprobando cambios en la nube..." : "Checking for updates in cloud...");
-      const updated = await fetchFromCloud(true);
-      pingSyncWorkerCheck();
-      cloudCheckNowBtn.disabled = false;
+    cloudCheckNowBtn?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      cloudCheckNowBtn.disabled = true
+      toast.info(
+        locale === 'es' ? 'Comprobando cambios en la nube...' : 'Checking for updates in cloud...',
+      )
+      const updated = await fetchFromCloud(true)
+      pingSyncWorkerCheck()
+      cloudCheckNowBtn.disabled = false
       if (updated) {
-        toast.success(locale === "es" ? "¡Equipo y capturas actualizados desde la nube!" : "Team and captures updated from cloud!");
+        toast.success(
+          locale === 'es'
+            ? '¡Equipo y capturas actualizados desde la nube!'
+            : 'Team and captures updated from cloud!',
+        )
       } else {
-        toast.success(locale === "es" ? "Comprobación finalizada (ya tenés la última versión)." : "Check completed (already up to date).");
+        toast.success(
+          locale === 'es'
+            ? 'Comprobación finalizada (ya tenés la última versión).'
+            : 'Check completed (already up to date).',
+        )
       }
-    });
+    })
 
-    cloudUnlinkBtn?.addEventListener("click", () => {
-      const locale = getCurrentLocale();
-      unlinkCloudVault();
-      toast.info(locale === "es" ? "Dispositivo desvinculado. Recargando..." : "Device unlinked. Reloading...");
+    cloudUnlinkBtn?.addEventListener('click', () => {
+      const locale = getCurrentLocale()
+      unlinkCloudVault()
+      toast.info(
+        locale === 'es'
+          ? 'Dispositivo desvinculado. Recargando...'
+          : 'Device unlinked. Reloading...',
+      )
       setTimeout(() => {
-        window.location.reload();
-      }, 400);
-    });
+        window.location.reload()
+      }, 400)
+    })
 
-    cloudDeleteTrigger?.addEventListener("click", () => {
-      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = false;
-      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = true;
-      refreshIcons();
-    });
+    cloudDeleteTrigger?.addEventListener('click', () => {
+      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = false
+      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = true
+      refreshIcons()
+    })
 
-    cloudCancelDelete?.addEventListener("click", () => {
-      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = true;
-      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = false;
-    });
+    cloudCancelDelete?.addEventListener('click', () => {
+      if (cloudDeleteConfirm) cloudDeleteConfirm.hidden = true
+      if (cloudDeleteTrigger) cloudDeleteTrigger.hidden = false
+    })
 
-    cloudConfirmDelete?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      cloudConfirmDelete.disabled = true;
-      const res = await deleteCloudVault();
-      cloudConfirmDelete.disabled = false;
+    cloudConfirmDelete?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      cloudConfirmDelete.disabled = true
+      const res = await deleteCloudVault()
+      cloudConfirmDelete.disabled = false
       if (res.success) {
-        toast.success(locale === "es" ? "Bóveda eliminada permanentemente de la DB." : "Vault permanently deleted from DB.");
+        toast.success(
+          locale === 'es'
+            ? 'Bóveda eliminada permanentemente de la DB.'
+            : 'Vault permanently deleted from DB.',
+        )
         setTimeout(() => {
-          window.location.reload();
-        }, 500);
+          window.location.reload()
+        }, 500)
       } else {
-        toast.error(res.error || (locale === "es" ? "Error al eliminar la bóveda" : "Error deleting vault"));
+        toast.error(
+          res.error || (locale === 'es' ? 'Error al eliminar la bóveda' : 'Error deleting vault'),
+        )
       }
-    });
+    })
 
     // Copiar enlace QR
-    copyBtn?.addEventListener("click", async () => {
-      const locale = getCurrentLocale();
-      if (!currentSyncUrl) currentSyncUrl = await generateSyncUrl();
+    copyBtn?.addEventListener('click', async () => {
+      const locale = getCurrentLocale()
+      if (!currentSyncUrl) currentSyncUrl = await generateSyncUrl()
       try {
-        await navigator.clipboard.writeText(currentSyncUrl);
-        toast.success(locale === "es" ? "¡Enlace de sincronización copiado!" : "Sync link copied!");
+        await navigator.clipboard.writeText(currentSyncUrl)
+        toast.success(locale === 'es' ? '¡Enlace de sincronización copiado!' : 'Sync link copied!')
       } catch {
-        toast.info(locale === "es" ? "Copia el enlace manualmente desde la barra" : "Copy the link manually from address bar");
+        toast.info(
+          locale === 'es'
+            ? 'Copia el enlace manualmente desde la barra'
+            : 'Copy the link manually from address bar',
+        )
       }
-    });
+    })
 
-    exportBtn?.addEventListener("click", () => {
-      const locale = getCurrentLocale();
+    exportBtn?.addEventListener('click', () => {
+      const locale = getCurrentLocale()
       try {
-        exportBackupFile();
-        toast.success(locale === "es" ? "Archivo de respaldo descargado" : "Backup file downloaded");
+        exportBackupFile()
+        toast.success(locale === 'es' ? 'Archivo de respaldo descargado' : 'Backup file downloaded')
       } catch {
-        toast.error(locale === "es" ? "Error al exportar el respaldo" : "Error exporting backup");
+        toast.error(locale === 'es' ? 'Error al exportar el respaldo' : 'Error exporting backup')
       }
-    });
+    })
 
-    importBtn?.addEventListener("click", () => {
-      fileInput?.click();
-    });
+    importBtn?.addEventListener('click', () => {
+      fileInput?.click()
+    })
 
-    fileInput?.addEventListener("change", async () => {
-      const locale = getCurrentLocale();
-      const file = fileInput.files?.[0];
-      if (!file) return;
+    fileInput?.addEventListener('change', async () => {
+      const locale = getCurrentLocale()
+      const file = fileInput.files?.[0]
+      if (!file) return
       try {
-        const result = await importBackupFile(file, "merge");
-        toast.success(locale === "es" ? `¡Sincronizado! Se añadieron ${result.addedCaptures} nuevas capturas.` : `Synced! Added ${result.addedCaptures} new captures.`);
-        closeModal();
+        const result = await importBackupFile(file, 'merge')
+        toast.success(
+          locale === 'es'
+            ? `¡Sincronizado! Se añadieron ${result.addedCaptures} nuevas capturas.`
+            : `Synced! Added ${result.addedCaptures} new captures.`,
+        )
+        closeModal()
       } catch {
-        toast.error(locale === "es" ? "El archivo no tiene un formato válido" : "File does not have a valid format");
+        toast.error(
+          locale === 'es'
+            ? 'El archivo no tiene un formato válido'
+            : 'File does not have a valid format',
+        )
       } finally {
-        fileInput.value = "";
+        fileInput.value = ''
       }
-    });
+    })
 
-    resetTrigger?.addEventListener("click", showResetConfirmation);
-    cancelDeleteBtn?.addEventListener("click", hideResetConfirmation);
+    resetTrigger?.addEventListener('click', showResetConfirmation)
+    cancelDeleteBtn?.addEventListener('click', hideResetConfirmation)
 
-    confirmDeleteBtn?.addEventListener("click", () => {
-      const locale = getCurrentLocale();
-      resetAllData();
-      hideResetConfirmation();
-      closeModal();
-      toast.success(locale === "es" ? "Todos tus datos han sido reiniciados a cero." : "All your data has been reset to zero.");
-    });
+    confirmDeleteBtn?.addEventListener('click', () => {
+      const locale = getCurrentLocale()
+      resetAllData()
+      hideResetConfirmation()
+      closeModal()
+      toast.success(
+        locale === 'es'
+          ? 'Todos tus datos han sido reiniciados a cero.'
+          : 'All your data has been reset to zero.',
+      )
+    })
   }
 
-  initSyncModal();
-  document.addEventListener("astro:after-swap", initSyncModal);
+  initSyncModal()
+  document.addEventListener('astro:after-swap', initSyncModal)
 </script>

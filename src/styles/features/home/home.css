@@ -15,11 +15,7 @@
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(
-    circle,
-    rgba(239, 68, 68, 0.15) 0%,
-    rgba(16, 16, 20, 0) 70%
-  );
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, rgba(16, 16, 20, 0) 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -199,4 +195,3 @@
   color: var(--text-muted);
   margin: 0;
 }
-

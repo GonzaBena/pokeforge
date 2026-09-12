@@ -31,7 +31,9 @@
   color: var(--text-muted);
   pointer-events: none;
   z-index: 1;
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
 }
 
 .select-wrapper:focus-within .select-wrapper__arrow {

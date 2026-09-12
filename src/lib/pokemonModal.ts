@@ -1,1 +1,1 @@
-export { openPokemonModal, closeModal, type PokemonModalOptions } from "./pokemonModal/index";
+export { openPokemonModal, closeModal, type PokemonModalOptions } from './pokemonModal/index'

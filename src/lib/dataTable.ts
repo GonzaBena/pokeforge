@@ -1,17 +1,22 @@
-import { createTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel } from "@tanstack/table-core";
-import type { ColumnDef, FilterFn, SortingState, TableOptionsResolved } from "@tanstack/table-core";
+import {
+  createTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+} from '@tanstack/table-core'
+import type { ColumnDef, FilterFn, SortingState, TableOptionsResolved } from '@tanstack/table-core'
 
 export interface RenderDataTableOptions<T = unknown> {
-  scrollHint?: string;
-  noMatchMessage?: string;
-  globalFilterFn?: FilterFn<T>;
-  onRowCountChange?: (filteredCount: number, totalCount: number) => void;
+  scrollHint?: string
+  noMatchMessage?: string
+  globalFilterFn?: FilterFn<T>
+  onRowCountChange?: (filteredCount: number, totalCount: number) => void
 }
 
 export interface DataTableHandle {
-  setGlobalFilter: (query: string) => void;
-  getFilteredRowCount: () => number;
-  getTotalRowCount: () => number;
+  setGlobalFilter: (query: string) => void
+  getFilteredRowCount: () => number
+  getTotalRowCount: () => number
 }
 
 export function renderDataTable<T>(
@@ -21,8 +26,8 @@ export function renderDataTable<T>(
   emptyMessage: string,
   tableOptions?: RenderDataTableOptions<T>,
 ): DataTableHandle {
-  let sorting: SortingState = [];
-  let globalFilter = "";
+  let sorting: SortingState = []
+  let globalFilter = ''
 
   // table-core's features (pinning, visibility, etc.) each expect their own
   // state slice to exist even when unused — createTable alone won't fill
@@ -40,26 +45,26 @@ export function renderDataTable<T>(
     getSortedRowModel: getSortedRowModel(),
     globalFilterFn: tableOptions?.globalFilterFn,
     renderFallbackValue: null,
-  };
+  }
 
-  const table = createTable(options);
+  const table = createTable(options)
   table.setOptions((prev) => ({
     ...prev,
     state: { ...table.initialState, sorting, globalFilter },
     onSortingChange: (updater) => {
-      sorting = typeof updater === "function" ? updater(sorting) : updater;
-      table.setOptions((p) => ({ ...p, state: { ...p.state, sorting } }));
-      draw();
+      sorting = typeof updater === 'function' ? updater(sorting) : updater
+      table.setOptions((p) => ({ ...p, state: { ...p.state, sorting } }))
+      draw()
     },
     onGlobalFilterChange: (updater) => {
-      globalFilter = typeof updater === "function" ? updater(globalFilter) : updater;
-      table.setOptions((p) => ({ ...p, state: { ...p.state, globalFilter } }));
-      draw();
+      globalFilter = typeof updater === 'function' ? updater(globalFilter) : updater
+      table.setOptions((p) => ({ ...p, state: { ...p.state, globalFilter } }))
+      draw()
     },
-  }));
+  }))
 
   function draw(): void {
-    const rows = table.getRowModel().rows;
+    const rows = table.getRowModel().rows
 
     const theadHtml = table
       .getHeaderGroups()
@@ -67,19 +72,19 @@ export function renderDataTable<T>(
         (hg) =>
           `<tr>${hg.headers
             .map((h) => {
-              const label = typeof h.column.columnDef.header === "string" ? h.column.columnDef.header : "";
-              const sorted = h.column.getIsSorted();
-              const arrow = sorted === "asc" ? " ▲" : sorted === "desc" ? " ▼" : "";
-              return `<th data-sort-col="${h.column.id}" class="${h.column.getCanSort() ? "sortable" : ""}">${label}${arrow}</th>`;
+              const label =
+                typeof h.column.columnDef.header === 'string' ? h.column.columnDef.header : ''
+              const sorted = h.column.getIsSorted()
+              const arrow = sorted === 'asc' ? ' ▲' : sorted === 'desc' ? ' ▼' : ''
+              return `<th data-sort-col="${h.column.id}" class="${h.column.getCanSort() ? 'sortable' : ''}">${label}${arrow}</th>`
             })
-            .join("")}</tr>`,
+            .join('')}</tr>`,
       )
-      .join("");
+      .join('')
 
-    const isFiltered = Boolean(globalFilter.trim());
-    const displayEmpty = isFiltered && tableOptions?.noMatchMessage
-      ? tableOptions.noMatchMessage
-      : emptyMessage;
+    const isFiltered = Boolean(globalFilter.trim())
+    const displayEmpty =
+      isFiltered && tableOptions?.noMatchMessage ? tableOptions.noMatchMessage : emptyMessage
 
     const tbodyHtml = rows.length
       ? rows
@@ -88,15 +93,18 @@ export function renderDataTable<T>(
               `<tr>${row
                 .getVisibleCells()
                 .map((cell) => {
-                  const def = cell.column.columnDef;
-                  const content = typeof def.cell === "function" ? String(def.cell(cell.getContext())) : String(cell.getValue() ?? "");
-                  const label = typeof def.header === "string" ? def.header : "";
-                  return `<td data-label="${label}">${content}</td>`;
+                  const def = cell.column.columnDef
+                  const content =
+                    typeof def.cell === 'function'
+                      ? String(def.cell(cell.getContext()))
+                      : String(cell.getValue() ?? '')
+                  const label = typeof def.header === 'string' ? def.header : ''
+                  return `<td data-label="${label}">${content}</td>`
                 })
-                .join("")}</tr>`,
+                .join('')}</tr>`,
           )
-          .join("")
-      : `<tr><td class="detail-empty" colspan="${columns.length}">${displayEmpty}</td></tr>`;
+          .join('')
+      : `<tr><td class="detail-empty" colspan="${columns.length}">${displayEmpty}</td></tr>`
 
     // table-layout:fixed (set in CSS) treats these <col> widths as ratios of
     // the table's own 100% width, not literal pixel targets — good enough to
@@ -105,31 +113,32 @@ export function renderDataTable<T>(
     const colgroupHtml = `<colgroup>${table
       .getFlatHeaders()
       .map((h) => `<col style="width:${h.column.getSize()}px" />`)
-      .join("")}</colgroup>`;
+      .join('')}</colgroup>`
 
-    const hintHtml = tableOptions?.scrollHint && rows.length
-      ? `<div class="table-scroll-hint" aria-hidden="true"><span>${tableOptions.scrollHint}</span></div>`
-      : "";
+    const hintHtml =
+      tableOptions?.scrollHint && rows.length
+        ? `<div class="table-scroll-hint" aria-hidden="true"><span>${tableOptions.scrollHint}</span></div>`
+        : ''
 
-    container.innerHTML = `${hintHtml}<div class="data-table-wrap"><table class="data-table">${colgroupHtml}<thead>${theadHtml}</thead><tbody>${tbodyHtml}</tbody></table></div>`;
+    container.innerHTML = `${hintHtml}<div class="data-table-wrap"><table class="data-table">${colgroupHtml}<thead>${theadHtml}</thead><tbody>${tbodyHtml}</tbody></table></div>`
 
-    container.querySelectorAll<HTMLElement>("[data-sort-col]").forEach((th) => {
-      if (!th.classList.contains("sortable")) return;
-      th.addEventListener("click", () => {
-        table.getColumn(th.dataset.sortCol!)?.toggleSorting(undefined, false);
-      });
-    });
+    container.querySelectorAll<HTMLElement>('[data-sort-col]').forEach((th) => {
+      if (!th.classList.contains('sortable')) return
+      th.addEventListener('click', () => {
+        table.getColumn(th.dataset.sortCol!)?.toggleSorting(undefined, false)
+      })
+    })
 
-    tableOptions?.onRowCountChange?.(rows.length, data.length);
+    tableOptions?.onRowCountChange?.(rows.length, data.length)
   }
 
-  draw();
+  draw()
 
   return {
     setGlobalFilter: (query: string) => {
-      table.setGlobalFilter(query);
+      table.setGlobalFilter(query)
     },
     getFilteredRowCount: () => table.getRowModel().rows.length,
     getTotalRowCount: () => data.length,
-  };
+  }
 }

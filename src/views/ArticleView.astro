@@ -1,68 +1,63 @@
 ---
-import BlogLayout from "../layouts/BlogLayout.astro";
-import DownloadCard from "../components/DownloadCard.astro";
-import { getCollection, render, type CollectionEntry } from "astro:content";
-import { getTranslations, getLocalizedPath, type Locale } from "../lib/i18n/translations";
-import { getAuthor } from "../lib/authors";
-import { getGuideHierarchy, getPostUrl, getCoverImageSrc } from "../lib/guides";
-import "../styles/features/blog/article.css";
+import BlogLayout from '../layouts/BlogLayout.astro'
+import DownloadCard from '../components/DownloadCard.astro'
+import { getCollection, render, type CollectionEntry } from 'astro:content'
+import { getTranslations, getLocalizedPath, type Locale } from '../lib/i18n/translations'
+import { getAuthor } from '../lib/authors'
+import { getGuideHierarchy, getPostUrl, getCoverImageSrc } from '../lib/guides'
+import '../styles/features/blog/article.css'
 
 interface Props {
-  post: CollectionEntry<"blog">;
+  post: CollectionEntry<'blog'>
 }
 
-const { post } = Astro.props;
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
-const { Content, headings } = await render(post);
+const { post } = Astro.props
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+const { Content, headings } = await render(post)
 
 // Obtener todas las entradas de este idioma para resolver relaciones de guías
-const allLocalePosts = await getCollection("blog", ({ id }) =>
-  id.startsWith(`${currentLocale}/`)
-);
-const guide = getGuideHierarchy(post, allLocalePosts, currentLocale);
-const isGuideInProgress = Boolean(post.data.inProgress || guide.parentPost?.data.inProgress);
+const allLocalePosts = await getCollection('blog', ({ id }) => id.startsWith(`${currentLocale}/`))
+const guide = getGuideHierarchy(post, allLocalePosts, currentLocale)
+const isGuideInProgress = Boolean(post.data.inProgress || guide.parentPost?.data.inProgress)
 
-const author = getAuthor(post.data.author);
-const blogPath = getLocalizedPath("/blog/", currentLocale);
+const author = getAuthor(post.data.author)
+const blogPath = getLocalizedPath('/blog/', currentLocale)
 
 // Filtrar encabezados H2 y H3 para el índice de contenidos
-const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
-const hasToc = toc.length >= 2;
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3)
+const hasToc = toc.length >= 2
 
 const formattedDate = post.data.pubDate.toLocaleDateString(
-  currentLocale === "es" ? "es-ES" : "en-US",
+  currentLocale === 'es' ? 'es-ES' : 'en-US',
   {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  }
-);
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  },
+)
 
 const categoryName =
-  t.blog.categories[post.data.category as keyof typeof t.blog.categories] ??
-  post.data.category;
+  t.blog.categories[post.data.category as keyof typeof t.blog.categories] ?? post.data.category
 
 // Calcular la URL equivalente en el otro idioma (o fallback al listado general del blog)
-const targetLocale: Locale = currentLocale === "es" ? "en" : "es";
-let alternatePostUrl: string;
+const targetLocale: Locale = currentLocale === 'es' ? 'en' : 'es'
+let alternatePostUrl: string
 
 if (post.data.translation) {
   alternatePostUrl =
-    targetLocale === "es"
-      ? `/es/blog/${post.data.translation}/`
-      : `/blog/${post.data.translation}/`;
+    targetLocale === 'es' ? `/es/blog/${post.data.translation}/` : `/blog/${post.data.translation}/`
 } else {
-  alternatePostUrl = getLocalizedPath("/blog/", targetLocale);
+  alternatePostUrl = getLocalizedPath('/blog/', targetLocale)
 }
 
 const alternateUrls: Partial<Record<Locale, string>> = {
   [currentLocale]: Astro.url.pathname,
   [targetLocale]: alternatePostUrl,
-};
+}
 
-const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) : null;
+const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) : null
 ---
 
 <BlogLayout
@@ -91,18 +86,22 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
               <i data-lucide="chevron-right"></i>
             </li>
             {guide.parentPost && guide.parentUrl && (
-              <li>
-                <a href={guide.parentUrl} class="guide-breadcrumb-link" data-astro-prefetch>
-                  <i data-lucide="book-open"></i>
-                  <span>{guide.parentPost.data.title}</span>
-                </a>
-              </li>
-              <li class="guide-breadcrumb-separator" aria-hidden="true">
-                <i data-lucide="chevron-right"></i>
-              </li>
+              <>
+                <li>
+                  <a href={guide.parentUrl} class="guide-breadcrumb-link" data-astro-prefetch>
+                    <i data-lucide="book-open"></i>
+                    <span>{guide.parentPost.data.title}</span>
+                  </a>
+                </li>
+                <li class="guide-breadcrumb-separator" aria-hidden="true">
+                  <i data-lucide="chevron-right"></i>
+                </li>
+              </>
             )}
             <li class="guide-breadcrumb-current" aria-current="page">
-              <span>{t.blog.guideChapter} {guide.currentNumber}</span>
+              <span>
+                {t.blog.guideChapter} {guide.currentNumber}
+              </span>
             </li>
           </ol>
 
@@ -111,7 +110,9 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
               <details class="guide-quick-dropdown">
                 <summary class="guide-quick-btn">
                   <i data-lucide="list-ordered"></i>
-                  <span>{t.blog.guideQuickNav} ({guide.currentNumber}/{guide.totalChapters})</span>
+                  <span>
+                    {t.blog.guideQuickNav} ({guide.currentNumber}/{guide.totalChapters})
+                  </span>
                   <i data-lucide="chevron-down" class="guide-quick-chevron"></i>
                 </summary>
                 <div class="guide-quick-menu">
@@ -122,13 +123,13 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                   </div>
                   <ul class="guide-quick-menu__list">
                     {guide.chapters.map((ch, idx) => {
-                      const chOrder = ch.data.order ?? (idx + 1);
-                      const isCurrent = ch.id === post.id;
+                      const chOrder = ch.data.order ?? idx + 1
+                      const isCurrent = ch.id === post.id
                       return (
                         <li>
                           <a
                             href={getPostUrl(ch.id, currentLocale)}
-                            class={`guide-quick-item ${isCurrent ? "active" : ""}`}
+                            class={`guide-quick-item ${isCurrent ? 'active' : ''}`}
                             data-astro-prefetch
                           >
                             <span class="guide-quick-item__num">{chOrder}</span>
@@ -138,10 +139,10 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                             )}
                           </a>
                         </li>
-                      );
+                      )
                     })}
                     {guide.plannedChapters.map((pch, idx) => {
-                      const pchOrder = pch.order ?? (guide.chapters.length + idx + 1);
+                      const pchOrder = pch.order ?? guide.chapters.length + idx + 1
                       return (
                         <li>
                           <div
@@ -150,10 +151,12 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                           >
                             <span class="guide-quick-item__num">{pchOrder}</span>
                             <span class="guide-quick-item__title">{pch.title}</span>
-                            <span class="guide-quick-item__badge">{t.blog.guideChapterPlanned}</span>
+                            <span class="guide-quick-item__badge">
+                              {t.blog.guideChapterPlanned}
+                            </span>
                           </div>
                         </li>
-                      );
+                      )
                     })}
                   </ul>
                 </div>
@@ -172,15 +175,13 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
 
       <header class="article-header" id="article-top">
         <div class="article-header__meta">
-          <span class={`blog-badge blog-badge--${post.data.category}`}>
-            {categoryName}
-          </span>
+          <span class={`blog-badge blog-badge--${post.data.category}`}>{categoryName}</span>
           {guide.isChapter && (
             <span class="guide-chapter-pill">
               <i data-lucide="map-pin"></i>
               {t.blog.guideChapterProgress
-                .replace("{current}", String(guide.currentNumber))
-                .replace("{total}", String(guide.totalChapters))}
+                .replace('{current}', String(guide.currentNumber))
+                .replace('{total}', String(guide.totalChapters))}
             </span>
           )}
           {guide.isHub && (
@@ -222,7 +223,9 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
         <p class="article-subtitle">{post.data.description}</p>
 
         {coverSrc && (
-          <div class={`article-cover ${post.data.coverImageFit === "cover" ? "article-cover--cover" : ""}`}>
+          <div
+            class={`article-cover ${post.data.coverImageFit === 'cover' ? 'article-cover--cover' : ''}`}
+          >
             <img
               src={coverSrc}
               alt={post.data.title}
@@ -247,10 +250,7 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
           </summary>
           <nav class="article-toc-mobile__nav">
             {toc.map((item) => (
-              <a
-                href={`#${item.slug}`}
-                class={`article-toc-link depth-${item.depth}`}
-              >
+              <a href={`#${item.slug}`} class={`article-toc-link depth-${item.depth}`}>
                 {item.text}
               </a>
             ))}
@@ -259,7 +259,7 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
       )}
 
       <!-- Layout: Contenido principal + Índice lateral Sticky en desktop -->
-      <div class={`article-layout ${hasToc ? "has-toc" : ""}`}>
+      <div class={`article-layout ${hasToc ? 'has-toc' : ''}`}>
         <div class="article-main">
           {post.data.inProgress && (
             <aside class="article-wip-banner" aria-label={t.blog.inProgressNoticeTitle}>
@@ -316,12 +316,12 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
 
               <div class="guide-chapters-grid">
                 {guide.chapters.map((ch, idx) => {
-                  const chOrder = ch.data.order ?? (idx + 1);
-                  const chUrl = getPostUrl(ch.id, currentLocale);
+                  const chOrder = ch.data.order ?? idx + 1
+                  const chUrl = getPostUrl(ch.id, currentLocale)
                   return (
                     <a href={chUrl} class="guide-chapter-card" data-astro-prefetch>
                       <div class="guide-chapter-card__number">
-                        <span>{String(chOrder).padStart(2, "0")}</span>
+                        <span>{String(chOrder).padStart(2, '0')}</span>
                       </div>
                       <div class="guide-chapter-card__content">
                         <div class="guide-chapter-card__meta">
@@ -342,15 +342,18 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                         <i data-lucide="arrow-right"></i>
                       </div>
                     </a>
-                  );
+                  )
                 })}
 
                 {guide.plannedChapters.map((pch, idx) => {
-                  const pchOrder = pch.order ?? (guide.chapters.length + idx + 1);
+                  const pchOrder = pch.order ?? guide.chapters.length + idx + 1
                   return (
-                    <div class="guide-chapter-card guide-chapter-card--planned" aria-disabled="true">
+                    <div
+                      class="guide-chapter-card guide-chapter-card--planned"
+                      aria-disabled="true"
+                    >
                       <div class="guide-chapter-card__number">
-                        <span>{String(pchOrder).padStart(2, "0")}</span>
+                        <span>{String(pchOrder).padStart(2, '0')}</span>
                       </div>
                       <div class="guide-chapter-card__content">
                         <div class="guide-chapter-card__meta">
@@ -371,7 +374,7 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                         <i data-lucide="lock"></i>
                       </div>
                     </div>
-                  );
+                  )
                 })}
               </div>
             </section>
@@ -462,7 +465,7 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
                   <div class="guide-stepper__card guide-stepper__card--end">
                     <span class="guide-stepper__sub">
                       <i data-lucide="check-circle-2"></i>
-                      <span>{currentLocale === "es" ? "Fin de la guía" : "End of guide"}</span>
+                      <span>{currentLocale === 'es' ? 'Fin de la guía' : 'End of guide'}</span>
                     </span>
                     <span class="guide-stepper__title">{t.blog.moreArticles}</span>
                   </div>
@@ -547,30 +550,29 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
       id="article-lightbox"
       class="article-lightbox"
       closedby="any"
-      aria-label={currentLocale === "es" ? "Vista ampliada de imagen" : "Enlarged image preview"}
+      aria-label={currentLocale === 'es' ? 'Vista ampliada de imagen' : 'Enlarged image preview'}
     >
       <div class="article-lightbox__dialog">
         <button
           type="button"
           class="article-lightbox__close"
-          aria-label={currentLocale === "es" ? "Cerrar imagen (Esc)" : "Close image (Esc)"}
+          aria-label={currentLocale === 'es' ? 'Cerrar imagen (Esc)' : 'Close image (Esc)'}
           data-lightbox-close
         >
           <i data-lucide="x"></i>
         </button>
         <div class="article-lightbox__media">
-          <img
-            id="article-lightbox-img"
-            class="article-lightbox__img"
-            src=""
-            alt=""
-          />
+          <img id="article-lightbox-img" class="article-lightbox__img" src="" alt="" />
         </div>
         <div class="article-lightbox__footer">
           <p id="article-lightbox-caption" class="article-lightbox__caption"></p>
           <span class="article-lightbox__hint">
             <i data-lucide="info"></i>
-            <span>{currentLocale === "es" ? "Haz clic fuera o presiona Esc para cerrar" : "Click outside or press Esc to close"}</span>
+            <span>
+              {currentLocale === 'es'
+                ? 'Haz clic fuera o presiona Esc para cerrar'
+                : 'Click outside or press Esc to close'}
+            </span>
           </span>
         </div>
       </div>
@@ -578,64 +580,64 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
   </div>
 
   <script>
-    import { refreshIcons } from "../lib/icons";
+    import { refreshIcons } from '../lib/icons'
 
     function setupTocScrollspy() {
       const tocLinks = document.querySelectorAll<HTMLAnchorElement>(
-        "[data-article-toc] a[data-toc-slug]"
-      );
-      if (tocLinks.length === 0) return;
+        '[data-article-toc] a[data-toc-slug]',
+      )
+      if (tocLinks.length === 0) return
 
-      const headingMap = new Map<string, HTMLElement>();
-      const slugs: string[] = [];
+      const headingMap = new Map<string, HTMLElement>()
+      const slugs: string[] = []
 
       tocLinks.forEach((link) => {
-        const slug = link.dataset.tocSlug;
-        if (!slug) return;
-        const target = document.getElementById(slug);
+        const slug = link.dataset.tocSlug
+        if (!slug) return
+        const target = document.getElementById(slug)
         if (target) {
-          headingMap.set(slug, target);
-          slugs.push(slug);
+          headingMap.set(slug, target)
+          slugs.push(slug)
         }
-      });
+      })
 
-      if (slugs.length === 0) return;
+      if (slugs.length === 0) return
 
       function updateActiveLink(activeSlug: string) {
         tocLinks.forEach((link) => {
           if (link.dataset.tocSlug === activeSlug) {
-            link.classList.add("active");
-            link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            link.classList.add('active')
+            link.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
           } else {
-            link.classList.remove("active");
+            link.classList.remove('active')
           }
-        });
+        })
       }
 
       // Marcar el primer link activo por defecto
-      updateActiveLink(slugs[0]);
+      updateActiveLink(slugs[0])
 
       // Suave scroll al hacer click en enlaces del índice
       tocLinks.forEach((link) => {
-        link.addEventListener("click", (e) => {
-          const slug = link.dataset.tocSlug;
-          if (!slug) return;
-          const target = document.getElementById(slug);
+        link.addEventListener('click', (e) => {
+          const slug = link.dataset.tocSlug
+          if (!slug) return
+          const target = document.getElementById(slug)
           if (target) {
-            e.preventDefault();
-            target.scrollIntoView({ behavior: "smooth" });
-            history.pushState(null, "", `#${slug}`);
-            updateActiveLink(slug);
+            e.preventDefault()
+            target.scrollIntoView({ behavior: 'smooth' })
+            history.pushState(null, '', `#${slug}`)
+            updateActiveLink(slug)
           }
-        });
-      });
+        })
+      })
 
       // Botón volver arriba
-      const backToTopBtn = document.getElementById("toc-back-to-top");
+      const backToTopBtn = document.getElementById('toc-back-to-top')
       if (backToTopBtn) {
-        backToTopBtn.addEventListener("click", () => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        });
+        backToTopBtn.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
       }
 
       // Intersection Observer para resaltar la sección activa
@@ -643,300 +645,314 @@ const coverSrc = post.data.coverImage ? getCoverImageSrc(post.data.coverImage) :
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              updateActiveLink(entry.target.id);
+              updateActiveLink(entry.target.id)
             }
-          });
+          })
         },
         {
-          rootMargin: "0px 0px -70% 0px",
+          rootMargin: '0px 0px -70% 0px',
           threshold: 0.1,
-        }
-      );
+        },
+      )
 
-      headingMap.forEach((el) => observer.observe(el));
+      headingMap.forEach((el) => observer.observe(el))
 
       // Si el usuario llega al pie del artículo, activar el último encabezado
-      const footerEl = document.querySelector(".article-footer-box");
+      const footerEl = document.querySelector('.article-footer-box')
       if (footerEl && slugs.length > 0) {
         const footerObserver = new IntersectionObserver(
           (entries) => {
             if (entries[0]?.isIntersecting) {
-              updateActiveLink(slugs[slugs.length - 1]);
+              updateActiveLink(slugs[slugs.length - 1])
             }
           },
-          { threshold: 0.1 }
-        );
-        footerObserver.observe(footerEl);
+          { threshold: 0.1 },
+        )
+        footerObserver.observe(footerEl)
       }
 
       // En móviles, cerrar el desplegable al tocar un enlace
-      const mobileDetails = document.querySelector<HTMLDetailsElement>(".article-toc-mobile");
+      const mobileDetails = document.querySelector<HTMLDetailsElement>('.article-toc-mobile')
       if (mobileDetails) {
-        mobileDetails.querySelectorAll("a").forEach((a) => {
-          a.addEventListener("click", () => {
-            mobileDetails.open = false;
-          });
-        });
+        mobileDetails.querySelectorAll('a').forEach((a) => {
+          a.addEventListener('click', () => {
+            mobileDetails.open = false
+          })
+        })
       }
     }
 
     function setupGuideInteractions() {
-      document.addEventListener("click", (e) => {
-        const dropdown = document.querySelector<HTMLDetailsElement>(".guide-quick-dropdown[open]");
+      document.addEventListener('click', (e) => {
+        const dropdown = document.querySelector<HTMLDetailsElement>('.guide-quick-dropdown[open]')
         if (dropdown && !dropdown.contains(e.target as Node)) {
-          dropdown.open = false;
+          dropdown.open = false
         }
-      });
+      })
     }
 
     function setupArticleLightbox() {
-      const lightbox = document.getElementById("article-lightbox") as HTMLDialogElement | null;
-      if (!lightbox) return;
+      const lightbox = document.getElementById('article-lightbox') as HTMLDialogElement | null
+      if (!lightbox) return
 
-      const lightboxImg = document.getElementById("article-lightbox-img") as HTMLImageElement | null;
-      const captionEl = document.getElementById("article-lightbox-caption");
-      const closeBtn = lightbox.querySelector("[data-lightbox-close]");
+      const lightboxImg = document.getElementById('article-lightbox-img') as HTMLImageElement | null
+      const captionEl = document.getElementById('article-lightbox-caption')
+      const closeBtn = lightbox.querySelector('[data-lightbox-close]')
 
-      if (!lightboxImg || !captionEl) return;
+      if (!lightboxImg || !captionEl) return
 
       // Seleccionar todas las imágenes del cuerpo del artículo y la portada
       const images = document.querySelectorAll<HTMLImageElement>(
-        ".article-body img:not([data-no-zoom]), .article-cover img"
-      );
+        '.article-body img:not([data-no-zoom]), .article-cover img',
+      )
 
       images.forEach((img) => {
-        if (img.dataset.hasLightbox === "true") return;
-        img.dataset.hasLightbox = "true";
+        if (img.dataset.hasLightbox === 'true') return
+        img.dataset.hasLightbox = 'true'
 
-        img.addEventListener("click", (e) => {
+        img.addEventListener('click', (e) => {
           // Si la imagen está dentro de un enlace que navega a otra página, no bloquear la navegación
-          const parentLink = img.closest("a");
-          if (parentLink && parentLink.getAttribute("href") && !parentLink.getAttribute("href")?.startsWith("#")) {
-            return;
+          const parentLink = img.closest('a')
+          if (
+            parentLink &&
+            parentLink.getAttribute('href') &&
+            !parentLink.getAttribute('href')?.startsWith('#')
+          ) {
+            return
           }
-          e.preventDefault();
+          e.preventDefault()
 
-          const src = img.currentSrc || img.src;
-          if (!src) return;
+          const src = img.currentSrc || img.src
+          if (!src) return
 
-          const cleanAlt = (img.alt || "")
-            .replace(/(\|([a-z0-9-]+)\s*)+$/i, "")
-            .trim();
-          lightboxImg.src = src;
-          lightboxImg.alt = cleanAlt;
+          const cleanAlt = (img.alt || '').replace(/(\|([a-z0-9-]+)\s*)+$/i, '').trim()
+          lightboxImg.src = src
+          lightboxImg.alt = cleanAlt
 
           // Extraer descripción o pie de foto
-          let caption = "";
-          const parentFigure = img.closest("figure");
-          const figcaption = parentFigure?.querySelector("figcaption");
+          let caption = ''
+          const parentFigure = img.closest('figure')
+          const figcaption = parentFigure?.querySelector('figcaption')
 
           if (figcaption && figcaption.textContent) {
-            caption = figcaption.textContent.trim();
+            caption = figcaption.textContent.trim()
           } else {
             // 1. Buscar si hay un <em> inmediatamente adyacente dentro del mismo contenedor
-            let adjacentEm: HTMLElement | null = null;
-            let sibling = img.nextElementSibling;
-            while (sibling && sibling.tagName === "BR") {
-              sibling = sibling.nextElementSibling;
+            let adjacentEm: HTMLElement | null = null
+            let sibling = img.nextElementSibling
+            while (sibling && sibling.tagName === 'BR') {
+              sibling = sibling.nextElementSibling
             }
-            if (sibling && sibling.tagName === "EM") {
-              adjacentEm = sibling as HTMLElement;
+            if (sibling && sibling.tagName === 'EM') {
+              adjacentEm = sibling as HTMLElement
             }
 
-            const parentP = img.closest("p");
-            const samePEm = parentP?.querySelector("em");
-            const nextElem = parentP?.nextElementSibling;
-            const nextEm = nextElem?.querySelector("em");
+            const parentP = img.closest('p')
+            const samePEm = parentP?.querySelector('em')
+            const nextElem = parentP?.nextElementSibling
+            const nextEm = nextElem?.querySelector('em')
 
             if (adjacentEm && adjacentEm.textContent) {
-              caption = adjacentEm.textContent.trim();
-            } else if (samePEm && samePEm.textContent && parentP && parentP.querySelectorAll("img").length === 1) {
-              caption = samePEm.textContent.trim();
+              caption = adjacentEm.textContent.trim()
+            } else if (
+              samePEm &&
+              samePEm.textContent &&
+              parentP &&
+              parentP.querySelectorAll('img').length === 1
+            ) {
+              caption = samePEm.textContent.trim()
             } else if (nextEm && nextEm.textContent && nextElem?.children.length === 1) {
-              caption = nextEm.textContent.trim();
+              caption = nextEm.textContent.trim()
             } else if (cleanAlt) {
-              caption = cleanAlt;
+              caption = cleanAlt
             }
           }
 
-          captionEl.textContent = caption;
+          captionEl.textContent = caption
 
           // Si es un sprite pixel-art, renderizar con pixelated
           const isPixelated =
             img.naturalWidth <= 128 ||
-            img.classList.contains("starter-card__sprite") ||
-            img.classList.contains("sprite") ||
-            /\|sprite/i.test(img.alt || "") ||
-            window.getComputedStyle(img).imageRendering === "pixelated";
+            img.classList.contains('starter-card__sprite') ||
+            img.classList.contains('sprite') ||
+            /\|sprite/i.test(img.alt || '') ||
+            window.getComputedStyle(img).imageRendering === 'pixelated'
 
           if (isPixelated) {
-            lightboxImg.classList.add("is-pixelated");
+            lightboxImg.classList.add('is-pixelated')
           } else {
-            lightboxImg.classList.remove("is-pixelated");
+            lightboxImg.classList.remove('is-pixelated')
           }
 
-          document.body.style.overflow = "hidden";
-          lightbox.showModal();
-          refreshIcons();
-        });
-      });
+          document.body.style.overflow = 'hidden'
+          lightbox.showModal()
+          refreshIcons()
+        })
+      })
 
       function closeLightbox() {
         if (lightbox && lightbox.open) {
-          lightbox.close();
-          document.body.style.overflow = "";
+          lightbox.close()
+          document.body.style.overflow = ''
         }
       }
 
-      closeBtn?.addEventListener("click", closeLightbox);
+      closeBtn?.addEventListener('click', closeLightbox)
 
-      lightbox.addEventListener("click", (e) => {
+      lightbox.addEventListener('click', (e) => {
         if (
           e.target === lightbox ||
-          (e.target as HTMLElement).classList.contains("article-lightbox__dialog") ||
-          (e.target as HTMLElement).classList.contains("article-lightbox__media")
+          (e.target as HTMLElement).classList.contains('article-lightbox__dialog') ||
+          (e.target as HTMLElement).classList.contains('article-lightbox__media')
         ) {
-          closeLightbox();
+          closeLightbox()
         }
-      });
+      })
 
-      lightbox.addEventListener("close", () => {
-        document.body.style.overflow = "";
-        lightboxImg.src = "";
-      });
+      lightbox.addEventListener('close', () => {
+        document.body.style.overflow = ''
+        lightboxImg.src = ''
+      })
     }
 
     function setupArticleTables() {
-      document.querySelectorAll<HTMLTableElement>(".article-body table").forEach((table) => {
-        if (table.parentElement?.classList.contains("table-wrapper")) return;
-        const wrapper = document.createElement("div");
-        wrapper.className = "table-wrapper";
-        table.parentNode?.insertBefore(wrapper, table);
-        wrapper.appendChild(table);
-      });
+      document.querySelectorAll<HTMLTableElement>('.article-body table').forEach((table) => {
+        if (table.parentElement?.classList.contains('table-wrapper')) return
+        const wrapper = document.createElement('div')
+        wrapper.className = 'table-wrapper'
+        table.parentNode?.insertBefore(wrapper, table)
+        wrapper.appendChild(table)
+      })
     }
 
     function setupRivalStarterSelectors() {
-      const selectors = document.querySelectorAll<HTMLElement>(".rival-starter-selector");
-      const slots = document.querySelectorAll<HTMLElement>(".rival-slot-container");
-      if (!selectors.length && !slots.length) return;
+      const selectors = document.querySelectorAll<HTMLElement>('.rival-starter-selector')
+      const slots = document.querySelectorAll<HTMLElement>('.rival-slot-container')
+      if (!selectors.length && !slots.length) return
 
-      const STORAGE_KEY = "pokeforge_player_starter";
-      let savedStarter = "bulbasaur";
+      const STORAGE_KEY = 'pokeforge_player_starter'
+      let savedStarter = 'bulbasaur'
       try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored && ["bulbasaur", "charmander", "squirtle"].includes(stored)) {
-          savedStarter = stored;
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored && ['bulbasaur', 'charmander', 'squirtle'].includes(stored)) {
+          savedStarter = stored
         }
-      } catch (e) {
+      } catch {
         // En caso de que localStorage no esté disponible
       }
 
       function setActiveStarter(starterName: string) {
         // 1. Actualizar botones en todos los selectores de la página
         selectors.forEach((sel) => {
-          sel.querySelectorAll<HTMLButtonElement>(".rival-starter-selector__btn").forEach((btn) => {
-            const isMatch = btn.dataset.starter === starterName;
-            btn.classList.toggle("is-active", isMatch);
-            btn.setAttribute("aria-pressed", isMatch ? "true" : "false");
-          });
-        });
+          sel.querySelectorAll<HTMLButtonElement>('.rival-starter-selector__btn').forEach((btn) => {
+            const isMatch = btn.dataset.starter === starterName
+            btn.classList.toggle('is-active', isMatch)
+            btn.setAttribute('aria-pressed', isMatch ? 'true' : 'false')
+          })
+        })
 
         // 2. Actualizar tarjetas en todos los slots de rival
         slots.forEach((slot) => {
-          slot.querySelectorAll<HTMLElement>(".starter-card").forEach((card) => {
-            const isMatch = card.dataset.forStarter === starterName;
-            card.classList.toggle("is-active", isMatch);
-          });
-        });
+          slot.querySelectorAll<HTMLElement>('.starter-card').forEach((card) => {
+            const isMatch = card.dataset.forStarter === starterName
+            card.classList.toggle('is-active', isMatch)
+          })
+        })
 
         // 3. Guardar en almacenamiento local
         try {
-          localStorage.setItem(STORAGE_KEY, starterName);
-        } catch (e) {}
+          localStorage.setItem(STORAGE_KEY, starterName)
+        } catch {
+          // ignore write failures (e.g. private browsing, storage quota)
+        }
       }
 
       // Asignar eventos a los botones
       selectors.forEach((sel) => {
-        sel.querySelectorAll<HTMLButtonElement>(".rival-starter-selector__btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const starter = btn.dataset.starter;
+        sel.querySelectorAll<HTMLButtonElement>('.rival-starter-selector__btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const starter = btn.dataset.starter
             if (starter) {
-              setActiveStarter(starter);
+              setActiveStarter(starter)
             }
-          });
-        });
-      });
+          })
+        })
+      })
 
       // Aplicar estado inicial
-      setActiveStarter(savedStarter);
+      setActiveStarter(savedStarter)
     }
 
     function setupArticleChecklists() {
       const taskItems = document.querySelectorAll<HTMLLIElement>(
-        ".article-body li.task-list-item, .article-body ul.contains-task-list li"
-      );
-      if (!taskItems.length) return;
+        '.article-body li.task-list-item, .article-body ul.contains-task-list li',
+      )
+      if (!taskItems.length) return
 
-      const storageKey = `pokeforge_checklist_${window.location.pathname.replace(/\/$/, "")}`;
-      let savedData: Record<string, boolean> = {};
+      const storageKey = `pokeforge_checklist_${window.location.pathname.replace(/\/$/, '')}`
+      let savedData: Record<string, boolean> = {}
       try {
-        const stored = localStorage.getItem(storageKey);
-        if (stored) savedData = JSON.parse(stored);
-      } catch (e) {}
+        const stored = localStorage.getItem(storageKey)
+        if (stored) savedData = JSON.parse(stored)
+      } catch {
+        // ignore malformed or inaccessible storage
+      }
 
       taskItems.forEach((item, index) => {
-        const checkboxEl = item.querySelector<HTMLInputElement>('input[type="checkbox"]');
-        if (!checkboxEl) return;
-        const targetCheckbox = checkboxEl;
+        const checkboxEl = item.querySelector<HTMLInputElement>('input[type="checkbox"]')
+        if (!checkboxEl) return
+        const targetCheckbox = checkboxEl
 
-        targetCheckbox.removeAttribute("disabled");
-        targetCheckbox.disabled = false;
+        targetCheckbox.removeAttribute('disabled')
+        targetCheckbox.disabled = false
 
-        const textSnippet = (item.textContent || "").trim().slice(0, 35).replace(/\s+/g, "_");
-        const itemKey = `item_${index}_${textSnippet}`;
+        const textSnippet = (item.textContent || '').trim().slice(0, 35).replace(/\s+/g, '_')
+        const itemKey = `item_${index}_${textSnippet}`
 
         if (savedData[itemKey] !== undefined) {
-          targetCheckbox.checked = Boolean(savedData[itemKey]);
+          targetCheckbox.checked = Boolean(savedData[itemKey])
         }
-        item.classList.toggle("is-checked", targetCheckbox.checked);
+        item.classList.toggle('is-checked', targetCheckbox.checked)
 
         function saveCheck(isChecked: boolean) {
-          targetCheckbox.checked = isChecked;
-          item.classList.toggle("is-checked", isChecked);
-          savedData[itemKey] = isChecked;
+          targetCheckbox.checked = isChecked
+          item.classList.toggle('is-checked', isChecked)
+          savedData[itemKey] = isChecked
           try {
-            localStorage.setItem(storageKey, JSON.stringify(savedData));
-          } catch (e) {}
+            localStorage.setItem(storageKey, JSON.stringify(savedData))
+          } catch {
+            // ignore write failures (e.g. private browsing, storage quota)
+          }
         }
 
-        if ((item as any)._hasChecklistInit) return;
-        (item as any)._hasChecklistInit = true;
+        const initializedItem = item as HTMLLIElement & { _hasChecklistInit?: boolean }
+        if (initializedItem._hasChecklistInit) return
+        initializedItem._hasChecklistInit = true
 
-        targetCheckbox.addEventListener("change", (e) => {
-          e.stopPropagation();
-          saveCheck(targetCheckbox.checked);
-        });
+        targetCheckbox.addEventListener('change', (e) => {
+          e.stopPropagation()
+          saveCheck(targetCheckbox.checked)
+        })
 
-        item.addEventListener("click", (e) => {
-          if (e.target === targetCheckbox) return;
-          if ((e.target as HTMLElement).closest("a")) return;
-          saveCheck(!targetCheckbox.checked);
-        });
-      });
+        item.addEventListener('click', (e) => {
+          if (e.target === targetCheckbox) return
+          if ((e.target as HTMLElement).closest('a')) return
+          saveCheck(!targetCheckbox.checked)
+        })
+      })
     }
 
-    setupTocScrollspy();
-    setupGuideInteractions();
-    setupArticleLightbox();
-    setupArticleTables();
-    setupRivalStarterSelectors();
-    setupArticleChecklists();
-    document.addEventListener("astro:page-load", setupTocScrollspy);
-    document.addEventListener("astro:page-load", setupGuideInteractions);
-    document.addEventListener("astro:page-load", setupArticleLightbox);
-    document.addEventListener("astro:page-load", setupArticleTables);
-    document.addEventListener("astro:page-load", setupRivalStarterSelectors);
-    document.addEventListener("astro:page-load", setupArticleChecklists);
+    setupTocScrollspy()
+    setupGuideInteractions()
+    setupArticleLightbox()
+    setupArticleTables()
+    setupRivalStarterSelectors()
+    setupArticleChecklists()
+    document.addEventListener('astro:page-load', setupTocScrollspy)
+    document.addEventListener('astro:page-load', setupGuideInteractions)
+    document.addEventListener('astro:page-load', setupArticleLightbox)
+    document.addEventListener('astro:page-load', setupArticleTables)
+    document.addEventListener('astro:page-load', setupRivalStarterSelectors)
+    document.addEventListener('astro:page-load', setupArticleChecklists)
   </script>
 </BlogLayout>

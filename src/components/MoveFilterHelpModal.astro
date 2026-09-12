@@ -1,10 +1,10 @@
 ---
-import { getTranslations, type Locale } from "../lib/i18n/translations";
-import "../styles/components/modal.css";
-import "../styles/components/move-filter-guide.css";
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import '../styles/components/modal.css'
+import '../styles/components/move-filter-guide.css'
 
-const currentLocale = (Astro.currentLocale ?? "en") as Locale;
-const t = getTranslations(currentLocale);
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
 ---
 
 <div
@@ -14,7 +14,12 @@ const t = getTranslations(currentLocale);
   data-copied-msg={t.moveFilterGuide.copied}
   hidden
 >
-  <div class="modal-panel move-filter-guide-panel" role="dialog" aria-modal="true" aria-labelledby="move-filter-guide-title">
+  <div
+    class="modal-panel move-filter-guide-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="move-filter-guide-title"
+  >
     <div class="modal-panel__header">
       <div class="picker-panel__header-info">
         <h2 id="move-filter-guide-title">
@@ -23,7 +28,12 @@ const t = getTranslations(currentLocale);
         </h2>
         <span class="type-matrix-modal__subtitle">{t.moveFilterGuide.modalSubtitle}</span>
       </div>
-      <button class="modal-panel__close" type="button" data-move-filter-guide-close aria-label={t.moveFilterGuide.close}>
+      <button
+        class="modal-panel__close"
+        type="button"
+        data-move-filter-guide-close
+        aria-label={t.moveFilterGuide.close}
+      >
         <i data-lucide="x"></i>
       </button>
     </div>
@@ -45,7 +55,12 @@ const t = getTranslations(currentLocale);
           </div>
           <div class="move-filter-guide__chips">
             {t.moveFilterGuide.examples.types.map((ex) => (
-              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+              <button
+                type="button"
+                class="filter-example-chip"
+                data-filter-chip={ex}
+                title={t.moveFilterGuide.clickToCopy}
+              >
                 <code>{ex}</code>
                 <i data-lucide="copy"></i>
               </button>
@@ -60,11 +75,18 @@ const t = getTranslations(currentLocale);
               <i data-lucide="target"></i>
               {t.moveFilterGuide.sectionCategories}
             </span>
-            <span class="move-filter-guide__card-desc">{t.moveFilterGuide.sectionCategoriesDesc}</span>
+            <span class="move-filter-guide__card-desc">
+              {t.moveFilterGuide.sectionCategoriesDesc}
+            </span>
           </div>
           <div class="move-filter-guide__chips">
             {t.moveFilterGuide.examples.categories.map((ex) => (
-              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+              <button
+                type="button"
+                class="filter-example-chip"
+                data-filter-chip={ex}
+                title={t.moveFilterGuide.clickToCopy}
+              >
                 <code>{ex}</code>
                 <i data-lucide="copy"></i>
               </button>
@@ -83,7 +105,12 @@ const t = getTranslations(currentLocale);
           </div>
           <div class="move-filter-guide__chips">
             {t.moveFilterGuide.examples.power.map((ex) => (
-              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+              <button
+                type="button"
+                class="filter-example-chip"
+                data-filter-chip={ex}
+                title={t.moveFilterGuide.clickToCopy}
+              >
                 <code>{ex}</code>
                 <i data-lucide="copy"></i>
               </button>
@@ -98,11 +125,18 @@ const t = getTranslations(currentLocale);
               <i data-lucide="crosshair"></i>
               {t.moveFilterGuide.sectionPP} / {t.moveFilterGuide.sectionAccuracy}
             </span>
-            <span class="move-filter-guide__card-desc">{t.moveFilterGuide.sectionPPDesc} {t.moveFilterGuide.sectionAccuracyDesc}</span>
+            <span class="move-filter-guide__card-desc">
+              {t.moveFilterGuide.sectionPPDesc} {t.moveFilterGuide.sectionAccuracyDesc}
+            </span>
           </div>
           <div class="move-filter-guide__chips">
             {t.moveFilterGuide.examples.ppAcc.map((ex) => (
-              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+              <button
+                type="button"
+                class="filter-example-chip"
+                data-filter-chip={ex}
+                title={t.moveFilterGuide.clickToCopy}
+              >
                 <code>{ex}</code>
                 <i data-lucide="copy"></i>
               </button>
@@ -121,7 +155,12 @@ const t = getTranslations(currentLocale);
           </div>
           <div class="move-filter-guide__chips">
             {t.moveFilterGuide.examples.methodLevel.map((ex) => (
-              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+              <button
+                type="button"
+                class="filter-example-chip"
+                data-filter-chip={ex}
+                title={t.moveFilterGuide.clickToCopy}
+              >
                 <code>{ex}</code>
                 <i data-lucide="copy"></i>
               </button>
@@ -140,7 +179,12 @@ const t = getTranslations(currentLocale);
           </div>
           <div class="move-filter-guide__chips">
             {t.moveFilterGuide.examples.combos.map((ex) => (
-              <button type="button" class="filter-example-chip" data-filter-chip={ex} title={t.moveFilterGuide.clickToCopy}>
+              <button
+                type="button"
+                class="filter-example-chip"
+                data-filter-chip={ex}
+                title={t.moveFilterGuide.clickToCopy}
+              >
                 <code>{ex}</code>
                 <i data-lucide="copy"></i>
               </button>
@@ -159,78 +203,83 @@ const t = getTranslations(currentLocale);
 </div>
 
 <script>
-  import { refreshIcons } from "../lib/icons";
-  import { toast } from "../lib/toast";
+  import { refreshIcons } from '../lib/icons'
+  import { toast } from '../lib/toast'
 
-  let lastActiveInput: HTMLInputElement | null = null;
-  const overlay = document.querySelector<HTMLElement>("[data-move-filter-guide-overlay]");
+  let lastActiveInput: HTMLInputElement | null = null
+  const overlay = document.querySelector<HTMLElement>('[data-move-filter-guide-overlay]')
 
   function openGuide(fromInput?: HTMLInputElement | null) {
     if (fromInput) {
-      lastActiveInput = fromInput;
+      lastActiveInput = fromInput
     }
     if (!lastActiveInput || lastActiveInput.offsetParent === null) {
-      const movePickerInput = document.querySelector<HTMLInputElement>("[data-move-picker-search]");
-      const modalInput = document.querySelector<HTMLInputElement>("[data-move-search-input]");
-      const dexInput = document.querySelector<HTMLInputElement>("[data-moves-input]");
-      if (movePickerInput && movePickerInput.offsetParent !== null) lastActiveInput = movePickerInput;
-      else if (modalInput && modalInput.offsetParent !== null) lastActiveInput = modalInput;
-      else if (dexInput && dexInput.offsetParent !== null) lastActiveInput = dexInput;
+      const movePickerInput = document.querySelector<HTMLInputElement>('[data-move-picker-search]')
+      const modalInput = document.querySelector<HTMLInputElement>('[data-move-search-input]')
+      const dexInput = document.querySelector<HTMLInputElement>('[data-moves-input]')
+      if (movePickerInput && movePickerInput.offsetParent !== null)
+        lastActiveInput = movePickerInput
+      else if (modalInput && modalInput.offsetParent !== null) lastActiveInput = modalInput
+      else if (dexInput && dexInput.offsetParent !== null) lastActiveInput = dexInput
     }
     if (overlay) {
-      overlay.hidden = false;
-      refreshIcons();
+      overlay.hidden = false
+      refreshIcons()
     }
   }
 
   function closeGuide() {
     if (overlay) {
-      overlay.hidden = true;
+      overlay.hidden = true
     }
   }
 
-  document.addEventListener("click", (e) => {
-    const target = e.target as HTMLElement;
-    const openBtn = target.closest<HTMLElement>("[data-open-move-filter-guide]");
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement
+    const openBtn = target.closest<HTMLElement>('[data-open-move-filter-guide]')
     if (openBtn) {
-      const parentRow = openBtn.closest(".search-with-help, .picker-panel__filters, .move-table-toolbar, .moves-filter-input-wrap, .move-table-search-row");
-      const input = parentRow?.querySelector<HTMLInputElement>("input[type='search'], input[type='text']");
-      openGuide(input);
-      return;
+      const parentRow = openBtn.closest(
+        '.search-with-help, .picker-panel__filters, .move-table-toolbar, .moves-filter-input-wrap, .move-table-search-row',
+      )
+      const input = parentRow?.querySelector<HTMLInputElement>(
+        "input[type='search'], input[type='text']",
+      )
+      openGuide(input)
+      return
     }
 
-    if (target.closest("[data-move-filter-guide-close]")) {
-      closeGuide();
-      return;
+    if (target.closest('[data-move-filter-guide-close]')) {
+      closeGuide()
+      return
     }
 
     if (e.target === overlay) {
-      closeGuide();
-      return;
+      closeGuide()
+      return
     }
 
-    const chip = target.closest<HTMLElement>("[data-filter-chip]");
+    const chip = target.closest<HTMLElement>('[data-filter-chip]')
     if (chip && chip.dataset.filterChip) {
-      const text = chip.dataset.filterChip;
-      navigator.clipboard?.writeText(text).catch(() => {});
-      const appliedTemplate = overlay?.dataset.filterAppliedMsg ?? "Filter applied: {text}";
-      const copiedText = overlay?.dataset.copiedMsg ?? "Copied!";
+      const text = chip.dataset.filterChip
+      navigator.clipboard?.writeText(text).catch(() => {})
+      const appliedTemplate = overlay?.dataset.filterAppliedMsg ?? 'Filter applied: {text}'
+      const copiedText = overlay?.dataset.copiedMsg ?? 'Copied!'
 
       if (lastActiveInput) {
-        lastActiveInput.value = text;
-        lastActiveInput.dispatchEvent(new Event("input", { bubbles: true }));
-        toast.info(appliedTemplate.replace("{text}", text), { duration: 2000 });
-        closeGuide();
-        lastActiveInput.focus();
+        lastActiveInput.value = text
+        lastActiveInput.dispatchEvent(new Event('input', { bubbles: true }))
+        toast.info(appliedTemplate.replace('{text}', text), { duration: 2000 })
+        closeGuide()
+        lastActiveInput.focus()
       } else {
-        toast.success(copiedText, { duration: 1800 });
+        toast.success(copiedText, { duration: 1800 })
       }
     }
-  });
+  })
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && overlay && !overlay.hidden) {
-      closeGuide();
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay && !overlay.hidden) {
+      closeGuide()
     }
-  });
+  })
 </script>

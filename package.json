@@ -13,7 +13,11 @@
     "check": "astro check",
     "astro": "astro",
     "fetch:pokedex": "tsx scripts/fetch-pokedex.ts",
-    "fetch:pokedex:force": "tsx scripts/fetch-pokedex.ts --force"
+    "fetch:pokedex:force": "tsx scripts/fetch-pokedex.ts --force",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.0",
@@ -28,12 +32,21 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@eslint/js": "^10.0.1",
     "@types/animejs": "^3.1.13",
     "@types/node": "^22.10.7",
     "@types/qrcode": "^1.5.6",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^3.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "globals": "^17.12.0",
     "p-limit": "^6.2.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^1.0.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.70.0"
   },
   "allowScripts": {
     "esbuild": true

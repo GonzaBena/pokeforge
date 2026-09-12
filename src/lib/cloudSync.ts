@@ -1,75 +1,81 @@
-import { createSyncPayload, encodeSyncPayload, decodeSyncPayload, applySyncPayload, type SyncPayload } from "./sync";
-import { CAPTURED_CHANGED_EVENT, TEAM_CHANGED_EVENT, GAME_CHANGED_EVENT } from "./storage";
-import { getCurrentLocale, getTranslations } from "./i18n/translations";
-import { toast } from "./toast";
+import {
+  createSyncPayload,
+  encodeSyncPayload,
+  decodeSyncPayload,
+  applySyncPayload,
+  type SyncPayload,
+} from './sync'
+import { CAPTURED_CHANGED_EVENT, TEAM_CHANGED_EVENT, GAME_CHANGED_EVENT } from './storage'
+import { getCurrentLocale, getTranslations } from './i18n/translations'
+import { toast } from './toast'
 
-export const CLOUD_STATUS_EVENT = "poketeam:cloud-status";
+export const CLOUD_STATUS_EVENT = 'poketeam:cloud-status'
 
-const CLOUD_CODE_KEY = "poketeam:cloud_code";
-const CLOUD_SECRET_KEY = "poketeam:cloud_secret";
-const CLOUD_LAST_SYNC_KEY = "poketeam:cloud_last_sync";
+const CLOUD_CODE_KEY = 'poketeam:cloud_code'
+const CLOUD_SECRET_KEY = 'poketeam:cloud_secret'
+const CLOUD_LAST_SYNC_KEY = 'poketeam:cloud_last_sync'
 
-export type CloudSyncStatus = "unlinked" | "syncing" | "synced" | "offline" | "error";
+export type CloudSyncStatus = 'unlinked' | 'syncing' | 'synced' | 'offline' | 'error'
 
 export interface CloudState {
-  isLinked: boolean;
-  code: string | null;
-  secretKey: string | null;
-  lastSync: number | null;
-  isSyncing: boolean;
-  status: CloudSyncStatus;
-  lastError: string | null;
+  isLinked: boolean
+  code: string | null
+  secretKey: string | null
+  lastSync: number | null
+  isSyncing: boolean
+  status: CloudSyncStatus
+  lastError: string | null
 }
 
-let isSyncing = false;
-let syncDebounceTimer: number | null = null;
-let isInitialized = false;
-let isApplyingRemoteUpdate = false;
-let lastSyncError: string | null = null;
-let syncWorker: Worker | null = null;
-let fallbackIntervalTimer: number | null = null;
+let isSyncing = false
+let syncDebounceTimer: number | null = null
+let isInitialized = false
+let isApplyingRemoteUpdate = false
+let lastSyncError: string | null = null
+let syncWorker: Worker | null = null
+let fallbackIntervalTimer: number | null = null
 
 // Intervalo de comprobación en segundo plano (5 minutos)
-const SYNC_WORKER_INTERVAL = 5 * 60 * 1000;
+const SYNC_WORKER_INTERVAL = 5 * 60 * 1000
 
 function getSyncRemoteUpdatedText(): string {
   try {
-    const locale = getCurrentLocale();
-    const t = getTranslations(locale);
-    return t.nav.cloudRemoteUpdated || "Datos actualizados desde la nube";
+    const locale = getCurrentLocale()
+    const t = getTranslations(locale)
+    return t.nav.cloudRemoteUpdated || 'Datos actualizados desde la nube'
   } catch {
-    return "Datos actualizados desde la nube";
+    return 'Datos actualizados desde la nube'
   }
 }
 
 export function getCloudState(): CloudState {
-  if (typeof localStorage === "undefined") {
+  if (typeof localStorage === 'undefined') {
     return {
       isLinked: false,
       code: null,
       secretKey: null,
       lastSync: null,
       isSyncing: false,
-      status: "unlinked",
+      status: 'unlinked',
       lastError: null,
-    };
+    }
   }
 
-  const code = localStorage.getItem(CLOUD_CODE_KEY);
-  const secretKey = localStorage.getItem(CLOUD_SECRET_KEY);
-  const lastSyncStr = localStorage.getItem(CLOUD_LAST_SYNC_KEY);
-  const lastSync = lastSyncStr ? parseInt(lastSyncStr, 10) : null;
+  const code = localStorage.getItem(CLOUD_CODE_KEY)
+  const secretKey = localStorage.getItem(CLOUD_SECRET_KEY)
+  const lastSyncStr = localStorage.getItem(CLOUD_LAST_SYNC_KEY)
+  const lastSync = lastSyncStr ? parseInt(lastSyncStr, 10) : null
 
-  let status: CloudSyncStatus = "unlinked";
+  let status: CloudSyncStatus = 'unlinked'
   if (code) {
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      status = "offline";
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      status = 'offline'
     } else if (isSyncing) {
-      status = "syncing";
+      status = 'syncing'
     } else if (lastSyncError) {
-      status = "error";
+      status = 'error'
     } else {
-      status = "synced";
+      status = 'synced'
     }
   }
 
@@ -81,124 +87,124 @@ export function getCloudState(): CloudState {
     isSyncing,
     status,
     lastError: lastSyncError,
-  };
+  }
 }
 
 export function notifyStatusChange(): void {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent(CLOUD_STATUS_EVENT, { detail: getCloudState() }));
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(CLOUD_STATUS_EVENT, { detail: getCloudState() }))
 }
 
 /**
  * Inicia el Web Worker para verificar cambios remotos en segundo plano cada ~5 minutos.
  */
 function initSyncWorker(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return
 
-  const state = getCloudState();
+  const state = getCloudState()
   if (!state.isLinked || !state.code) {
-    stopSyncWorker();
-    return;
+    stopSyncWorker()
+    return
   }
 
-  if (typeof Worker !== "undefined") {
+  if (typeof Worker !== 'undefined') {
     if (!syncWorker) {
       try {
-        syncWorker = new Worker("/sync-worker.js");
+        syncWorker = new Worker('/sync-worker.js')
         syncWorker.onmessage = async (e: MessageEvent) => {
-          const data = e.data;
-          if (!data) return;
+          const data = e.data
+          if (!data) return
 
-          if (data.type === "VAULT_CHECK_RESULT") {
+          if (data.type === 'VAULT_CHECK_RESULT') {
             if (data.isOffline) {
-              lastSyncError = null;
-              notifyStatusChange();
-              return;
+              lastSyncError = null
+              notifyStatusChange()
+              return
             }
 
             if (!data.success) {
-              lastSyncError = data.error || "Error al comprobar cambios en la nube";
-              notifyStatusChange();
-              return;
+              lastSyncError = data.error || 'Error al comprobar cambios en la nube'
+              notifyStatusChange()
+              return
             }
 
-            lastSyncError = null;
-            const remoteUpdatedAt = Number(data.updatedAt) || 0;
-            const currentSyncState = getCloudState();
-            const localLastSync = currentSyncState.lastSync || 0;
+            lastSyncError = null
+            const remoteUpdatedAt = Number(data.updatedAt) || 0
+            const currentSyncState = getCloudState()
+            const localLastSync = currentSyncState.lastSync || 0
 
             // Si la nube tiene cambios más nuevos por más de 1.5s
             if (remoteUpdatedAt > localLastSync + 1500) {
               try {
-                isApplyingRemoteUpdate = true;
-                const payload = await decodeSyncPayload(data.payload);
-                applySyncPayload(payload, "replace");
-                localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdatedAt));
-                toast.info(getSyncRemoteUpdatedText());
+                isApplyingRemoteUpdate = true
+                const payload = await decodeSyncPayload(data.payload)
+                applySyncPayload(payload, 'replace')
+                localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdatedAt))
+                toast.info(getSyncRemoteUpdatedText())
               } catch (err) {
-                console.error("Error al aplicar actualización remota:", err);
+                console.error('Error al aplicar actualización remota:', err)
               } finally {
-                isApplyingRemoteUpdate = false;
-                notifyStatusChange();
+                isApplyingRemoteUpdate = false
+                notifyStatusChange()
               }
             } else {
-              notifyStatusChange();
+              notifyStatusChange()
             }
           }
-        };
+        }
 
         syncWorker.onerror = (err) => {
-          console.warn("Sync Worker warning:", err);
-        };
+          console.warn('Sync Worker warning:', err)
+        }
       } catch (err) {
-        console.warn("No se pudo iniciar Web Worker, usando temporizador estándar:", err);
-        startFallbackTimer();
-        return;
+        console.warn('No se pudo iniciar Web Worker, usando temporizador estándar:', err)
+        startFallbackTimer()
+        return
       }
     }
 
     syncWorker.postMessage({
-      action: "START",
+      action: 'START',
       code: state.code,
       intervalMs: SYNC_WORKER_INTERVAL,
-    });
+    })
   } else {
-    startFallbackTimer();
+    startFallbackTimer()
   }
 }
 
 function stopSyncWorker(): void {
   if (syncWorker) {
-    syncWorker.postMessage({ action: "STOP" });
-    syncWorker.terminate();
-    syncWorker = null;
+    syncWorker.postMessage({ action: 'STOP' })
+    syncWorker.terminate()
+    syncWorker = null
   }
   if (fallbackIntervalTimer) {
-    window.clearInterval(fallbackIntervalTimer);
-    fallbackIntervalTimer = null;
+    window.clearInterval(fallbackIntervalTimer)
+    fallbackIntervalTimer = null
   }
 }
 
 function startFallbackTimer(): void {
   if (fallbackIntervalTimer) {
-    window.clearInterval(fallbackIntervalTimer);
+    window.clearInterval(fallbackIntervalTimer)
   }
   fallbackIntervalTimer = window.setInterval(() => {
-    fetchFromCloud();
-  }, SYNC_WORKER_INTERVAL);
+    fetchFromCloud()
+  }, SYNC_WORKER_INTERVAL)
 }
 
 /**
  * Solicita al Web Worker una verificación forzada inmediata.
  */
 export function pingSyncWorkerCheck(): void {
-  const state = getCloudState();
-  if (!state.isLinked || !state.code) return;
+  const state = getCloudState()
+  if (!state.isLinked || !state.code) return
 
   if (syncWorker) {
-    syncWorker.postMessage({ action: "CHECK_NOW", code: state.code });
+    syncWorker.postMessage({ action: 'CHECK_NOW', code: state.code })
   } else {
-    fetchFromCloud();
+    fetchFromCloud()
   }
 }
 
@@ -206,25 +212,25 @@ export function pingSyncWorkerCheck(): void {
  * Consulta la bóveda en la DB y decodifica su payload sin aplicarlo localmente.
  */
 export async function fetchCloudVault(
-  code: string
+  code: string,
 ): Promise<{ success: boolean; payload?: SyncPayload; updatedAt?: number; error?: string }> {
-  const cleanCode = code.toUpperCase().trim();
-  if (!cleanCode) return { success: false, error: "Código requerido" };
+  const cleanCode = code.toUpperCase().trim()
+  if (!cleanCode) return { success: false, error: 'Código requerido' }
 
   try {
     const res = await fetch(`/api/vault?code=${encodeURIComponent(cleanCode)}&_t=${Date.now()}`, {
-      cache: "no-store",
-    });
-    const data = await res.json();
+      cache: 'no-store',
+    })
+    const data = await res.json()
 
     if (!res.ok || !data.success) {
-      return { success: false, error: data.message || "Bóveda no encontrada" };
+      return { success: false, error: data.message || 'Bóveda no encontrada' }
     }
 
-    const payload = await decodeSyncPayload(data.payload);
-    return { success: true, payload, updatedAt: data.updatedAt };
+    const payload = await decodeSyncPayload(data.payload)
+    return { success: true, payload, updatedAt: data.updatedAt }
   } catch {
-    return { success: false, error: "Error de conexión con el servidor" };
+    return { success: false, error: 'Error de conexión con el servidor' }
   }
 }
 
@@ -232,52 +238,56 @@ export async function fetchCloudVault(
  * Asigna o actualiza la clave secreta en el dispositivo local para habilitar permisos de escritura.
  */
 export async function setCloudSecretKey(secretKey: string): Promise<boolean> {
-  const cleanKey = secretKey.trim();
-  if (!cleanKey) return false;
-  localStorage.setItem(CLOUD_SECRET_KEY, cleanKey);
-  notifyStatusChange();
+  const cleanKey = secretKey.trim()
+  if (!cleanKey) return false
+  localStorage.setItem(CLOUD_SECRET_KEY, cleanKey)
+  notifyStatusChange()
   // Traer inmediatamente el estado más reciente de la nube
-  await fetchFromCloud(true);
-  return true;
+  await fetchFromCloud(true)
+  return true
 }
 
 /**
  * Crea una nueva bóveda en la DB con el estado local actual.
  */
-export async function createCloudVault(): Promise<{ success: boolean; code?: string; error?: string }> {
+export async function createCloudVault(): Promise<{
+  success: boolean
+  code?: string
+  error?: string
+}> {
   try {
-    isSyncing = true;
-    lastSyncError = null;
-    notifyStatusChange();
+    isSyncing = true
+    lastSyncError = null
+    notifyStatusChange()
 
-    const localPayload = createSyncPayload();
-    const token = await encodeSyncPayload(localPayload);
+    const localPayload = createSyncPayload()
+    const token = await encodeSyncPayload(localPayload)
 
-    const res = await fetch("/api/vault", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/vault', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload: token }),
-    });
+    })
 
-    const data = await res.json();
+    const data = await res.json()
     if (!res.ok || !data.success) {
-      lastSyncError = data.message || "Error al crear bóveda en la nube";
-      return { success: false, error: lastSyncError ?? undefined };
+      lastSyncError = data.message || 'Error al crear bóveda en la nube'
+      return { success: false, error: lastSyncError ?? undefined }
     }
 
-    localStorage.setItem(CLOUD_CODE_KEY, data.code);
-    localStorage.setItem(CLOUD_SECRET_KEY, data.secretKey);
-    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt));
-    lastSyncError = null;
+    localStorage.setItem(CLOUD_CODE_KEY, data.code)
+    localStorage.setItem(CLOUD_SECRET_KEY, data.secretKey)
+    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt))
+    lastSyncError = null
 
-    initSyncWorker();
-    return { success: true, code: data.code };
-  } catch (err) {
-    lastSyncError = "Error de conexión con el servidor";
-    return { success: false, error: lastSyncError };
+    initSyncWorker()
+    return { success: true, code: data.code }
+  } catch {
+    lastSyncError = 'Error de conexión con el servidor'
+    return { success: false, error: lastSyncError }
   } finally {
-    isSyncing = false;
-    notifyStatusChange();
+    isSyncing = false
+    notifyStatusChange()
   }
 }
 
@@ -287,100 +297,106 @@ export async function createCloudVault(): Promise<{ success: boolean; code?: str
 export async function joinCloudVault(
   code: string,
   secretKey?: string,
-  mode: "merge" | "replace" = "replace"
+  mode: 'merge' | 'replace' = 'replace',
 ): Promise<{ success: boolean; payload?: SyncPayload; error?: string }> {
-  const cleanCode = code.toUpperCase().trim();
-  if (!cleanCode) return { success: false, error: "Código requerido" };
+  const cleanCode = code.toUpperCase().trim()
+  if (!cleanCode) return { success: false, error: 'Código requerido' }
 
   try {
-    isSyncing = true;
-    lastSyncError = null;
-    notifyStatusChange();
+    isSyncing = true
+    lastSyncError = null
+    notifyStatusChange()
 
     const res = await fetch(`/api/vault?code=${encodeURIComponent(cleanCode)}&_t=${Date.now()}`, {
-      cache: "no-store",
-    });
-    const data = await res.json();
+      cache: 'no-store',
+    })
+    const data = await res.json()
 
     if (!res.ok || !data.success) {
-      lastSyncError = data.message || "Bóveda no encontrada";
-      return { success: false, error: lastSyncError ?? undefined };
+      lastSyncError = data.message || 'Bóveda no encontrada'
+      return { success: false, error: lastSyncError ?? undefined }
     }
 
-    const payload = await decodeSyncPayload(data.payload);
-    isApplyingRemoteUpdate = true;
+    const payload = await decodeSyncPayload(data.payload)
+    isApplyingRemoteUpdate = true
     try {
-      applySyncPayload(payload, mode);
+      applySyncPayload(payload, mode)
     } finally {
-      isApplyingRemoteUpdate = false;
+      isApplyingRemoteUpdate = false
     }
 
-    localStorage.setItem(CLOUD_CODE_KEY, cleanCode);
+    localStorage.setItem(CLOUD_CODE_KEY, cleanCode)
     if (secretKey) {
-      localStorage.setItem(CLOUD_SECRET_KEY, secretKey.trim());
+      localStorage.setItem(CLOUD_SECRET_KEY, secretKey.trim())
     }
-    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt));
-    lastSyncError = null;
+    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt))
+    lastSyncError = null
 
-    initSyncWorker();
-    return { success: true, payload };
+    initSyncWorker()
+    return { success: true, payload }
   } catch {
-    lastSyncError = "Error al sincronizar con la nube";
-    return { success: false, error: lastSyncError };
+    lastSyncError = 'Error al sincronizar con la nube'
+    return { success: false, error: lastSyncError }
   } finally {
-    isSyncing = false;
-    notifyStatusChange();
+    isSyncing = false
+    notifyStatusChange()
   }
 }
 
 /**
  * Envía los cambios locales a la bóveda en la DB (PUT /api/vault).
  */
-export async function syncToCloudNow(skipRemoteCheck = false): Promise<{ success: boolean; error?: string }> {
+export async function syncToCloudNow(
+  skipRemoteCheck = false,
+): Promise<{ success: boolean; error?: string }> {
   if (syncDebounceTimer) {
-    window.clearTimeout(syncDebounceTimer);
-    syncDebounceTimer = null;
+    window.clearTimeout(syncDebounceTimer)
+    syncDebounceTimer = null
   }
 
-  const state = getCloudState();
+  const state = getCloudState()
   if (!state.isLinked || !state.code) {
-    return { success: false, error: "Dispositivo no vinculado a la nube" };
+    return { success: false, error: 'Dispositivo no vinculado a la nube' }
   }
   if (!state.secretKey) {
     return {
       success: false,
-      error: "Dispositivo en modo Solo Lectura. Escaneá el código QR desde tu PC para habilitar permisos de escritura.",
-    };
+      error:
+        'Dispositivo en modo Solo Lectura. Escaneá el código QR desde tu PC para habilitar permisos de escritura.',
+    }
   }
 
   try {
-    isSyncing = true;
-    lastSyncError = null;
-    notifyStatusChange();
+    isSyncing = true
+    lastSyncError = null
+    notifyStatusChange()
 
     // Protección contra sobreescritura accidental: si otro dispositivo guardó algo más nuevo, descargarlo
     if (!skipRemoteCheck) {
       try {
-        const checkRes = await fetch(`/api/vault?code=${encodeURIComponent(state.code)}&_t=${Date.now()}`, {
-          cache: "no-store",
-          headers: { "Cache-Control": "no-cache" },
-        });
+        const checkRes = await fetch(
+          `/api/vault?code=${encodeURIComponent(state.code)}&_t=${Date.now()}`,
+          {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache' },
+          },
+        )
         if (checkRes.ok) {
-          const remoteData = await checkRes.json();
+          const remoteData = await checkRes.json()
           if (remoteData.success && remoteData.updatedAt) {
-            const remoteUpdated = Number(remoteData.updatedAt);
-            const localLastSync = state.lastSync || 0;
+            const remoteUpdated = Number(remoteData.updatedAt)
+            const localLastSync = state.lastSync || 0
             if (remoteUpdated > localLastSync + 1500) {
-              isApplyingRemoteUpdate = true;
+              isApplyingRemoteUpdate = true
               try {
-                const remotePayload = await decodeSyncPayload(remoteData.payload);
-                applySyncPayload(remotePayload, "replace");
-                localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated));
-                toast.info(getSyncRemoteUpdatedText());
-                return { success: true };
+                const remotePayload = await decodeSyncPayload(remoteData.payload)
+                applySyncPayload(remotePayload, 'replace')
+                localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated))
+                toast.info(getSyncRemoteUpdatedText())
+                return { success: true }
               } finally {
-                isApplyingRemoteUpdate = false;
-                notifyStatusChange();
+                isApplyingRemoteUpdate = false
+                notifyStatusChange()
               }
             }
           }
@@ -390,34 +406,34 @@ export async function syncToCloudNow(skipRemoteCheck = false): Promise<{ success
       }
     }
 
-    const localPayload = createSyncPayload();
-    const token = await encodeSyncPayload(localPayload);
+    const localPayload = createSyncPayload()
+    const token = await encodeSyncPayload(localPayload)
 
-    const res = await fetch("/api/vault", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/vault', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code: state.code,
         secretKey: state.secretKey,
         payload: token,
       }),
-    });
+    })
 
-    const data = await res.json();
+    const data = await res.json()
     if (!res.ok || !data.success) {
-      lastSyncError = data.message || "Error al actualizar nube";
-      return { success: false, error: lastSyncError ?? undefined };
+      lastSyncError = data.message || 'Error al actualizar nube'
+      return { success: false, error: lastSyncError ?? undefined }
     }
 
-    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt));
-    lastSyncError = null;
-    return { success: true };
+    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt))
+    lastSyncError = null
+    return { success: true }
   } catch {
-    lastSyncError = "Sin conexión a internet";
-    return { success: false, error: lastSyncError };
+    lastSyncError = 'Sin conexión a internet'
+    return { success: false, error: lastSyncError }
   } finally {
-    isSyncing = false;
-    notifyStatusChange();
+    isSyncing = false
+    notifyStatusChange()
   }
 }
 
@@ -426,47 +442,47 @@ export async function syncToCloudNow(skipRemoteCheck = false): Promise<{ success
  */
 export async function fetchFromCloud(force: boolean = false): Promise<boolean> {
   if (syncDebounceTimer) {
-    window.clearTimeout(syncDebounceTimer);
-    syncDebounceTimer = null;
+    window.clearTimeout(syncDebounceTimer)
+    syncDebounceTimer = null
   }
 
-  const state = getCloudState();
-  if (!state.isLinked || !state.code) return false;
+  const state = getCloudState()
+  if (!state.isLinked || !state.code) return false
 
   try {
     const res = await fetch(`/api/vault?code=${encodeURIComponent(state.code)}&_t=${Date.now()}`, {
-      cache: "no-store",
-      headers: { "Cache-Control": "no-cache" },
-    });
-    if (!res.ok) return false;
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+    })
+    if (!res.ok) return false
 
-    const data = await res.json();
-    if (!data.success || !data.updatedAt) return false;
+    const data = await res.json()
+    if (!data.success || !data.updatedAt) return false
 
-    const localLastSync = state.lastSync || 0;
-    const remoteUpdated = Number(data.updatedAt);
+    const localLastSync = state.lastSync || 0
+    const remoteUpdated = Number(data.updatedAt)
     // Si la nube tiene cambios más nuevos por más de 1.5s o se solicita verificación forzada
     if (force || remoteUpdated > localLastSync + 1500) {
-      isApplyingRemoteUpdate = true;
+      isApplyingRemoteUpdate = true
       try {
-        const payload = await decodeSyncPayload(data.payload);
-        applySyncPayload(payload, "replace");
-        localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated));
-        lastSyncError = null;
-        toast.info(getSyncRemoteUpdatedText());
-        return true;
+        const payload = await decodeSyncPayload(data.payload)
+        applySyncPayload(payload, 'replace')
+        localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated))
+        lastSyncError = null
+        toast.info(getSyncRemoteUpdatedText())
+        return true
       } finally {
-        isApplyingRemoteUpdate = false;
-        notifyStatusChange();
+        isApplyingRemoteUpdate = false
+        notifyStatusChange()
       }
     } else {
-      lastSyncError = null;
-      notifyStatusChange();
-      return false;
+      lastSyncError = null
+      notifyStatusChange()
+      return false
     }
   } catch {
     // Modo offline silencioso
-    return false;
+    return false
   }
 }
 
@@ -475,75 +491,75 @@ export async function fetchFromCloud(force: boolean = false): Promise<boolean> {
  * Muestra inmediatamente el estado de "Guardando..." estilo Google Docs.
  */
 export function scheduleAutoSync(): void {
-  if (isApplyingRemoteUpdate) return;
-  const state = getCloudState();
-  if (!state.isLinked || !state.secretKey) return;
+  if (isApplyingRemoteUpdate) return
+  const state = getCloudState()
+  if (!state.isLinked || !state.secretKey) return
 
   // Feedback visual instantáneo: marcando como guardando/syncing
-  isSyncing = true;
-  lastSyncError = null;
-  notifyStatusChange();
+  isSyncing = true
+  lastSyncError = null
+  notifyStatusChange()
 
   if (syncDebounceTimer) {
-    window.clearTimeout(syncDebounceTimer);
+    window.clearTimeout(syncDebounceTimer)
   }
 
   syncDebounceTimer = window.setTimeout(async () => {
-    if (isApplyingRemoteUpdate) return;
-    await syncToCloudNow();
-  }, 1500);
+    if (isApplyingRemoteUpdate) return
+    await syncToCloudNow()
+  }, 1500)
 }
 
 /**
  * Desvincula el dispositivo local sin borrar los datos en la DB.
  */
 export function unlinkCloudVault(): void {
-  stopSyncWorker();
-  localStorage.removeItem(CLOUD_CODE_KEY);
-  localStorage.removeItem(CLOUD_SECRET_KEY);
-  localStorage.removeItem(CLOUD_LAST_SYNC_KEY);
-  lastSyncError = null;
-  notifyStatusChange();
+  stopSyncWorker()
+  localStorage.removeItem(CLOUD_CODE_KEY)
+  localStorage.removeItem(CLOUD_SECRET_KEY)
+  localStorage.removeItem(CLOUD_LAST_SYNC_KEY)
+  lastSyncError = null
+  notifyStatusChange()
 }
 
 /**
  * Elimina la bóveda de la DB permanentemente (DELETE).
  */
 export async function deleteCloudVault(): Promise<{ success: boolean; error?: string }> {
-  const state = getCloudState();
+  const state = getCloudState()
   if (!state.isLinked || !state.code || !state.secretKey) {
-    unlinkCloudVault();
-    return { success: true };
+    unlinkCloudVault()
+    return { success: true }
   }
 
   try {
-    isSyncing = true;
-    lastSyncError = null;
-    notifyStatusChange();
+    isSyncing = true
+    lastSyncError = null
+    notifyStatusChange()
 
-    const res = await fetch("/api/vault", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/vault', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code: state.code,
         secretKey: state.secretKey,
       }),
-    });
+    })
 
-    const data = await res.json();
+    const data = await res.json()
     if (!res.ok || !data.success) {
-      lastSyncError = data.message || "Error al eliminar bóveda";
-      return { success: false, error: lastSyncError ?? undefined };
+      lastSyncError = data.message || 'Error al eliminar bóveda'
+      return { success: false, error: lastSyncError ?? undefined }
     }
 
-    unlinkCloudVault();
-    return { success: true };
+    unlinkCloudVault()
+    return { success: true }
   } catch {
-    lastSyncError = "Error al comunicar con la DB";
-    return { success: false, error: lastSyncError ?? undefined };
+    lastSyncError = 'Error al comunicar con la DB'
+    return { success: false, error: lastSyncError ?? undefined }
   } finally {
-    isSyncing = false;
-    notifyStatusChange();
+    isSyncing = false
+    notifyStatusChange()
   }
 }
 
@@ -551,35 +567,35 @@ export async function deleteCloudVault(): Promise<{ success: boolean; error?: st
  * Inicializa los listeners globales para auto-sync y Web Worker en el cliente.
  */
 export function initCloudSyncClient(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return
 
   if (isInitialized) {
-    initSyncWorker();
-    fetchFromCloud();
-    return;
+    initSyncWorker()
+    fetchFromCloud()
+    return
   }
-  isInitialized = true;
+  isInitialized = true
 
-  window.addEventListener(CAPTURED_CHANGED_EVENT, scheduleAutoSync);
-  window.addEventListener(TEAM_CHANGED_EVENT, scheduleAutoSync);
-  window.addEventListener(GAME_CHANGED_EVENT, scheduleAutoSync);
+  window.addEventListener(CAPTURED_CHANGED_EVENT, scheduleAutoSync)
+  window.addEventListener(TEAM_CHANGED_EVENT, scheduleAutoSync)
+  window.addEventListener(GAME_CHANGED_EVENT, scheduleAutoSync)
 
   // Al volver a la pestaña, comprobar si hubo cambios en otros dispositivos
-  window.addEventListener("focus", () => {
-    pingSyncWorkerCheck();
-  });
+  window.addEventListener('focus', () => {
+    pingSyncWorkerCheck()
+  })
 
-  window.addEventListener("online", () => {
-    lastSyncError = null;
-    notifyStatusChange();
-    pingSyncWorkerCheck();
-    fetchFromCloud(true);
-  });
+  window.addEventListener('online', () => {
+    lastSyncError = null
+    notifyStatusChange()
+    pingSyncWorkerCheck()
+    fetchFromCloud(true)
+  })
 
-  window.addEventListener("offline", () => {
-    notifyStatusChange();
-  });
+  window.addEventListener('offline', () => {
+    notifyStatusChange()
+  })
 
-  initSyncWorker();
-  fetchFromCloud();
+  initSyncWorker()
+  fetchFromCloud()
 }

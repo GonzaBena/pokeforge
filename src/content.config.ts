@@ -1,25 +1,19 @@
-import { defineCollection } from "astro:content";
-import { z } from "astro/zod";
-import { glob } from "astro/loaders";
+import { defineCollection } from 'astro:content'
+import { z } from 'astro/zod'
+import { glob } from 'astro/loaders'
 
 const blog = defineCollection({
-  loader: glob({ pattern: "{en,es}/**/*.md", base: "./src/content/blog" }),
+  loader: glob({ pattern: '{en,es}/**/*.md', base: './src/content/blog' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
       description: z.string(),
       pubDate: z.coerce.date(),
-      author: z.string().default("poketeam"),
-      category: z.enum([
-        "guias",
-        "curiosidades",
-        "competitivo",
-        "novedades",
-        "recursos",
-      ]),
+      author: z.string().default('poketeam'),
+      category: z.enum(['guias', 'curiosidades', 'competitivo', 'novedades', 'recursos']),
       tags: z.array(z.string()).default([]),
       coverImage: z.union([image(), z.string()]).optional(),
-      coverImageFit: z.enum(["contain", "cover"]).default("contain"),
+      coverImageFit: z.enum(['contain', 'cover']).default('contain'),
       featured: z.boolean().default(false),
       readingTime: z.string().optional(),
       translation: z.string().optional(),
@@ -57,6 +51,6 @@ const blog = defineCollection({
         .optional()
         .default([]),
     }),
-});
+})
 
-export const collections = { blog };
+export const collections = { blog }

@@ -1,20 +1,20 @@
 ---
-title: "Guide to Trade and Stone Evolutions in Pokémon FireRed and LeafGreen"
-description: "Master every trade and stone evolution in Kanto: required held items, evolution stone shop locations, moveset warnings, and link cable trauma."
+title: 'Guide to Trade and Stone Evolutions in Pokémon FireRed and LeafGreen'
+description: 'Master every trade and stone evolution in Kanto: required held items, evolution stone shop locations, moveset warnings, and link cable trauma.'
 pubDate: 2026-09-10
-category: "guias"
-tags: ["Guide", "FireRed", "LeafGreen", "Evolutions", "Kanto", "Items"]
+category: 'guias'
+tags: ['Guide', 'FireRed', 'LeafGreen', 'Evolutions', 'Kanto', 'Items']
 coverImage: ./assets/EvolutionBanner.webp
 coverImageFit: cover
 featured: false
-readingTime: "9 min"
-author: "gonzo"
-translation: "evoluciones-intercambio-piedras"
+readingTime: '9 min'
+author: 'gonzo'
+translation: 'evoluciones-intercambio-piedras'
 ---
 
-We all remember the golden era of **Pokémon FireRed & LeafGreen**. You assembled your dream team, spent hours grinding your Kadabra or Haunter up to level 60 thinking, *"surely it evolves next level!"*, only to confront harsh reality: **Game Freak designed these monsters so you had to talk to other humans in real life**.
+We all remember the golden era of **Pokémon FireRed & LeafGreen**. You assembled your dream team, spent hours grinding your Kadabra or Haunter up to level 60 thinking, _"surely it evolves next level!"_, only to confront harsh reality: **Game Freak designed these monsters so you had to talk to other humans in real life**.
 
-And if you weren't wrestling with a flaky Game Boy Advance Game Link Cable that canceled the trade if someone bumped the table, you were probably dealing with the tragedy of buying a Fire Stone at the Celadon Department Store, slapping it onto your level 18 Growlithe immediately, and permanently locking it out of ever learning *Flamethrower*.
+And if you weren't wrestling with a flaky Game Boy Advance Game Link Cable that canceled the trade if someone bumped the table, you were probably dealing with the tragedy of buying a Fire Stone at the Celadon Department Store, slapping it onto your level 18 Growlithe immediately, and permanently locking it out of ever learning _Flamethrower_.
 
 In this comprehensive guide, we break down every single Pokémon that evolves through **Trading** and **Evolutionary Stones** in FireRed & LeafGreen, including competitive movesets, item locations, and key pitfalls to avoid.
 
@@ -48,10 +48,10 @@ These four Generation I powerhouses evolve immediately upon being traded to anot
   </pokemon-card>
 </pokemon-showcase>
 
-* **Kadabra ➔ Alakazam**: A pure special sweeper with staggering Special Attack and Speed. In Gen III, elemental punches (Fire Punch, Ice Punch, Thunder Punch) were special attacks, making Alakazam a terrifying coverage cannon.
-* **Machoke ➔ Machamp**: Four arms packed with raw physical power. Its *Guts* ability boosts Attack by 50% when afflicted by status conditions like burn or paralysis.
-* **Graveler ➔ Golem**: The quintessential physical tank. An absolute lifesaver against Lt. Surge and Blaine, packing *Explosion* as the ultimate tactical reset button.
-* **Haunter ➔ Gengar**: Blessed with *Levitate*, Gengar completely invalidates its Ground weakness (Earthquake) while boasting three full immunities (Normal, Fighting, Ground).
+- **Kadabra ➔ Alakazam**: A pure special sweeper with staggering Special Attack and Speed. In Gen III, elemental punches (Fire Punch, Ice Punch, Thunder Punch) were special attacks, making Alakazam a terrifying coverage cannon.
+- **Machoke ➔ Machamp**: Four arms packed with raw physical power. Its _Guts_ ability boosts Attack by 50% when afflicted by status conditions like burn or paralysis.
+- **Graveler ➔ Golem**: The quintessential physical tank. An absolute lifesaver against Lt. Surge and Blaine, packing _Explosion_ as the ultimate tactical reset button.
+- **Haunter ➔ Gengar**: Blessed with _Levitate_, Gengar completely invalidates its Ground weakness (Earthquake) while boasting three full immunities (Normal, Fighting, Ground).
 
 ---
 
@@ -94,11 +94,12 @@ These four Generation I powerhouses evolve immediately upon being traded to anot
 </pokemon-showcase>
 
 #### Where to find Trade Evolution items in Kanto & Sevii Islands:
-* **Metal Coat**: Five Island (Memorial Pillar) by giving a Lemonade to the grieving Onix trainer (*Tectonix*), or held rarely (5%) by wild Magnemite/Magneton.
-* **Dragon Scale**: Icefall Cave (Four Island) on the ground, or held rarely by wild Horsea, Seadra, Dratini, and Dragonair.
-* **King's Rock**: Seven Island (Sevault Canyon), or held rarely by wild Poliwhirl/Slowpoke.
-* **Up-Grade**: Rocket Warehouse on Five Island.
-* **Deep Sea Tooth & Deep Sea Scale**: Transferred from Pokémon Ruby/Sapphire/Emerald via the Abandoned Ship.
+
+- **Metal Coat**: Five Island (Memorial Pillar) by giving a Lemonade to the grieving Onix trainer (_Tectonix_), or held rarely (5%) by wild Magnemite/Magneton.
+- **Dragon Scale**: Icefall Cave (Four Island) on the ground, or held rarely by wild Horsea, Seadra, Dratini, and Dragonair.
+- **King's Rock**: Seven Island (Sevault Canyon), or held rarely by wild Poliwhirl/Slowpoke.
+- **Up-Grade**: Rocket Warehouse on Five Island.
+- **Deep Sea Tooth & Deep Sea Scale**: Transferred from Pokémon Ruby/Sapphire/Emerald via the Abandoned Ship.
 
 ---
 
@@ -107,9 +108,10 @@ These four Generation I powerhouses evolve immediately upon being traded to anot
 Evolutionary stones offer an instant power spike... but harbor a **critical design trap** in Generation III:
 
 > **The Level-Up Moveset Penalty**: In Pokémon FireRed and LeafGreen, nearly all Pokémon evolved via stones **stop learning moves naturally through level-up**.
-> * Evolving **Pikachu** at level 5 into Raichu means Raichu will never learn *Thunderbolt*, *Agility*, or *Thunder Wave* naturally.
-> * Evolving **Growlithe** before level 49 means Arcanine will never learn *Flamethrower* on its own (forcing you to grind coins for TM35 at the Rocket Game Corner).
-> * **Pro Tip**: Always verify natural learnsets on PokeForge before consuming your evolutionary stones!
+>
+> - Evolving **Pikachu** at level 5 into Raichu means Raichu will never learn _Thunderbolt_, _Agility_, or _Thunder Wave_ naturally.
+> - Evolving **Growlithe** before level 49 means Arcanine will never learn _Flamethrower_ on its own (forcing you to grind coins for TM35 at the Rocket Game Corner).
+> - **Pro Tip**: Always verify natural learnsets on PokeForge before consuming your evolutionary stones!
 
 ### 2.1. Water Stone
 
@@ -137,11 +139,11 @@ Transforms aquatic allies into offensive and defensive powerhouses.
   </pokemon-card>
 </pokemon-showcase>
 
-* **Poliwhirl ➔ Poliwrath**: Gains Fighting typing and beefy physical bulk.
-* **Shellder ➔ Cloyster**: Sky-high 180 base Defense, plus entry hazards (*Spikes*) and a devastating *Explosion*.
-* **Staryu ➔ Starmie**: An elite Kanto sweeper. High speed, great Special Attack, and unrivaled coverage (*Surf*, *Psychic*, *Thunderbolt*, *Ice Beam*).
-* **Eevee ➔ Vaporeon**: A premier special sponge boasting 130 base HP.
-* **Lombre ➔ Ludicolo (National Dex)**: Rare Water/Grass dual typing that neutralizes mutual weaknesses.
+- **Poliwhirl ➔ Poliwrath**: Gains Fighting typing and beefy physical bulk.
+- **Shellder ➔ Cloyster**: Sky-high 180 base Defense, plus entry hazards (_Spikes_) and a devastating _Explosion_.
+- **Staryu ➔ Starmie**: An elite Kanto sweeper. High speed, great Special Attack, and unrivaled coverage (_Surf_, _Psychic_, _Thunderbolt_, _Ice Beam_).
+- **Eevee ➔ Vaporeon**: A premier special sponge boasting 130 base HP.
+- **Lombre ➔ Ludicolo (National Dex)**: Rare Water/Grass dual typing that neutralizes mutual weaknesses.
 
 ---
 
@@ -163,9 +165,9 @@ Unleashing blazing fury across Kanto's competitive landscape.
   </pokemon-card>
 </pokemon-showcase>
 
-* **Vulpix ➔ Ninetales (LeafGreen Exclusive)**: High Speed paired with disruptive tools like *Will-O-Wisp* and *Confuse Ray*.
-* **Growlithe ➔ Arcanine (FireRed Exclusive)**: Kanto's pseudo-legendary with a massive 555 base stat total and *Intimidate*.
-* **Eevee ➔ Flareon**: An insane 130 base physical Attack stat, delivering colossal damage with *Shadow Ball* and *Return*.
+- **Vulpix ➔ Ninetales (LeafGreen Exclusive)**: High Speed paired with disruptive tools like _Will-O-Wisp_ and _Confuse Ray_.
+- **Growlithe ➔ Arcanine (FireRed Exclusive)**: Kanto's pseudo-legendary with a massive 555 base stat total and _Intimidate_.
+- **Eevee ➔ Flareon**: An insane 130 base physical Attack stat, delivering colossal damage with _Shadow Ball_ and _Return_.
 
 ---
 
@@ -183,8 +185,8 @@ Pure electrical current bottled into evolutionary potential.
   </pokemon-card>
 </pokemon-showcase>
 
-* **Pikachu ➔ Raichu**: Provides higher offensive firepower and speed than Pikachu. (Ensure Pikachu learns *Thunderbolt* at Lv. 26 before using the stone).
-* **Eevee ➔ Jolteon**: 130 base Speed and 110 Special Attack make Jolteon one of the fastest and most dangerous electric attackers in Generation III.
+- **Pikachu ➔ Raichu**: Provides higher offensive firepower and speed than Pikachu. (Ensure Pikachu learns _Thunderbolt_ at Lv. 26 before using the stone).
+- **Eevee ➔ Jolteon**: 130 base Speed and 110 Special Attack make Jolteon one of the fastest and most dangerous electric attackers in Generation III.
 
 ---
 
@@ -210,10 +212,10 @@ Channeling botanical venom and psychic mastery.
   </pokemon-card>
 </pokemon-showcase>
 
-* **Gloom ➔ Vileplume (FireRed Exclusive)**: Master of status affliction with *Sleep Powder* and sustain through *Giga Drain*.
-* **Weepinbell ➔ Victreebel (LeafGreen Exclusive)**: High mixed offensive stats with *Sludge Bomb* and *Razor Leaf*.
-* **Exeggcute ➔ Exeggutor**: One of the strongest Pokémon in Kanto, bringing massive Special Attack, psychic typing, and *Explosion*.
-* **Nuzleaf ➔ Shiftry (National Dex)**: Dual Grass/Dark typing to threaten Psychic and Ghost types.
+- **Gloom ➔ Vileplume (FireRed Exclusive)**: Master of status affliction with _Sleep Powder_ and sustain through _Giga Drain_.
+- **Weepinbell ➔ Victreebel (LeafGreen Exclusive)**: High mixed offensive stats with _Sludge Bomb_ and _Razor Leaf_.
+- **Exeggcute ➔ Exeggutor**: One of the strongest Pokémon in Kanto, bringing massive Special Attack, psychic typing, and _Explosion_.
+- **Nuzleaf ➔ Shiftry (National Dex)**: Dual Grass/Dark typing to threaten Psychic and Ghost types.
 
 ---
 
@@ -243,10 +245,10 @@ A cosmic mineral awakening nocturnal power and royal battle prowess.
   </pokemon-card>
 </pokemon-showcase>
 
-* **Nidorina ➔ Nidoqueen & Nidorino ➔ Nidoking**: Unrivaled TM versatility (Earthquake, Ice Beam, Thunderbolt, Flamethrower, Surf, Megahorn). You can possess a fully evolved Nidoking or Nidoqueen before the 3rd Gym badge!
-* **Clefairy ➔ Clefable**: Vast movepool combined with defensive stat boosters like *Cosmic Power* and *Moonlight*.
-* **Jigglypuff ➔ Wigglytuff**: A massive HP pool (140 base HP) capable of soaking substantial damage.
-* **Skitty ➔ Delcatty (National Dex)**: Agile Normal-type utility supporter.
+- **Nidorina ➔ Nidoqueen & Nidorino ➔ Nidoking**: Unrivaled TM versatility (Earthquake, Ice Beam, Thunderbolt, Flamethrower, Surf, Megahorn). You can possess a fully evolved Nidoking or Nidoqueen before the 3rd Gym badge!
+- **Clefairy ➔ Clefable**: Vast movepool combined with defensive stat boosters like _Cosmic Power_ and _Moonlight_.
+- **Jigglypuff ➔ Wigglytuff**: A massive HP pool (140 base HP) capable of soaking substantial damage.
+- **Skitty ➔ Delcatty (National Dex)**: Agile Normal-type utility supporter.
 
 ---
 
@@ -264,8 +266,8 @@ Harnessing solar rays to bloom into cheerful, radiant forms.
   </pokemon-card>
 </pokemon-showcase>
 
-* **Gloom ➔ Bellossom**: Sheds the secondary Poison typing to become a pure Grass-type with 100 base Special Defense and *Teeter Dance*.
-* **Sunkern ➔ Sunflora (National Dex)**: Powerful *Solar Beam* cannon under bright sun.
+- **Gloom ➔ Bellossom**: Sheds the secondary Poison typing to become a pure Grass-type with 100 base Special Defense and _Teeter Dance_.
+- **Sunkern ➔ Sunflora (National Dex)**: Powerful _Solar Beam_ cannon under bright sun.
 
 ---
 
@@ -273,16 +275,16 @@ Harnessing solar rays to bloom into cheerful, radiant forms.
 
 Avoid wandering aimlessly; here is the complete supply checklist for your journey:
 
-| Evolutionary Stone | Main Location in FireRed / LeafGreen | Purchasable? |
-| :--- | :--- | :--- |
-| **Fire Stone** | Celadon Department Store (4F) | Yes ($2,100) |
-| **Water Stone** | Celadon Department Store (4F) & Route 25 | Yes ($2,100) |
-| **Thunder Stone** | Celadon Department Store (4F) & Power Plant | Yes ($2,100) |
-| **Leaf Stone** | Celadon Department Store (4F) & Safari Zone | Yes ($2,100) |
-| **Moon Stone** | Mt. Moon (x2), Rocket Hideout, Pokémon Mansion, and wild Clefairy (5%) | No (Finite) |
-| **Sun Stone** | Ruin Valley (Six Island) on ground, or held by wild Meowth/Solrock | No (Finite) |
+| Evolutionary Stone | Main Location in FireRed / LeafGreen                                   | Purchasable? |
+| :----------------- | :--------------------------------------------------------------------- | :----------- |
+| **Fire Stone**     | Celadon Department Store (4F)                                          | Yes ($2,100) |
+| **Water Stone**    | Celadon Department Store (4F) & Route 25                               | Yes ($2,100) |
+| **Thunder Stone**  | Celadon Department Store (4F) & Power Plant                            | Yes ($2,100) |
+| **Leaf Stone**     | Celadon Department Store (4F) & Safari Zone                            | Yes ($2,100) |
+| **Moon Stone**     | Mt. Moon (x2), Rocket Hideout, Pokémon Mansion, and wild Clefairy (5%) | No (Finite)  |
+| **Sun Stone**      | Ruin Valley (Six Island) on ground, or held by wild Meowth/Solrock     | No (Finite)  |
 
-> **PokeForge Tip**: Because Fire, Water, Thunder, and Leaf Stones are infinitely purchasable in Celadon City, spend your prize money freely once your pre-evolved Pokémon have learned their required moves! However, hoard your **Moon Stones** carefully, as there are only 4 fixed pickups in the main story before you have to farm wild Clefairies using *Thief*.
+> **PokeForge Tip**: Because Fire, Water, Thunder, and Leaf Stones are infinitely purchasable in Celadon City, spend your prize money freely once your pre-evolved Pokémon have learned their required moves! However, hoard your **Moon Stones** carefully, as there are only 4 fixed pickups in the main story before you have to farm wild Clefairies using _Thief_.
 
 ---
 
