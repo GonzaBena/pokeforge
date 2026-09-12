@@ -561,7 +561,7 @@ export interface Translations {
 export const UI_TRANSLATIONS: Record<Locale, Translations> = {
   en: {
     nav: {
-      pokedex: "Pokédex",
+      pokedex: "Pokedex",
       team: "Team",
       blog: "Blog",
       installApp: "Install App",
@@ -585,13 +585,17 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudTooltipUnlinked: "Sync with cloud and other devices",
       cloudRemoteUpdated: "Data updated from cloud",
       pwaPopoverTitle: "Install PokeForge",
-      pwaPopoverSubtitle: "Install PokeForge on your device for instant offline access and a faster experience.",
+      pwaPopoverSubtitle:
+        "Install PokeForge on your device for instant offline access and a faster experience.",
       pwaFeatureOffline: "Works 100% Offline",
-      pwaFeatureOfflineDesc: "Access the Pokédex and your saved teams without internet connection.",
+      pwaFeatureOfflineDesc:
+        "Access the Pokedex and your saved teams without internet connection.",
       pwaFeatureFast: "Fullscreen & Fast",
-      pwaFeatureFastDesc: "No browser clutter, instant launch, and maximum screen space.",
+      pwaFeatureFastDesc:
+        "No browser clutter, instant launch, and maximum screen space.",
       pwaFeatureSafe: "Device Sync & Cloud",
-      pwaFeatureSafeDesc: "Seamlessly save your teams and sync across all your devices.",
+      pwaFeatureSafeDesc:
+        "Seamlessly save your teams and sync across all your devices.",
       pwaInstallCta: "Install PokeForge",
       pwaIosTitle: "How to install on iOS / Safari:",
       pwaIosStep1: "Tap the Share button in Safari toolbar",
@@ -602,10 +606,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       badge: "PokeForge PWA v1.0 · Gen I to IX",
       titlePrefix: "Forge your ",
       titleAccent: "ultimate",
-      titleSuffix: " Pokémon team",
+      titleSuffix: " Pokemon team",
       subtitle:
-        "Explore the complete Pokédex, track your catches, and craft the perfect strategy by analyzing your team weaknesses and moves.",
-      explorePokedex: "Explore Pokédex",
+        "Explore the complete Pokedex, track your catches, and craft the perfect strategy by analyzing your team weaknesses and moves.",
+      explorePokedex: "Explore Pokedex",
       pokedexDesc: "1025+ Pokémon with game and gen filters",
       buildTeam: "Build Team",
       teamDesc: "Tactical type and weakness analysis",
@@ -626,7 +630,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       backBlog: "Back to Blog",
     },
     pokedex: {
-      title: "Pokédex",
+      title: "Pokedex",
       subtitle: "Explore all Pokémon and mark the ones you caught.",
       capturedCount: "Caught",
       all: "All",
@@ -640,13 +644,13 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       typeMatchOrDesc: "Match any selected type (OR)",
       typeMatchAndDesc: "Match all selected types (AND)",
       filterByGen: "Filter by generation",
-      empty: "No Pokémon found matching those filters.",
+      empty: "No Pokemon found matching those filters.",
       loadMore: "Load more Pokémon",
       catch: "Catch",
       caught: "Caught",
       regionalDex: "Regional Dex",
       obtainable: "Obtainable",
-      dexMode: "Pokédex Mode",
+      dexMode: "Pokedex Mode",
       exclusiveFilter: "Exclusives",
       exclusiveAll: "All",
       exclusiveBoth: "Both games",
@@ -658,7 +662,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       clearFilters: "Clear filters",
       filterByMoves: "Filter by moves",
       movesSearchPlaceholder: "Type a move (e.g. Ember, Surf)...",
-      movesHelper: "Pokémon must learn all selected moves",
+      movesHelper: "Pokemon must learn all selected moves",
       noMovesFound: "No moves found",
       removeMove: "Remove {move}",
       clearMoves: "Clear all moves",
@@ -672,7 +676,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       teamCardTitle: "Generate and download visual team card",
       downloadPng: "Download PNG Image",
       copyShowdown: "Copy Showdown Format",
-      choosePokemon: "Choose Pokémon",
+      choosePokemon: "Choose Pokemon",
       selectMove: "Select Move",
       searchByNameOrNum: "Search by name or #...",
       filterByMove: "Filter by move (e.g. type:fire pow:>30)...",
@@ -720,7 +724,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         "Cross-table of weaknesses, resistances, and balances for all 18 elemental types",
       typeMatrixShort: "Matrix",
       typeMatrixEmpty:
-        "Add at least one Pokémon to your team to view the type matrix.",
+        "Add at least one Pokemon to your team to view the type matrix.",
       netBalance: "Net Balance",
       legend: "Legend",
       legend4x: "4× Double weakness",
@@ -736,7 +740,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       resistances: "Resistances",
       immunities: "Immunities",
       coverage: "Defensive Coverage",
-      noTeam: "Add Pokémon to see weaknesses and resistances",
+      noTeam: "Add Pokemon to see weaknesses and resistances",
       threatCritical: "Critical",
       threatExposed: "Unprotected",
       threatCovered: "Covered",
@@ -750,7 +754,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       resistantGroup: "Resistances",
       immuneGroup: "Immunities",
       neutralGroup: "Neutral",
-      noResistWarning: "No Pokémon on the team resists this type.",
+      noResistWarning: "No Pokemon on the team resists this type.",
       noWeaknesses: "No shared weaknesses in the team.",
       noResistances: "No pure resistances.",
       noImmunities: "No immunities.",
@@ -785,7 +789,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       bringsNewTypeBadge: "New: {types}",
       synergyGameFilterLabel: "Game:",
       synergyGameAllPrompt:
-        "Select a game to see Pokémon available specifically in that version's Pokédex.",
+        "Select a game to see Pokemon available specifically in that version's Pokedex.",
       synergyGameFilteredNotice:
         "Suggestions filtered for {game} ({count} Pokémon in {dex}).",
       viewCompact: "Compact",
@@ -806,7 +810,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       guideTabModes: "Views & Tips",
       guideDefenseTitle: "Defensive Matchups & Multipliers",
       guideDefenseDesc:
-        "Evaluates incoming damage from enemy attacks against your team's Pokémon.",
+        "Evaluates incoming damage from enemy attacks against your team's Pokemon.",
       guideMultiplier4xTitle: "4× Critical Weakness",
       guideMultiplier4xDesc:
         "Double weakness (e.g. Grass/Bug vs Fire). Takes quadruple damage.",
@@ -852,9 +856,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       neutralNature: "Neutral: does not modify any stat.",
       increases: "Increases",
       decreases: "Decreases",
-      captureHint: "Catch this Pokémon to customize its stats and nature.",
+      captureHint: "Catch this Pokemon to customize its stats and nature.",
       specialCondition: "Special condition",
-      noEvolutions: "This Pokémon does not evolve.",
+      noEvolutions: "This Pokemon does not evolve.",
       level: "Level",
       method: "Method",
       move: "Move",
@@ -877,15 +881,15 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       sectionIndex: "Section Index",
       top: "Top",
       collapsed: "Collapsed",
-      loading: "Loading Pokémon data...",
-      loadError: "Could not load Pokémon details.",
+      loading: "Loading Pokemon data...",
+      loadError: "Could not load Pokemon details.",
       teamSlotBadge: "Team · Slot {n}",
-      linkPokedex: "Sync with Pokédex",
-      copyFromPokedex: "Copy from Pokédex",
-      copyToPokedex: "Save to Pokédex",
-      copiedFromPokedex: "Pokédex data copied to team slot.",
-      savedToPokedex: "Team slot data saved to Pokédex.",
-      noPokedexData: "No custom stats or nature in Pokédex.",
+      linkPokedex: "Sync with Pokedex",
+      copyFromPokedex: "Copy from Pokedex",
+      copyToPokedex: "Save to Pokedex",
+      copiedFromPokedex: "Pokedex data copied to team slot.",
+      savedToPokedex: "Team slot data saved to Pokedex.",
+      noPokedexData: "No custom stats or nature in Pokedex.",
       teamNatureNotice: "Customizing stats and nature for this team member.",
       abilities: "Abilities",
       ability: "Ability",
@@ -907,7 +911,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       step1: "On your computer, click the Sync button in the navigation bar.",
       step2: "Open your phone camera and point it at the QR code on screen.",
       step3: "Tap the link and your data will be transferred instantly.",
-      goToPokedex: "Go to Pokédex",
+      goToPokedex: "Go to Pokedex",
       generateQrHere: "Generate QR code here",
       readyTitle: "Data ready to sync!",
       readySubtitle:
@@ -969,7 +973,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudPasteFromClipboard: "Paste from clipboard",
       cloudToggleSecretVisibility: "Toggle visibility",
       cloudReadOnlyBadge: "Read-Only Mode Active",
-      cloudReadOnlyTip: "Tip: You can find or copy your secret key from the sync modal on the device where you created the vault.",
+      cloudReadOnlyTip:
+        "Tip: You can find or copy your secret key from the sync modal on the device where you created the vault.",
       cloudQrTitle: "Link Mobile Phone via QR Code",
       cloudQrDesc:
         "Scan this code with your phone camera to link it automatically with full sync permissions (read & write).",
@@ -977,7 +982,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudPairingLinkCopied: "Full pairing link copied to clipboard!",
       cloudReadOnlyWarning:
         "This device is in Read-Only mode and cannot upload changes. Enter your secret key below or scan the pairing QR code from your main device to unlock full write permissions.",
-      cloudUpgradeKeyPlaceholder: "Paste secret key (e.g. 550e8400-e29b-41d4-a716-446655440000)...",
+      cloudUpgradeKeyPlaceholder:
+        "Paste secret key (e.g. 550e8400-e29b-41d4-a716-446655440000)...",
       cloudUpgradeKeyBtn: "Enable write permissions",
       cloudUpgradeSuccess: "Write permissions enabled successfully!",
       cancel: "Cancel",
@@ -992,7 +998,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       dangerResetBtn: "Reset all my local data",
       dangerResetTitle: "Reset and delete everything?",
       dangerResetDesc:
-        "Your captured Pokémon and current team will be deleted. This action is permanent.",
+        "Your captured Pokemon and current team will be deleted. This action is permanent.",
       dangerResetConfirm: "Yes, delete everything",
     },
     blog: {
@@ -1000,7 +1006,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       titleAccent: "discover",
       titleSuffix: " secrets",
       subtitle:
-        "Guides, teambuilding strategies, competitive breakdowns, and curiosities from the Pokémon universe.",
+        "Guides, teambuilding strategies, competitive breakdowns, and curiosities from the Pokemon universe.",
       badge: "PokeForge Blog · Lore & Tactics",
       searchPlaceholder: "Search articles by title, tag, or topic...",
       allCategories: "All",
@@ -1059,20 +1065,24 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
     moveFilterGuide: {
       buttonTitle: "Filter syntax and search guide",
       modalTitle: "Move Search & Filter Guide",
-      modalSubtitle: "Smart commands to quickly find any attack in English or Spanish.",
+      modalSubtitle:
+        "Smart commands to quickly find any attack in English or Spanish.",
       tip: "💡 You can type any normal move name, or combine multiple smart ':' filter tags separated by spaces.",
       sectionTypes: "Types (tipo: / type: / t:)",
-      sectionTypesDesc: "Filter by elemental type. Supports comma-separated types (OR) and negation (! or -).",
+      sectionTypesDesc:
+        "Filter by elemental type. Supports comma-separated types (OR) and negation (! or -).",
       sectionCategories: "Category (categoria: / category: / cat: / c:)",
       sectionCategoriesDesc: "Filter physical, special, or status moves.",
       sectionPower: "Power (potencia: / pot: / power: / pow:)",
-      sectionPowerDesc: "Compare move power using =, >, >=, <, <=, or pot:null for status moves.",
+      sectionPowerDesc:
+        "Compare move power using =, >, >=, <, <=, or pot:null for status moves.",
       sectionPP: "Power Points (pp: / puntos:)",
       sectionPPDesc: "Compare move PP using =, >, >=, <, <=.",
       sectionAccuracy: "Accuracy (precision: / prec: / accuracy: / acc:)",
       sectionAccuracyDesc: "Compare move accuracy percentage.",
       sectionMethod: "Learn Method & Level (metodo: / nivel:)",
-      sectionMethodDesc: "Filter how and when this Pokémon learns the move (level, machine/tm, tutor, egg).",
+      sectionMethodDesc:
+        "Filter how and when this Pokemon learns the move (level, machine/tm, tutor, egg).",
       sectionCombos: "Combined Examples",
       sectionCombosDesc: "Combine multiple tags and text together.",
       clickToCopy: "Click to copy",
@@ -1080,12 +1090,34 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       filterApplied: "Filter applied: {text}",
       close: "Got it",
       examples: {
-        types: ["type:fire", "type:water", "t:electric", "type:grass,ice", "!type:normal"],
-        categories: ["category:special", "cat:physical", "cat:phys", "c:status", "!cat:status"],
+        types: [
+          "type:fire",
+          "type:water",
+          "t:electric",
+          "type:grass,ice",
+          "!type:normal",
+        ],
+        categories: [
+          "category:special",
+          "cat:physical",
+          "cat:phys",
+          "c:status",
+          "!cat:status",
+        ],
         power: ["power:>30", "pow:>=90", "pwr:10", "power:<60", "power:null"],
         ppAcc: ["pp:10", "pp:>=30", "accuracy:100", "acc:>80", "acc:>=90"],
-        methodLevel: ["method:level", "method:tm", "m:tutor", "level:<=25", "lvl:>40"],
-        combos: ["type:fire pow:>80 cat:special", "flamethrower type:fire", "type:water !cat:status pow:>=90"],
+        methodLevel: [
+          "method:level",
+          "method:tm",
+          "m:tutor",
+          "level:<=25",
+          "lvl:>40",
+        ],
+        combos: [
+          "type:fire pow:>80 cat:special",
+          "flamethrower type:fire",
+          "type:water !cat:status pow:>=90",
+        ],
       },
     },
   },
@@ -1116,13 +1148,17 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudTooltipUnlinked: "Sincronizar con la nube y otros dispositivos",
       cloudRemoteUpdated: "Datos actualizados desde la nube",
       pwaPopoverTitle: "Instalar PokeForge",
-      pwaPopoverSubtitle: "Instalá PokeForge en tu dispositivo para acceder al instante sin conexión y con mayor fluidez.",
+      pwaPopoverSubtitle:
+        "Instalá PokeForge en tu dispositivo para acceder al instante sin conexión y con mayor fluidez.",
       pwaFeatureOffline: "100% Sin Conexión",
-      pwaFeatureOfflineDesc: "Consultá la Pokédex y tus equipos guardados sin necesidad de internet.",
+      pwaFeatureOfflineDesc:
+        "Consultá la Pokédex y tus equipos guardados sin necesidad de internet.",
       pwaFeatureFast: "Pantalla Completa y Rápida",
-      pwaFeatureFastDesc: "Sin barras del navegador, inicio instantáneo y mayor espacio visual.",
+      pwaFeatureFastDesc:
+        "Sin barras del navegador, inicio instantáneo y mayor espacio visual.",
       pwaFeatureSafe: "Sincronización en la Nube",
-      pwaFeatureSafeDesc: "Guardá y sincronizá tus equipos fácilmente entre todos tus dispositivos.",
+      pwaFeatureSafeDesc:
+        "Guardá y sincronizá tus equipos fácilmente entre todos tus dispositivos.",
       pwaInstallCta: "Instalar PokeForge",
       pwaIosTitle: "Cómo instalar en iOS / Safari:",
       pwaIosStep1: "Tocá el botón Compartir en la barra de Safari",
@@ -1509,7 +1545,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudPasteFromClipboard: "Pegar clave",
       cloudToggleSecretVisibility: "Mostrar u ocultar clave",
       cloudReadOnlyBadge: "Modo Solo Lectura Activo",
-      cloudReadOnlyTip: "Tip: Podés copiar tu clave secreta desde el modal de sincronización en el dispositivo donde creaste la bóveda.",
+      cloudReadOnlyTip:
+        "Tip: Podés copiar tu clave secreta desde el modal de sincronización en el dispositivo donde creaste la bóveda.",
       cloudQrTitle: "Vincular Celular con Código QR",
       cloudQrDesc:
         "Escaneá este código con la cámara de tu celular para vincularlo automáticamente con permisos completos de sincronización (lectura y escritura).",
@@ -1517,7 +1554,8 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       cloudPairingLinkCopied: "¡Enlace de vinculación copiado al portapapeles!",
       cloudReadOnlyWarning:
         "Este dispositivo está en modo Solo Lectura (no puede subir cambios a la nube). Ingresá tu clave secreta a continuación o escaneá el QR desde tu dispositivo principal para activar permisos de escritura.",
-      cloudUpgradeKeyPlaceholder: "Pegá tu clave secreta (ej. 550e8400-e29b-41d4-a716-446655440000)...",
+      cloudUpgradeKeyPlaceholder:
+        "Pegá tu clave secreta (ej. 550e8400-e29b-41d4-a716-446655440000)...",
       cloudUpgradeKeyBtn: "Activar permisos de escritura",
       cloudUpgradeSuccess: "¡Permisos de escritura activados con éxito!",
       cancel: "Cancelar",
@@ -1600,20 +1638,24 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
     moveFilterGuide: {
       buttonTitle: "Guía de filtros y sintaxis de búsqueda",
       modalTitle: "Guía de Filtros y Búsqueda de Ataques",
-      modalSubtitle: "Comandos inteligentes para encontrar cualquier movimiento al instante en español o inglés.",
+      modalSubtitle:
+        "Comandos inteligentes para encontrar cualquier movimiento al instante en español o inglés.",
       tip: "💡 Podés escribir texto normal para buscar por nombre, o usar filtros con ':' (en español o inglés) separados por espacios.",
       sectionTypes: "Tipos (tipo: / type: / t:)",
-      sectionTypesDesc: "Filtra por tipo elemental. Admite varios tipos separados por coma (O lógico) y negación (! o -).",
+      sectionTypesDesc:
+        "Filtra por tipo elemental. Admite varios tipos separados por coma (O lógico) y negación (! o -).",
       sectionCategories: "Categoría (categoria: / category: / cat: / c:)",
       sectionCategoriesDesc: "Filtra ataques físicos, especiales o de estado.",
       sectionPower: "Potencia (potencia: / pot: / power: / pow:)",
-      sectionPowerDesc: "Compara la potencia usando =, >, >=, <, <=, o pot:null para movimientos de estado.",
+      sectionPowerDesc:
+        "Compara la potencia usando =, >, >=, <, <=, o pot:null para movimientos de estado.",
       sectionPP: "Puntos de Poder (pp: / puntos:)",
       sectionPPDesc: "Compara los PP usando =, >, >=, <, <=.",
       sectionAccuracy: "Precisión (precision: / prec: / accuracy: / acc:)",
       sectionAccuracyDesc: "Compara el porcentaje de precisión del ataque.",
       sectionMethod: "Método de Aprendizaje y Nivel (metodo: / nivel:)",
-      sectionMethodDesc: "Filtra cómo y cuándo aprende el ataque este Pokémon (nivel, mt/máquina, tutor, huevo).",
+      sectionMethodDesc:
+        "Filtra cómo y cuándo aprende el ataque este Pokémon (nivel, mt/máquina, tutor, huevo).",
       sectionCombos: "Ejemplos Combinados",
       sectionCombosDesc: "Combiná filtros y texto libre en una sola búsqueda.",
       clickToCopy: "Clic para copiar",
@@ -1621,12 +1663,34 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       filterApplied: "Filtro aplicado: {text}",
       close: "Entendido",
       examples: {
-        types: ["tipo:fuego", "tipo:agua", "t:electrico", "tipo:planta,hielo", "!tipo:normal"],
-        categories: ["categoria:especial", "cat:fisico", "cat:esp", "c:estado", "!cat:estado"],
+        types: [
+          "tipo:fuego",
+          "tipo:agua",
+          "t:electrico",
+          "tipo:planta,hielo",
+          "!tipo:normal",
+        ],
+        categories: [
+          "categoria:especial",
+          "cat:fisico",
+          "cat:esp",
+          "c:estado",
+          "!cat:estado",
+        ],
         power: ["pot:>30", "pot:>=90", "pot:10", "pot:<60", "pot:null"],
         ppAcc: ["pp:10", "pp:>=30", "prec:100", "prec:>80", "precision:>=90"],
-        methodLevel: ["metodo:nivel", "metodo:mt", "m:tutor", "nivel:<=25", "nv:>40"],
-        combos: ["tipo:fuego pot:>80 cat:especial", "lanzallamas tipo:fuego", "tipo:agua !cat:estado pot:>=90"],
+        methodLevel: [
+          "metodo:nivel",
+          "metodo:mt",
+          "m:tutor",
+          "nivel:<=25",
+          "nv:>40",
+        ],
+        combos: [
+          "tipo:fuego pot:>80 cat:especial",
+          "lanzallamas tipo:fuego",
+          "tipo:agua !cat:estado pot:>=90",
+        ],
       },
     },
   },
@@ -1858,4 +1922,3 @@ export function getCategoryName(
   if (category === "status") return t.team.status;
   return category;
 }
-
