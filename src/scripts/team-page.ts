@@ -34,7 +34,7 @@ import { typeColor } from "../lib/typeColors";
 import { openPokemonModal } from "../lib/pokemonModal";
 import { getDefaultAbility } from "../lib/pokemonModal/utils";
 import { renderTeamCardHTML, downloadTeamCardCanvas, generateShowdownText } from "../lib/teamCardExporter";
-import { getCurrentLocale, getNatureName, getTranslations, getTypeName, getGameTitle, getRegionName, getMoveName, type Locale } from "../lib/i18n/translations";
+import { getCurrentLocale, getNatureName, getTranslations, getTypeName, getGameTitle, getRegionName, getMoveName, getMoveDescription, type Locale } from "../lib/i18n/translations";
 import { computeTeamSynergy } from "../lib/teamSynergy";
 import { filterItems, getItemById, getItemDisplayName, renderItemIconHTML } from "../lib/items";
 import type { GameDexData, GameDexMode, GameVersionMeta, GenerationInfo, MoveData, MoveDetail, Pokemon, TeamSlotState, TeamState, TypeChart } from "../lib/types";
@@ -239,15 +239,28 @@ function renderSlotHTML(index: number, pokemon: Pokemon | null): string {
       const powerText = meta?.power !== null && meta?.power !== undefined ? meta.power : "-";
       const ppText = meta?.pp !== null && meta?.pp !== undefined ? meta.pp : "-";
 
+      const slotMoveName = getMoveName(moveName, locale, meta);
+      const slotMoveDesc = getMoveDescription(meta, locale);
+      const slotAriaLabel = `${slotMoveName} - ${slotMoveDesc}`;
+
       return `
         <div class="move-slot-card filled" data-move-slot data-slot-index="${index}" data-move-index="${mIdx}" draggable="true">
           <div class="move-slot-card__top">
             <div class="move-slot-drag-handle" data-drag-handle title="${locale === "es" ? "Arrastrar para reordenar" : "Drag to reorder"}" aria-label="${locale === "es" ? "Arrastrar para reordenar" : "Drag to reorder"}">
               <i data-lucide="grip-vertical"></i>
             </div>
+            <button
+              type="button"
+              class="move-help-btn move-help-btn--slot"
+              data-move-tooltip-trigger
+              data-move-name="${slotMoveName.replace(/"/g, "&quot;")}"
+              data-move-desc="${slotMoveDesc.replace(/"/g, "&quot;")}"
+              aria-label="${slotAriaLabel.replace(/"/g, "&quot;")}"
+              title="${slotMoveDesc.replace(/"/g, "&quot;")}"
+            ><span class="move-help-btn__text" aria-hidden="true">?</span></button>
             <button class="move-slot-card__name-btn" type="button" data-select-move data-slot-index="${index}" data-move-index="${mIdx}">
               <i data-lucide="swords"></i>
-              <span class="move-slot-card__title">${getMoveName(moveName, locale, meta)}</span>
+              <span class="move-slot-card__title">${slotMoveName}</span>
             </button>
             <button class="move-slot-card__clear" type="button" data-clear-move data-slot-index="${index}" data-move-index="${mIdx}" aria-label="${locale === "es" ? "Quitar movimiento" : "Remove move"}">
               <i data-lucide="x"></i>
@@ -1823,10 +1836,25 @@ function renderMovePickerTable(): void {
       const levelText = r.method === "level-up" ? `${locale === "es" ? "Nv." : "Lv."} ${r.level}` : "-";
       const methodBadgeClass = `move-method-badge move-method-badge--${r.method}`;
 
+      const rowMoveName = getMoveName(r.name, locale, meta);
+      const rowMoveDesc = getMoveDescription(meta, locale);
+      const rowAriaLabel = `${rowMoveName} - ${rowMoveDesc}`;
+
       return `
         <tr data-pick-move="${r.name}">
           <td class="move-table__cell-name" data-label="${t.modal.move}">
-            <span class="move-table__name">${getMoveName(r.name, locale, meta)}</span>
+            <div class="move-name-wrap">
+              <button
+                type="button"
+                class="move-help-btn"
+                data-move-tooltip-trigger
+                data-move-name="${rowMoveName.replace(/"/g, "&quot;")}"
+                data-move-desc="${rowMoveDesc.replace(/"/g, "&quot;")}"
+                aria-label="${rowAriaLabel.replace(/"/g, "&quot;")}"
+                title="${rowMoveDesc.replace(/"/g, "&quot;")}"
+              ><span class="move-help-btn__text" aria-hidden="true">?</span></button>
+              <span class="move-table__name">${rowMoveName}</span>
+            </div>
           </td>
           <td class="move-table__cell-type" data-label="${locale === "es" ? "Tipo" : "Type"}">${typeBadgeHtml}</td>
           <td class="move-table__cell-category" data-label="${locale === "es" ? "Categoría" : "Category"}">${categoryBadgeHtml}</td>
@@ -3326,6 +3354,10 @@ movePickerResultsEl.addEventListener("click", (e) => {
   const clearBtn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-clear-move-filters]");
   if (clearBtn) {
     clearMovePickerFilters();
+    return;
+  }
+
+  if ((e.target as HTMLElement).closest("[data-move-tooltip-trigger]")) {
     return;
   }
 

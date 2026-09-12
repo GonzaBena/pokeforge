@@ -155,12 +155,12 @@
     max-width: 100%;
   }
 
-  .picker-panel__filters .filters-panel__game-row .view-toggle {
+  .picker-panel__filters .filters-panel__game-row .view-toggle:not(.exclusive-toggle) {
     display: flex;
     width: 100%;
   }
 
-  .picker-panel__filters .filters-panel__game-row .view-toggle__btn {
+  .picker-panel__filters .filters-panel__game-row .view-toggle:not(.exclusive-toggle) .view-toggle__btn {
     flex: 1;
     text-align: center;
     justify-content: center;

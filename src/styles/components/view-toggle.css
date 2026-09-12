@@ -126,3 +126,45 @@
   line-height: 1.4;
 }
 
+/* -------------------------------------------------------- exclusive-toggle mobile 2x2 grid */
+@media (max-width: 640px) {
+  .view-toggle.exclusive-toggle,
+  .filters-panel__game-row .view-toggle.exclusive-toggle,
+  .picker-panel__filters .filters-panel__game-row .view-toggle.exclusive-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
+    width: 100%;
+    border-radius: var(--radius-md, 8px);
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .view-toggle.exclusive-toggle .view-toggle__btn,
+  .filters-panel__game-row .view-toggle.exclusive-toggle .view-toggle__btn,
+  .picker-panel__filters .filters-panel__game-row .view-toggle.exclusive-toggle .view-toggle__btn {
+    flex: none;
+    width: 100%;
+    justify-content: center;
+    padding: 7px 6px;
+    font-size: 11.5px;
+    letter-spacing: normal;
+    border-radius: var(--radius-sm, 6px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Reset corner merging for 2x2 grid */
+  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed="true"],
+  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed="true"]:has(+ .view-toggle__btn[aria-pressed="true"]),
+  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed="true"] + .view-toggle__btn[aria-pressed="true"] {
+    border-radius: var(--radius-sm, 6px);
+  }
+
+  /* Disable single-row horizontal liquid fusion bridge between 2x2 rows */
+  .view-toggle.exclusive-toggle .view-toggle__btn[aria-pressed="true"] + .view-toggle__btn[aria-pressed="true"]::before {
+    display: none;
+  }
+}
+

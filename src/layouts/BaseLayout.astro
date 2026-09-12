@@ -42,7 +42,9 @@ const currentLocale = Astro.currentLocale ?? "en";
     <ToastContainer />
     <script>
       import { refreshIcons } from "../lib/icons";
+      import { initMoveTooltip } from "../lib/moveTooltip";
       refreshIcons();
+      initMoveTooltip();
 
       if ("serviceWorker" in navigator) {
         if (import.meta.env.PROD) {

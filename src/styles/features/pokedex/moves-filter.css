@@ -471,12 +471,12 @@
     max-width: 100%;
   }
 
-  .filters-panel__game-row .view-toggle {
+  .filters-panel__game-row .view-toggle:not(.exclusive-toggle) {
     display: flex;
     width: 100%;
   }
 
-  .filters-panel__game-row .view-toggle__btn {
+  .filters-panel__game-row .view-toggle:not(.exclusive-toggle) .view-toggle__btn {
     flex: 1;
     text-align: center;
   }

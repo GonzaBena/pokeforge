@@ -1,0 +1,150 @@
+/* -------------------------------------------------- Move Help Tooltip & Button */
+
+.move-name-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  max-width: 100%;
+}
+
+.move-name-wrap--slot {
+  flex: 1;
+  min-width: 0;
+}
+
+.move-name-wrap--slot .move-slot-card__name-btn {
+  flex: 1;
+  min-width: 0;
+}
+
+.move-help-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* El botón "?" a la izquierda del nombre del ataque */
+.move-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  min-height: 17px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.16));
+  background: var(--bg-surface, rgba(255, 255, 255, 0.05));
+  color: var(--text-muted, #94a3b8);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--duration-fast, 0.15s) ease,
+    background-color var(--duration-fast, 0.15s) ease,
+    border-color var(--duration-fast, 0.15s) ease,
+    transform var(--duration-fast, 0.15s) ease,
+    box-shadow var(--duration-fast, 0.15s) ease;
+}
+
+.move-help-btn__text {
+  display: inline-block;
+  line-height: 1;
+  transform: translateY(-0.5px);
+}
+
+.move-help-btn:hover,
+.move-help-btn:focus-visible,
+.move-help-tooltip.is-open .move-help-btn {
+  color: #fff;
+  border-color: var(--brand, #ef4444);
+  background: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.35);
+  transform: scale(1.08);
+}
+
+.move-help-btn:focus-visible {
+  outline: 2px solid var(--brand, #ef4444);
+  outline-offset: 1px;
+}
+
+/* Tooltip estático en línea (fallback CSS) */
+.move-help-popover {
+  display: none;
+}
+
+/* Tooltip flotante global (arriba del botón "?") */
+.move-floating-tooltip {
+  position: fixed;
+  width: min(260px, calc(100vw - 24px));
+  background: var(--bg-card, #18181f);
+  border: 1px solid var(--border-strong, rgba(255, 255, 255, 0.18));
+  border-radius: var(--radius-md, 8px);
+  padding: 10px 12px;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  z-index: 99999;
+  pointer-events: none;
+  white-space: normal;
+  text-align: left;
+  transform: translateX(-50%) translateY(4px);
+  opacity: 0;
+  transition:
+    opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.move-floating-tooltip.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.move-floating-tooltip.is-flipped {
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.move-floating-tooltip.is-visible.is-flipped {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Flecha apuntando al botón "?" */
+.move-floating-tooltip__arrow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--border-strong, rgba(255, 255, 255, 0.18)) transparent transparent transparent;
+}
+
+.move-floating-tooltip.is-flipped .move-floating-tooltip__arrow {
+  top: auto;
+  bottom: 100%;
+  border-color: transparent transparent var(--border-strong, rgba(255, 255, 255, 0.18)) transparent;
+}
+
+.move-floating-tooltip__title {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text, #f8fafc);
+  margin-bottom: 4px;
+}
+
+.move-floating-tooltip__text {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted, #cbd5e1);
+  margin: 0;
+  font-weight: 400;
+}

@@ -88,6 +88,8 @@ export interface MoveData {
   accuracy: number | null;
   nameEs?: string;
   nameEn?: string;
+  descriptionEs?: string;
+  descriptionEn?: string;
 }
 
 export interface PokemonAbilityInfo {

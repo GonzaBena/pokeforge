@@ -29,6 +29,7 @@ export interface MoveTableRow {
   method: string;
   methodLabel: string;
   level: number;
+  description?: string;
 }
 
 export interface EffectivenessItem {

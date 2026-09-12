@@ -15,6 +15,8 @@ interface RawMoveDetail {
   power: number | null;
   pp: number | null;
   accuracy: number | null;
+  flavor_text_entries?: { flavor_text: string; language: { name: string } }[];
+  effect_entries?: { effect: string; short_effect: string; language: { name: string } }[];
 }
 
 export interface MoveData {
@@ -26,6 +28,8 @@ export interface MoveData {
   accuracy: number | null;
   nameEs?: string;
   nameEn?: string;
+  descriptionEs?: string;
+  descriptionEn?: string;
 }
 
 export type MovesDetailsMap = Record<string, MoveData>;
@@ -55,6 +59,27 @@ export async function buildMoveDetails(force = false): Promise<MovesDetailsMap> 
           const nameEs = raw.names?.find((n) => n.language?.name === "es")?.name;
           const nameEn = raw.names?.find((n) => n.language?.name === "en")?.name;
 
+          let descEs = "";
+          const esFlavors = raw.flavor_text_entries?.filter((f) => f.language?.name === "es");
+          if (esFlavors && esFlavors.length > 0) {
+            descEs = esFlavors[esFlavors.length - 1].flavor_text.replace(/[\f\n\r]/g, " ").replace(/\s+/g, " ").trim();
+          }
+
+          let descEn = "";
+          const enFlavors = raw.flavor_text_entries?.filter((f) => f.language?.name === "en");
+          if (enFlavors && enFlavors.length > 0) {
+            descEn = enFlavors[enFlavors.length - 1].flavor_text.replace(/[\f\n\r]/g, " ").replace(/\s+/g, " ").trim();
+          } else {
+            const enEffect = raw.effect_entries?.find((e) => e.language?.name === "en");
+            if (enEffect?.short_effect) {
+              descEn = enEffect.short_effect.replace(/[\f\n\r]/g, " ").replace(/\s+/g, " ").trim();
+            }
+          }
+
+          if (!descEs && descEn) {
+            descEs = descEn;
+          }
+
           movesMap[name] = {
             name: raw.name,
             type: raw.type?.name ?? "normal",
@@ -64,6 +89,8 @@ export async function buildMoveDetails(force = false): Promise<MovesDetailsMap> 
             accuracy: raw.accuracy ?? null,
             ...(nameEs ? { nameEs } : {}),
             ...(nameEn ? { nameEn } : {}),
+            ...(descEs ? { descriptionEs: descEs } : {}),
+            ...(descEn ? { descriptionEn: descEn } : {}),
           };
         } catch (err) {
           console.warn(`Failed to fetch move detail for ${name}:`, err);

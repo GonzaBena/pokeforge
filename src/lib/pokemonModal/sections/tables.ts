@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import {
   getCategoryName,
   getGameTitle,
+  getMoveDescription,
   getMoveName,
   getTranslations,
   getTypeName,
@@ -23,6 +24,7 @@ export function buildMoveTableRows(
     const meta = moveDetailsMap?.[m.name];
     const category = meta?.category ?? null;
     const type = meta?.type ?? null;
+    const description = getMoveDescription(meta, locale);
     return {
       name: getMoveName(m.name, locale, meta),
       rawName: m.name,
@@ -38,6 +40,7 @@ export function buildMoveTableRows(
       method: m.method,
       methodLabel: methodMap[m.method] ?? formatLabel(m.method),
       level: m.level,
+      description,
     };
   });
 }
@@ -77,8 +80,14 @@ export function getMoveColumns(locale: Locale): ColumnDef<MoveTableRow, unknown>
     {
       accessorKey: "name",
       header: t.modal.move,
-      size: 160,
-      cell: (info) => `<span class="move-table__name">${String(info.getValue())}</span>`,
+      size: 175,
+      cell: (info) => {
+        const name = String(info.getValue());
+        const row = info.row.original;
+        const desc = row.description || getMoveDescription(undefined, locale);
+        const ariaLabel = `${name} - ${desc}`;
+        return `<div class="move-name-wrap"><div class="move-help-tooltip"><button type="button" class="move-help-btn" data-move-tooltip-trigger data-move-name="${name.replace(/"/g, "&quot;")}" data-move-desc="${desc.replace(/"/g, "&quot;")}" aria-label="${ariaLabel.replace(/"/g, "&quot;")}" title="${desc.replace(/"/g, "&quot;")}"><span class="move-help-btn__text" aria-hidden="true">?</span></button><div class="move-help-popover" role="tooltip"><strong class="move-help-popover__title">${name}</strong><p class="move-help-popover__text">${desc}</p></div></div><span class="move-table__name">${name}</span></div>`;
+      },
     },
     {
       accessorKey: "typeName",

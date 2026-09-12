@@ -1898,6 +1898,22 @@ export function getMoveName(
   return moveKey.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+export function getMoveDescription(
+  meta?: { descriptionEs?: string; descriptionEn?: string } | null,
+  locale: Locale = "es",
+): string {
+  if (meta) {
+    if (locale === "es") {
+      if (meta.descriptionEs) return meta.descriptionEs;
+      if (meta.descriptionEn) return meta.descriptionEn;
+    } else {
+      if (meta.descriptionEn) return meta.descriptionEn;
+      if (meta.descriptionEs) return meta.descriptionEs;
+    }
+  }
+  return locale === "es" ? "Sin descripción disponible." : "No description available.";
+}
+
 export function getNatureName(
   natureKey: string | null | undefined,
   locale: Locale = "es",
