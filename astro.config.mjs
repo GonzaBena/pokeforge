@@ -80,6 +80,7 @@ export default defineConfig({
   },
   integrations: [swVersionPlugin(), buildPaginationRedirectsPlugin()],
   adapter: isBuild ? netlify() : undefined,
+  session: false,
   output: 'static',
   build: {
     format: 'directory',

@@ -19,15 +19,21 @@ export function getTursoClient(): Client | null {
     return cachedClient
   }
 
-  const url = (process.env.TURSO_DATABASE_URL ||
-    (import.meta.env && import.meta.env.TURSO_DATABASE_URL)) as string
-  const authToken = (process.env.TURSO_AUTH_TOKEN ||
-    (import.meta.env && import.meta.env.TURSO_AUTH_TOKEN)) as string
+  try {
+    const url = (process.env.TURSO_DATABASE_URL ||
+      (import.meta.env && import.meta.env.TURSO_DATABASE_URL)) as string
+    const authToken = (process.env.TURSO_AUTH_TOKEN ||
+      (import.meta.env && import.meta.env.TURSO_AUTH_TOKEN)) as string
 
-  cachedClient = createClient({
-    url,
-    authToken,
-  })
+    cachedClient = createClient({
+      url,
+      authToken,
+    })
 
-  return cachedClient
+    return cachedClient
+  } catch (err) {
+    console.error('Error creating Turso client:', err)
+    return null
+  }
 }
+
