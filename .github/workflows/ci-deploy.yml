@@ -7,8 +7,8 @@ on:
     branches: [master]
 
 jobs:
-  build-test:
-    name: Install, check, test & build
+  build-test-deploy:
+    name: Install, check, test, build & deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,76 +37,8 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist
-          retention-days: 1
-
-      - name: Upload Netlify build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: netlify-build
-          path: .netlify/build
-          include-hidden-files: true
-          retention-days: 1
-
-      - name: Upload Netlify functions artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: netlify-v1
-          path: .netlify/v1
-          include-hidden-files: true
-          retention-days: 1
-
-  deploy:
-    name: Deploy to Netlify
-    needs: build-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
-
-      - name: Download Netlify build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: netlify-build
-          path: .netlify/build
-
-      - name: Download Netlify functions artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: netlify-v1
-          path: .netlify/v1
-
-      - name: Ensure Netlify function internal build directory exists
-        run: |
-          mkdir -p .netlify/v1/functions/ssr/.netlify
-          cp -r .netlify/build .netlify/v1/functions/ssr/.netlify/
-
       - name: Deploy to Netlify
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
