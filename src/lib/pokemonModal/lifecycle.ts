@@ -1,4 +1,5 @@
 import { modalIn, modalOut } from '../animations'
+import { buildCapturePath } from '../capturePlan'
 import { getCurrentLocale, getTranslations } from '../i18n/translations'
 import { getAllPokemon, getGameDexData, getMoveDetailsMap, getTypeChart } from '../pokedexData'
 import { getEvolutionChain, getNatures, getPokemonDetail } from '../pokemonDetail'
@@ -74,6 +75,15 @@ export async function openPokemonModal(id: number, options?: PokemonModalOptions
         : null
     if (modalState.currentId !== id) return
 
+    const baseNode = buildCapturePath(chain, id)[0] ?? null
+    let baseAcquisitions = detail.acquisitions
+    if (baseNode && baseNode.speciesId !== id) {
+      baseAcquisitions = await getPokemonDetail(baseNode.speciesId)
+        .then((d) => d.acquisitions)
+        .catch(() => [])
+    }
+    if (modalState.currentId !== id) return
+
     render({
       pokemon,
       detail,
@@ -84,6 +94,7 @@ export async function openPokemonModal(id: number, options?: PokemonModalOptions
       moveDetailsMap,
       selectedGame: getSelectedGame(),
       gameDexData,
+      baseAcquisitions,
     })
     bodyEl.scrollTop = 0
 

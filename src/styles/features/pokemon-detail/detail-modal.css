@@ -1440,6 +1440,211 @@
   height: 16px;
 }
 
+/* Capture plan ------------------------------------------------------------ */
+
+.capture-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.capture-acquisition {
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.capture-acquisition__intro {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.capture-acquisition__fallback-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.capture-acquisition__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.capture-acquisition__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.capture-acquisition__row:last-child {
+  border-bottom: none;
+}
+
+.capture-acquisition__location {
+  color: var(--text);
+}
+
+.capture-acquisition__method {
+  color: var(--text-muted);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.capture-step__acquisition-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.capture-plan__route {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.capture-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.capture-step__marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  padding: 2px 0;
+}
+
+.capture-step__marker svg {
+  width: 16px;
+  height: 16px;
+}
+
+.capture-step__marker--start {
+  color: var(--accent);
+}
+
+.capture-step__card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: left;
+}
+
+.capture-step__card:hover {
+  border-color: var(--accent);
+}
+
+.capture-step__card.current {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  cursor: default;
+}
+
+.capture-step__card img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.capture-step__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.capture-step__title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.capture-step__id {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.capture-step__name {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.capture-step__types {
+  display: flex;
+  gap: 4px;
+}
+
+.capture-step__condition {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.capture-step__target-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+}
+
+.capture-step__target-badge svg {
+  width: 10px;
+  height: 10px;
+}
+
+.capture-step__trade-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--info);
+  background: var(--info-soft);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  width: fit-content;
+}
+
+.capture-step__trade-badge svg {
+  width: 12px;
+  height: 12px;
+}
+
 .detail-empty {
   color: var(--text-muted);
   font-size: 12px;

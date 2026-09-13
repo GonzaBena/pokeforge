@@ -4,6 +4,7 @@ import { getCurrentEffectiveOverrides } from '../overrides'
 import type { RenderContext } from '../types'
 import { capitalize, getDefaultAbility } from '../utils'
 import { renderAbilitiesContent } from './abilities'
+import { renderCapturePlanContent } from './capturePlan'
 import { renderEffectivenessContent } from './effectiveness'
 import { renderEvolutionsContent } from './evolutions'
 import { renderPassportContent } from './passport'
@@ -53,6 +54,7 @@ export const SECTION_CONTENT: Record<string, (ctx: RenderContext) => string> = {
     `
   },
   evolutions: (ctx) => renderEvolutionsContent(ctx.chain, ctx.pokemon.id, ctx.allById),
+  'capture-plan': (ctx) => renderCapturePlanContent(ctx),
   passport: (ctx) => renderPassportContent(ctx),
 }
 
@@ -70,6 +72,7 @@ export function renderSection(
     location: t.modal.acquisition,
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
+    'capture-plan': t.modal.capturePlanTitle,
     passport: t.modal.passport,
   }
   const isCollapsed = isSectionCollapsed(id)

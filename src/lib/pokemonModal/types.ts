@@ -1,4 +1,5 @@
 import type {
+  AcquisitionRow,
   EvolutionChain,
   GameDexData,
   MoveData,
@@ -18,6 +19,7 @@ export interface RenderContext {
   moveDetailsMap?: Record<string, MoveData>
   selectedGame: string
   gameDexData: GameDexData | null
+  baseAcquisitions: AcquisitionRow[]
 }
 
 export interface PokemonModalOptions {

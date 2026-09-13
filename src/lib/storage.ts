@@ -489,6 +489,7 @@ export const DEFAULT_SECTION_ORDER = [
   'location',
   'moves',
   'evolutions',
+  'capture-plan',
   'passport',
 ]
 

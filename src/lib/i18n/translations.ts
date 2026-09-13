@@ -412,6 +412,12 @@ export interface Translations {
     passportClear: string
     passportSavedToast: string
     passportSummary: string
+    capturePlanTitle: string
+    capturePlanTargetBadge: string
+    capturePlanTradeBadge: string
+    capturePlanGetBase: string
+    capturePlanFallbackGame: string
+    capturePlanNoData: string
   }
   sync: {
     title: string
@@ -1007,6 +1013,14 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       passportClear: 'Clear entry',
       passportSavedToast: 'Passport entry saved',
       passportSummary: 'Caught on {date} · {method} · {game}',
+      capturePlanTitle: 'Capture Plan',
+      capturePlanTargetBadge: 'Target',
+      capturePlanTradeBadge:
+        'Needs a trade. With two copies of the game you can trade with yourself to evolve it.',
+      capturePlanGetBase: 'Get {name} in:',
+      capturePlanFallbackGame:
+        'Not available in your selected game — showing the earliest game where it appears.',
+      capturePlanNoData: 'No location data available for this Pokémon yet.',
     },
     sync: {
       title: 'Sync Devices',
@@ -1625,6 +1639,14 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       passportClear: 'Borrar registro',
       passportSavedToast: 'Registro de captura guardado',
       passportSummary: 'Capturado el {date} · {method} · {game}',
+      capturePlanTitle: 'Plan de captura',
+      capturePlanTargetBadge: 'Objetivo',
+      capturePlanTradeBadge:
+        'Necesita intercambio. Con dos copias del juego podés autocambiártelo para evolucionarlo.',
+      capturePlanGetBase: 'Conseguí a {name} en:',
+      capturePlanFallbackGame:
+        'No está disponible en tu juego seleccionado — mostrando el juego más antiguo donde aparece.',
+      capturePlanNoData: 'Todavía no hay datos de ubicación para este Pokémon.',
     },
     sync: {
       title: 'Sincronizar Dispositivos',

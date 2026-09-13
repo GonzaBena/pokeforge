@@ -1,30 +1,7 @@
-import {
-  getCurrentLocale,
-  getTranslations,
-  getEvolutionTriggerName,
-  type Locale,
-} from '../../i18n/translations'
-import type { EvolutionChain, EvolutionNode, Pokemon } from '../../types'
-import { dexNumber, formatLabel, typeBadgesHtml } from '../utils'
-
-export function evolutionConditionText(node: EvolutionNode, locale: Locale): string {
-  if (node.evolvesFromSpecies === null) return ''
-  const parts: string[] = []
-  if (node.minLevel)
-    parts.push(locale === 'es' ? `Nivel ${node.minLevel}` : `Level ${node.minLevel}`)
-  if (node.item)
-    parts.push(
-      locale === 'es' ? (node.itemDisplay ?? formatLabel(node.item)) : formatLabel(node.item),
-    )
-  if (node.trigger && node.trigger !== 'level-up' && !node.item) {
-    parts.push(getEvolutionTriggerName(node.trigger, locale))
-  }
-  return parts.length
-    ? parts.join(' · ')
-    : locale === 'es'
-      ? 'Condición especial'
-      : 'Special condition'
-}
+import { getCurrentLocale, getTranslations } from '../../i18n/translations'
+import { evolutionConditionText } from '../../capturePlan'
+import type { EvolutionChain, Pokemon } from '../../types'
+import { dexNumber, typeBadgesHtml } from '../utils'
 
 export function renderEvolutionsContent(
   chain: EvolutionChain | null,

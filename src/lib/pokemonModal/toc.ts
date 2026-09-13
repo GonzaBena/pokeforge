@@ -18,6 +18,7 @@ export function updateTocMenu(): void {
     location: t.modal.acquisition,
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
+    'capture-plan': t.modal.capturePlanTitle,
     passport: t.modal.passport,
   }
   const icons: Record<string, string> = {
@@ -26,6 +27,7 @@ export function updateTocMenu(): void {
     location: 'gamepad-2',
     moves: 'swords',
     evolutions: 'sparkles',
+    'capture-plan': 'map',
     passport: 'stamp',
   }
 
