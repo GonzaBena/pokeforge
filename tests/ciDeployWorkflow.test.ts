@@ -1,45 +1,56 @@
-import test from 'node:test'
-import assert from 'node:assert/strict'
-import fs from 'node:fs'
-import path from 'node:path'
+import test from "node:test"
+import assert from "node:assert/strict"
+import fs from "node:fs"
+import path from "node:path"
 
-test('ci-deploy workflow includes .netlify/build and .netlify/v1 artifacts with hidden files included', () => {
+test("ci-deploy workflow includes .netlify/build and .netlify/v1 artifacts with hidden files included", () => {
   const root = process.cwd()
-  const workflowPath = path.join(root, '.github/workflows/ci-deploy.yml')
-  assert.ok(fs.existsSync(workflowPath), 'ci-deploy.yml must exist')
+  const workflowPath = path.join(root, ".github/workflows/ci-deploy.yml")
+  assert.ok(fs.existsSync(workflowPath), "ci-deploy.yml must exist")
 
-  const content = fs.readFileSync(workflowPath, 'utf-8')
+  const content = fs.readFileSync(workflowPath, "utf-8")
 
   // In build-test job, .netlify/build must be uploaded so Netlify SSR function entrypoint is available
   assert.match(
     content,
     /path:\s*\.netlify\/build/,
-    'build-test job must upload .netlify/build artifact',
+    "build-test job must upload .netlify/build artifact"
   )
 
   // In build-test job, .netlify/v1 must be uploaded
-  assert.match(content, /path:\s*\.netlify\/v1/, 'build-test job must upload .netlify/v1 artifact')
+  assert.match(content, /path:\s*\.netlify\/v1/, "build-test job must upload .netlify/v1 artifact")
 
   // Both upload steps must specify include-hidden-files: true so that .netlify dot-directories are not dropped
   assert.match(
     content,
     /include-hidden-files:\s*true/,
-    'upload-artifact steps must specify include-hidden-files: true',
+    "upload-artifact steps must specify include-hidden-files: true"
   )
 
   // In deploy job, both artifacts must be downloaded
-  const deployJobIndex = content.indexOf('deploy:')
-  assert.ok(deployJobIndex > 0, 'deploy job must exist in workflow')
+  const deployJobIndex = content.indexOf("deploy:")
+  assert.ok(deployJobIndex > 0, "deploy job must exist in workflow")
   const deployJobContent = content.slice(deployJobIndex)
 
   assert.match(
     deployJobContent,
+    /uses:\s*actions\/checkout@v4/,
+    "deploy job must checkout repo for package.json and netlify.toml"
+  )
+  assert.match(
+    deployJobContent,
+    /pnpm install --frozen-lockfile/,
+    "deploy job must install dependencies so symlinked node_modules are valid"
+  )
+
+  assert.match(
+    deployJobContent,
     /path:\s*\.netlify\/build/,
-    'deploy job must download .netlify/build artifact',
+    "deploy job must download .netlify/build artifact"
   )
   assert.match(
     deployJobContent,
     /path:\s*\.netlify\/v1/,
-    'deploy job must download .netlify/v1 artifact',
+    "deploy job must download .netlify/v1 artifact"
   )
 })
