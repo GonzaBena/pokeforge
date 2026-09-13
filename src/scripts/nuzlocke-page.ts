@@ -1,4 +1,4 @@
-import { getAllPokemon, getGameDexData } from '../lib/pokedexData'
+import { getAllPokemon, getGameDexData, getGenerations } from '../lib/pokedexData'
 import { getPokemonDetail } from '../lib/pokemonDetail'
 import { getNuzlockeState, NUZLOCKE_CHANGED_EVENT, DATA_RESET_EVENT } from '../lib/storage'
 import {
@@ -12,7 +12,7 @@ import {
   computeProgress,
   getSortedDeaths,
   getSortedAreaEntries,
-  getIndividualVersionOptions,
+  getVersionOptionGroups,
   findVersionMeta,
   getAreaSuggestions,
 } from '../lib/nuzlocke'
@@ -39,13 +39,14 @@ async function init(): Promise<void> {
   const locale = getCurrentLocale()
   const t = getTranslations(locale).nuzlocke
 
-  const [allPokemon, gameDexData] = await Promise.all([
+  const [allPokemon, gameDexData, generations] = await Promise.all([
     getAllPokemon(),
     getGameDexData().catch(() => null as GameDexData | null),
+    getGenerations().catch(() => []),
   ])
   const pokemonMap = new Map<number, Pokemon>(allPokemon.map((p) => [p.id, p]))
   const resolvedGameDex: GameDexData = gameDexData ?? {}
-  const versionOptions = getIndividualVersionOptions(resolvedGameDex, locale)
+  const versionOptionGroups = getVersionOptionGroups(resolvedGameDex, generations, locale)
 
   const headerActionsEl = document.querySelector<HTMLElement>('[data-nuzlocke-header-actions]')!
   const runSelectEl = document.querySelector<HTMLSelectElement>('[data-run-select]')!
@@ -105,8 +106,14 @@ async function init(): Promise<void> {
   }
 
   function populateGameSelect(selectEl: HTMLSelectElement): void {
-    selectEl.innerHTML = versionOptions
-      .map((opt) => `<option value="${opt.id}">${opt.label}</option>`)
+    selectEl.innerHTML = versionOptionGroups
+      .map(
+        (group) => `
+          <optgroup label="${group.genLabel}">
+            ${group.options.map((opt) => `<option value="${opt.id}">${opt.label}</option>`).join('')}
+          </optgroup>
+        `,
+      )
       .join('')
   }
 

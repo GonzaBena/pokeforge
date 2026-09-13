@@ -4,9 +4,11 @@ import {
   setCapturedForVersions,
   setCaptureMeta,
 } from './storage'
+import { getRegionName } from './i18n/translations'
 import type {
   GameDexData,
   GameVersionMeta,
+  GenerationInfo,
   NuzlockeArea,
   NuzlockeDeath,
   NuzlockeOutcome,
@@ -184,26 +186,44 @@ export interface VersionOption {
   label: string
 }
 
+export interface VersionOptionGroup {
+  genLabel: string
+  options: VersionOption[]
+}
+
 /**
  * Flattens game-pokedex.json down to individual version ids (scarlet,
  * violet, ...) — do NOT use getGameOptionsHTML from team/helpers.ts, which
  * works at the version-group level ("scarlet-violet") and doesn't match the
- * namespace of poketeam:captured-by-game / CaptureLogEntry.game.
+ * namespace of poketeam:captured-by-game / CaptureLogEntry.game. Grouped and
+ * ordered by generation (via `generations`, already gen-ordered) to match
+ * the other game selectors in the app, instead of sorting alphabetically.
  */
-export function getIndividualVersionOptions(
+export function getVersionOptionGroups(
   gameDexData: GameDexData,
+  generations: GenerationInfo[],
   locale: 'en' | 'es',
-): VersionOption[] {
+): VersionOptionGroup[] {
   const seen = new Set<string>()
-  const options: VersionOption[] = []
-  for (const entry of Object.values(gameDexData)) {
-    for (const v of entry.versions ?? []) {
-      if (seen.has(v.id)) continue
-      seen.add(v.id)
-      options.push({ id: v.id, label: locale === 'es' ? v.nameEs : v.name })
+  const groups: VersionOptionGroup[] = []
+  for (const gen of generations) {
+    const regionName = gen.region ? getRegionName(gen.region, locale) : ''
+    const genName =
+      locale === 'es' ? gen.displayName : gen.displayName.replace('Generación', 'Generation')
+    const genLabel = regionName ? `${genName} (${regionName})` : genName
+
+    const options: VersionOption[] = []
+    for (const vg of gen.versionGroups) {
+      const entry = gameDexData[vg.name]
+      for (const v of entry?.versions ?? []) {
+        if (seen.has(v.id)) continue
+        seen.add(v.id)
+        options.push({ id: v.id, label: locale === 'es' ? v.nameEs : v.name })
+      }
     }
+    if (options.length > 0) groups.push({ genLabel, options })
   }
-  return options.sort((a, b) => a.label.localeCompare(b.label))
+  return groups
 }
 
 export function findVersionMeta(gameDexData: GameDexData, versionId: string): GameVersionMeta | null {
