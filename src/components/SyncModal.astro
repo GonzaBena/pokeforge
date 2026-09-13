@@ -5,10 +5,7 @@ import '../styles/features/sync/sync-modal.css'
 
 const currentLocale = (Astro.currentLocale ?? 'en') as Locale
 const t = getTranslations(currentLocale)
-const dashboardNotificationsHref = getLocalizedPath(
-  '/dashboard/notifications/',
-  currentLocale,
-)
+const dashboardNotificationsHref = getLocalizedPath('/dashboard/notifications/', currentLocale)
 ---
 
 <div class="modal-overlay" data-sync-overlay hidden>
@@ -51,9 +48,7 @@ const dashboardNotificationsHref = getLocalizedPath(
             <h4 class="sync-unassigned-banner__title" data-unassigned-title>
               {t.syncModal.unassignedAlertTitle.replace('{n}', '0')}
             </h4>
-            <p class="sync-unassigned-banner__desc">
-              {t.syncModal.unassignedAlertDesc}
-            </p>
+            <p class="sync-unassigned-banner__desc">{t.syncModal.unassignedAlertDesc}</p>
           </div>
         </div>
         <div class="sync-unassigned-banner__actions">
@@ -746,7 +741,7 @@ const dashboardNotificationsHref = getLocalizedPath(
 
     // Escuchar triggers globales con [data-sync-open]
     document.addEventListener('click', (e) => {
-      const target = (e.target as HTMLElement).closest('[data-sync-open]')
+      const target = e.target instanceof Element ? e.target.closest('[data-sync-open]') : null
       if (target) {
         e.preventDefault()
         openModal()

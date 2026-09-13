@@ -119,7 +119,7 @@ export function initMoveTooltip(): void {
     'pointerenter',
     ((e: PointerEvent) => {
       if (e.pointerType === 'touch') return
-      const target = e.target as HTMLElement
+      const target = e.target instanceof Element ? e.target : null
       const trigger = target?.closest<HTMLElement>('[data-move-tooltip-trigger]')
       if (trigger) {
         showMoveTooltip(trigger)
@@ -132,7 +132,7 @@ export function initMoveTooltip(): void {
     'pointerleave',
     ((e: PointerEvent) => {
       if (e.pointerType === 'touch') return
-      const target = e.target as HTMLElement
+      const target = e.target instanceof Element ? e.target : null
       const trigger = target?.closest<HTMLElement>('[data-move-tooltip-trigger]')
       if (trigger && activeTrigger === trigger) {
         hideMoveTooltip()
@@ -142,7 +142,7 @@ export function initMoveTooltip(): void {
   )
 
   document.addEventListener('focusin', (e) => {
-    const target = e.target as HTMLElement
+    const target = e.target instanceof Element ? e.target : null
     const trigger = target?.closest<HTMLElement>('[data-move-tooltip-trigger]')
     if (trigger) {
       showMoveTooltip(trigger)
@@ -150,7 +150,7 @@ export function initMoveTooltip(): void {
   })
 
   document.addEventListener('focusout', (e) => {
-    const target = e.target as HTMLElement
+    const target = e.target instanceof Element ? e.target : null
     const trigger = target?.closest<HTMLElement>('[data-move-tooltip-trigger]')
     if (trigger && activeTrigger === trigger) {
       hideMoveTooltip()
@@ -174,7 +174,7 @@ export function initMoveTooltip(): void {
   )
 
   document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement
+    const target = e.target instanceof Element ? e.target : null
     const trigger = target?.closest<HTMLElement>('[data-move-tooltip-trigger]')
     if (trigger) {
       if (!shouldToggleTooltip(activeTrigger, trigger, lastShownTime)) {
@@ -185,7 +185,7 @@ export function initMoveTooltip(): void {
       } else {
         showMoveTooltip(trigger)
       }
-    } else if (activeTrigger && !target.closest('.move-floating-tooltip')) {
+    } else if (activeTrigger && !target?.closest('.move-floating-tooltip')) {
       hideMoveTooltip()
     }
   })

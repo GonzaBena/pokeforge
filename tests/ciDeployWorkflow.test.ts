@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 
-test('ci-deploy workflow includes .netlify/build and .netlify/v1 artifacts', () => {
+test('ci-deploy workflow includes .netlify/build and .netlify/v1 artifacts with hidden files included', () => {
   const root = process.cwd()
   const workflowPath = path.join(root, '.github/workflows/ci-deploy.yml')
   assert.ok(fs.existsSync(workflowPath), 'ci-deploy.yml must exist')
@@ -19,6 +19,13 @@ test('ci-deploy workflow includes .netlify/build and .netlify/v1 artifacts', () 
 
   // In build-test job, .netlify/v1 must be uploaded
   assert.match(content, /path:\s*\.netlify\/v1/, 'build-test job must upload .netlify/v1 artifact')
+
+  // Both upload steps must specify include-hidden-files: true so that .netlify dot-directories are not dropped
+  assert.match(
+    content,
+    /include-hidden-files:\s*true/,
+    'upload-artifact steps must specify include-hidden-files: true',
+  )
 
   // In deploy job, both artifacts must be downloaded
   const deployJobIndex = content.indexOf('deploy:')

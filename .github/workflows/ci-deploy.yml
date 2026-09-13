@@ -49,6 +49,7 @@ jobs:
         with:
           name: netlify-build
           path: .netlify/build
+          include-hidden-files: true
           retention-days: 1
 
       - name: Upload Netlify functions artifact
@@ -56,6 +57,7 @@ jobs:
         with:
           name: netlify-v1
           path: .netlify/v1
+          include-hidden-files: true
           retention-days: 1
 
   deploy:
@@ -91,6 +93,11 @@ jobs:
         with:
           name: netlify-v1
           path: .netlify/v1
+
+      - name: Ensure Netlify function internal build directory exists
+        run: |
+          mkdir -p .netlify/v1/functions/ssr/.netlify
+          cp -r .netlify/build .netlify/v1/functions/ssr/.netlify/
 
       - name: Deploy to Netlify
         env:
