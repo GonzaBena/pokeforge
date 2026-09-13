@@ -72,9 +72,6 @@ const VERSION_METADATA: Record<string, { name: string; nameEs: string; color: st
   red: { name: 'Red', nameEs: 'Rojo', color: '#e3350d' },
   blue: { name: 'Blue', nameEs: 'Azul', color: '#2980b9' },
   yellow: { name: 'Yellow', nameEs: 'Amarillo', color: '#f39c12' },
-  'red-japan': { name: 'Red (JP)', nameEs: 'Rojo (JP)', color: '#e3350d' },
-  'green-japan': { name: 'Green (JP)', nameEs: 'Verde (JP)', color: '#27ae60' },
-  'blue-japan': { name: 'Blue (JP)', nameEs: 'Azul (JP)', color: '#2980b9' },
   // Gen 2
   gold: { name: 'Gold', nameEs: 'Oro', color: '#d4af37' },
   silver: { name: 'Silver', nameEs: 'Plata', color: '#95a5a6' },

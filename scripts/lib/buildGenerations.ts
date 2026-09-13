@@ -98,14 +98,22 @@ export async function buildGenerations(force = false): Promise<BuildGenerationsR
 
     const versionGroups: VersionGroupInfo[] = []
     for (const vg of detail.version_groups) {
-      groupToGeneration.set(vg.name, name)
-
       const vgDetail = await cachedFetch<VersionGroupDetailResponse>(
         'version-group',
         vg.name,
         () => fetchJson<VersionGroupDetailResponse>(vg.url),
         force,
       )
+
+      // Skip version groups exclusive to the Japan-only original releases
+      // (e.g. "red-green-japan", "blue-japan") — they aren't meaningfully
+      // distinct from their international counterparts and only add noise
+      // to the game selectors across the app.
+      const isJapanOnlyGroup =
+        vgDetail.versions.length > 0 && vgDetail.versions.every((v) => v.name.endsWith('-japan'))
+      if (isJapanOnlyGroup) continue
+
+      groupToGeneration.set(vg.name, name)
 
       const versionNames: string[] = []
       for (const v of vgDetail.versions) {
