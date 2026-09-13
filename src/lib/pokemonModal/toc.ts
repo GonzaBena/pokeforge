@@ -18,6 +18,7 @@ export function updateTocMenu(): void {
     location: t.modal.acquisition,
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
+    passport: t.modal.passport,
   }
   const icons: Record<string, string> = {
     effectiveness: 'shield-check',
@@ -25,6 +26,7 @@ export function updateTocMenu(): void {
     location: 'gamepad-2',
     moves: 'swords',
     evolutions: 'sparkles',
+    passport: 'stamp',
   }
 
   const topItem = `

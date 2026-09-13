@@ -205,7 +205,12 @@ img[src*='/sprites/pokemon/']:not([src*='official-artwork']) {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: white;
+  /* Dual Version Mode: split into both cartridges' colors when captured in
+     both (set inline as --captured-badge-bg) — a fixed accent color would
+     risk coinciding with a real version color (e.g. LeafGreen), so "both"
+     is a two-color split instead of any single solid color. Plain white
+     otherwise. */
+  background: var(--captured-badge-bg, white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -216,7 +221,11 @@ img[src*='/sprites/pokemon/']:not([src*='official-artwork']) {
 .captured-badge svg {
   width: 15px;
   height: 15px;
-  color: var(--accent);
+  /* Tinted to the cartridge's color when captured in only one of the two
+     versions, or white on top of the split background for "both" (set
+     inline as --captured-badge-color); falls back to the default accent
+     red otherwise. */
+  color: var(--captured-badge-color, var(--accent));
 }
 
 .pokemon-card:not(.captured) .captured-badge {

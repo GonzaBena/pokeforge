@@ -1,0 +1,67 @@
+/* --------------------------------------------------- version progress pills */
+/* Dual Version Mode: precise per-cartridge capture progress, next to the
+   aggregate CapturedCounter. Mirrors the .captured-counter pill shape so
+   the two read as one family, colored per game version. */
+
+.version-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.version-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.version-pill::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pill-color, var(--accent));
+  box-shadow: 0 0 5px var(--pill-color, var(--accent));
+  flex-shrink: 0;
+}
+
+.version-pill:hover {
+  border-color: color-mix(in srgb, var(--pill-color, var(--accent)) 45%, var(--border));
+}
+
+.version-pill--active {
+  background: color-mix(in srgb, var(--pill-color, var(--accent)) 16%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--pill-color, var(--accent)) 55%, var(--border));
+}
+
+.version-pill__name {
+  color: var(--text);
+}
+
+.version-pill__count {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+@media (max-width: 540px) {
+  .version-progress {
+    width: 100%;
+  }
+
+  .version-pill {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}

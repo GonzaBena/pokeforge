@@ -1,24 +1,31 @@
 import QRCode from 'qrcode'
 import {
   getCapturedIds,
+  getAllCapturedByGame,
   getTeam,
   setTeam,
   getPokemonOverrides,
   setPokemonOverrides,
   getSelectedGame,
   setSelectedGame,
+  getCaptureLog,
+  getCaptureMeta,
+  setCaptureMeta,
   type PokemonOverrides,
   CAPTURED_CHANGED_EVENT,
+  CAPTURED_BY_GAME_CHANGED_EVENT,
 } from './storage'
-import type { TeamState } from './types'
+import type { CaptureLogEntry, TeamState } from './types'
 
 export interface SyncPayload {
-  v: 1
+  v: 1 | 2
   timestamp: number
   capturedBitset: string // Base64 129-byte bitset for 1025 pokemon
+  capturedByGame?: Record<string, string> // v2 only: versionId -> Base64 bitset
   team: TeamState
   overrides?: Record<number, PokemonOverrides>
   game?: string
+  captureLog?: Record<number, CaptureLogEntry>
 }
 
 export interface SyncSummary {
@@ -89,17 +96,31 @@ export function getAllOverrides(): Record<number, PokemonOverrides> {
 }
 
 /**
+ * Encodes every per-version captured-by-game list into Base64 bitsets.
+ */
+export function encodeAllCapturedByGame(): Record<string, string> {
+  const byGame = getAllCapturedByGame()
+  const encoded: Record<string, string> = {}
+  for (const [versionId, ids] of Object.entries(byGame)) {
+    encoded[versionId] = encodeCapturedIds(ids)
+  }
+  return encoded
+}
+
+/**
  * Gathers the current local state into a SyncPayload.
  */
 export function createSyncPayload(): SyncPayload {
   const captured = getCapturedIds()
   return {
-    v: 1,
+    v: 2,
     timestamp: Date.now(),
     capturedBitset: encodeCapturedIds(captured),
+    capturedByGame: encodeAllCapturedByGame(),
     team: getTeam(),
     overrides: getAllOverrides(),
     game: getSelectedGame(),
+    captureLog: getCaptureLog(),
   }
 }
 
@@ -223,7 +244,7 @@ export async function parseSyncFromHash(hashStr?: string): Promise<SyncPayload |
 
   try {
     const payload = await decodeSyncPayload(match[1])
-    if (payload && payload.v === 1) {
+    if (payload && (payload.v === 1 || payload.v === 2)) {
       return payload
     }
   } catch (err) {
@@ -268,6 +289,37 @@ export function applySyncPayload(
     // ignore write failures (e.g. private browsing, storage quota)
   }
 
+  // Save captured-by-game (Dual Version Mode, v2+ payloads only). Versions
+  // not present in the incoming payload are left untouched, in both modes —
+  // 'replace' only overwrites what the other device actually sent.
+  if (payload.capturedByGame) {
+    try {
+      const currentRaw = localStorage.getItem('poketeam:captured-by-game')
+      const currentMap: Record<string, number[]> = currentRaw ? JSON.parse(currentRaw) : {}
+      const finalMap: Record<string, number[]> = { ...currentMap }
+
+      for (const [versionId, bitset] of Object.entries(payload.capturedByGame)) {
+        const incomingIds = decodeCapturedIds(bitset)
+        if (mode === 'merge') {
+          const merged = new Set(currentMap[versionId] ?? [])
+          for (const id of incomingIds) merged.add(id)
+          finalMap[versionId] = [...merged]
+        } else {
+          finalMap[versionId] = [...incomingIds]
+        }
+      }
+
+      localStorage.setItem('poketeam:captured-by-game', JSON.stringify(finalMap))
+      window.dispatchEvent(
+        new CustomEvent(CAPTURED_BY_GAME_CHANGED_EVENT, {
+          detail: { versionIds: Object.keys(payload.capturedByGame) },
+        }),
+      )
+    } catch {
+      // ignore write failures (e.g. private browsing, storage quota)
+    }
+  }
+
   // Save team
   if (payload.team && Array.isArray(payload.team.slots)) {
     setTeam(payload.team)
@@ -286,6 +338,25 @@ export function applySyncPayload(
   // Save game preference if set
   if (payload.game) {
     setSelectedGame(payload.game)
+  }
+
+  // Save capture log (passport). Never deletes entries absent from the
+  // incoming payload, in both modes. In merge mode, an incoming entry only
+  // wins over a local one if it is strictly more recent (ISO date strings
+  // compare lexicographically = chronologically).
+  if (payload.captureLog) {
+    for (const [idStr, incomingEntry] of Object.entries(payload.captureLog)) {
+      const id = parseInt(idStr, 10)
+      if (isNaN(id)) continue
+      if (mode === 'replace') {
+        setCaptureMeta(id, incomingEntry)
+      } else {
+        const localEntry = getCaptureMeta(id)
+        if (!localEntry || incomingEntry.date > localEntry.date) {
+          setCaptureMeta(id, incomingEntry)
+        }
+      }
+    }
   }
 
   return { addedCaptures: addedCount, totalCaptures: finalCaptures.size }
@@ -312,15 +383,21 @@ export async function renderQrCode(canvas: HTMLCanvasElement, text: string): Pro
 export function exportBackupFile(): void {
   const payload = createSyncPayload()
   const captured = [...decodeCapturedIds(payload.capturedBitset)]
+  const capturedByGame: Record<string, number[]> = {}
+  for (const [versionId, bitset] of Object.entries(payload.capturedByGame ?? {})) {
+    capturedByGame[versionId] = [...decodeCapturedIds(bitset)]
+  }
   const exportData = {
     app: 'PokeForge',
-    version: 1,
+    version: 2,
     exportDate: new Date().toISOString(),
     totalCaptured: captured.length,
     captured,
+    capturedByGame,
     team: payload.team,
     overrides: payload.overrides,
     game: payload.game,
+    captureLog: payload.captureLog,
   }
 
   const json = JSON.stringify(exportData, null, 2)
@@ -355,13 +432,28 @@ export async function importBackupFile(
     throw new Error('Formato de respaldo no válido')
   }
 
+  // capturedByGame is optional — absent in backups exported before Dual
+  // Version Mode, in which case we just skip that part of the import.
+  let capturedByGame: Record<string, string> | undefined
+  if (raw.capturedByGame && typeof raw.capturedByGame === 'object') {
+    capturedByGame = {}
+    for (const [versionId, ids] of Object.entries(raw.capturedByGame)) {
+      if (Array.isArray(ids)) {
+        capturedByGame[versionId] = encodeCapturedIds(new Set(ids as number[]))
+      }
+    }
+  }
+
   const payload: SyncPayload = {
-    v: 1,
+    v: 2,
     timestamp: raw.exportDate ? new Date(raw.exportDate).getTime() : Date.now(),
     capturedBitset: bitset,
+    capturedByGame,
     team: raw.team,
     overrides: raw.overrides || {},
     game: raw.game,
+    captureLog:
+      raw.captureLog && typeof raw.captureLog === 'object' ? raw.captureLog : undefined,
   }
 
   return applySyncPayload(payload, mode)

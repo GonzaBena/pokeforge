@@ -1,7 +1,8 @@
 import { modalIn, modalOut } from '../animations'
 import { getCurrentLocale, getTranslations } from '../i18n/translations'
-import { getAllPokemon, getMoveDetailsMap, getTypeChart } from '../pokedexData'
+import { getAllPokemon, getGameDexData, getMoveDetailsMap, getTypeChart } from '../pokedexData'
 import { getEvolutionChain, getNatures, getPokemonDetail } from '../pokemonDetail'
+import { getSelectedGame } from '../storage'
 import { toast } from '../toast'
 import type { Pokemon } from '../types'
 import { getModalElements } from './dom'
@@ -49,13 +50,15 @@ export async function openPokemonModal(id: number, options?: PokemonModalOptions
   }
 
   try {
-    const [allPokemon, detail, natures, typeChart, moveDetailsMap] = await Promise.all([
-      getAllPokemon(),
-      getPokemonDetail(id),
-      getNatures(),
-      getTypeChart(),
-      getMoveDetailsMap().catch(() => ({})),
-    ])
+    const [allPokemon, detail, natures, typeChart, moveDetailsMap, gameDexData] =
+      await Promise.all([
+        getAllPokemon(),
+        getPokemonDetail(id),
+        getNatures(),
+        getTypeChart(),
+        getMoveDetailsMap().catch(() => ({})),
+        getGameDexData().catch(() => null),
+      ])
     if (modalState.currentId !== id) return
 
     const pokemon = allPokemon.find((p) => p.id === id)
@@ -71,7 +74,17 @@ export async function openPokemonModal(id: number, options?: PokemonModalOptions
         : null
     if (modalState.currentId !== id) return
 
-    render({ pokemon, detail, chain, natures, allById, typeChart, moveDetailsMap })
+    render({
+      pokemon,
+      detail,
+      chain,
+      natures,
+      allById,
+      typeChart,
+      moveDetailsMap,
+      selectedGame: getSelectedGame(),
+      gameDexData,
+    })
     bodyEl.scrollTop = 0
 
     if (detail.isOfflineFallback) {

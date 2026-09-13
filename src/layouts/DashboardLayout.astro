@@ -1,0 +1,358 @@
+---
+import Nav from '../components/Nav.astro'
+import NavProgress from '../components/NavProgress.astro'
+import ToastContainer from '../components/ToastContainer.astro'
+import SyncModal from '../components/SyncModal.astro'
+import MoveFilterHelpModal from '../components/MoveFilterHelpModal.astro'
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import {
+  getSidebarHeader,
+  getSidebarSections,
+  isSettingsPath,
+  isNotificationsPath,
+} from '../lib/dashboardSidebar'
+import '../styles/global.css'
+import '../styles/features/dashboard/dashboard.css'
+
+interface Props {
+  title: string
+  alternateUrls?: Partial<Record<Locale, string>>
+}
+
+const { title, alternateUrls } = Astro.props
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+
+const pathname = Astro.url.pathname
+const isSettingsPage = isSettingsPath(pathname, currentLocale)
+const isNotificationsPage = isNotificationsPath(pathname, currentLocale)
+const sidebarHeader = getSidebarHeader(pathname, currentLocale)
+const sidebarSections = getSidebarSections(pathname, currentLocale)
+---
+
+<!doctype html>
+<html lang={currentLocale} class="dashboard-html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
+    <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#101014" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PokeForge" />
+    <title>{title} · PokeForge</title>
+  </head>
+  <body class="dashboard-body">
+    <NavProgress locale={currentLocale} />
+    <Nav alternateUrls={alternateUrls} />
+
+    <!-- Mobile Sidebar Toggle Bar -->
+    <div class="dashboard-mobile-bar">
+      <button
+        type="button"
+        class="dashboard-mobile-toggle"
+        data-sidebar-toggle
+        aria-label="Toggle Dashboard Menu"
+        aria-expanded="false"
+      >
+        <i data-lucide="menu"></i>
+        <span>{sidebarHeader.title}</span>
+      </button>
+      <div class="dashboard-mobile-quick-stats" data-sidebar-quick-stats>
+        <span data-sidebar-national-pct-mobile>0%</span>
+      </div>
+    </div>
+
+    <!-- Dashboard Layout Container -->
+    <div
+      class="dashboard-container"
+      data-is-settings-page={isSettingsPage ? 'true' : 'false'}
+      data-is-notifications-page={isNotificationsPage ? 'true' : 'false'}
+      data-page-type={isSettingsPage ? 'settings' : isNotificationsPage ? 'notifications' : 'dashboard'}
+    >
+      <!-- Sidebar Overlay for mobile -->
+      <div class="dashboard-sidebar-overlay" data-sidebar-overlay hidden></div>
+
+      <!-- Left Sidebar -->
+      <aside class="dashboard-sidebar" data-dashboard-sidebar>
+        <!-- Header: [icon, PokeForge Hub] & section title -->
+        <div class="dashboard-sidebar__header">
+          <div class="dashboard-sidebar__brand">
+            <div class="dashboard-sidebar__icon-badge">
+              <i data-lucide={sidebarHeader.icon}></i>
+            </div>
+            <div>
+              <span class="dashboard-sidebar__label">{sidebarHeader.label}</span>
+              <h2 class="dashboard-sidebar__title">{sidebarHeader.title}</h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="dashboard-sidebar__close"
+            data-sidebar-close
+            aria-label="Close sidebar"
+          >
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <!-- Sections List with Collapsible Inner Index -->
+        <nav class="dashboard-sidebar__nav" aria-label="Secciones del Dashboard">
+          <div class="sidebar-sections-list">
+            {sidebarSections.map((section) => (
+              <div
+                class:list={[
+                  'sidebar-section-item',
+                  {
+                    'is-active': section.isActive,
+                    'is-expanded': section.isExpanded,
+                  },
+                ]}
+                data-section-group={section.id}
+              >
+                <div class="sidebar-section-header">
+                  <a
+                    href={section.href}
+                    class:list={[
+                      'sidebar-section-link',
+                      { 'is-active': section.isActive },
+                    ]}
+                    data-main-section-link={section.id}
+                    data-astro-prefetch
+                  >
+                    <i data-lucide={section.icon}></i>
+                    <span class="sidebar-section-title">{section.title}</span>
+                    {section.id === 'notifications' && (
+                      <span
+                        class="sidebar-notifications-badge"
+                        data-sidebar-notifications-badge
+                        hidden
+                      >
+                        0
+                      </span>
+                    )}
+                  </a>
+                  <button
+                    type="button"
+                    class="sidebar-section-toggle"
+                    data-section-toggle={section.id}
+                    aria-label={`Toggle ${section.title}`}
+                    aria-expanded={section.isExpanded ? 'true' : 'false'}
+                    aria-controls={`subnav-${section.id}`}
+                  >
+                    <i data-lucide="chevron-down"></i>
+                  </button>
+                </div>
+
+                <div
+                  class="sidebar-subnav-container"
+                  id={`subnav-${section.id}`}
+                  data-subnav-container={section.id}
+                  hidden={!section.isExpanded}
+                >
+                  <div class="sidebar-subnav">
+                    {section.items.map((subItem) => (
+                      <a
+                        href={subItem.href}
+                        class="sidebar-subnav-link"
+                        data-section-link={subItem.id}
+                        data-parent-section={section.id}
+                        data-astro-prefetch
+                      >
+                        <i data-lucide={subItem.icon}></i>
+                        <span>{subItem.label}</span>
+                        {(subItem.id === 'notifications' || subItem.id === 'unassigned') && (
+                          <span
+                            class="sidebar-notifications-badge"
+                            data-sidebar-notifications-badge
+                            hidden
+                          >
+                            0
+                          </span>
+                        )}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </nav>
+
+        <!-- Bottom Area: National Dex mini progress widget -->
+        <div class="dashboard-sidebar__bottom">
+          <div class="dashboard-sidebar__footer">
+            <div class="sidebar-mini-widget">
+              <div class="sidebar-mini-widget__header">
+                <span>{t.dashboard.nationalDex}</span>
+                <strong data-sidebar-national-pct>0%</strong>
+              </div>
+              <div class="sidebar-mini-widget__bar">
+                <div class="sidebar-mini-widget__fill" data-sidebar-national-bar style="width: 0%;"></div>
+              </div>
+              <span class="sidebar-mini-widget__counts" data-sidebar-national-counts>0 / 1025</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="dashboard-main">
+        <slot />
+      </main>
+    </div>
+
+    <SyncModal />
+    <MoveFilterHelpModal />
+    <ToastContainer />
+
+    <script>
+      import { refreshIcons } from '../lib/icons'
+      import { getCapturedIds } from '../lib/storage'
+      import { calculatePercentage } from '../lib/dashboard'
+      import { setupSmoothScroll } from '../lib/smoothScroll'
+      import { initSpriteLoader } from '../lib/spriteLoader'
+      import {
+        getUnassignedCount,
+        VERSION_ASSIGNMENT_CHANGED_EVENT,
+      } from '../lib/versionAssignment'
+
+      initSpriteLoader()
+
+      function initSidebar() {
+        document.documentElement.classList.add('dashboard-html')
+        const toggleBtn = document.querySelector<HTMLButtonElement>('[data-sidebar-toggle]')
+        const closeBtn = document.querySelector<HTMLButtonElement>('[data-sidebar-close]')
+        const sidebar = document.querySelector<HTMLElement>('[data-dashboard-sidebar]')
+        const overlay = document.querySelector<HTMLElement>('[data-sidebar-overlay]')
+        const navLinks = document.querySelectorAll<HTMLAnchorElement>('[data-section-link]')
+        const sectionToggles = document.querySelectorAll<HTMLButtonElement>('[data-section-toggle]')
+
+        const sidePct = document.querySelector<HTMLElement>('[data-sidebar-national-pct]')
+        const sidePctMobile = document.querySelector<HTMLElement>('[data-sidebar-national-pct-mobile]')
+        const sideBar = document.querySelector<HTMLElement>('[data-sidebar-national-bar]')
+        const sideCounts = document.querySelector<HTMLElement>('[data-sidebar-national-counts]')
+
+        function updateSidebarWidget() {
+          const ids = getCapturedIds()
+          const total = 1025
+          const pct = calculatePercentage(ids.size, total)
+
+          if (sidePct) sidePct.textContent = `${pct}%`
+          if (sidePctMobile) sidePctMobile.textContent = `${pct}% Pokédex`
+          if (sideBar) sideBar.style.width = `${pct}%`
+          if (sideCounts) sideCounts.textContent = `${ids.size} / ${total}`
+        }
+
+        function openSidebar() {
+          if (!sidebar) return
+          sidebar.classList.add('is-open')
+          if (overlay) overlay.hidden = false
+          toggleBtn?.setAttribute('aria-expanded', 'true')
+        }
+
+        function closeSidebar() {
+          if (!sidebar) return
+          sidebar.classList.remove('is-open')
+          if (overlay) overlay.hidden = true
+          toggleBtn?.setAttribute('aria-expanded', 'false')
+        }
+
+        toggleBtn?.addEventListener('click', openSidebar)
+        closeBtn?.addEventListener('click', closeSidebar)
+        overlay?.addEventListener('click', closeSidebar)
+
+        // Accordion toggle behavior
+        sectionToggles.forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            const sectionId = btn.dataset.sectionToggle
+            const group = document.querySelector<HTMLElement>(`[data-section-group="${sectionId}"]`)
+            const subnav = document.querySelector<HTMLElement>(`#subnav-${sectionId}`)
+            if (!group || !subnav) return
+
+            const isExpanded = group.classList.contains('is-expanded')
+            if (isExpanded) {
+              group.classList.remove('is-expanded')
+              subnav.hidden = true
+              btn.setAttribute('aria-expanded', 'false')
+            } else {
+              group.classList.add('is-expanded')
+              subnav.hidden = false
+              btn.setAttribute('aria-expanded', 'true')
+            }
+          })
+        })
+
+        // Smooth scroll for all in-page hash links across /dashboard and child pages
+        setupSmoothScroll(document, {
+          onScroll: () => closeSidebar(),
+        })
+
+
+
+        // Scroll spy to highlight active subnav item
+        const container = document.querySelector<HTMLElement>('[data-page-type]') || document.querySelector<HTMLElement>('[data-is-settings-page]')
+        const isSettings = container?.dataset.isSettingsPage === 'true'
+        const isNotif = container?.dataset.isNotificationsPage === 'true'
+        const sectionIds = isSettings
+          ? ['audio', 'sync', 'data']
+          : isNotif
+            ? ['unassigned']
+            : ['overview', 'active-team', 'game-progress']
+
+        const sections = sectionIds
+          .map((id) => document.getElementById(id))
+          .filter(Boolean) as HTMLElement[]
+
+        function onScroll() {
+          if (sections.length === 0) return
+          const scrollPos = window.scrollY + 180
+          let currentId = sections[0].id
+
+          for (const section of sections) {
+            if (section.offsetTop <= scrollPos) {
+              currentId = section.id
+            }
+          }
+
+          navLinks.forEach((link) => {
+            const linkTarget = link.dataset.sectionLink
+            const isActive = linkTarget === currentId
+            link.classList.toggle('is-active', isActive)
+          })
+        }
+
+        const notifBadges = document.querySelectorAll<HTMLElement>(
+          '[data-sidebar-notifications-badge]',
+        )
+        function updateSidebarBadge() {
+          const count = getUnassignedCount()
+          notifBadges.forEach((badge) => {
+            badge.hidden = count === 0
+            badge.textContent = String(count)
+          })
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true })
+        updateSidebarWidget()
+        updateSidebarBadge()
+        window.addEventListener('poketeam:captured-changed', () => {
+          updateSidebarWidget()
+          updateSidebarBadge()
+        })
+        window.addEventListener(VERSION_ASSIGNMENT_CHANGED_EVENT, updateSidebarBadge)
+        refreshIcons()
+      }
+
+      initSidebar()
+      document.addEventListener('astro:after-swap', initSidebar)
+    </script>
+  </body>
+</html>

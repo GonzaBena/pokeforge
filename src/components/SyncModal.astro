@@ -1,10 +1,14 @@
 ---
-import { getTranslations, type Locale } from '../lib/i18n/translations'
+import { getTranslations, getLocalizedPath, type Locale } from '../lib/i18n/translations'
 import '../styles/components/modal.css'
 import '../styles/features/sync/sync-modal.css'
 
 const currentLocale = (Astro.currentLocale ?? 'en') as Locale
 const t = getTranslations(currentLocale)
+const dashboardNotificationsHref = getLocalizedPath(
+  '/dashboard/notifications/',
+  currentLocale,
+)
 ---
 
 <div class="modal-overlay" data-sync-overlay hidden>
@@ -37,6 +41,40 @@ const t = getTranslations(currentLocale)
     </div>
 
     <div class="sync-modal__body">
+      <!-- Banner de alerta: Pokémon sin versión asignada -->
+      <div class="sync-unassigned-banner" data-unassigned-banner hidden>
+        <div class="sync-unassigned-banner__header">
+          <div class="sync-unassigned-banner__icon">
+            <i data-lucide="alert-triangle"></i>
+          </div>
+          <div class="sync-unassigned-banner__content">
+            <h4 class="sync-unassigned-banner__title" data-unassigned-title>
+              {t.syncModal.unassignedAlertTitle.replace('{n}', '0')}
+            </h4>
+            <p class="sync-unassigned-banner__desc">
+              {t.syncModal.unassignedAlertDesc}
+            </p>
+          </div>
+        </div>
+        <div class="sync-unassigned-banner__actions">
+          <a
+            href={dashboardNotificationsHref}
+            class="btn btn--primary btn--sm sync-unassigned-banner__btn"
+            data-resolve-notifications-btn
+          >
+            <i data-lucide="list"></i>
+            <span>{t.syncModal.resolveInNotifications}</span>
+          </a>
+          <button
+            type="button"
+            class="btn btn--secondary btn--sm sync-unassigned-banner__btn"
+            data-auto-assign-btn
+          >
+            <i data-lucide="sparkles"></i>
+            <span>{t.syncModal.autoAssignOption}</span>
+          </button>
+        </div>
+      </div>
       <!-- PANEL 1: NUBE DB -->
       <div class="sync-tab-panel" data-tab-panel="cloud">
         <!-- Estado NO vinculado -->
@@ -436,6 +474,11 @@ const t = getTranslations(currentLocale)
   import { toast } from '../lib/toast'
   import { refreshIcons } from '../lib/icons'
   import { getCurrentLocale, getTranslations } from '../lib/i18n/translations'
+  import {
+    getUnassignedCount,
+    autoAssignAll,
+    VERSION_ASSIGNMENT_CHANGED_EVENT,
+  } from '../lib/versionAssignment'
 
   function initSyncModal() {
     const overlay = document.querySelector<HTMLDivElement>('[data-sync-overlay]')
@@ -512,6 +555,26 @@ const t = getTranslations(currentLocale)
     const confirmMsg = overlay.querySelector<HTMLParagraphElement>('[data-sync-confirm-msg]')
     const confirmDeleteBtn = overlay.querySelector<HTMLButtonElement>('[data-sync-confirm-delete]')
     const cancelDeleteBtn = overlay.querySelector<HTMLButtonElement>('[data-sync-cancel-delete]')
+
+    // Elementos Alerta Capturas Sin Versión
+    const unassignedBanner = overlay.querySelector<HTMLDivElement>('[data-unassigned-banner]')
+    const unassignedTitle = overlay.querySelector<HTMLElement>('[data-unassigned-title]')
+    const resolveBtn = overlay.querySelector<HTMLAnchorElement>('[data-resolve-notifications-btn]')
+    const autoAssignBtn = overlay.querySelector<HTMLButtonElement>('[data-auto-assign-btn]')
+
+    function updateUnassignedUI() {
+      const count = getUnassignedCount()
+      if (unassignedBanner) {
+        unassignedBanner.hidden = count === 0
+        if (unassignedTitle && count > 0) {
+          const t = getTranslations(getCurrentLocale())
+          unassignedTitle.textContent = t.syncModal.unassignedAlertTitle.replace(
+            '{n}',
+            String(count),
+          )
+        }
+      }
+    }
 
     let currentSyncUrl = ''
     let currentPairingUrl = ''
@@ -653,6 +716,9 @@ const t = getTranslations(currentLocale)
           loading.innerHTML = `<span>${locale === 'es' ? 'Error al generar código QR' : 'Error generating QR code'}</span>`
         }
       }
+
+      // Actualizar banner de capturas sin versión asignada
+      updateUnassignedUI()
     }
 
     function closeModal() {
@@ -660,6 +726,23 @@ const t = getTranslations(currentLocale)
       document.body.style.overflow = ''
       hideResetConfirmation()
     }
+
+    // Acciones de alerta de capturas sin versión
+    resolveBtn?.addEventListener('click', () => {
+      closeModal()
+    })
+
+    autoAssignBtn?.addEventListener('click', () => {
+      const locale = getCurrentLocale()
+      const t = getTranslations(locale)
+      autoAssignAll()
+      updateUnassignedUI()
+      toast.success(t.syncModal.autoAssignSuccess)
+    })
+
+    window.addEventListener(VERSION_ASSIGNMENT_CHANGED_EVENT, () => {
+      updateUnassignedUI()
+    })
 
     // Escuchar triggers globales con [data-sync-open]
     document.addEventListener('click', (e) => {

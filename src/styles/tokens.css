@@ -34,7 +34,7 @@
   --font-sans: 'Poppins', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --header-h: 94px;
+  --header-h: 66px;
 
   /* ===============================================================
      Pokémon Elemental Types (18 Tipos Oficiales de PokeForge)
@@ -58,4 +58,10 @@
   --type-dragon: #7038f8;
   --type-dark: #705848;
   --type-fairy: #ee99ac;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --header-h: calc(57px + env(safe-area-inset-top, 0px));
+  }
 }

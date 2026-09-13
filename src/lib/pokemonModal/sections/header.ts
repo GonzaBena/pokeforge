@@ -1,6 +1,6 @@
 import { getCurrentLocale, getNatureName, getTranslations } from '../../i18n/translations'
 import { refreshIcons } from '../../icons'
-import { getTeam, isCaptured } from '../../storage'
+import { getCapturedByGame, getTeam, isCaptured } from '../../storage'
 import { typeColor } from '../../typeColors'
 import type { PokemonStats } from '../../types'
 import { getAllItems, getItemById, getItemStatModifiers, renderItemIconHTML } from '../../items'
@@ -60,6 +60,51 @@ function renderItemEffectBadges(
   }
 
   return ''
+}
+
+// Dual Version Mode: renders "Caught in: [A] [B]" instead of the plain
+// capture toggle, but only when the selected game is an actual pair of
+// cartridges (has exclusives) — not a single-version game nor a DLC pack
+// (which share versions.length===2 but have no `exclusives`, same gate the
+// exclusive-filter toggle in pokedex-page.ts already uses). Each button
+// toggles independently, so both can be pressed at once — stacked in a
+// column so long version names (e.g. "Let's Go, Pikachu!") never truncate.
+function renderCaptureVersionSelector(ctx: RenderContext, pokemonId: number): string | null {
+  const entry = ctx.selectedGame ? ctx.gameDexData?.[ctx.selectedGame] : null
+  if (!entry?.versions || entry.versions.length !== 2) return null
+  if (!entry.exclusives || Object.keys(entry.exclusives).length === 0) return null
+
+  const [vA, vB] = entry.versions
+  const locale = getCurrentLocale()
+  const t = getTranslations(locale)
+  const nameA = locale === 'es' ? vA.nameEs : vA.name
+  const nameB = locale === 'es' ? vB.nameEs : vB.name
+  const inA = getCapturedByGame(vA.id).has(pokemonId)
+  const inB = getCapturedByGame(vB.id).has(pokemonId)
+
+  return `
+    <div class="detail-capture-version" data-modal-capture-version-group>
+      <span class="detail-capture-version__label">${t.pokedex.captureVersionLabel}</span>
+      <div class="view-toggle detail-capture-version__toggle" role="group" aria-label="${t.pokedex.captureVersionLabel}">
+        <button
+          class="view-toggle__btn"
+          type="button"
+          data-modal-capture-version-btn
+          data-version-mode="a"
+          style="--btn-color:${vA.color};"
+          aria-pressed="${inA}"
+        >${nameA}</button>
+        <button
+          class="view-toggle__btn"
+          type="button"
+          data-modal-capture-version-btn
+          data-version-mode="b"
+          style="--btn-color:${vB.color};"
+          aria-pressed="${inB}"
+        >${nameB}</button>
+      </div>
+    </div>
+  `
 }
 
 export function renderHeader(ctx: RenderContext): string {
@@ -198,7 +243,10 @@ export function renderHeader(ctx: RenderContext): string {
       </div>
     `
   } else {
-    footerActionsHtml = `
+    const versionSelectorHtml = renderCaptureVersionSelector(ctx, pokemon.id)
+    footerActionsHtml =
+      versionSelectorHtml ??
+      `
       <button class="btn ${captured ? 'btn--captured' : 'btn--primary'}" type="button" data-modal-capture-btn>
         <i data-lucide="${captured ? 'check' : 'circle-dot'}"></i>
         ${captured ? t.pokedex.caught : t.pokedex.catch}

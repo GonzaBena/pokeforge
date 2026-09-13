@@ -9,8 +9,10 @@ import {
 } from '../lib/pokedexData'
 import {
   getCapturedIds,
+  getCapturedByGame,
   setCaptured,
   CAPTURED_CHANGED_EVENT,
+  CAPTURED_BY_GAME_CHANGED_EVENT,
   getSelectedGame,
   setSelectedGame,
   GAME_CHANGED_EVENT,
@@ -20,6 +22,12 @@ import {
   DATA_RESET_EVENT,
 } from '../lib/storage'
 import { staggerCardsIn, cardHoverTilt, animateCaptureReveal } from '../lib/animations'
+import {
+  calculatePercentage,
+  calculateRegionProgress,
+  getReachedMilestones,
+  MILESTONE_THRESHOLDS,
+} from '../lib/dashboard'
 import {
   getCurrentLocale,
   getTranslations,
@@ -52,6 +60,17 @@ const searchInput = document.querySelector<HTMLInputElement>('[data-search-input
 const gameFilterEl = document.querySelector<HTMLSelectElement>('[data-game-filter]')!
 const gameModeToggleEl = document.querySelector<HTMLElement>('[data-game-mode-toggle]')
 const exclusiveToggleEl = document.querySelector<HTMLElement>('[data-exclusive-toggle]')
+const versionProgressEl = document.querySelector<HTMLElement>('[data-version-progress]')
+const genProgressPanelEl = document.querySelector<HTMLElement>('[data-generation-progress-panel]')
+const genProgressToggleBtn = document.querySelector<HTMLButtonElement>(
+  '[data-generation-progress-toggle]',
+)
+const genProgressCloseBtn = document.querySelector<HTMLButtonElement>(
+  '[data-generation-progress-close]',
+)
+const genProgressBodyEl = document.querySelector<HTMLElement>('[data-generation-progress-body]')
+const genProgressBarsEl = document.querySelector<HTMLElement>('[data-generation-progress-bars]')
+const milestoneTrackerEl = document.querySelector<HTMLElement>('[data-milestone-tracker]')
 const typeFilterEl = document.querySelector<HTMLElement>('[data-type-filter]')!
 const typeModeToggleEl = document.querySelector<HTMLElement>('[data-type-mode-toggle]')
 const genFilterEl = document.querySelector<HTMLElement>('[data-generation-filter]')!
@@ -78,6 +97,16 @@ let shown = 0
 let manifestTotal = 0
 let view: 'all' | 'captured' = 'all'
 let search = ''
+const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+const urlGame = urlParams?.get('game')
+if (urlGame) {
+  setSelectedGame(urlGame)
+}
+const urlMode = urlParams?.get('mode') as GameDexMode | null
+if (urlMode === 'regional' || urlMode === 'obtainable') {
+  setGameDexMode(urlMode)
+}
+
 let selectedGame = getSelectedGame()
 let selectedGameMode: GameDexMode = getGameDexMode()
 let selectedExclusiveFilters = new Set<string>(['all'])
@@ -93,6 +122,8 @@ const moveCountMap = new Map<string, number>()
 let highlightedMoveIndex = -1
 let currentMoveMatches: MoveData[] = []
 const gameToGenMap = new Map<string, GenerationInfo>()
+let cachedGenerations: GenerationInfo[] = []
+let lastGlobalPercentage = 0
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
@@ -129,6 +160,19 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
     `
   }
 
+  // The round "captured" stamp tints to the specific cartridge's color when
+  // the pokemon is only captured in one of the two versions.
+  const dualVersionInfo = getDualVersionCaptureInfo(p.id)
+  const badgeAppearance = getCapturedBadgeAppearance(dualVersionInfo, locale, t)
+  const badgeStyleProps = [
+    badgeAppearance.bg ? `--captured-badge-bg:${badgeAppearance.bg}` : '',
+    badgeAppearance.color ? `--captured-badge-color:${badgeAppearance.color}` : '',
+  ]
+    .filter(Boolean)
+    .join('; ')
+  const capturedBadgeStyle = badgeStyleProps ? ` style="${badgeStyleProps};"` : ''
+  const capturedBadgeTitle = badgeAppearance.title ? ` title="${badgeAppearance.title}"` : ''
+
   return `
     <article class="pokemon-card${captured ? ' captured' : ''}" data-pokemon-id="${p.id}" style="--type-glow:${glowColor};">
       <div class="pokemon-card__header">
@@ -138,7 +182,7 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
       <div class="pokemon-card__sprite-wrap">
         <img class="pokemon-card__sprite" data-sprite-src="${sprite}" alt="${p.name}" decoding="async" width="120" height="120" />
       </div>
-      <div class="captured-badge"><i data-lucide="circle-dot"></i></div>
+      <div class="captured-badge"${capturedBadgeStyle}${capturedBadgeTitle}><i data-lucide="circle-dot"></i></div>
       <div class="pokemon-card__name">${p.name}</div>
       <div class="pokemon-card__types">${typesHtml}</div>
       <button class="pokemon-card__capture-btn" type="button" data-capture-btn data-pokemon-id="${p.id}">
@@ -147,6 +191,73 @@ function renderCardHTML(p: Pokemon, captured: boolean): string {
       </button>
     </article>
   `
+}
+
+interface DualVersionCaptureInfo {
+  vA: GameVersionMeta
+  vB: GameVersionMeta
+  inA: boolean
+  inB: boolean
+}
+
+// Dual Version Mode: whether/how a pokemon is captured per cartridge in the
+// currently selected game. Only meaningful for real version pairs (same
+// gate as the exclusive toggle) — null for single-version games, DLC packs,
+// or when no game is selected.
+function getDualVersionCaptureInfo(pokemonId: number): DualVersionCaptureInfo | null {
+  if (!selectedGame || !gameDexData) return null
+  const entry = gameDexData[selectedGame]
+  const hasDualVersions = Boolean(
+    entry?.versions &&
+      entry.versions.length === 2 &&
+      entry.exclusives &&
+      Object.keys(entry.exclusives).length > 0,
+  )
+  if (!hasDualVersions) return null
+
+  const [vA, vB] = entry!.versions!
+  return {
+    vA,
+    vB,
+    inA: getCapturedByGame(vA.id).has(pokemonId),
+    inB: getCapturedByGame(vB.id).has(pokemonId),
+  }
+}
+
+interface CapturedBadgeAppearance {
+  bg: string | null
+  color: string | null
+  title: string
+}
+
+// Shared by renderCardHTML (initial render) and syncCapturedBadgeAppearance
+// (live updates from the modal) so both stay in sync. Captured in only one
+// version tints the icon to that version's color; captured in both splits
+// the badge's background between both colors instead of picking a single
+// fixed accent — a fixed color would risk coinciding with a real version
+// color (e.g. LeafGreen).
+function getCapturedBadgeAppearance(
+  info: DualVersionCaptureInfo | null,
+  locale: 'en' | 'es',
+  t: ReturnType<typeof getTranslations>,
+): CapturedBadgeAppearance {
+  if (!info || (!info.inA && !info.inB)) return { bg: null, color: null, title: '' }
+
+  if (info.inA !== info.inB) {
+    const meta = info.inA ? info.vA : info.vB
+    const vName = locale === 'es' ? meta.nameEs : meta.name
+    return {
+      bg: null,
+      color: meta.color,
+      title: t.pokedex.capturedInVersion.replace('{version}', vName),
+    }
+  }
+
+  return {
+    bg: `linear-gradient(135deg, ${info.vA.color} 50%, ${info.vB.color} 50%)`,
+    color: '#fff',
+    title: t.pokedex.capturedInBoth,
+  }
 }
 
 function getExclusiveMapForGame(game: string): Map<number, GameVersionMeta> {
@@ -264,12 +375,160 @@ function updateCapturedCounter(): void {
   }
 }
 
+// Dual Version Mode: one pill per cartridge with precise per-version
+// progress (from `poketeam:captured-by-game`, not the aggregate captured
+// set), so a player owning both copies can see exactly what's left in each.
+function updateVersionProgressUI(): void {
+  if (!versionProgressEl) return
+  const entry = selectedGame && gameDexData ? gameDexData[selectedGame] : null
+  const hasDualVersions = Boolean(
+    entry?.versions &&
+      entry.versions.length === 2 &&
+      entry.exclusives &&
+      Object.keys(entry.exclusives).length > 0,
+  )
+
+  if (!hasDualVersions || !entry) {
+    versionProgressEl.hidden = true
+    versionProgressEl.innerHTML = ''
+    return
+  }
+
+  versionProgressEl.hidden = false
+  const locale = getCurrentLocale()
+  const fullGameList = getActiveGamePokemonList(selectedGame)!
+  const [vA, vB] = entry.versions!
+
+  versionProgressEl.innerHTML = [vA, vB]
+    .map((v) => {
+      const name = locale === 'es' ? v.nameEs : v.name
+      const eligible = fullGameList.filter((id) => {
+        const meta = activeExclusivesMap.get(id)
+        return !meta || meta.id === v.id
+      })
+      const capturedForVersion = getCapturedByGame(v.id)
+      const count = eligible.filter((id) => capturedForVersion.has(id)).length
+      const isActive = selectedExclusiveFilters.has(v.id)
+      return `
+        <button
+          class="version-pill${isActive ? ' version-pill--active' : ''}"
+          type="button"
+          data-version-pill
+          data-version-id="${v.id}"
+          style="--pill-color:${v.color};"
+        >
+          <span class="version-pill__name">${name}</span>
+          <span class="version-pill__count">${count}/${eligible.length}</span>
+        </button>
+      `
+    })
+    .join('')
+}
+
+// Shared by the generation filter chips and the generation progress bars, so
+// both triggers stay in sync when either one is clicked.
+function toggleGenerationFilter(genName: string): void {
+  if (selectedGenerations.has(genName)) {
+    selectedGenerations.delete(genName)
+  } else {
+    selectedGenerations.add(genName)
+  }
+  genFilterEl
+    .querySelectorAll<HTMLButtonElement>(`[data-generation="${genName}"]`)
+    .forEach((btn) => btn.setAttribute('aria-pressed', String(selectedGenerations.has(genName))))
+  genProgressBarsEl
+    ?.querySelectorAll<HTMLButtonElement>(`[data-generation-progress-bar][data-generation="${genName}"]`)
+    .forEach((btn) => btn.setAttribute('aria-pressed', String(selectedGenerations.has(genName))))
+  updateActiveFilterBadge()
+  applyFilters()
+}
+
+// Region/generation progress panel + global milestone tracker. Milestones
+// are global only (25/50/75/100% of manifestTotal) — no per-region marks in
+// v1. lastGlobalPercentage lives in memory only, so reloading the page while
+// already past a threshold never re-announces it (no transition happened).
+function updateGenerationProgressUI(): void {
+  if (!genProgressBarsEl && !milestoneTrackerEl) return
+
+  const capturedIds = getCapturedIds()
+
+  if (milestoneTrackerEl) {
+    const globalPercentage = calculatePercentage(capturedIds.size, manifestTotal)
+    const reached = getReachedMilestones(globalPercentage)
+
+    milestoneTrackerEl.innerHTML = MILESTONE_THRESHOLDS.map((threshold) => {
+      const isReached = reached.includes(threshold)
+      return `<span class="milestone-node${isReached ? ' is-reached' : ''}">${threshold}%</span>`
+    }).join('')
+
+    if (globalPercentage > lastGlobalPercentage) {
+      const newlyReached = reached.filter(
+        (m) => !getReachedMilestones(lastGlobalPercentage).includes(m),
+      )
+      if (newlyReached.length > 0) {
+        const locale = getCurrentLocale()
+        const t = getTranslations(locale)
+        const milestone = newlyReached[newlyReached.length - 1]
+        toast.success(t.pokedex.milestoneReached.replace('{pct}', String(milestone)))
+      }
+    }
+    lastGlobalPercentage = globalPercentage
+  }
+
+  if (genProgressBarsEl && cachedGenerations.length > 0) {
+    const regionProgress = calculateRegionProgress(cachedGenerations, capturedIds)
+    genProgressBarsEl.innerHTML = regionProgress
+      .map((r) => {
+        const isActive = selectedGenerations.has(r.generationName)
+        return `
+          <button
+            type="button"
+            class="generation-progress-bar"
+            data-generation-progress-bar
+            data-generation="${r.generationName}"
+            aria-pressed="${isActive}"
+          >
+            <span class="generation-progress-bar__label">
+              <span>${r.displayName}</span>
+              <span class="generation-progress-bar__count">${r.caughtCount}/${r.totalCount}</span>
+            </span>
+            <span class="generation-progress-bar__track">
+              <span class="generation-progress-bar__fill" style="width:${r.percentage}%"></span>
+            </span>
+          </button>
+        `
+      })
+      .join('')
+  }
+}
+
 // Ids whose card-level capture animation this page's own grid click just
 // started — CAPTURED_CHANGED_EVENT fires synchronously from setCaptured(),
 // before that click handler finishes updating the card itself, so the
 // cross-source sync below must skip them to avoid stomping the mid-flight
 // reveal animation with an instant class toggle.
 const animatingIds = new Set<number>()
+
+// Keeps the round captured-badge's version tint/title in sync — needed not
+// just on first render but also when a modal toggle flips which version(s)
+// a pokemon is attributed to without necessarily flipping `captured` itself
+// (e.g. going from "only A" to "both"). "Both" gets --success rather than
+// either game's color, matching the same choice made in renderCardHTML.
+function syncCapturedBadgeAppearance(card: HTMLElement, id: number): void {
+  const badge = card.querySelector<HTMLElement>('.captured-badge')
+  if (!badge) return
+  const locale = getCurrentLocale()
+  const t = getTranslations(locale)
+  const appearance = getCapturedBadgeAppearance(getDualVersionCaptureInfo(id), locale, t)
+
+  if (appearance.bg) badge.style.setProperty('--captured-badge-bg', appearance.bg)
+  else badge.style.removeProperty('--captured-badge-bg')
+
+  if (appearance.color) badge.style.setProperty('--captured-badge-color', appearance.color)
+  else badge.style.removeProperty('--captured-badge-color')
+
+  badge.title = appearance.title
+}
 
 // Keeps a card in the grid correct when captured state changes from
 // somewhere other than clicking that same card (e.g. the detail modal) —
@@ -285,6 +544,7 @@ function syncCardCapturedState(id: number, captured: boolean): void {
     btn.innerHTML = `<i data-lucide="${captured ? 'check' : 'circle-dot'}"></i> ${captured ? t.pokedex.caught : t.pokedex.catch}`
     refreshIcons()
   }
+  syncCapturedBadgeAppearance(card, id)
 
   if (!captured && view === 'captured') applyFilters()
 }
@@ -730,6 +990,7 @@ function populateGameSelect(generations: GenerationInfo[]): void {
 // --- filter collapse & active badge --------------------------------------
 
 const STORAGE_KEY_FILTERS_EXPANDED = 'poketeam:pokedex-filters-expanded'
+const STORAGE_KEY_GEN_PROGRESS_EXPANDED = 'poketeam:generation-progress-expanded'
 
 let filtersExpanded = false
 
@@ -762,6 +1023,41 @@ function toggleFilters(): void {
   updateFiltersCollapseUI(willExpand)
   try {
     sessionStorage.setItem(STORAGE_KEY_FILTERS_EXPANDED, String(willExpand))
+  } catch {
+    // Ignore storage issues
+  }
+}
+
+let genProgressExpanded = false
+
+function updateGenerationProgressCollapseUI(expanded: boolean): void {
+  genProgressExpanded = expanded
+  const locale = getCurrentLocale()
+  const t = getTranslations(locale)
+
+  if (genProgressPanelEl) {
+    if (expanded) {
+      genProgressPanelEl.classList.remove('is-collapsed')
+      genProgressPanelEl.classList.add('is-expanded')
+    } else {
+      genProgressPanelEl.classList.add('is-collapsed')
+      genProgressPanelEl.classList.remove('is-expanded')
+    }
+  }
+
+  if (genProgressBodyEl) {
+    genProgressBodyEl.hidden = !expanded
+  }
+
+  if (genProgressToggleBtn) {
+    genProgressToggleBtn.setAttribute('aria-expanded', String(expanded))
+    genProgressToggleBtn.classList.toggle('is-active', expanded)
+    const label = expanded ? t.pokedex.hideRegionProgress : t.pokedex.progressByRegion
+    genProgressToggleBtn.title = label
+  }
+
+  try {
+    sessionStorage.setItem(STORAGE_KEY_GEN_PROGRESS_EXPANDED, String(expanded))
   } catch {
     // Ignore storage issues
   }
@@ -806,10 +1102,12 @@ function clearAllFilters(): void {
     selectedExclusiveFilters = new Set(['all'])
     updateGameModeToggleUI()
     updateExclusiveToggleUI()
+    updateVersionProgressUI()
     changed = true
   } else if (!selectedExclusiveFilters.has('all')) {
     selectedExclusiveFilters = new Set(['all'])
     updateExclusiveToggleUI()
+    updateVersionProgressUI()
     changed = true
   }
 
@@ -834,6 +1132,9 @@ function clearAllFilters(): void {
     genFilterEl.querySelectorAll<HTMLButtonElement>('[data-generation]').forEach((btn) => {
       btn.setAttribute('aria-pressed', 'false')
     })
+    genProgressBarsEl
+      ?.querySelectorAll<HTMLButtonElement>('[data-generation-progress-bar]')
+      .forEach((btn) => btn.setAttribute('aria-pressed', 'false'))
     changed = true
   }
 
@@ -943,13 +1244,21 @@ typeModeToggleEl?.addEventListener('click', (e) => {
 genFilterEl.addEventListener('click', (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-generation]')
   if (!btn) return
-  const g = btn.dataset.generation!
-  const pressed = btn.getAttribute('aria-pressed') === 'true'
-  btn.setAttribute('aria-pressed', String(!pressed))
-  if (pressed) selectedGenerations.delete(g)
-  else selectedGenerations.add(g)
-  updateActiveFilterBadge()
-  applyFilters()
+  toggleGenerationFilter(btn.dataset.generation!)
+})
+
+genProgressBarsEl?.addEventListener('click', (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-generation-progress-bar]')
+  if (!btn) return
+  toggleGenerationFilter(btn.dataset.generation!)
+})
+
+genProgressToggleBtn?.addEventListener('click', () => {
+  updateGenerationProgressCollapseUI(!genProgressExpanded)
+})
+
+genProgressCloseBtn?.addEventListener('click', () => {
+  updateGenerationProgressCollapseUI(false)
 })
 
 let movesInputDebounce: number | undefined
@@ -1102,6 +1411,7 @@ gameFilterEl?.addEventListener('change', () => {
   selectedExclusiveFilters = new Set(['all'])
   updateGameModeToggleUI()
   updateExclusiveToggleUI()
+  updateVersionProgressUI()
   updateCapturedCounter()
   updateActiveFilterBadge()
   applyFilters()
@@ -1115,6 +1425,7 @@ gameModeToggleEl?.addEventListener('click', (e) => {
     selectedGameMode = mode
     setGameDexMode(mode)
     updateGameModeToggleUI()
+    updateVersionProgressUI()
     updateCapturedCounter()
     applyFilters()
   }
@@ -1150,6 +1461,23 @@ exclusiveToggleEl?.addEventListener('click', (e) => {
   exclusiveToggleEl.querySelectorAll<HTMLButtonElement>('[data-exclusive-filter]').forEach((b) => {
     b.setAttribute('aria-pressed', String(selectedExclusiveFilters.has(b.dataset.exclusiveFilter!)))
   })
+  updateVersionProgressUI()
+  updateCapturedCounter()
+  updateActiveFilterBadge()
+  applyFilters()
+})
+
+versionProgressEl?.addEventListener('click', (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-version-pill]')
+  const versionId = btn?.dataset.versionId
+  if (!versionId) return
+
+  // Reuse the existing exclusive-filter mechanism instead of inventing a
+  // second "active version" concept — clicking a pill narrows the grid to
+  // that version's pokemon, same as picking it in the exclusive toggle.
+  selectedExclusiveFilters = new Set([versionId])
+  updateExclusiveToggleUI()
+  updateVersionProgressUI()
   updateCapturedCounter()
   updateActiveFilterBadge()
   applyFilters()
@@ -1202,6 +1530,7 @@ loadMoreBtn.addEventListener('click', () => {
 
 window.addEventListener(CAPTURED_CHANGED_EVENT, (e) => {
   updateCapturedCounter()
+  updateGenerationProgressUI()
   const detail = (e as CustomEvent<{ changedId?: number; captured?: boolean }>).detail
   if (detail && detail.changedId !== undefined) {
     if (!animatingIds.has(detail.changedId)) {
@@ -1213,6 +1542,12 @@ window.addEventListener(CAPTURED_CHANGED_EVENT, (e) => {
   }
 })
 
+window.addEventListener(CAPTURED_BY_GAME_CHANGED_EVENT, () => {
+  updateVersionProgressUI()
+  updateCapturedCounter()
+  updateGenerationProgressUI()
+})
+
 window.addEventListener(GAME_CHANGED_EVENT, (e) => {
   const newGame = (e as CustomEvent<{ game: string }>).detail?.game ?? ''
   if (newGame !== selectedGame) {
@@ -1222,7 +1557,9 @@ window.addEventListener(GAME_CHANGED_EVENT, (e) => {
     selectedExclusiveFilters = new Set(['all'])
     updateGameModeToggleUI()
     updateExclusiveToggleUI()
+    updateVersionProgressUI()
     updateCapturedCounter()
+    updateGenerationProgressUI()
     updateActiveFilterBadge()
     applyFilters()
   }
@@ -1233,7 +1570,9 @@ window.addEventListener(GAME_DEX_MODE_CHANGED_EVENT, (e) => {
   if (newMode !== selectedGameMode) {
     selectedGameMode = newMode
     updateGameModeToggleUI()
+    updateVersionProgressUI()
     updateCapturedCounter()
+    updateGenerationProgressUI()
     applyFilters()
   }
 })
@@ -1241,7 +1580,10 @@ window.addEventListener(GAME_DEX_MODE_CHANGED_EVENT, (e) => {
 window.addEventListener(DATA_RESET_EVENT, () => {
   updateGameModeToggleUI()
   updateExclusiveToggleUI()
+  updateVersionProgressUI()
   updateCapturedCounter()
+  lastGlobalPercentage = 0
+  updateGenerationProgressUI()
   updateActiveFilterBadge()
   for (const card of grid.querySelectorAll<HTMLElement>('.pokemon-card')) {
     card.classList.remove('pokemon-card--captured')
@@ -1271,6 +1613,15 @@ async function init(): Promise<void> {
   updateFiltersCollapseUI(initialExpanded)
   updateActiveFilterBadge()
 
+  let initialGenProgressExpanded = false
+  try {
+    initialGenProgressExpanded =
+      sessionStorage.getItem(STORAGE_KEY_GEN_PROGRESS_EXPANDED) === 'true'
+  } catch {
+    // Ignore storage issues
+  }
+  updateGenerationProgressCollapseUI(initialGenProgressExpanded)
+
   filterToggleBtn?.addEventListener('click', toggleFilters)
   closeFiltersBtn?.addEventListener('click', () => {
     updateFiltersCollapseUI(false)
@@ -1297,6 +1648,7 @@ async function init(): Promise<void> {
   activeExclusivesMap = getExclusiveMapForGame(selectedGame)
   updateGameModeToggleUI()
   updateExclusiveToggleUI()
+  updateVersionProgressUI()
   updateCapturedCounter()
 
   if (selectedGame) {
@@ -1329,11 +1681,14 @@ async function init(): Promise<void> {
   })
   getTypeChart().then((chart) => populateTypeChips(chart.types))
   getGenerations().then((gens) => {
+    cachedGenerations = gens
     populateGenerationChips(gens)
     populateGameSelect(gens)
     updateGameModeToggleUI()
     updateExclusiveToggleUI()
+    updateVersionProgressUI()
     updateCapturedCounter()
+    updateGenerationProgressUI()
     updateActiveFilterBadge()
   })
 }

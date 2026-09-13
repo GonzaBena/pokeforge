@@ -1,0 +1,35 @@
+---
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import '../styles/components/generation-progress-panel.css'
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+---
+
+<section
+  id="generation-progress-panel"
+  class="generation-progress-panel is-collapsed"
+  data-generation-progress-panel
+  aria-label={t.pokedex.progressByRegion}
+>
+  <div class="generation-progress-panel__inner">
+    <div class="generation-progress-panel__card" data-generation-progress-body hidden>
+      <div class="generation-progress-panel__header">
+        <div class="generation-progress-panel__title">
+          <i data-lucide="map"></i>
+          <span>{t.pokedex.progressByRegion}</span>
+        </div>
+        <button
+          type="button"
+          class="generation-progress-panel__close-btn"
+          data-generation-progress-close
+          title={t.pokedex.hideRegionProgress}
+          aria-label={t.pokedex.hideRegionProgress}
+        >
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="generation-progress-panel__milestones" data-milestone-tracker></div>
+      <div class="generation-progress-panel__bars" data-generation-progress-bars></div>
+    </div>
+  </div>
+</section>

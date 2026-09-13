@@ -1,0 +1,325 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro'
+import {
+  getTranslations,
+  getLocalizedPath,
+  type Locale,
+} from '../lib/i18n/translations'
+import '../styles/features/dashboard/dashboard.css'
+
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+const dashboardHref = getLocalizedPath('/dashboard/', currentLocale)
+---
+
+<DashboardLayout title={t.dashboard.notificationsTitle}>
+  <div class="dashboard-page notifications-page">
+    <div class="dashboard-ambient-glow" aria-hidden="true"></div>
+
+    <!-- Header with Back Button -->
+    <header class="dashboard-header">
+      <div class="settings-header-top">
+        <a href={dashboardHref} class="settings-back-btn" data-astro-prefetch>
+          <i data-lucide="arrow-left"></i>
+          <span>{t.dashboard.backToDashboard}</span>
+        </a>
+        <div class="dashboard-header__badge">
+          <i data-lucide="bell"></i>
+          <span>PokeForge Hub</span>
+        </div>
+      </div>
+      <div class="dashboard-header__title-row">
+        <h1 class="dashboard-header__title">{t.dashboard.notificationsTitle}</h1>
+        <span
+          class="dashboard-notifications-count-badge"
+          data-notifications-header-badge
+          hidden
+        >
+          0
+        </span>
+      </div>
+      <p class="dashboard-header__subtitle">{t.dashboard.notificationsSubtitle}</p>
+    </header>
+
+    <!-- Main Notifications Section -->
+    <section class="dashboard-section" id="unassigned" data-notifications-section>
+      <!-- Estado activo: Hay notificaciones pendientes -->
+      <div class="notifications-content" data-notifications-active hidden>
+        <div class="notifications-actions-bar">
+          <div class="notifications-summary-info">
+            <i data-lucide="alert-triangle"></i>
+            <span data-notifications-summary-text></span>
+          </div>
+          <div class="notifications-bulk-actions">
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-assign-all-auto-btn
+            >
+              <i data-lucide="sparkles"></i>
+              <span>{t.dashboard.assignAllAuto}</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn--secondary btn--sm"
+              data-assign-all-both-btn
+            >
+              <i data-lucide="layers"></i>
+              <span>{t.dashboard.assignAllBoth}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="notifications-table-wrapper">
+          <table class="notifications-table">
+            <thead>
+              <tr>
+                <th>{t.dashboard.pokemonCol}</th>
+                <th>{t.dashboard.gameCol}</th>
+                <th>{t.dashboard.exclusiveBadge.replace('{version}', '')}</th>
+                <th>{t.dashboard.assignmentAction}</th>
+              </tr>
+            </thead>
+            <tbody data-notifications-table-body>
+              <!-- Fila inyectada por script -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Estado vacío: Sin notificaciones -->
+      <div class="notifications-empty-state" data-notifications-empty>
+        <div class="notifications-empty-icon">
+          <i data-lucide="check-circle-2"></i>
+        </div>
+        <h3 class="notifications-empty-title">{t.dashboard.noNotifications}</h3>
+        <p class="notifications-empty-desc">{t.dashboard.noNotificationsDesc}</p>
+      </div>
+    </section>
+  </div>
+</DashboardLayout>
+
+<script>
+  import { getAllPokemon } from '../lib/pokedexData'
+  import type { Pokemon } from '../lib/types'
+  import {
+    getUnassignedCaptures,
+    assignCapture,
+    autoAssignAll,
+    assignAllToBoth,
+    VERSION_ASSIGNMENT_CHANGED_EVENT,
+  } from '../lib/versionAssignment'
+  import {
+    CAPTURED_CHANGED_EVENT,
+    CAPTURED_BY_GAME_CHANGED_EVENT,
+  } from '../lib/storage'
+  import { getCurrentLocale, getTranslations, GAME_NAMES } from '../lib/i18n/translations'
+  import { capitalize } from '../lib/team/helpers'
+  import { toast } from '../lib/toast'
+  import { refreshIcons } from '../lib/icons'
+
+  async function initNotificationsPage() {
+    const locale = getCurrentLocale()
+    const t = getTranslations(locale)
+    const allPokemon: Pokemon[] = await getAllPokemon()
+    const pkmMap = new Map<number, Pokemon>(allPokemon.map((p) => [p.id, p]))
+
+    const section = document.querySelector<HTMLElement>('[data-notifications-section]')
+    if (!section) return
+
+    const activeContainer = section.querySelector<HTMLElement>('[data-notifications-active]')
+    const emptyContainer = section.querySelector<HTMLElement>('[data-notifications-empty]')
+    const summaryText = section.querySelector<HTMLElement>('[data-notifications-summary-text]')
+    const tableBody = section.querySelector<HTMLTableSectionElement>('[data-notifications-table-body]')
+    const headerBadge = document.querySelector<HTMLElement>('[data-notifications-header-badge]')
+
+    const autoAssignBtn = section.querySelector<HTMLButtonElement>('[data-assign-all-auto-btn]')
+    const bothAssignBtn = section.querySelector<HTMLButtonElement>('[data-assign-all-both-btn]')
+
+    function renderNotifications() {
+      const unassignedList = getUnassignedCaptures()
+      const count = unassignedList.length
+
+      if (headerBadge) {
+        headerBadge.hidden = count === 0
+        headerBadge.textContent = String(count)
+      }
+
+      if (count === 0) {
+        if (activeContainer) activeContainer.hidden = true
+        if (emptyContainer) emptyContainer.hidden = false
+        refreshIcons()
+        return
+      }
+
+      if (emptyContainer) emptyContainer.hidden = true
+      if (activeContainer) activeContainer.hidden = false
+
+      if (summaryText) {
+        summaryText.textContent = t.syncModal.unassignedAlertTitle.replace('{n}', String(count))
+      }
+
+      if (!tableBody) return
+      tableBody.innerHTML = ''
+
+      unassignedList.forEach((item) => {
+        const pkm = pkmMap.get(item.id)
+        const name = pkm ? capitalize(pkm.name) : `#${item.id}`
+        const spriteUrl =
+          pkm?.sprites?.officialArtwork ||
+          pkm?.sprites?.default ||
+          `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png`
+        const numFormatted = `#${String(item.id).padStart(4, '0')}`
+        const gameName = GAME_NAMES[item.gameKey]?.[locale] ?? item.gameKey
+
+        const tr = document.createElement('tr')
+        tr.className = 'notif-row'
+        tr.dataset.notifRow = String(item.id)
+
+        // Exclusive badge HTML
+        let exclusiveHtml = ''
+        const nameA = locale === 'es' ? item.versionA.nameEs : item.versionA.name
+        const nameB = locale === 'es' ? item.versionB.nameEs : item.versionB.name
+
+        if (item.exclusiveTo === 'a') {
+          exclusiveHtml = `
+            <span class="notif-excl-pill" style="--excl-color: ${item.versionA.color};">
+              ${t.dashboard.exclusiveBadge.replace('{version}', nameA)}
+            </span>
+          `
+        } else if (item.exclusiveTo === 'b') {
+          exclusiveHtml = `
+            <span class="notif-excl-pill" style="--excl-color: ${item.versionB.color};">
+              ${t.dashboard.exclusiveBadge.replace('{version}', nameB)}
+            </span>
+          `
+        } else {
+          exclusiveHtml = `
+            <span class="notif-excl-pill notif-excl-pill--both">
+              ${t.dashboard.bothAvailable}
+            </span>
+          `
+        }
+
+        tr.innerHTML = `
+          <td>
+            <div class="notif-cell-pokemon">
+              <img
+                data-sprite-src="${spriteUrl}"
+                alt="${name}"
+                class="notif-sprite"
+                width="40"
+                height="40"
+              />
+              <div class="notif-pokemon-meta">
+                <span class="notif-pokemon-id">${numFormatted}</span>
+                <strong class="notif-pokemon-name">${name}</strong>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="notif-cell-game">
+              <span class="notif-game-title">${gameName}</span>
+              <div class="notif-version-dots">
+                <span class="notif-version-dot" style="--dot-color: ${item.versionA.color};" title="${nameA}"></span>
+                <span class="notif-version-dot" style="--dot-color: ${item.versionB.color};" title="${nameB}"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            ${exclusiveHtml}
+          </td>
+          <td>
+            <div class="notif-btn-group" role="group" aria-label="${t.dashboard.assignmentAction}">
+              <button
+                type="button"
+                class="notif-btn"
+                style="--btn-color: ${item.versionA.color};"
+                data-assign-btn="a"
+                title="${nameA}"
+              >
+                ${nameA}
+              </button>
+              <button
+                type="button"
+                class="notif-btn"
+                style="--btn-color: ${item.versionB.color};"
+                data-assign-btn="b"
+                title="${nameB}"
+              >
+                ${nameB}
+              </button>
+              <button
+                type="button"
+                class="notif-btn notif-btn--both"
+                data-assign-btn="both"
+                title="${t.dashboard.bothVersions}"
+              >
+                ${t.dashboard.bothVersions}
+              </button>
+            </div>
+          </td>
+        `
+
+        const btnA = tr.querySelector<HTMLButtonElement>('[data-assign-btn="a"]')
+        const btnB = tr.querySelector<HTMLButtonElement>('[data-assign-btn="b"]')
+        const btnBoth = tr.querySelector<HTMLButtonElement>('[data-assign-btn="both"]')
+
+        btnA?.addEventListener('click', () => {
+          assignCapture(item.id, item.gameKey, 'a')
+          toast.success(
+            t.dashboard.assignedSuccessToast
+              .replace('{name}', name)
+              .replace('{version}', nameA),
+          )
+          renderNotifications()
+        })
+
+        btnB?.addEventListener('click', () => {
+          assignCapture(item.id, item.gameKey, 'b')
+          toast.success(
+            t.dashboard.assignedSuccessToast
+              .replace('{name}', name)
+              .replace('{version}', nameB),
+          )
+          renderNotifications()
+        })
+
+        btnBoth?.addEventListener('click', () => {
+          assignCapture(item.id, item.gameKey, 'both')
+          toast.success(
+            t.dashboard.assignedSuccessToast
+              .replace('{name}', name)
+              .replace('{version}', t.dashboard.bothVersions),
+          )
+          renderNotifications()
+        })
+
+        tableBody.appendChild(tr)
+      })
+
+      refreshIcons()
+    }
+
+    autoAssignBtn?.addEventListener('click', () => {
+      autoAssignAll()
+      toast.success(t.syncModal.autoAssignSuccess)
+      renderNotifications()
+    })
+
+    bothAssignBtn?.addEventListener('click', () => {
+      assignAllToBoth()
+      toast.success(t.syncModal.autoAssignSuccess)
+      renderNotifications()
+    })
+
+    renderNotifications()
+
+    window.addEventListener(VERSION_ASSIGNMENT_CHANGED_EVENT, renderNotifications)
+    window.addEventListener(CAPTURED_BY_GAME_CHANGED_EVENT, renderNotifications)
+    window.addEventListener(CAPTURED_CHANGED_EVENT, renderNotifications)
+  }
+
+  initNotificationsPage()
+  document.addEventListener('astro:after-swap', initNotificationsPage)
+</script>

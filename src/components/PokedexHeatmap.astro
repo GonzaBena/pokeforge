@@ -1,0 +1,290 @@
+---
+import { getTranslations, type Locale, TYPE_NAMES, getLocalizedPath } from '../lib/i18n/translations'
+import type { GenerationInfo } from '../lib/types'
+import { TYPE_COLORS } from '../lib/typeColors'
+import '../styles/components/pokedex-heatmap.css'
+
+interface Props {
+  generations: GenerationInfo[]
+}
+
+const { generations } = Astro.props
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+const pokedexHref = getLocalizedPath('/pokedex/', currentLocale)
+const typesList = Object.keys(TYPE_COLORS)
+---
+
+<section class="dashboard-section" id="national-matrix" aria-label={t.dashboard.heatmapTitle}>
+  <div class="pokedex-heatmap" data-pokedex-heatmap data-locale={currentLocale} data-pokedex-href={pokedexHref}>
+    <!-- Top Header -->
+    <div class="pokedex-heatmap__top">
+      <div class="pokedex-heatmap__header-info">
+        <div class="pokedex-heatmap__icon">
+          <i data-lucide="layout-grid"></i>
+        </div>
+        <div class="pokedex-heatmap__titles">
+          <h2 class="pokedex-heatmap__title">
+            <span>{t.dashboard.heatmapTitle}</span>
+          </h2>
+          <p class="pokedex-heatmap__subtitle">{t.dashboard.heatmapSubtitle}</p>
+        </div>
+      </div>
+
+      <div class="pokedex-heatmap__badges">
+        <div class="pokedex-heatmap__stat-badge pokedex-heatmap__stat-badge--highlight">
+          <i data-lucide="sparkles"></i>
+          <span data-heatmap-caught-text>0 / 1025</span>
+        </div>
+        <div class="pokedex-heatmap__stat-badge">
+          <span data-heatmap-pct-text>0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls / Filters -->
+    <div class="pokedex-heatmap__controls">
+      <select class="pokedex-heatmap__select" data-heatmap-gen-select aria-label={t.dashboard.filterByGen}>
+        <option value="all">{t.dashboard.heatmapAllGens}</option>
+        {generations.map((g) => (
+          <option value={g.name}>{g.displayName} ({g.region})</option>
+        ))}
+      </select>
+
+      <select class="pokedex-heatmap__select" data-heatmap-type-select aria-label={t.dashboard.heatmapAllTypes}>
+        <option value="all">{t.dashboard.heatmapAllTypes}</option>
+        {typesList.map((typeKey) => (
+          <option value={typeKey}>{TYPE_NAMES[typeKey]?.[currentLocale] ?? typeKey}</option>
+        ))}
+      </select>
+    </div>
+
+    <!-- 1025 Pixels Grid -->
+    <div class="pokedex-heatmap__grid-wrap">
+      <div class="pokedex-heatmap__grid" data-heatmap-grid role="grid" aria-label={t.dashboard.heatmapTitle}>
+        <!-- Populated via client script -->
+      </div>
+    </div>
+
+    <!-- Type Legend Row -->
+    <div class="pokedex-heatmap__legend">
+      <span class="pokedex-heatmap__legend-label">{currentLocale === 'es' ? 'Filtrar tipo:' : 'Filter type:'}</span>
+      {typesList.map((typeKey) => (
+        <button
+          type="button"
+          class="pokedex-heatmap__legend-pill"
+          data-type-pill={typeKey}
+          style={`--type-bg: ${TYPE_COLORS[typeKey]};`}
+        >
+          <span class="pokedex-heatmap__legend-dot"></span>
+          <span>{TYPE_NAMES[typeKey]?.[currentLocale] ?? typeKey}</span>
+        </button>
+      ))}
+    </div>
+
+    <!-- Floating Tooltip -->
+    <div class="pokedex-heatmap__tooltip" data-heatmap-tooltip role="tooltip" aria-hidden="true">
+      <img class="pokedex-heatmap__tooltip-sprite" data-tooltip-sprite src="" alt="" />
+      <div class="pokedex-heatmap__tooltip-info">
+        <span class="pokedex-heatmap__tooltip-id" data-tooltip-id>#0001</span>
+        <span class="pokedex-heatmap__tooltip-name" data-tooltip-name>Bulbasaur</span>
+        <div class="pokedex-heatmap__tooltip-types" data-tooltip-types></div>
+        <span class="pokedex-heatmap__tooltip-status" data-tooltip-status></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { getAllPokemon } from '../lib/pokedexData'
+  import { getCapturedIds, CAPTURED_CHANGED_EVENT, CAPTURED_BY_GAME_CHANGED_EVENT } from '../lib/storage'
+  import { buildHeatmapData, getHeatmapStats, type HeatmapPixel } from '../lib/pokedexHeatmap'
+  import { TYPE_COLORS } from '../lib/typeColors'
+  import { TYPE_NAMES, getTranslations, type Locale } from '../lib/i18n/translations'
+  import { refreshIcons } from '../lib/icons'
+
+  function initHeatmap() {
+    const container = document.querySelector<HTMLElement>('[data-pokedex-heatmap]')
+    if (!container) return
+
+    const grid = container.querySelector<HTMLElement>('[data-heatmap-grid]')
+    const caughtText = container.querySelector<HTMLElement>('[data-heatmap-caught-text]')
+    const pctText = container.querySelector<HTMLElement>('[data-heatmap-pct-text]')
+    const genSelect = container.querySelector<HTMLSelectElement>('[data-heatmap-gen-select]')
+    const typeSelect = container.querySelector<HTMLSelectElement>('[data-heatmap-type-select]')
+    const typePills = container.querySelectorAll<HTMLButtonElement>('[data-type-pill]')
+    const tooltip = container.querySelector<HTMLElement>('[data-heatmap-tooltip]')
+
+    const tooltipSprite = container.querySelector<HTMLImageElement>('[data-tooltip-sprite]')
+    const tooltipId = container.querySelector<HTMLElement>('[data-tooltip-id]')
+    const tooltipName = container.querySelector<HTMLElement>('[data-tooltip-name]')
+    const tooltipTypes = container.querySelector<HTMLElement>('[data-tooltip-types]')
+    const tooltipStatus = container.querySelector<HTMLElement>('[data-tooltip-status]')
+
+    const locale = (container.dataset.locale || 'en') as Locale
+    const t = getTranslations(locale)
+    const pokedexHref = container.dataset.pokedexHref || '/pokedex/'
+
+    let allPixels: HeatmapPixel[] = []
+    const pixelElements = new Map<number, HTMLButtonElement>()
+    let activeTypeFilter = 'all'
+    let activeGenFilter = 'all'
+
+    // Load data and create grid
+    getAllPokemon().then((pokemonList) => {
+      const capturedIds = getCapturedIds()
+      allPixels = buildHeatmapData(pokemonList, capturedIds)
+
+      if (!grid) return
+
+      const fragment = document.createDocumentFragment()
+      for (const pixel of allPixels) {
+        const btn = document.createElement('button')
+        btn.type = 'button'
+        btn.className = `pokedex-heatmap__pixel ${pixel.isCaptured ? 'pokedex-heatmap__pixel--captured' : ''}`
+        btn.dataset.id = String(pixel.id)
+        btn.dataset.gen = pixel.generation
+        btn.dataset.types = pixel.types.join(',')
+        btn.style.setProperty('--pixel-bg', pixel.backgroundStyle)
+        btn.style.setProperty('--pixel-glow', pixel.primaryColor)
+        btn.setAttribute(
+          'aria-label',
+          `#${pixel.id.toString().padStart(4, '0')} ${pixel.name} (${pixel.types.join('/')})`
+        )
+
+        btn.addEventListener('mouseenter', (e) => showTooltip(pixel, e.currentTarget as HTMLElement))
+        btn.addEventListener('mouseleave', hideTooltip)
+        btn.addEventListener('focus', (e) => showTooltip(pixel, e.currentTarget as HTMLElement))
+        btn.addEventListener('blur', hideTooltip)
+
+        btn.addEventListener('click', () => {
+          window.location.href = `${pokedexHref}?id=${pixel.id}`
+        })
+
+        pixelElements.set(pixel.id, btn)
+        fragment.appendChild(btn)
+      }
+
+      grid.replaceChildren(fragment)
+      updateStats()
+      applyFilters()
+      refreshIcons()
+    })
+
+    function updateStats() {
+      const capturedIds = getCapturedIds()
+      for (const pixel of allPixels) {
+        pixel.isCaptured = capturedIds.has(pixel.id)
+        const el = pixelElements.get(pixel.id)
+        if (el) {
+          el.classList.toggle('pokedex-heatmap__pixel--captured', pixel.isCaptured)
+        }
+      }
+
+      const stats = getHeatmapStats(allPixels)
+      if (caughtText) caughtText.textContent = `${stats.caught} / ${stats.total}`
+      if (pctText) pctText.textContent = `${stats.percentage}%`
+    }
+
+    function applyFilters() {
+      for (const pixel of allPixels) {
+        const el = pixelElements.get(pixel.id)
+        if (!el) continue
+
+        const matchesGen = activeGenFilter === 'all' || pixel.generation === activeGenFilter
+        const matchesType =
+          activeTypeFilter === 'all' || pixel.types.map((t) => t.toLowerCase()).includes(activeTypeFilter)
+
+        const visible = matchesGen && matchesType
+        el.classList.toggle('pokedex-heatmap__pixel--dimmed', !visible)
+        el.classList.toggle('pokedex-heatmap__pixel--highlight', visible && activeTypeFilter !== 'all')
+      }
+    }
+
+    function showTooltip(pixel: HeatmapPixel, targetEl: HTMLElement) {
+      if (!tooltip) return
+
+      const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pixel.id}.png`
+      if (tooltipSprite) {
+        tooltipSprite.src = spriteUrl
+        tooltipSprite.alt = pixel.name
+      }
+
+      if (tooltipId) tooltipId.textContent = `#${pixel.id.toString().padStart(4, '0')}`
+      if (tooltipName) tooltipName.textContent = pixel.name
+
+      if (tooltipTypes) {
+        tooltipTypes.innerHTML = pixel.types
+          .map((typeName) => {
+            const color = TYPE_COLORS[typeName.toLowerCase()] ?? '#888'
+            const localized = TYPE_NAMES[typeName.toLowerCase()]?.[locale] ?? typeName
+            return `<span class="pokedex-heatmap__tooltip-type-badge" style="background:${color};">${localized}</span>`
+          })
+          .join('')
+      }
+
+      if (tooltipStatus) {
+        if (pixel.isCaptured) {
+          tooltipStatus.className = 'pokedex-heatmap__tooltip-status pokedex-heatmap__tooltip-status--caught'
+          tooltipStatus.textContent = `✓ ${t.dashboard.heatmapStatusCaught}`
+        } else {
+          tooltipStatus.className = 'pokedex-heatmap__tooltip-status pokedex-heatmap__tooltip-status--uncaught'
+          tooltipStatus.textContent = `○ ${t.dashboard.heatmapStatusUncaught}`
+        }
+      }
+
+      // Position tooltip
+      const rect = targetEl.getBoundingClientRect()
+      const x = rect.left + rect.width / 2
+      const y = rect.top
+
+      tooltip.style.left = `${x}px`
+      tooltip.style.top = `${y}px`
+      tooltip.classList.add('is-visible')
+      tooltip.setAttribute('aria-hidden', 'false')
+    }
+
+    function hideTooltip() {
+      if (!tooltip) return
+      tooltip.classList.remove('is-visible')
+      tooltip.setAttribute('aria-hidden', 'true')
+    }
+
+    // Filter event listeners
+    genSelect?.addEventListener('change', () => {
+      activeGenFilter = genSelect.value
+      applyFilters()
+    })
+
+    typeSelect?.addEventListener('change', () => {
+      activeTypeFilter = typeSelect.value
+      typePills.forEach((p) => {
+        p.classList.toggle('is-active', p.dataset.typePill === activeTypeFilter)
+      })
+      applyFilters()
+    })
+
+    typePills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const type = pill.dataset.typePill || 'all'
+        if (activeTypeFilter === type) {
+          activeTypeFilter = 'all'
+          if (typeSelect) typeSelect.value = 'all'
+        } else {
+          activeTypeFilter = type
+          if (typeSelect) typeSelect.value = type
+        }
+        typePills.forEach((p) => {
+          p.classList.toggle('is-active', p.dataset.typePill === activeTypeFilter)
+        })
+        applyFilters()
+      })
+    })
+
+    window.addEventListener(CAPTURED_CHANGED_EVENT, updateStats)
+    window.addEventListener(CAPTURED_BY_GAME_CHANGED_EVENT, updateStats)
+  }
+
+  initHeatmap()
+  document.addEventListener('astro:after-swap', initHeatmap)
+</script>

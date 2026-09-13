@@ -39,6 +39,19 @@ export const EVOLUTION_TRIGGER_NAMES: Record<string, { en: string; es: string }>
   other: { en: 'Special', es: 'Especial' },
 }
 
+export const CAPTURE_METHOD_NAMES: Record<
+  'wild' | 'egg' | 'gift' | 'trade' | 'event' | 'breed' | 'other',
+  { en: string; es: string }
+> = {
+  wild: { en: 'Wild encounter', es: 'Encuentro salvaje' },
+  egg: { en: 'Egg', es: 'Huevo' },
+  gift: { en: 'Gift', es: 'Regalo' },
+  trade: { en: 'Trade', es: 'Intercambio' },
+  event: { en: 'Event', es: 'Evento' },
+  breed: { en: 'Breeding', es: 'Cría' },
+  other: { en: 'Other', es: 'Otro' },
+}
+
 export const NATURE_NAMES: Record<string, { en: string; es: string }> = {
   hardy: { en: 'Hardy', es: 'Fuerte' },
   lonely: { en: 'Lonely', es: 'Huraña' },
@@ -69,6 +82,7 @@ export const NATURE_NAMES: Record<string, { en: string; es: string }> = {
 
 export interface Translations {
   nav: {
+    dashboard: string
     pokedex: string
     team: string
     blog: string
@@ -158,6 +172,9 @@ export interface Translations {
     exclusiveBoth: string
     exclusiveOnly: string
     exclusiveBadge: string
+    captureVersionLabel: string
+    capturedInVersion: string
+    capturedInBoth: string
     filters: string
     showFilters: string
     hideFilters: string
@@ -170,6 +187,10 @@ export interface Translations {
     clearMoves: string
     moveLearnedBy: string
     popularMovesHint: string
+    progressByRegion: string
+    hideRegionProgress: string
+    milestoneReached: string
+    nextMilestoneHint: string
   }
   team: {
     title: string
@@ -382,6 +403,15 @@ export interface Translations {
     noMovesMatch: string
     movesCount: string
     clearSearch: string
+    passport: string
+    passportEmptyHint: string
+    passportDateLabel: string
+    passportMethodLabel: string
+    passportGameLabel: string
+    passportSave: string
+    passportClear: string
+    passportSavedToast: string
+    passportSummary: string
   }
   sync: {
     title: string
@@ -464,6 +494,11 @@ export interface Translations {
     dangerResetTitle: string
     dangerResetDesc: string
     dangerResetConfirm: string
+    unassignedAlertTitle: string
+    unassignedAlertDesc: string
+    resolveInNotifications: string
+    autoAssignOption: string
+    autoAssignSuccess: string
   }
   blog: {
     titlePrefix: string
@@ -553,11 +588,84 @@ export interface Translations {
       combos: string[]
     }
   }
+  dashboard: {
+    title: string
+    subtitle: string
+    globalProgressTitle: string
+    nationalDex: string
+    caughtOfTotal: string
+    activeTeamTitle: string
+    emptyTeam: string
+    editTeam: string
+    gamesSummaryTitle: string
+    gamesStarted: string
+    gamesCompleted: string
+    gameProgressTitle: string
+    gameProgressSubtitle: string
+    searchPlaceholder: string
+    allGenerations: string
+    filterByGen: string
+    regionalMode: string
+    obtainableMode: string
+    openInPokedex: string
+    settingsTitle: string
+    settingsSubtitle: string
+    soundToggle: string
+    soundToggleDesc: string
+    cloudSyncTitle: string
+    cloudSyncDesc: string
+    openCloudSync: string
+    dataManagementTitle: string
+    exportBackup: string
+    exportBackupDesc: string
+    importBackup: string
+    importBackupDesc: string
+    resetData: string
+    resetDataDesc: string
+    resetConfirmTitle: string
+    resetConfirmText: string
+    cancel: string
+    confirmReset: string
+    backupExportSuccess: string
+    backupImportSuccess: string
+    backupImportError: string
+    resetSuccess: string
+    noGamesFound: string
+    versionBadge: string
+    progressPercent: string
+    openFullSettings: string
+    backToDashboard: string
+    audioTitle: string
+    notificationsTitle: string
+    notificationsSubtitle: string
+    noNotifications: string
+    noNotificationsDesc: string
+    bothVersions: string
+    assignAllBoth: string
+    assignAllAuto: string
+    pokemonCol: string
+    gameCol: string
+    exclusiveBadge: string
+    bothAvailable: string
+    assignmentAction: string
+    unassignedCountBadge: string
+    assignedSuccessToast: string
+    heatmapTitle: string
+    heatmapSubtitle: string
+    heatmapAllGens: string
+    heatmapAllTypes: string
+    heatmapCaughtCount: string
+    heatmapPixelAria: string
+    heatmapStatusCaught: string
+    heatmapStatusUncaught: string
+    heatmapEmptyFilter: string
+  }
 }
 
 export const UI_TRANSLATIONS: Record<Locale, Translations> = {
   en: {
     nav: {
+      dashboard: 'Dashboard',
       pokedex: 'Pokedex',
       team: 'Team',
       blog: 'Blog',
@@ -649,6 +757,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       exclusiveBoth: 'Both games',
       exclusiveOnly: 'Only {version}',
       exclusiveBadge: 'Exclusive to {version}',
+      captureVersionLabel: 'Caught in:',
+      capturedInVersion: 'Caught in {version}',
+      capturedInBoth: 'Caught in both',
       filters: 'Filters',
       showFilters: 'Show filters',
       hideFilters: 'Hide filters',
@@ -661,6 +772,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       clearMoves: 'Clear all moves',
       moveLearnedBy: '{count} Pokémon',
       popularMovesHint: 'Suggested moves:',
+      progressByRegion: 'Progress by region',
+      hideRegionProgress: 'Hide region progress',
+      milestoneReached: "You reached {pct}% of the Pokédex!",
+      nextMilestoneHint: '{n} more to reach {pct}%',
     },
     team: {
       title: 'Team Builder',
@@ -883,6 +998,15 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       noMovesMatch: 'No moves match your search.',
       movesCount: '{filtered} of {total} moves',
       clearSearch: 'Clear search',
+      passport: 'Passport',
+      passportEmptyHint: 'Capture this Pokémon to log how you got it.',
+      passportDateLabel: 'Date',
+      passportMethodLabel: 'Method',
+      passportGameLabel: 'Game',
+      passportSave: 'Save',
+      passportClear: 'Clear entry',
+      passportSavedToast: 'Passport entry saved',
+      passportSummary: 'Caught on {date} · {method} · {game}',
     },
     sync: {
       title: 'Sync Devices',
@@ -973,7 +1097,13 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       dangerResetTitle: 'Reset and delete everything?',
       dangerResetDesc:
         'Your captured Pokemon and current team will be deleted. This action is permanent.',
-      dangerResetConfirm: 'Yes, delete everything',
+      dangerResetConfirm: 'Yes, reset everything',
+      unassignedAlertTitle: 'You have {n} Pokémon without an assigned version',
+      unassignedAlertDesc:
+        'These captures were saved before the Dual Version update and do not have an edition assigned.',
+      resolveInNotifications: 'Resolve in Notifications',
+      autoAssignOption: "Don't mind, auto-assign",
+      autoAssignSuccess: 'All unassigned Pokémon were successfully assigned!',
     },
     blog: {
       titlePrefix: 'Master strategy & ',
@@ -1071,9 +1201,84 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         ],
       },
     },
+    dashboard: {
+      title: 'Dashboard',
+      subtitle: 'Overview of your collection progress, active team, and preferences.',
+      globalProgressTitle: 'National Dex Progress',
+      nationalDex: 'National Dex',
+      caughtOfTotal: '{caught} of {total} Pokémon',
+      activeTeamTitle: 'Active Team',
+      emptyTeam: 'No Pokémon in team yet.',
+      editTeam: 'Edit Team',
+      gamesSummaryTitle: 'Games Tracked',
+      gamesStarted: 'In Progress',
+      gamesCompleted: 'Completed',
+      gameProgressTitle: 'Progress by Game',
+      gameProgressSubtitle: 'Track your capture completion percentage across every Pokémon game.',
+      searchPlaceholder: 'Search game (e.g. Scarlet, Emerald)...',
+      allGenerations: 'All Generations',
+      filterByGen: 'Filter by Gen',
+      regionalMode: 'Regional Dex',
+      obtainableMode: 'Obtainable Dex',
+      openInPokedex: 'Open in Pokédex',
+      settingsTitle: 'Settings & Preferences',
+      settingsSubtitle: 'Configure sound, cloud sync, and local data storage.',
+      soundToggle: 'Sound Effects',
+      soundToggleDesc: 'Play classic sounds during captures and interactions.',
+      cloudSyncTitle: 'Cloud Sync',
+      cloudSyncDesc: 'Synchronize your progress and teams across all your devices.',
+      openCloudSync: 'Manage Sync',
+      dataManagementTitle: 'Data Management',
+      exportBackup: 'Export Backup',
+      exportBackupDesc: 'Download your full collection and teams as a JSON file.',
+      importBackup: 'Import Backup',
+      importBackupDesc: 'Restore your saved progress from a previous JSON backup.',
+      resetData: 'Reset All Data',
+      resetDataDesc: 'Clear all captured Pokémon, teams, and local overrides.',
+      resetConfirmTitle: 'Reset all data?',
+      resetConfirmText:
+        'This will permanently delete all your local captures, teams, and custom stats. This action cannot be undone.',
+      cancel: 'Cancel',
+      confirmReset: 'Yes, reset everything',
+      backupExportSuccess: 'Backup exported successfully!',
+      backupImportSuccess: 'Backup restored successfully!',
+      backupImportError: 'Invalid backup file format.',
+      resetSuccess: 'All data has been reset.',
+      noGamesFound: 'No games match your search.',
+      versionBadge: 'Version',
+      progressPercent: 'Progress',
+      openFullSettings: 'Open Full Settings',
+      backToDashboard: 'Back to Dashboard',
+      audioTitle: 'Sound & Audio',
+      notificationsTitle: 'Notifications',
+      notificationsSubtitle: 'Manage system alerts and unassigned Pokémon captures.',
+      noNotifications: 'No notifications',
+      noNotificationsDesc:
+        'No pending notifications. Everything is up to date and all your captures have an assigned version.',
+      bothVersions: 'Both',
+      assignAllBoth: 'Assign all to Both',
+      assignAllAuto: 'Auto-assign recommended',
+      pokemonCol: 'Pokémon',
+      gameCol: 'Edition / Game',
+      exclusiveBadge: 'Exclusive to {version}',
+      bothAvailable: 'Available in both',
+      assignmentAction: 'Assign to',
+      unassignedCountBadge: '{n} pending',
+      assignedSuccessToast: '{name} assigned to {version}',
+      heatmapTitle: 'National Dex Matrix',
+      heatmapSubtitle: 'Visual activity heatmap of all 1,025 Pokémon in the National Pokédex.',
+      heatmapAllGens: 'All Generations',
+      heatmapAllTypes: 'All Types',
+      heatmapCaughtCount: '{caught} / {total} Pokémon registered',
+      heatmapPixelAria: '#{id} {name}, Type: {types}, Status: {status}',
+      heatmapStatusCaught: 'Captured',
+      heatmapStatusUncaught: 'Not registered',
+      heatmapEmptyFilter: 'No Pokémon match the selected filters.',
+    },
   },
   es: {
     nav: {
+      dashboard: 'Dashboard',
       pokedex: 'Pokédex',
       team: 'Equipo',
       blog: 'Blog',
@@ -1168,6 +1373,9 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       exclusiveBoth: 'En ambos',
       exclusiveOnly: 'Solo {version}',
       exclusiveBadge: 'Exclusivo de {version}',
+      captureVersionLabel: 'Capturado en:',
+      capturedInVersion: 'Capturado en {version}',
+      capturedInBoth: 'Capturado en ambos',
       filters: 'Filtros',
       showFilters: 'Mostrar filtros',
       hideFilters: 'Ocultar filtros',
@@ -1180,6 +1388,10 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       clearMoves: 'Quitar todos',
       moveLearnedBy: '{count} Pokémon',
       popularMovesHint: 'Movimientos sugeridos:',
+      progressByRegion: 'Progreso por región',
+      hideRegionProgress: 'Ocultar progreso por región',
+      milestoneReached: '¡Alcanzaste el {pct}% de la Pokédex!',
+      nextMilestoneHint: 'Te faltan {n} para llegar al {pct}%',
     },
     team: {
       title: 'Armar equipo',
@@ -1404,6 +1616,15 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       noMovesMatch: 'No se encontraron movimientos que coincidan.',
       movesCount: '{filtered} de {total} movimientos',
       clearSearch: 'Limpiar búsqueda',
+      passport: 'Pasaporte',
+      passportEmptyHint: 'Captura este Pokémon para registrar cómo lo conseguiste.',
+      passportDateLabel: 'Fecha',
+      passportMethodLabel: 'Método',
+      passportGameLabel: 'Juego',
+      passportSave: 'Guardar',
+      passportClear: 'Borrar registro',
+      passportSavedToast: 'Registro de captura guardado',
+      passportSummary: 'Capturado el {date} · {method} · {game}',
     },
     sync: {
       title: 'Sincronizar Dispositivos',
@@ -1500,6 +1721,12 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       dangerResetDesc:
         'Se borrarán tus Pokémon capturados y tu equipo actual. Esta acción es permanente.',
       dangerResetConfirm: 'Sí, borrar todo',
+      unassignedAlertTitle: 'Tenés {n} Pokémon sin versión asignada',
+      unassignedAlertDesc:
+        'Estas capturas fueron registradas antes del Modo Dual y no tienen indicado en qué edición se consiguieron.',
+      resolveInNotifications: 'Resolver en Notificaciones',
+      autoAssignOption: 'No me importa, auto-asignar',
+      autoAssignSuccess: '¡Todos los Pokémon se asignaron automáticamente con éxito!',
     },
     blog: {
       titlePrefix: 'Estrategia, guías y ',
@@ -1601,6 +1828,80 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
         ],
       },
     },
+    dashboard: {
+      title: 'Dashboard',
+      subtitle: 'Resumen de tu progreso de colección, equipo activo y preferencias.',
+      globalProgressTitle: 'Progreso Pokédex Nacional',
+      nationalDex: 'Pokédex Nacional',
+      caughtOfTotal: '{caught} de {total} Pokémon',
+      activeTeamTitle: 'Equipo Activo',
+      emptyTeam: 'Aún no tienes Pokémon en tu equipo.',
+      editTeam: 'Gestionar Equipo',
+      gamesSummaryTitle: 'Juegos Registrados',
+      gamesStarted: 'En Progreso',
+      gamesCompleted: 'Completados',
+      gameProgressTitle: 'Progreso según el Juego',
+      gameProgressSubtitle: 'Sigue el porcentaje de capturas en la Pokédex de cada entrega de Pokémon.',
+      searchPlaceholder: 'Buscar juego (ej. Escarlata, Esmeralda)...',
+      allGenerations: 'Todas las Generaciones',
+      filterByGen: 'Filtrar por Gen',
+      regionalMode: 'Pokédex Regional',
+      obtainableMode: 'Pokédex Obtenible',
+      openInPokedex: 'Ver en Pokédex',
+      settingsTitle: 'Configuraciones y Preferencias',
+      settingsSubtitle: 'Gestiona efectos de sonido, sincronización en la nube y almacenamiento local.',
+      soundToggle: 'Efectos de Sonido',
+      soundToggleDesc: 'Reproducir sonidos al registrar capturas e interactuar.',
+      cloudSyncTitle: 'Sincronización en la Nube',
+      cloudSyncDesc: 'Sincroniza tus capturas y equipos entre todos tus dispositivos.',
+      openCloudSync: 'Gestionar Sincronización',
+      dataManagementTitle: 'Gestión de Datos',
+      exportBackup: 'Exportar Copia de Seguridad',
+      exportBackupDesc: 'Descarga todas tus capturas y equipos en un archivo JSON.',
+      importBackup: 'Importar Copia de Seguridad',
+      importBackupDesc: 'Restaura tu progreso desde un archivo JSON previo.',
+      resetData: 'Borrar Todos los Datos',
+      resetDataDesc: 'Elimina todas las capturas, equipos y personalizaciones locales.',
+      resetConfirmTitle: '¿Borrar todos los datos?',
+      resetConfirmText:
+        'Esta acción eliminará de forma permanente todas tus capturas y configuraciones de equipo locales. No se puede deshacer.',
+      cancel: 'Cancelar',
+      confirmReset: 'Sí, borrar todo',
+      backupExportSuccess: '¡Copia de seguridad exportada con éxito!',
+      backupImportSuccess: '¡Copia de seguridad restaurada correctamente!',
+      backupImportError: 'Formato de archivo de copia de seguridad no válido.',
+      resetSuccess: 'Todos los datos han sido restablecidos.',
+      noGamesFound: 'No se encontraron juegos con ese criterio.',
+      versionBadge: 'Versión',
+      progressPercent: 'Progreso',
+      openFullSettings: 'Abrir Configuración Completa',
+      backToDashboard: 'Volver al Dashboard',
+      audioTitle: 'Sonido y Audio',
+      notificationsTitle: 'Notificaciones',
+      notificationsSubtitle: 'Gestiona avisos del sistema y asignación de versiones pendientes.',
+      noNotifications: 'No tienes notificaciones',
+      noNotificationsDesc:
+        'No hay notificaciones pendientes. Todo está al día y todas tus capturas tienen su versión asignada.',
+      bothVersions: 'Ambos',
+      assignAllBoth: 'Asignar todos a Ambos',
+      assignAllAuto: 'Auto-asignar recomendados',
+      pokemonCol: 'Pokémon',
+      gameCol: 'Edición / Juego',
+      exclusiveBadge: 'Exclusivo de {version}',
+      bothAvailable: 'Disponible en ambos',
+      assignmentAction: 'Asignar a',
+      unassignedCountBadge: '{n} pendientes',
+      assignedSuccessToast: '{name} asignado a {version}',
+      heatmapTitle: 'Mosaico de la Pokédex Nacional',
+      heatmapSubtitle: 'Gráfico de actividad y píxeles de los 1.025 Pokémon de la Pokédex Nacional.',
+      heatmapAllGens: 'Todas las Generaciones',
+      heatmapAllTypes: 'Todos los Tipos',
+      heatmapCaughtCount: '{caught} / {total} Pokémon registrados',
+      heatmapPixelAria: '#{id} {name}, Tipo: {types}, Estado: {status}',
+      heatmapStatusCaught: 'Capturado',
+      heatmapStatusUncaught: 'No registrado',
+      heatmapEmptyFilter: 'No hay Pokémon que coincidan con los filtros seleccionados.',
+    },
   },
 }
 
@@ -1661,6 +1962,14 @@ export function getLocalizedPath(pathname: string, targetLocale: Locale): string
   if (cleanPath.startsWith('/team/')) {
     const sub = cleanPath.slice('/team/'.length)
     return targetLocale === 'en' ? `/team/${sub}` : `/es/equipo/${sub}`
+  }
+
+  if (cleanPath === '/dashboard' || cleanPath === '/dashboard/') {
+    return targetLocale === 'en' ? '/dashboard/' : '/es/dashboard/'
+  }
+
+  if (cleanPath === '/dashboard/settings' || cleanPath === '/dashboard/settings/') {
+    return targetLocale === 'en' ? '/dashboard/settings/' : '/es/dashboard/settings/'
   }
 
   if (targetLocale === 'en') {

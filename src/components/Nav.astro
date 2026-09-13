@@ -15,6 +15,7 @@ const t = getTranslations(currentLocale)
 const homePath = getLocalizedPath('/', currentLocale)
 const pokedexPath = getLocalizedPath('/pokedex/', currentLocale)
 const teamPath = getLocalizedPath('/team/', currentLocale)
+const dashboardPath = getLocalizedPath('/dashboard/', currentLocale)
 const blogPath = getLocalizedPath('/blog/', currentLocale)
 
 const enHref = alternateUrls?.en ?? getLocalizedPath(path, 'en')
@@ -28,6 +29,8 @@ const isEquipo =
   currentLocale === 'es'
     ? path.startsWith('/es/equipo')
     : path.startsWith('/team') || path.startsWith('/equipo')
+const isDashboard =
+  currentLocale === 'es' ? path.startsWith('/es/dashboard') : path.startsWith('/dashboard')
 const isBlog = currentLocale === 'es' ? path.startsWith('/es/blog') : path.startsWith('/blog')
 const isMinimal = variant === 'minimal' || isBlog
 ---
@@ -56,6 +59,15 @@ const isMinimal = variant === 'minimal' || isBlog
       >
         <i data-lucide="users"></i>
         {t.nav.team}
+      </a>
+      <a
+        class="nav__link"
+        href={dashboardPath}
+        data-astro-prefetch
+        aria-current={isDashboard ? 'page' : undefined}
+      >
+        <i data-lucide="layout-dashboard"></i>
+        {t.nav.dashboard}
       </a>
       <a
         class="nav__link"
@@ -204,6 +216,7 @@ const isMinimal = variant === 'minimal' || isBlog
             title={t.nav.syncTitle}
             aria-label={t.nav.syncTitle}
           >
+            <span class="nav__sync-badge-dot" data-sync-alert-dot hidden aria-hidden="true"></span>
             <span class="nav__cloud-wrapper" aria-hidden="true">
               <!-- 1. Sincronizado / Guardado (Google Docs: Nube con check) -->
               <span
@@ -295,6 +308,15 @@ const isMinimal = variant === 'minimal' || isBlog
   </a>
   <a
     class="bottom-nav__link"
+    href={dashboardPath}
+    data-astro-prefetch
+    aria-current={isDashboard ? 'page' : undefined}
+  >
+    <i data-lucide="layout-dashboard"></i>
+    <span>{t.nav.dashboard}</span>
+  </a>
+  <a
+    class="bottom-nav__link"
     href={blogPath}
     data-astro-prefetch
     aria-current={isBlog ? 'page' : undefined}
@@ -315,6 +337,33 @@ const isMinimal = variant === 'minimal' || isBlog
     CLOUD_STATUS_EVENT,
     type CloudState,
   } from '../lib/cloudSync'
+  import {
+    getUnassignedCount,
+    VERSION_ASSIGNMENT_CHANGED_EVENT,
+  } from '../lib/versionAssignment'
+  import { CAPTURED_CHANGED_EVENT } from '../lib/storage'
+
+  function initSyncAlertBadge() {
+    const alertDot = document.querySelector<HTMLElement>('[data-sync-alert-dot]')
+    if (!alertDot) return
+
+    function updateAlertBadge(count: number) {
+      if (alertDot) {
+        alertDot.hidden = count === 0
+      }
+    }
+
+    updateAlertBadge(getUnassignedCount())
+
+    window.addEventListener(VERSION_ASSIGNMENT_CHANGED_EVENT, (e) => {
+      const count = (e as CustomEvent).detail?.count ?? getUnassignedCount()
+      updateAlertBadge(count)
+    })
+
+    window.addEventListener(CAPTURED_CHANGED_EVENT, () => {
+      updateAlertBadge(getUnassignedCount())
+    })
+  }
 
   function initSoundToggle() {
     const soundBtn = document.querySelector<HTMLButtonElement>('[data-sound-toggle]')
@@ -554,9 +603,11 @@ const isMinimal = variant === 'minimal' || isBlog
   initSoundToggle()
   initPwaInstall()
   initCloudStatus()
+  initSyncAlertBadge()
   document.addEventListener('astro:after-swap', () => {
     initSoundToggle()
     initPwaInstall()
     initCloudStatus()
+    initSyncAlertBadge()
   })
 </script>

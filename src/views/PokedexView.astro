@@ -1,12 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import CapturedCounter from '../components/CapturedCounter.astro'
+import GenerationProgressPanel from '../components/GenerationProgressPanel.astro'
 import LoadMoreButton from '../components/LoadMoreButton.astro'
 import PokemonDetailModal from '../components/PokemonDetailModal.astro'
 import { getTranslations, type Locale } from '../lib/i18n/translations'
 import '../styles/features/pokedex/filters.css'
 import '../styles/features/pokedex/moves-filter.css'
 import '../styles/features/pokedex/grid.css'
+import '../styles/components/version-progress.css'
 
 const currentLocale = (Astro.currentLocale ?? 'en') as Locale
 const t = getTranslations(currentLocale)
@@ -21,8 +23,24 @@ const t = getTranslations(currentLocale)
         </h1>
         <p class="page__subtitle">{t.pokedex.subtitle}</p>
       </div>
-      <CapturedCounter />
+      <div class="page__header-counters">
+        <CapturedCounter />
+        <div class="version-progress" data-version-progress hidden></div>
+        <button
+          type="button"
+          class="generation-progress-panel__toggle"
+          data-generation-progress-toggle
+          aria-expanded="false"
+          aria-controls="generation-progress-panel"
+        >
+          <i data-lucide="map"></i>
+          <span>{t.pokedex.progressByRegion}</span>
+          <i data-lucide="chevron-down" class="generation-progress-panel__chevron"></i>
+        </button>
+      </div>
     </div>
+
+    <GenerationProgressPanel />
 
     <div class="pokedex-controls">
       <div class="filters-bar">

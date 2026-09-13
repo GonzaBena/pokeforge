@@ -112,6 +112,7 @@ export function playStampSound(): void {
   if (!soundEnabled) return
 
   const ctx = getAudioContext()
+
   if (!ctx) {
     playFallbackAudio('/sounds/stamp.wav')
     return
@@ -160,6 +161,8 @@ export function playStampSound(): void {
     playFallbackAudio('/sounds/stamp.wav')
   }
 }
+
+export const playCaptureSound = playStampSound
 
 function playMetallicClick(ctx: AudioContext, startTime: number): void {
   const bufferSize = Math.floor(ctx.sampleRate * 0.02)

@@ -6,6 +6,7 @@ import { capitalize, getDefaultAbility } from '../utils'
 import { renderAbilitiesContent } from './abilities'
 import { renderEffectivenessContent } from './effectiveness'
 import { renderEvolutionsContent } from './evolutions'
+import { renderPassportContent } from './passport'
 
 export const SECTION_CONTENT: Record<string, (ctx: RenderContext) => string> = {
   effectiveness: (ctx) => renderEffectivenessContent(ctx.pokemon, ctx.typeChart),
@@ -52,6 +53,7 @@ export const SECTION_CONTENT: Record<string, (ctx: RenderContext) => string> = {
     `
   },
   evolutions: (ctx) => renderEvolutionsContent(ctx.chain, ctx.pokemon.id, ctx.allById),
+  passport: (ctx) => renderPassportContent(ctx),
 }
 
 export function renderSection(
@@ -68,6 +70,7 @@ export function renderSection(
     location: t.modal.acquisition,
     moves: t.modal.moves,
     evolutions: t.modal.evolutions,
+    passport: t.modal.passport,
   }
   const isCollapsed = isSectionCollapsed(id)
 

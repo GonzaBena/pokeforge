@@ -4,10 +4,14 @@ import { refreshIcons } from '../icons'
 import {
   copyPokedexToSlot,
   copySlotToPokedex,
+  deleteCaptureMeta,
+  getCapturedByGame,
   getPokemonOverrides,
   getTeam,
   isCaptured,
   setCaptured,
+  setCapturedByGame,
+  setCaptureMeta,
   setPokemonOverrides,
   setTeamSlotAbility,
   setTeamSlotItem,
@@ -16,7 +20,7 @@ import {
   setTeamSlotUsePokedexData,
 } from '../storage'
 import { toast } from '../toast'
-import type { PokemonStats } from '../types'
+import type { CaptureMethod, PokemonStats } from '../types'
 import {
   getNatureModifier,
   natureEffectText,
@@ -28,6 +32,7 @@ import { getModalElements } from './dom'
 import { closeModal, openPokemonModal } from './lifecycle'
 import { renderAbilitiesContent } from './sections/abilities'
 import { renderEffectivenessContent } from './sections/effectiveness'
+import { renderPassportContent } from './sections/passport'
 import { moveSectionToEdge, swapSection, toggleSectionCollapse } from './sections/actions'
 import { reRenderHeader, updateHeaderCapturedState } from './sections/header'
 import { modalState } from './state'
@@ -35,6 +40,23 @@ import { closeTocMenu, scrollToSection, toggleTocMenu } from './toc'
 import { capitalize, getDefaultAbility } from './utils'
 
 let hasBoundEvents = false
+
+// The passport section content is rendered once per modal open/re-render and
+// otherwise only refreshed by its own save/clear handlers — but captured
+// state can also flip via the header's capture button(s), so those must
+// refresh it too or it shows stale content (e.g. the "not captured" hint
+// after capturing) until the modal is closed and reopened.
+function refreshPassportSection(): void {
+  const { bodyEl } = getModalElements()
+  if (!bodyEl || !modalState.lastContext) return
+  const passportSection = bodyEl.querySelector<HTMLElement>(
+    '[data-section-id="passport"] .detail-section__content',
+  )
+  if (passportSection) {
+    passportSection.innerHTML = renderPassportContent(modalState.lastContext)
+    refreshIcons()
+  }
+}
 
 export function bindModalEvents(): void {
   if (hasBoundEvents) return
@@ -528,6 +550,60 @@ export function bindModalEvents(): void {
         )
         if (medal) medal.hidden = true
       }
+      refreshPassportSection()
+      return
+    }
+
+    const versionBtn = target.closest<HTMLButtonElement>('[data-modal-capture-version-btn]')
+    if (versionBtn && modalState.currentId !== null && modalState.lastContext) {
+      const id = modalState.currentId
+      const { gameDexData, selectedGame } = modalState.lastContext
+      const entry = selectedGame ? gameDexData?.[selectedGame] : null
+      const [vA, vB] = entry?.versions ?? []
+
+      if (vA && vB) {
+        const mode = versionBtn.dataset.versionMode
+        if (mode === 'a') {
+          setCapturedByGame(vA.id, id, !getCapturedByGame(vA.id).has(id))
+        } else if (mode === 'b') {
+          setCapturedByGame(vB.id, id, !getCapturedByGame(vB.id).has(id))
+        }
+
+        reRenderHeader()
+        refreshPassportSection()
+
+        const locale = getCurrentLocale()
+        const name = capitalize(modalState.lastContext.pokemon.name)
+        toast.success(locale === 'es' ? `${name} actualizado` : `${name} updated`)
+      }
+      return
+    }
+
+    const passportSaveBtn = target.closest<HTMLButtonElement>('[data-passport-save]')
+    if (passportSaveBtn && modalState.currentId !== null && modalState.lastContext) {
+      const id = modalState.currentId
+      const dateInput = bodyEl.querySelector<HTMLInputElement>('[data-passport-date]')
+      const methodSelect = bodyEl.querySelector<HTMLSelectElement>('[data-passport-method]')
+      const gameSelect = bodyEl.querySelector<HTMLSelectElement>('[data-passport-game]')
+
+      setCaptureMeta(id, {
+        date: dateInput?.value || new Date().toISOString().slice(0, 10),
+        method: (methodSelect?.value as CaptureMethod) || 'other',
+        game: gameSelect?.value || null,
+      })
+
+      refreshPassportSection()
+
+      const locale = getCurrentLocale()
+      const t = getTranslations(locale)
+      toast.success(t.modal.passportSavedToast)
+      return
+    }
+
+    const passportClearBtn = target.closest<HTMLButtonElement>('[data-passport-clear]')
+    if (passportClearBtn && modalState.currentId !== null && modalState.lastContext) {
+      deleteCaptureMeta(modalState.currentId)
+      refreshPassportSection()
       return
     }
 

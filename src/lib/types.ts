@@ -230,3 +230,11 @@ export interface ItemData {
   shortDescEs: string
   shortDescEn: string
 }
+
+export type CaptureMethod = 'wild' | 'egg' | 'gift' | 'trade' | 'event' | 'breed' | 'other'
+
+export interface CaptureLogEntry {
+  date: string // ISO 'YYYY-MM-DD'
+  method: CaptureMethod
+  game: string | null // versionId (same namespace as poketeam:captured-by-game), null = unspecified
+}

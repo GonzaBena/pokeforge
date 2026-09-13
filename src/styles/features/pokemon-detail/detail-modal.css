@@ -77,6 +77,62 @@
   border-radius: var(--radius-md);
 }
 
+/* Dual Version Mode: "Caught in: [A] [B]", replacing the plain capture
+   button when the selected game is a real cartridge pair. Each button
+   toggles its own version independently (both can be pressed at once), and
+   they stack in a column — full width, wrapping text — so long version
+   names ("Let's Go, Pikachu!", Spanish names) never get truncated at the
+   250px aside width. */
+.detail-capture-version {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.detail-capture-version__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.detail-capture-version__toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 3px;
+}
+
+.detail-capture-version__toggle .view-toggle__btn {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+  white-space: normal;
+  line-height: 1.25;
+  text-align: center;
+}
+
+/* The base .view-toggle "liquid goo" merge (view-toggle.css) flattens the
+   left/right corners of consecutive pressed buttons for a horizontal row.
+   This toggle stacks vertically, so that logic leaves one side unrounded
+   on both buttons instead of merging them — reset back to full pills here,
+   same fix already applied to the 2x2 exclusive-toggle mobile grid. */
+.detail-capture-version__toggle .view-toggle__btn[aria-pressed='true'],
+.detail-capture-version__toggle
+  .view-toggle__btn[aria-pressed='true']:has(+ .view-toggle__btn[aria-pressed='true']),
+.detail-capture-version__toggle
+  .view-toggle__btn[aria-pressed='true']
+  + .view-toggle__btn[aria-pressed='true'] {
+  border-radius: var(--radius-pill);
+}
+
+.detail-capture-version__toggle
+  .view-toggle__btn[aria-pressed='true']
+  + .view-toggle__btn[aria-pressed='true']::before {
+  display: none;
+}
+
 .detail-capture-medal {
   position: absolute;
   top: -5px;
@@ -1489,4 +1545,71 @@
   color: var(--text-muted);
   padding: 12px;
   text-align: center;
+}
+
+.detail-passport {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detail-passport__form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.detail-passport__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-passport__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.detail-passport__field input[type='date'],
+.detail-passport__field select {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.detail-passport__field input[type='date']:focus-visible,
+.detail-passport__field select:focus-visible {
+  border-color: var(--accent);
+}
+
+.detail-passport__value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.detail-passport__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+.detail-passport__summary p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
 }

@@ -29,6 +29,8 @@ pnpm-debug.log*
 
 # notes & plans
 MEJORAS.md
+spec*.md
+spec.md
 
 # Obsidian
 .obsidian/

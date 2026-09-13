@@ -1,0 +1,293 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro'
+import { getTranslations, getLocalizedPath, type Locale } from '../lib/i18n/translations'
+import '../styles/features/dashboard/dashboard.css'
+
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+const dashboardHref = getLocalizedPath('/dashboard/', currentLocale)
+---
+
+<DashboardLayout title={t.dashboard.settingsTitle}>
+  <div class="dashboard-page settings-page">
+    <div class="dashboard-ambient-glow" aria-hidden="true"></div>
+
+    <!-- Header with Back Button -->
+    <header class="dashboard-header">
+      <div class="settings-header-top">
+        <a href={dashboardHref} class="settings-back-btn" data-astro-prefetch>
+          <i data-lucide="arrow-left"></i>
+          <span>{t.dashboard.backToDashboard}</span>
+        </a>
+        <div class="dashboard-header__badge">
+          <i data-lucide="sliders"></i>
+          <span>PokeForge Hub</span>
+        </div>
+      </div>
+      <h1 class="dashboard-header__title">{t.dashboard.settingsTitle}</h1>
+      <p class="dashboard-header__subtitle">{t.dashboard.settingsSubtitle}</p>
+    </header>
+
+    <!-- Settings Sections Grid -->
+    <div class="dashboard-settings-grid">
+      <!-- Audio & Sound Effects Card -->
+      <section class="settings-card" id="audio">
+        <div class="settings-card__header">
+          <div class="settings-card__icon">
+            <i data-lucide="volume-2"></i>
+          </div>
+          <div>
+            <h2 class="settings-card__title">{t.dashboard.audioTitle}</h2>
+            <span class="settings-card__subtitle">{currentLocale === 'es' ? 'Preferencias sonoras' : 'Sound feedback'}</span>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <span class="settings-item__label">{t.dashboard.soundToggle}</span>
+            <span class="settings-item__desc">{t.dashboard.soundToggleDesc}</span>
+          </div>
+          <label class="switch" aria-label={t.dashboard.soundToggle}>
+            <input type="checkbox" data-sound-switch />
+            <span class="switch__slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <span class="settings-item__label">{currentLocale === 'es' ? 'Prueba de Sonido' : 'Sound Test'}</span>
+            <span class="settings-item__desc">{currentLocale === 'es' ? 'Comprueba que los efectos se reproducen correctamente.' : 'Check that audio feedback plays correctly.'}</span>
+          </div>
+          <button type="button" class="btn btn--secondary btn--sm" data-sound-test>
+            <i data-lucide="play"></i>
+            <span>{currentLocale === 'es' ? 'Reproducir' : 'Play Test'}</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Cloud Sync Card -->
+      <section class="settings-card" id="sync">
+        <div class="settings-card__header">
+          <div class="settings-card__icon">
+            <i data-lucide="cloud"></i>
+          </div>
+          <div>
+            <h2 class="settings-card__title">{t.dashboard.cloudSyncTitle}</h2>
+            <span class="settings-card__subtitle">{currentLocale === 'es' ? 'Sincronización multidispositivo' : 'Multi-device sync'}</span>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <span class="settings-item__label">{currentLocale === 'es' ? 'Estado de la Conexión' : 'Connection Status'}</span>
+            <span class="settings-item__desc" data-cloud-status-text>
+              {currentLocale === 'es' ? 'Comprobando estado...' : 'Checking status...'}
+            </span>
+          </div>
+          <button type="button" class="btn btn--secondary btn--sm" data-sync-open>
+            <i data-lucide="qr-code"></i>
+            <span>{t.dashboard.openCloudSync}</span>
+          </button>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <span class="settings-item__label">{currentLocale === 'es' ? 'Vincular Otro Dispositivo' : 'Pair Another Device'}</span>
+            <span class="settings-item__desc">
+              {currentLocale === 'es'
+                ? 'Escanea un código QR desde tu teléfono o tablet para transferir tus datos al instante.'
+                : 'Scan a QR code from your phone or tablet to transfer progress instantly.'}
+            </span>
+          </div>
+          <button type="button" class="btn btn--secondary btn--sm" data-sync-open>
+            <i data-lucide="smartphone"></i>
+            <span>{currentLocale === 'es' ? 'Abrir QR' : 'Open QR'}</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Data Management & Backups Card -->
+      <section class="settings-card" id="data">
+        <div class="settings-card__header">
+          <div class="settings-card__icon">
+            <i data-lucide="database"></i>
+          </div>
+          <div>
+            <h2 class="settings-card__title">{t.dashboard.dataManagementTitle}</h2>
+            <span class="settings-card__subtitle">{currentLocale === 'es' ? 'Almacenamiento y copias locales' : 'Storage and local backups'}</span>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <span class="settings-item__label">{t.dashboard.exportBackup}</span>
+            <span class="settings-item__desc">{t.dashboard.exportBackupDesc}</span>
+          </div>
+          <button type="button" class="btn btn--secondary btn--sm" data-export-backup>
+            <i data-lucide="download"></i>
+            <span>{t.dashboard.exportBackup}</span>
+          </button>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item__info">
+            <span class="settings-item__label">{t.dashboard.importBackup}</span>
+            <span class="settings-item__desc">{t.dashboard.importBackupDesc}</span>
+          </div>
+          <button type="button" class="btn btn--secondary btn--sm" data-import-backup-trigger>
+            <i data-lucide="upload"></i>
+            <span>{t.dashboard.importBackup}</span>
+          </button>
+          <input type="file" accept=".json" data-import-file-input hidden />
+        </div>
+
+        <div class="settings-item settings-item--danger">
+          <div class="settings-item__info">
+            <span class="settings-item__label">{t.dashboard.resetData}</span>
+            <span class="settings-item__desc">{t.dashboard.resetDataDesc}</span>
+          </div>
+          <button type="button" class="btn btn--danger btn--sm" data-reset-open>
+            <i data-lucide="trash-2"></i>
+            <span>{t.dashboard.resetData}</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Confirmation Modal for Reset -->
+    <div class="dashboard-modal-backdrop" data-reset-modal hidden>
+      <div class="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title">
+        <div class="dashboard-modal__header">
+          <i data-lucide="alert-triangle"></i>
+          <h3 class="dashboard-modal__title" id="reset-modal-title">{t.dashboard.resetConfirmTitle}</h3>
+        </div>
+        <p class="dashboard-modal__text">{t.dashboard.resetConfirmText}</p>
+        <div class="dashboard-modal__actions">
+          <button type="button" class="btn btn--secondary btn--sm" data-reset-cancel>
+            {t.dashboard.cancel}
+          </button>
+          <button type="button" class="btn btn--danger btn--sm" data-reset-confirm>
+            <i data-lucide="trash-2"></i>
+            <span>{t.dashboard.confirmReset}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  import { isSoundEnabled, setSoundEnabled, playCaptureSound } from '../lib/sound'
+  import { exportBackupFile, importBackupFile } from '../lib/sync'
+  import { resetAllData } from '../lib/storage'
+  import { getCloudState, CLOUD_STATUS_EVENT, type CloudState } from '../lib/cloudSync'
+  import { getCurrentLocale, getTranslations } from '../lib/i18n/translations'
+  import { toast } from '../lib/toast'
+  import { refreshIcons } from '../lib/icons'
+
+  function initSettingsPage() {
+    const locale = getCurrentLocale()
+    const t = getTranslations(locale)
+
+    const soundSwitch = document.querySelector<HTMLInputElement>('[data-sound-switch]')
+    const soundTestBtn = document.querySelector<HTMLButtonElement>('[data-sound-test]')
+    const cloudStatusText = document.querySelector<HTMLElement>('[data-cloud-status-text]')
+
+    const exportBtn = document.querySelector<HTMLButtonElement>('[data-export-backup]')
+    const importBtn = document.querySelector<HTMLButtonElement>('[data-import-backup-trigger]')
+    const fileInput = document.querySelector<HTMLInputElement>('[data-import-file-input]')
+
+    const resetOpenBtn = document.querySelector<HTMLButtonElement>('[data-reset-open]')
+    const resetModal = document.querySelector<HTMLElement>('[data-reset-modal]')
+    const resetCancelBtn = document.querySelector<HTMLButtonElement>('[data-reset-cancel]')
+    const resetConfirmBtn = document.querySelector<HTMLButtonElement>('[data-reset-confirm]')
+
+    // Sound toggle
+    if (soundSwitch) {
+      soundSwitch.checked = isSoundEnabled()
+      soundSwitch.addEventListener('change', () => {
+        setSoundEnabled(soundSwitch.checked)
+      })
+    }
+
+    // Sound test
+    soundTestBtn?.addEventListener('click', () => {
+      playCaptureSound()
+      toast.info(locale === 'es' ? 'Reproduciendo sonido de captura' : 'Playing capture sound')
+    })
+
+    // Cloud status
+    function updateCloudStatus(state: CloudState) {
+      if (!cloudStatusText) return
+      let label = t.nav.cloudTooltipUnlinked
+      if (state.status === 'synced') label = t.nav.cloudSynced
+      else if (state.status === 'syncing') label = t.nav.cloudSyncing
+      else if (state.status === 'offline') label = t.nav.cloudOffline
+      else if (state.status === 'error') label = t.nav.cloudError
+      cloudStatusText.textContent = `${label} (${state.code ? state.code : (locale === 'es' ? 'Sin vincular' : 'Unlinked')})`
+    }
+
+    updateCloudStatus(getCloudState())
+    window.addEventListener(CLOUD_STATUS_EVENT, (e) => {
+      const detail = (e as CustomEvent<CloudState>).detail
+      if (detail) updateCloudStatus(detail)
+    })
+
+    // Export backup
+    exportBtn?.addEventListener('click', () => {
+      exportBackupFile()
+      toast.success(t.dashboard.backupExportSuccess)
+    })
+
+    // Import backup
+    importBtn?.addEventListener('click', () => {
+      fileInput?.click()
+    })
+
+    fileInput?.addEventListener('change', async () => {
+      const file = fileInput.files?.[0]
+      if (!file) return
+
+      try {
+        const result = await importBackupFile(file, 'merge')
+        if (result) {
+          toast.success(t.dashboard.backupImportSuccess)
+        } else {
+          toast.error(t.dashboard.backupImportError)
+        }
+      } catch {
+        toast.error(t.dashboard.backupImportError)
+      }
+      fileInput.value = ''
+    })
+
+    // Reset Modal
+    function openResetModal() {
+      if (resetModal) {
+        resetModal.hidden = false
+        refreshIcons()
+      }
+    }
+
+    function closeResetModal() {
+      if (resetModal) resetModal.hidden = true
+    }
+
+    resetOpenBtn?.addEventListener('click', openResetModal)
+    resetCancelBtn?.addEventListener('click', closeResetModal)
+    resetModal?.addEventListener('click', (e) => {
+      if (e.target === resetModal) closeResetModal()
+    })
+
+    resetConfirmBtn?.addEventListener('click', () => {
+      resetAllData()
+      closeResetModal()
+      toast.info(t.dashboard.resetSuccess)
+    })
+
+    refreshIcons()
+  }
+
+  initSettingsPage()
+  document.addEventListener('astro:after-swap', initSettingsPage)
+</script>

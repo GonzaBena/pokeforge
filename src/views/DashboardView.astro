@@ -1,0 +1,453 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro'
+import PokedexHeatmap from '../components/PokedexHeatmap.astro'
+import {
+  getTranslations,
+  getLocalizedPath,
+  GAME_NAMES,
+  type Locale,
+} from '../lib/i18n/translations'
+import type { GameDexData, GenerationInfo } from '../lib/types'
+import '../styles/features/dashboard/dashboard.css'
+import generationsRaw from '../../public/data/generations/generations.json'
+import gameDexDataRaw from '../../public/data/pokedex/game-pokedex.json'
+
+const generations = generationsRaw as GenerationInfo[]
+const gameDexData = gameDexDataRaw as GameDexData
+
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+const pokedexHref = getLocalizedPath('/pokedex/', currentLocale)
+const teamHref = getLocalizedPath('/team/', currentLocale)
+
+// Helper to find generation info for a game key
+function getGenInfo(gameKey: string) {
+  for (const gen of generations) {
+    if (gen.versionGroups.some((vg) => vg.name === gameKey)) {
+      return { id: gen.id, displayName: gen.displayName, name: gen.name }
+    }
+  }
+  return { id: 9, displayName: 'Gen IX', name: 'generation-ix' }
+}
+
+// Prepare list of games with metadata
+const gamesList = Object.entries(gameDexData).map(([key, entry]) => {
+  const gen = getGenInfo(key)
+  const title = GAME_NAMES[key]?.[currentLocale] ?? key
+  const primaryColor = entry.versions?.[0]?.color ?? 'var(--accent)'
+  return {
+    key,
+    entry,
+    gen,
+    title,
+    primaryColor,
+  }
+})
+---
+
+<DashboardLayout title={t.dashboard.title}>
+  <div class="dashboard-page">
+    <div class="dashboard-ambient-glow" aria-hidden="true"></div>
+
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="dashboard-header__badge">
+        <i data-lucide="layout-dashboard"></i>
+        <span>PokeForge Hub</span>
+      </div>
+      <h1 class="dashboard-header__title">{t.dashboard.title}</h1>
+      <p class="dashboard-header__subtitle">{t.dashboard.subtitle}</p>
+    </header>
+
+    <!-- Quick Index Bar -->
+    <nav class="dashboard-index-bar" aria-label="Índice rápido de secciones">
+      <a href="#overview" class="dashboard-index-chip">
+        <i data-lucide="bar-chart-2"></i>
+        <span>{currentLocale === 'es' ? 'Resumen General' : 'Overview'}</span>
+      </a>
+      <a href="#active-team" class="dashboard-index-chip">
+        <i data-lucide="users"></i>
+        <span>{t.dashboard.activeTeamTitle}</span>
+      </a>
+      <a href="#game-progress" class="dashboard-index-chip">
+        <i data-lucide="gamepad-2"></i>
+        <span>{t.dashboard.gameProgressTitle}</span>
+      </a>
+    </nav>
+
+    <!-- Top Overview Metrics Grid -->
+    <section class="dashboard-metrics-grid" id="overview" aria-label="Resumen general">
+      <!-- National Dex Progress Card -->
+      <div class="metric-card" data-metric="national-dex">
+        <div class="metric-card__header">
+          <span class="metric-card__title">
+            <i data-lucide="book-open"></i>
+            {t.dashboard.nationalDex}
+          </span>
+          <div class="metric-card__icon">
+            <i data-lucide="sparkles"></i>
+          </div>
+        </div>
+        <div class="metric-card__body">
+          <div class="metric-card__value" data-national-percentage>0%</div>
+          <div class="metric-card__subtext" data-national-counts>0 / 1025 Pokémon</div>
+        </div>
+        <div class="metric-progress-bar">
+          <div class="metric-progress-bar__fill" data-national-bar style="width: 0%;"></div>
+        </div>
+        <a href={pokedexHref} class="metric-card__link" data-astro-prefetch>
+          <span>{t.dashboard.openInPokedex}</span>
+          <i data-lucide="arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- Active Team Card -->
+      <div class="metric-card" id="active-team" data-metric="active-team">
+        <div class="metric-card__header">
+          <span class="metric-card__title">
+            <i data-lucide="users"></i>
+            {t.dashboard.activeTeamTitle}
+          </span>
+          <div class="metric-card__icon">
+            <i data-lucide="swords"></i>
+          </div>
+        </div>
+        <div class="dashboard-team-slots" data-team-slots>
+          <!-- 6 slots hydrated via script -->
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div class="dashboard-team-slot" data-slot-index={i} title={`Slot ${i + 1}`}>
+              <i data-lucide="circle-dashed"></i>
+            </div>
+          ))}
+        </div>
+        <a href={teamHref} class="metric-card__link" data-astro-prefetch>
+          <span>{t.dashboard.editTeam}</span>
+          <i data-lucide="arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- Games Status Card -->
+      <div class="metric-card" data-metric="games-status">
+        <div class="metric-card__header">
+          <span class="metric-card__title">
+            <i data-lucide="gamepad-2"></i>
+            {t.dashboard.gamesSummaryTitle}
+          </span>
+          <div class="metric-card__icon">
+            <i data-lucide="trophy"></i>
+          </div>
+        </div>
+        <div class="metric-card__body">
+          <div class="metric-card__value" data-games-started-count>0</div>
+          <div class="metric-card__subtext" data-games-status-subtext>
+            0 {t.dashboard.gamesCompleted.toLowerCase()}
+          </div>
+        </div>
+        <div class="metric-progress-bar">
+          <div class="metric-progress-bar__fill" data-games-bar style="width: 0%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- National Pokédex Pixel Heatmap Matrix -->
+    <PokedexHeatmap generations={generations} />
+
+    <!-- Section 1: Progress According to Game -->
+    <section class="dashboard-section" id="game-progress">
+      <div class="dashboard-section__header">
+        <h2 class="dashboard-section__title">{t.dashboard.gameProgressTitle}</h2>
+        <p class="dashboard-section__subtitle">{t.dashboard.gameProgressSubtitle}</p>
+      </div>
+
+      <!-- Controls: Search, Gen Filter, Mode Toggle -->
+      <div class="dashboard-controls">
+        <div class="dashboard-search-wrap">
+          <i data-lucide="search"></i>
+          <input
+            type="search"
+            class="dashboard-search-input"
+            data-game-search
+            placeholder={t.dashboard.searchPlaceholder}
+            aria-label={t.dashboard.searchPlaceholder}
+          />
+        </div>
+
+        <select class="dashboard-gen-select" data-gen-select aria-label={t.dashboard.filterByGen}>
+          <option value="all">{t.dashboard.allGenerations}</option>
+          {generations.map((gen) => (
+            <option value={String(gen.id)}>{gen.displayName}</option>
+          ))}
+        </select>
+
+        <div class="dashboard-mode-toggle" role="group" aria-label="Modo de Pokédex">
+          <button
+            type="button"
+            class="dashboard-mode-btn dashboard-mode-btn--active"
+            data-mode-btn="regional"
+            aria-pressed="true"
+          >
+            {t.dashboard.regionalMode}
+          </button>
+          <button
+            type="button"
+            class="dashboard-mode-btn"
+            data-mode-btn="obtainable"
+            aria-pressed="false"
+          >
+            {t.dashboard.obtainableMode}
+          </button>
+        </div>
+      </div>
+
+      <!-- Games Grid -->
+      <div class="dashboard-games-grid" data-games-grid>
+        {gamesList.map((g) => {
+          return (
+            <div
+              class="game-card"
+              data-game-card
+              data-game-key={g.key}
+              data-gen={g.gen.id}
+              data-title={g.title.toLowerCase()}
+              style={`--card-theme: ${g.primaryColor};`}
+            >
+              <div class="game-card__header">
+                <div class="game-card__title-wrap">
+                  <span class="game-card__gen-badge">{g.gen.displayName}</span>
+                  <h3 class="game-card__title">{g.title}</h3>
+                </div>
+                <a
+                  href={`${pokedexHref}?game=${g.key}`}
+                  class="game-card__link-icon"
+                  title={`${t.dashboard.openInPokedex}: ${g.title}`}
+                  aria-label={`${t.dashboard.openInPokedex}: ${g.title}`}
+                  data-astro-prefetch
+                >
+                  <i data-lucide="external-link"></i>
+                </a>
+              </div>
+
+              <div class="game-card__progress-wrap">
+                <div class="game-card__progress-bar">
+                  <div class="game-card__progress-fill" data-progress-fill style="width: 0%;"></div>
+                </div>
+                <div class="game-card__progress-stats">
+                  <span class="game-card__counts" data-counts-text>0 / 0</span>
+                  <span class="game-card__percentage" data-pct-text>0%</span>
+                </div>
+              </div>
+
+              {g.entry.versions && g.entry.versions.length > 0 && (
+                <div class="game-card__versions" data-versions-list>
+                  {g.entry.versions.map((ver) => (
+                    <div
+                      class="game-card__version-pill"
+                      data-version-item={ver.id}
+                      style={`--pill-color: ${ver.color};`}
+                    >
+                      <span class="game-card__version-dot"></span>
+                      <span class="game-card__version-name">
+                        {currentLocale === 'es' ? ver.nameEs : ver.name}
+                      </span>
+                      <span class="game-card__version-count" data-version-count>0/0</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+
+        <div class="dashboard-empty-search" data-empty-search hidden>
+          <i data-lucide="search-x"></i>
+          <p>{t.dashboard.noGamesFound}</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</DashboardLayout>
+
+<script>
+  import {
+    getCapturedIds,
+    getAllCapturedByGame,
+    getTeam,
+    CAPTURED_CHANGED_EVENT,
+    CAPTURED_BY_GAME_CHANGED_EVENT,
+    TEAM_CHANGED_EVENT,
+  } from '../lib/storage'
+  import { calculateGameProgress, getDashboardOverview } from '../lib/dashboard'
+  import { getCurrentLocale, getTranslations } from '../lib/i18n/translations'
+  import { refreshIcons } from '../lib/icons'
+  import { getAllPokemon } from '../lib/pokedexData'
+  import type { GameDexData, GameDexMode, Pokemon } from '../lib/types'
+  import gameDexDataRaw from '../../public/data/pokedex/game-pokedex.json'
+
+  const gameDexData = gameDexDataRaw as GameDexData
+  let currentMode: GameDexMode = 'regional'
+  const TOTAL_SPECIES = 1025
+
+  async function initDashboard() {
+    const locale = getCurrentLocale()
+    const t = getTranslations(locale)
+
+    const allPokemon = await getAllPokemon()
+    const pokemonById = new Map<number, Pokemon>(allPokemon.map((p) => [p.id, p]))
+
+    // Elements
+    const nationalBar = document.querySelector<HTMLElement>('[data-national-bar]')
+    const nationalPct = document.querySelector<HTMLElement>('[data-national-percentage]')
+    const nationalCounts = document.querySelector<HTMLElement>('[data-national-counts]')
+    const teamSlotsContainer = document.querySelector<HTMLElement>('[data-team-slots]')
+    const gamesStartedCountEl = document.querySelector<HTMLElement>('[data-games-started-count]')
+    const gamesStatusSubtextEl = document.querySelector<HTMLElement>('[data-games-status-subtext]')
+    const gamesBarEl = document.querySelector<HTMLElement>('[data-games-bar]')
+
+    const gameCards = document.querySelectorAll<HTMLElement>('[data-game-card]')
+    const searchInput = document.querySelector<HTMLInputElement>('[data-game-search]')
+    const genSelect = document.querySelector<HTMLSelectElement>('[data-gen-select]')
+    const modeButtons = document.querySelectorAll<HTMLButtonElement>('[data-mode-btn]')
+    const emptySearchEl = document.querySelector<HTMLElement>('[data-empty-search]')
+
+    function renderDashboardData() {
+      const capturedIds = getCapturedIds()
+      const capturedByGame = getAllCapturedByGame()
+      const team = getTeam()
+
+      // Top metrics
+      const overview = getDashboardOverview({
+        totalSpeciesCount: TOTAL_SPECIES,
+        capturedIds,
+        team,
+        gamesData: gameDexData,
+        capturedByGame,
+        mode: currentMode,
+      })
+
+      if (nationalPct) nationalPct.textContent = `${overview.nationalDexPercentage}%`
+      if (nationalCounts) nationalCounts.textContent = `${overview.nationalDexCaught} / ${TOTAL_SPECIES} Pokémon`
+      if (nationalBar) nationalBar.style.width = `${overview.nationalDexPercentage}%`
+
+      if (gamesStartedCountEl) gamesStartedCountEl.textContent = String(overview.gamesStartedCount)
+      if (gamesStatusSubtextEl) {
+        gamesStatusSubtextEl.textContent = `${overview.gamesCompletedCount} ${t.dashboard.gamesCompleted.toLowerCase()}`
+      }
+      const totalGames = Object.keys(gameDexData).length
+      if (gamesBarEl) {
+        const gamesPct = Math.round((overview.gamesStartedCount / totalGames) * 100)
+        gamesBarEl.style.width = `${gamesPct}%`
+      }
+
+      // Render Active Team preview slots
+      if (teamSlotsContainer) {
+        const slots = team.slots || []
+        teamSlotsContainer.querySelectorAll<HTMLElement>('[data-slot-index]').forEach((el) => {
+          const idx = Number(el.dataset.slotIndex)
+          const slot = slots[idx]
+          if (slot && slot.pokemonId) {
+            el.classList.add('dashboard-team-slot--filled')
+            const pokemon = pokemonById.get(slot.pokemonId)
+            const sprite = pokemon?.sprites.officialArtwork ?? pokemon?.sprites.default ?? ''
+            el.innerHTML = `<img data-sprite-src="${sprite}" alt="${pokemon?.name ?? `Pokemon #${slot.pokemonId}`}" />`
+          } else {
+            el.classList.remove('dashboard-team-slot--filled')
+            el.innerHTML = `<i data-lucide="circle-dashed"></i>`
+          }
+        })
+      }
+
+      // Render Game Cards progress
+      gameCards.forEach((card) => {
+        const gameKey = card.dataset.gameKey
+        if (!gameKey || !gameDexData[gameKey]) return
+
+        const entry = gameDexData[gameKey]
+        const progress = calculateGameProgress({
+          gameKey,
+          entry,
+          mode: currentMode,
+          capturedIds,
+          capturedByGame,
+        })
+
+        const barFill = card.querySelector<HTMLElement>('[data-progress-fill]')
+        const countsText = card.querySelector<HTMLElement>('[data-counts-text]')
+        const pctText = card.querySelector<HTMLElement>('[data-pct-text]')
+
+        if (barFill) barFill.style.width = `${progress.percentage}%`
+        if (countsText) countsText.textContent = `${progress.caughtCount} / ${progress.totalCount}`
+        if (pctText) pctText.textContent = `${progress.percentage}%`
+
+        // Version breakdowns
+        if (progress.versions.length > 0) {
+          progress.versions.forEach((ver) => {
+            const verPill = card.querySelector<HTMLElement>(`[data-version-item="${ver.id}"]`)
+            if (verPill) {
+              const countEl = verPill.querySelector<HTMLElement>('[data-version-count]')
+              if (countEl) {
+                countEl.textContent = `${ver.caughtCount}/${ver.eligibleCount}`
+              }
+            }
+          })
+        }
+      })
+
+      refreshIcons()
+    }
+
+    // Filter cards
+    function filterCards() {
+      const q = (searchInput?.value || '').trim().toLowerCase()
+      const selectedGen = genSelect?.value || 'all'
+      let visibleCount = 0
+
+      gameCards.forEach((card) => {
+        const title = card.dataset.title || ''
+        const gen = card.dataset.gen || ''
+
+        const matchesQuery = !q || title.includes(q)
+        const matchesGen = selectedGen === 'all' || gen === selectedGen
+
+        const visible = matchesQuery && matchesGen
+        card.hidden = !visible
+        if (visible) visibleCount++
+      })
+
+      if (emptySearchEl) {
+        emptySearchEl.hidden = visibleCount > 0
+      }
+    }
+
+    // Mode buttons
+    modeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.modeBtn as GameDexMode
+        if (mode === currentMode) return
+
+        currentMode = mode
+        modeButtons.forEach((b) => {
+          const isActive = b.dataset.modeBtn === mode
+          b.classList.toggle('dashboard-mode-btn--active', isActive)
+          b.setAttribute('aria-pressed', String(isActive))
+        })
+
+        renderDashboardData()
+      })
+    })
+
+    // Search and Gen select
+    searchInput?.addEventListener('input', filterCards)
+    genSelect?.addEventListener('change', filterCards)
+
+    // Event listeners for external updates
+    window.addEventListener(CAPTURED_CHANGED_EVENT, renderDashboardData)
+    window.addEventListener(CAPTURED_BY_GAME_CHANGED_EVENT, renderDashboardData)
+    window.addEventListener(TEAM_CHANGED_EVENT, renderDashboardData)
+
+    // Initial render
+    renderDashboardData()
+  }
+
+  initDashboard()
+  document.addEventListener('astro:after-swap', initDashboard)
+</script>

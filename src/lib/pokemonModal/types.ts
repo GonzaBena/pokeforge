@@ -1,4 +1,12 @@
-import type { EvolutionChain, MoveData, Nature, Pokemon, PokemonDetail, TypeChart } from '../types'
+import type {
+  EvolutionChain,
+  GameDexData,
+  MoveData,
+  Nature,
+  Pokemon,
+  PokemonDetail,
+  TypeChart,
+} from '../types'
 
 export interface RenderContext {
   pokemon: Pokemon
@@ -8,6 +16,8 @@ export interface RenderContext {
   allById: Map<number, Pokemon>
   typeChart: TypeChart
   moveDetailsMap?: Record<string, MoveData>
+  selectedGame: string
+  gameDexData: GameDexData | null
 }
 
 export interface PokemonModalOptions {

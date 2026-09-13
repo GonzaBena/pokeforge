@@ -1,12 +1,20 @@
-import type { PokemonStats, TeamSlotState, TeamState } from './types'
+import type { CaptureLogEntry, PokemonStats, TeamSlotState, TeamState } from './types'
+
+export type { CaptureLogEntry } from './types'
 
 const CAPTURED_KEY = 'poketeam:captured'
 const TEAM_KEY = 'poketeam:team'
 const SECTION_ORDER_KEY = 'poketeam:modal-section-order'
 const overridesKey = (id: number) => `poketeam:pokemon-overrides:${id}`
+const captureMetaKey = (id: number) => `poketeam:capture-meta:${id}`
+const CAPTURE_META_KEY_PREFIX = 'poketeam:capture-meta:'
+
+const CAPTURED_BY_GAME_KEY = 'poketeam:captured-by-game'
 
 export const CAPTURED_CHANGED_EVENT = 'poketeam:captured-changed'
+export const CAPTURED_BY_GAME_CHANGED_EVENT = 'poketeam:captured-by-game-changed'
 export const TEAM_CHANGED_EVENT = 'poketeam:team-changed'
+export const CAPTURE_LOG_CHANGED_EVENT = 'poketeam:capture-log-changed'
 
 function readJson<T>(key: string, fallback: T): T {
   try {
@@ -23,9 +31,31 @@ function writeJson<T>(key: string, value: T): void {
 }
 
 // --- Captured pokemon -------------------------------------------------
+//
+// Two sources feed the aggregate "captured" state:
+// - CAPTURED_KEY: the original global set (unattributed captures).
+// - CAPTURED_BY_GAME_KEY: per-version-id lists (Dual Version Mode), e.g.
+//   { scarlet: [1, 2], violet: [2, 3] }.
+// getCapturedIds()/isCaptured() always return the union of both, so the
+// ~10 existing call sites keep working unchanged. setCaptured() only ever
+// touches the global set — it must read via getRawGlobalCapturedIds(), not
+// getCapturedIds(), or it would silently promote per-game ids into the
+// global set on every write.
+
+function getRawGlobalCapturedIds(): Set<number> {
+  return new Set(readJson<number[]>(CAPTURED_KEY, []))
+}
+
+function readCapturedByGameMap(): Record<string, number[]> {
+  return readJson<Record<string, number[]>>(CAPTURED_BY_GAME_KEY, {})
+}
 
 export function getCapturedIds(): Set<number> {
-  return new Set(readJson<number[]>(CAPTURED_KEY, []))
+  const union = getRawGlobalCapturedIds()
+  for (const ids of Object.values(readCapturedByGameMap())) {
+    for (const id of ids) union.add(id)
+  }
+  return union
 }
 
 export function isCaptured(id: number): boolean {
@@ -33,19 +63,82 @@ export function isCaptured(id: number): boolean {
 }
 
 export function setCaptured(id: number, captured: boolean): Set<number> {
-  const ids = getCapturedIds()
+  const ids = getRawGlobalCapturedIds()
   if (captured) {
     ids.add(id)
   } else {
     ids.delete(id)
-    deletePokemonOverrides(id)
   }
-
   writeJson(CAPTURED_KEY, [...ids])
+
+  const aggregate = getCapturedIds()
+  if (!captured && !aggregate.has(id)) {
+    // Only wipe overrides once no source (global or any version) still
+    // considers this pokemon captured.
+    deletePokemonOverrides(id)
+    deleteCaptureMeta(id)
+  }
   window.dispatchEvent(
-    new CustomEvent(CAPTURED_CHANGED_EVENT, { detail: { ids, changedId: id, captured } }),
+    new CustomEvent(CAPTURED_CHANGED_EVENT, {
+      detail: { ids: aggregate, changedId: id, captured },
+    }),
   )
-  return ids
+  return aggregate
+}
+
+// --- Captured pokemon, by game version (Dual Version Mode) -------------
+
+export function getCapturedByGame(versionId: string): Set<number> {
+  return new Set(readCapturedByGameMap()[versionId] ?? [])
+}
+
+export function getAllCapturedByGame(): Record<string, Set<number>> {
+  const map = readCapturedByGameMap()
+  const result: Record<string, Set<number>> = {}
+  for (const [versionId, ids] of Object.entries(map)) {
+    result[versionId] = new Set(ids)
+  }
+  return result
+}
+
+export function setCapturedForVersions(
+  id: number,
+  versionIds: string[],
+  captured: boolean,
+): void {
+  const map = readCapturedByGameMap()
+  for (const versionId of versionIds) {
+    const set = new Set(map[versionId] ?? [])
+    if (captured) {
+      set.add(id)
+    } else {
+      set.delete(id)
+    }
+    map[versionId] = [...set]
+  }
+  writeJson(CAPTURED_BY_GAME_KEY, map)
+
+  const aggregate = getCapturedIds()
+  if (!captured && !aggregate.has(id)) {
+    deletePokemonOverrides(id)
+    deleteCaptureMeta(id)
+  }
+  window.dispatchEvent(
+    new CustomEvent(CAPTURED_BY_GAME_CHANGED_EVENT, {
+      detail: { versionIds, changedId: id, captured },
+    }),
+  )
+  // Also notify CAPTURED_CHANGED_EVENT listeners (cloudSync auto-sync, card
+  // sync in pokedex-page.ts) so they don't need to know Dual Version Mode exists.
+  window.dispatchEvent(
+    new CustomEvent(CAPTURED_CHANGED_EVENT, {
+      detail: { ids: aggregate, changedId: id, captured: aggregate.has(id) },
+    }),
+  )
+}
+
+export function setCapturedByGame(versionId: string, id: number, captured: boolean): void {
+  setCapturedForVersions(id, [versionId], captured)
 }
 
 // --- Active team --------------------------------------------------------
@@ -345,6 +438,49 @@ export function deletePokemonOverrides(id: number): void {
   localStorage.removeItem(overridesKey(id))
 }
 
+// --- Capture log / passport (fecha, método, juego) — optional, additive layer
+// on top of the capture model above. Keys are per-id, mirroring the overrides
+// trio above, so cleanup is O(1) and rides the same 'poketeam:' prefix sweep
+// in resetAllData().
+
+export function getCaptureMeta(id: number): CaptureLogEntry | null {
+  const stored = readJson<CaptureLogEntry | null>(captureMetaKey(id), null)
+  return stored ?? null
+}
+
+export function setCaptureMeta(id: number, meta: CaptureLogEntry): void {
+  writeJson(captureMetaKey(id), meta)
+  window.dispatchEvent(new CustomEvent(CAPTURE_LOG_CHANGED_EVENT, { detail: { id, meta } }))
+}
+
+export function deleteCaptureMeta(id: number): void {
+  if (getCaptureMeta(id) === null) return
+  localStorage.removeItem(captureMetaKey(id))
+  window.dispatchEvent(
+    new CustomEvent(CAPTURE_LOG_CHANGED_EVENT, { detail: { id, deleted: true } }),
+  )
+}
+
+export function getCaptureLog(): Record<number, CaptureLogEntry> {
+  const log: Record<number, CaptureLogEntry> = {}
+  if (typeof localStorage === 'undefined') return log
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(CAPTURE_META_KEY_PREFIX)) {
+        const id = parseInt(key.replace(CAPTURE_META_KEY_PREFIX, ''), 10)
+        if (!isNaN(id)) {
+          const meta = getCaptureMeta(id)
+          if (meta) log[id] = meta
+        }
+      }
+    }
+  } catch {
+    // ignore storage access failures
+  }
+  return log
+}
+
 // --- Modal section order -------------------------------------------------
 
 export const DEFAULT_SECTION_ORDER = [
@@ -353,6 +489,7 @@ export const DEFAULT_SECTION_ORDER = [
   'location',
   'moves',
   'evolutions',
+  'passport',
 ]
 
 export function getSectionOrder(): string[] {
@@ -470,9 +607,13 @@ export function resetAllData(): void {
   window.dispatchEvent(
     new CustomEvent(CAPTURED_CHANGED_EVENT, { detail: { ids: new Set(), reset: true } }),
   )
+  window.dispatchEvent(
+    new CustomEvent(CAPTURED_BY_GAME_CHANGED_EVENT, { detail: { reset: true } }),
+  )
   window.dispatchEvent(new CustomEvent(TEAM_CHANGED_EVENT, { detail: { team: DEFAULT_TEAM } }))
   window.dispatchEvent(new CustomEvent(GAME_CHANGED_EVENT, { detail: { game: '' } }))
   window.dispatchEvent(
     new CustomEvent(GAME_DEX_MODE_CHANGED_EVENT, { detail: { mode: 'regional' } }),
   )
+  window.dispatchEvent(new CustomEvent(CAPTURE_LOG_CHANGED_EVENT, { detail: { reset: true } }))
 }
