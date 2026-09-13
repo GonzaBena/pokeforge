@@ -1,4 +1,12 @@
-import type { CaptureLogEntry, PokemonStats, TeamSlotState, TeamState } from './types'
+import type {
+  CaptureLogEntry,
+  NuzlockePlaythrough,
+  NuzlockeRules,
+  NuzlockeState,
+  PokemonStats,
+  TeamSlotState,
+  TeamState,
+} from './types'
 
 export type { CaptureLogEntry } from './types'
 
@@ -583,6 +591,66 @@ export function setGameDexMode(mode: GameDexMode): GameDexMode {
   return mode
 }
 
+// --- Nuzlocke mode -------------------------------------------------------
+
+const NUZLOCKE_KEY = 'poketeam:nuzlocke'
+const NUZLOCKE_PARTY_SIZE = 6
+export const NUZLOCKE_CHANGED_EVENT = 'poketeam:nuzlocke-changed'
+
+const DEFAULT_NUZLOCKE_RULES: NuzlockeRules = {
+  capLevelByGym: false,
+  noHeal: false,
+  noItems: false,
+  shuffle: false,
+}
+
+const DEFAULT_NUZLOCKE_STATE: NuzlockeState = {
+  enabled: false,
+  rules: DEFAULT_NUZLOCKE_RULES,
+  playthroughs: {},
+  activeRunId: null,
+}
+
+const NUZLOCKE_STATUSES = ['active', 'won', 'lost', 'abandoned']
+
+function normalizeNuzlockePlaythrough(raw: NuzlockePlaythrough): NuzlockePlaythrough {
+  const party = Array.from({ length: NUZLOCKE_PARTY_SIZE }, (_, i) => raw?.party?.[i] ?? null)
+  const areas = raw?.areas && typeof raw.areas === 'object' ? raw.areas : {}
+  const deaths = Array.isArray(raw?.deaths) ? raw.deaths : []
+  const status: NuzlockePlaythrough['status'] =
+    raw?.status && NUZLOCKE_STATUSES.includes(raw.status) ? raw.status : 'active'
+  return {
+    id: raw.id,
+    game: raw.game,
+    startedAt: raw.startedAt,
+    areas,
+    deaths,
+    party,
+    status,
+  }
+}
+
+function normalizeNuzlockeState(raw: NuzlockeState): NuzlockeState {
+  const rules = { ...DEFAULT_NUZLOCKE_RULES, ...(raw?.rules ?? {}) }
+  const playthroughs: Record<string, NuzlockePlaythrough> = {}
+  for (const [id, p] of Object.entries(raw?.playthroughs ?? {})) {
+    playthroughs[id] = normalizeNuzlockePlaythrough({ ...p, id })
+  }
+  const activeRunId = raw?.activeRunId && playthroughs[raw.activeRunId] ? raw.activeRunId : null
+  return { enabled: Boolean(raw?.enabled), rules, playthroughs, activeRunId }
+}
+
+export function getNuzlockeState(): NuzlockeState {
+  return normalizeNuzlockeState(readJson<NuzlockeState>(NUZLOCKE_KEY, DEFAULT_NUZLOCKE_STATE))
+}
+
+export function setNuzlockeState(state: NuzlockeState): NuzlockeState {
+  const normalized = normalizeNuzlockeState(state)
+  writeJson(NUZLOCKE_KEY, normalized)
+  window.dispatchEvent(new CustomEvent(NUZLOCKE_CHANGED_EVENT, { detail: { state: normalized } }))
+  return normalized
+}
+
 // --- Reset all data ----------------------------------------------------
 
 export const DATA_RESET_EVENT = 'poketeam:data-reset'
@@ -617,4 +685,7 @@ export function resetAllData(): void {
     new CustomEvent(GAME_DEX_MODE_CHANGED_EVENT, { detail: { mode: 'regional' } }),
   )
   window.dispatchEvent(new CustomEvent(CAPTURE_LOG_CHANGED_EVENT, { detail: { reset: true } }))
+  window.dispatchEvent(
+    new CustomEvent(NUZLOCKE_CHANGED_EVENT, { detail: { state: DEFAULT_NUZLOCKE_STATE, reset: true } }),
+  )
 }

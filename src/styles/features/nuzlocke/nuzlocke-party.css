@@ -1,0 +1,52 @@
+/* -------------------------------------------------------- nuzlocke: run party */
+
+.nuzlocke-party-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.nuzlocke-party-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.nuzlocke-party-slot:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.nuzlocke-party-slot img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.nuzlocke-party-slot--empty {
+  border-style: dashed;
+  color: var(--text-faint);
+  cursor: default;
+  font-weight: 600;
+  min-height: 92px;
+  align-items: center;
+  justify-content: center;
+}
+
+.nuzlocke-party-slot--empty:hover {
+  border-color: var(--border);
+  transform: none;
+}

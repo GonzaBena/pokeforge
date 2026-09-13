@@ -1,0 +1,281 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PokemonDetailModal from '../components/PokemonDetailModal.astro'
+import { getTranslations, type Locale } from '../lib/i18n/translations'
+import '../styles/features/team/synergy.css'
+import '../styles/features/nuzlocke/nuzlocke-page.css'
+import '../styles/features/nuzlocke/nuzlocke-party.css'
+import '../styles/features/nuzlocke/nuzlocke-graveyard.css'
+import '../styles/features/nuzlocke/nuzlocke-encounter-modal.css'
+
+const currentLocale = (Astro.currentLocale ?? 'en') as Locale
+const t = getTranslations(currentLocale)
+---
+
+<BaseLayout title={t.nuzlocke.title}>
+  <div class="page" data-nuzlocke-root>
+    <div class="page__header">
+      <div>
+        <h1 class="page__title">
+          <i data-lucide="skull"></i> {t.nuzlocke.title}
+        </h1>
+        <p class="page__subtitle">{t.nuzlocke.subtitle}</p>
+      </div>
+      <div class="page__header-actions" data-nuzlocke-header-actions hidden>
+        <div class="select-wrapper select-wrapper--compact">
+          <i data-lucide="flag" class="select-wrapper__icon"></i>
+          <select
+            class="game-select"
+            data-run-select
+            aria-label={t.nuzlocke.runSelectLabel}
+          ></select>
+          <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+        </div>
+        <button class="btn btn--primary" type="button" data-new-run-btn>
+          <i data-lucide="plus"></i>
+          <span>{t.nuzlocke.newRunBtn}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="nuzlocke-empty-state" data-nuzlocke-empty-state hidden>
+      <i data-lucide="skull" class="nuzlocke-empty-state__icon"></i>
+      <h2>{t.nuzlocke.emptyTitle}</h2>
+      <p>{t.nuzlocke.emptyDesc}</p>
+      <div class="nuzlocke-empty-state__form">
+        <div class="select-wrapper">
+          <i data-lucide="gamepad-2" class="select-wrapper__icon"></i>
+          <select class="game-select" data-new-run-game-select aria-label={t.nuzlocke.gameSelectLabel}
+          ></select>
+          <i data-lucide="chevron-down" class="select-wrapper__arrow"></i>
+        </div>
+        <button class="btn btn--primary" type="button" data-new-run-submit>
+          <i data-lucide="play"></i>
+          <span>{t.nuzlocke.createRunBtn}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="nuzlocke-dashboard" data-nuzlocke-dashboard hidden>
+      <div class="nuzlocke-stats" data-nuzlocke-stats></div>
+
+      <section class="nuzlocke-section">
+        <div class="nuzlocke-section__header">
+          <h2><i data-lucide="users"></i> {t.nuzlocke.partyTitle}</h2>
+          <button class="btn btn--primary btn--sm" type="button" data-new-encounter-btn>
+            <i data-lucide="plus"></i>
+            <span>{t.nuzlocke.newEncounterBtn}</span>
+          </button>
+        </div>
+        <div class="nuzlocke-party-grid" data-nuzlocke-party-slots></div>
+      </section>
+
+      <section class="nuzlocke-section">
+        <div class="nuzlocke-section__header">
+          <h2><i data-lucide="map"></i> {t.nuzlocke.areasTitle}</h2>
+        </div>
+        <div class="nuzlocke-areas-list" data-nuzlocke-areas-list></div>
+      </section>
+
+      <section class="nuzlocke-section">
+        <div class="nuzlocke-section__header">
+          <h2>
+            <i data-lucide="skull"></i> {t.nuzlocke.graveyardTitle}
+            <span class="nuzlocke-graveyard-count" data-graveyard-count-badge></span>
+          </h2>
+          <div class="nuzlocke-section__header-actions">
+            <button class="btn btn--sm" type="button" data-register-death-btn>
+              <i data-lucide="skull"></i>
+              <span>{t.nuzlocke.registerDeathBtn}</span>
+            </button>
+            <button class="btn btn--sm" type="button" data-export-memorial-btn>
+              <i data-lucide="image"></i>
+              <span>{t.nuzlocke.exportMemorialBtn}</span>
+            </button>
+          </div>
+        </div>
+        <div class="nuzlocke-graveyard-list" data-nuzlocke-graveyard-list></div>
+      </section>
+
+      <section class="nuzlocke-section">
+        <div class="nuzlocke-section__header">
+          <h2><i data-lucide="list-checks"></i> {t.nuzlocke.rulesTitle}</h2>
+        </div>
+        <div class="nuzlocke-rules">
+          <label class="nuzlocke-rule">
+            <input type="checkbox" data-rule="capLevelByGym" />
+            <span>{t.nuzlocke.ruleCapLevelByGym}</span>
+          </label>
+          <label class="nuzlocke-rule">
+            <input type="checkbox" data-rule="noHeal" />
+            <span>{t.nuzlocke.ruleNoHeal}</span>
+          </label>
+          <label class="nuzlocke-rule">
+            <input type="checkbox" data-rule="noItems" />
+            <span>{t.nuzlocke.ruleNoItems}</span>
+          </label>
+          <label class="nuzlocke-rule">
+            <input type="checkbox" data-rule="shuffle" />
+            <span>{t.nuzlocke.ruleShuffle}</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="nuzlocke-section nuzlocke-section--danger">
+        <div class="nuzlocke-danger-zone">
+          <label class="nuzlocke-status-select-wrap">
+            <span>{t.nuzlocke.statusLabel}</span>
+            <select class="game-select" data-run-status-select>
+              <option value="active">{t.nuzlocke.statusActive}</option>
+              <option value="won">{t.nuzlocke.statusWon}</option>
+              <option value="lost">{t.nuzlocke.statusLost}</option>
+              <option value="abandoned">{t.nuzlocke.statusAbandoned}</option>
+            </select>
+          </label>
+          <button class="btn btn--danger" type="button" data-delete-run-btn>
+            <i data-lucide="trash-2"></i>
+            <span>{t.nuzlocke.deleteRunBtn}</span>
+          </button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="modal-overlay" data-encounter-modal-overlay hidden>
+    <div class="modal-panel nuzlocke-encounter-panel">
+      <div class="modal-panel__header">
+        <h2><i data-lucide="crosshair"></i> {t.nuzlocke.encounterModalTitle}</h2>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-encounter-modal-close
+          aria-label={t.modal.close}
+        >
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="nuzlocke-encounter-panel__body">
+        <label class="nuzlocke-input-wrap">
+          <i data-lucide="map-pin" class="nuzlocke-input-icon"></i>
+          <input
+            class="nuzlocke-input"
+            type="text"
+            list="nuzlocke-area-options"
+            placeholder={t.nuzlocke.areaInputPlaceholder}
+            data-encounter-area-input
+          />
+          <datalist id="nuzlocke-area-options" data-encounter-area-options></datalist>
+        </label>
+        <label class="nuzlocke-input-wrap">
+          <i data-lucide="search" class="nuzlocke-input-icon"></i>
+          <input
+            class="nuzlocke-input"
+            type="search"
+            placeholder={t.nuzlocke.searchPlaceholder}
+            data-encounter-search
+          />
+        </label>
+        <div class="nuzlocke-encounter-results" data-encounter-results></div>
+        <div class="nuzlocke-encounter-selected" data-encounter-selected-chip hidden></div>
+        <div class="view-toggle nuzlocke-outcome-toggle" data-encounter-outcome-toggle>
+          <button
+            class="view-toggle__btn"
+            type="button"
+            data-encounter-outcome="captured"
+            aria-pressed="false"
+          >
+            <i data-lucide="check-circle-2"></i>
+            {t.nuzlocke.outcomeCaptured}
+          </button>
+          <button
+            class="view-toggle__btn"
+            type="button"
+            data-encounter-outcome="fainted"
+            aria-pressed="false"
+          >
+            <i data-lucide="skull"></i>
+            {t.nuzlocke.outcomeFainted}
+          </button>
+        </div>
+        <button class="btn btn--primary" type="button" data-encounter-confirm disabled>
+          {t.nuzlocke.confirmBtn}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" data-death-modal-overlay hidden>
+    <div class="modal-panel nuzlocke-death-panel">
+      <div class="modal-panel__header">
+        <h2><i data-lucide="skull"></i> {t.nuzlocke.deathModalTitle}</h2>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-death-modal-close
+          aria-label={t.modal.close}
+        >
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="nuzlocke-death-panel__body">
+        <label class="nuzlocke-form-field">
+          <span>{t.nuzlocke.deathPokemonLabel}</span>
+          <select class="game-select" data-death-pokemon-select></select>
+        </label>
+        <label class="nuzlocke-form-field">
+          <span>{t.nuzlocke.deathLevelPlaceholder}</span>
+          <input class="nuzlocke-input" type="number" min="1" max="100" data-death-level />
+        </label>
+        <label class="nuzlocke-form-field">
+          <span>{t.nuzlocke.deathAreaPlaceholder}</span>
+          <input
+            class="nuzlocke-input"
+            type="text"
+            list="nuzlocke-area-options"
+            data-death-area
+          />
+        </label>
+        <label class="nuzlocke-form-field">
+          <span>{t.nuzlocke.deathCausePlaceholder}</span>
+          <input class="nuzlocke-input" type="text" data-death-cause />
+        </label>
+        <label class="nuzlocke-form-field">
+          <span>{t.nuzlocke.deathDateLabel}</span>
+          <input class="nuzlocke-input" type="date" data-death-date />
+        </label>
+        <button class="btn btn--danger" type="button" data-death-confirm>
+          {t.nuzlocke.confirmDeathBtn}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" data-memorial-modal-overlay hidden>
+    <div class="modal-panel nuzlocke-memorial-panel">
+      <div class="modal-panel__header">
+        <h2><i data-lucide="image"></i> {t.nuzlocke.memorialModalTitle}</h2>
+        <button
+          class="modal-panel__close"
+          type="button"
+          data-memorial-modal-close
+          aria-label={t.modal.close}
+        >
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="nuzlocke-memorial-panel__body">
+        <div class="nuzlocke-memorial-preview" data-memorial-preview></div>
+        <button class="btn btn--primary" type="button" data-download-memorial-png>
+          <i data-lucide="download"></i>
+          <span>{t.nuzlocke.downloadMemorialPng}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <PokemonDetailModal />
+
+  <script>
+    import '../scripts/nuzlocke-page'
+  </script>
+</BaseLayout>

@@ -16,6 +16,7 @@ const homePath = getLocalizedPath('/', currentLocale)
 const pokedexPath = getLocalizedPath('/pokedex/', currentLocale)
 const teamPath = getLocalizedPath('/team/', currentLocale)
 const dashboardPath = getLocalizedPath('/dashboard/', currentLocale)
+const nuzlockePath = getLocalizedPath('/nuzlocke/', currentLocale)
 const blogPath = getLocalizedPath('/blog/', currentLocale)
 
 const enHref = alternateUrls?.en ?? getLocalizedPath(path, 'en')
@@ -31,6 +32,8 @@ const isEquipo =
     : path.startsWith('/team') || path.startsWith('/equipo')
 const isDashboard =
   currentLocale === 'es' ? path.startsWith('/es/dashboard') : path.startsWith('/dashboard')
+const isNuzlocke =
+  currentLocale === 'es' ? path.startsWith('/es/nuzlocke') : path.startsWith('/nuzlocke')
 const isBlog = currentLocale === 'es' ? path.startsWith('/es/blog') : path.startsWith('/blog')
 const isMinimal = variant === 'minimal' || isBlog
 ---
@@ -68,6 +71,15 @@ const isMinimal = variant === 'minimal' || isBlog
       >
         <i data-lucide="layout-dashboard"></i>
         {t.nav.dashboard}
+      </a>
+      <a
+        class="nav__link"
+        href={nuzlockePath}
+        data-astro-prefetch
+        aria-current={isNuzlocke ? 'page' : undefined}
+      >
+        <i data-lucide="skull"></i>
+        {t.nav.nuzlocke}
       </a>
       <a
         class="nav__link"
@@ -314,6 +326,15 @@ const isMinimal = variant === 'minimal' || isBlog
   >
     <i data-lucide="layout-dashboard"></i>
     <span>{t.nav.dashboard}</span>
+  </a>
+  <a
+    class="bottom-nav__link"
+    href={nuzlockePath}
+    data-astro-prefetch
+    aria-current={isNuzlocke ? 'page' : undefined}
+  >
+    <i data-lucide="skull"></i>
+    <span>{t.nav.nuzlocke}</span>
   </a>
   <a
     class="bottom-nav__link"

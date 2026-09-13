@@ -85,6 +85,7 @@ export interface Translations {
     dashboard: string
     pokedex: string
     team: string
+    nuzlocke: string
     blog: string
     installApp: string
     installAppTitle: string
@@ -254,6 +255,58 @@ export interface Translations {
     legendHalf: string
     legendQuarter: string
     legendImmune: string
+  }
+  nuzlocke: {
+    title: string
+    subtitle: string
+    emptyTitle: string
+    emptyDesc: string
+    gameSelectLabel: string
+    createRunBtn: string
+    runSelectLabel: string
+    newRunBtn: string
+    statAreas: string
+    statCaptures: string
+    statDeaths: string
+    statAlive: string
+    partyTitle: string
+    partyEmptySlot: string
+    newEncounterBtn: string
+    areasTitle: string
+    areasEmpty: string
+    graveyardTitle: string
+    graveyardEmpty: string
+    graveyardCount: string
+    registerDeathBtn: string
+    exportMemorialBtn: string
+    rulesTitle: string
+    ruleCapLevelByGym: string
+    ruleNoHeal: string
+    ruleNoItems: string
+    ruleShuffle: string
+    statusLabel: string
+    statusActive: string
+    statusWon: string
+    statusLost: string
+    statusAbandoned: string
+    deleteRunBtn: string
+    deleteRunConfirm: string
+    encounterModalTitle: string
+    areaInputPlaceholder: string
+    searchPlaceholder: string
+    outcomeCaptured: string
+    outcomeFainted: string
+    confirmBtn: string
+    partyFullWarning: string
+    deathModalTitle: string
+    deathPokemonLabel: string
+    deathLevelPlaceholder: string
+    deathAreaPlaceholder: string
+    deathCausePlaceholder: string
+    deathDateLabel: string
+    confirmDeathBtn: string
+    memorialModalTitle: string
+    downloadMemorialPng: string
   }
   strengthsWeaknesses: {
     title: string
@@ -674,6 +727,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       dashboard: 'Dashboard',
       pokedex: 'Pokedex',
       team: 'Team',
+      nuzlocke: 'Nuzlocke',
       blog: 'Blog',
       installApp: 'Install App',
       installAppTitle: 'Install PokeForge application',
@@ -846,6 +900,58 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       legendHalf: '½× Resistance',
       legendQuarter: '¼× Double resistance',
       legendImmune: '0× Immunity',
+    },
+    nuzlocke: {
+      title: 'Nuzlocke Mode',
+      subtitle: 'Track your Nuzlocke run: encounters, party, and graveyard.',
+      emptyTitle: 'No active run',
+      emptyDesc: 'Pick a game version and start a new Nuzlocke run.',
+      gameSelectLabel: 'Game version',
+      createRunBtn: 'Start run',
+      runSelectLabel: 'Run',
+      newRunBtn: 'New run',
+      statAreas: 'Areas',
+      statCaptures: 'Captures',
+      statDeaths: 'Deaths',
+      statAlive: 'Alive',
+      partyTitle: 'Run party',
+      partyEmptySlot: 'Empty',
+      newEncounterBtn: 'New encounter',
+      areasTitle: 'Areas visited',
+      areasEmpty: 'No areas registered yet.',
+      graveyardTitle: 'Graveyard',
+      graveyardEmpty: 'No deaths registered.',
+      graveyardCount: '{count} deaths',
+      registerDeathBtn: 'Register death',
+      exportMemorialBtn: 'Export memorial',
+      rulesTitle: 'Rules',
+      ruleCapLevelByGym: 'Level cap per gym',
+      ruleNoHeal: 'No healing between battles',
+      ruleNoItems: 'No items in battle',
+      ruleShuffle: 'Mandatory team shuffle',
+      statusLabel: 'Run status',
+      statusActive: 'Active',
+      statusWon: 'Won',
+      statusLost: 'Lost',
+      statusAbandoned: 'Abandoned',
+      deleteRunBtn: 'Delete run',
+      deleteRunConfirm: 'Delete this run permanently? This cannot be undone.',
+      encounterModalTitle: 'New encounter',
+      areaInputPlaceholder: 'Area (e.g. Route 1)',
+      searchPlaceholder: 'Search wild Pokémon...',
+      outcomeCaptured: 'Captured',
+      outcomeFainted: 'Fainted',
+      confirmBtn: 'Confirm',
+      partyFullWarning: 'Encounter registered, but the run party is full — not added to party.',
+      deathModalTitle: 'Register death',
+      deathPokemonLabel: 'Pokémon',
+      deathLevelPlaceholder: 'Level',
+      deathAreaPlaceholder: 'Area',
+      deathCausePlaceholder: 'Cause (e.g. Sableye crit)',
+      deathDateLabel: 'Date',
+      confirmDeathBtn: 'Register death',
+      memorialModalTitle: 'Nuzlocke memorial',
+      downloadMemorialPng: 'Download PNG',
     },
     strengthsWeaknesses: {
       title: 'Team Defense Analysis',
@@ -1295,6 +1401,7 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       dashboard: 'Dashboard',
       pokedex: 'Pokédex',
       team: 'Equipo',
+      nuzlocke: 'Nuzlocke',
       blog: 'Blog',
       installApp: 'Instalar App',
       installAppTitle: 'Instalar aplicación PokeForge',
@@ -1470,6 +1577,59 @@ export const UI_TRANSLATIONS: Record<Locale, Translations> = {
       legendHalf: '½× Resistencia',
       legendQuarter: '¼× Doble resistencia',
       legendImmune: '0× Inmunidad',
+    },
+    nuzlocke: {
+      title: 'Modo Nuzlocke',
+      subtitle: 'Registrá tu partida Nuzlocke: encuentros, equipo y cementerio.',
+      emptyTitle: 'Sin carrera activa',
+      emptyDesc: 'Elegí una versión del juego y empezá una nueva carrera Nuzlocke.',
+      gameSelectLabel: 'Versión del juego',
+      createRunBtn: 'Empezar carrera',
+      runSelectLabel: 'Carrera',
+      newRunBtn: 'Nueva carrera',
+      statAreas: 'Zonas',
+      statCaptures: 'Capturas',
+      statDeaths: 'Bajas',
+      statAlive: 'Vivos',
+      partyTitle: 'Equipo de la carrera',
+      partyEmptySlot: 'Vacío',
+      newEncounterBtn: 'Nuevo encuentro',
+      areasTitle: 'Zonas registradas',
+      areasEmpty: 'Todavía no hay zonas registradas.',
+      graveyardTitle: 'Cementerio',
+      graveyardEmpty: 'Sin bajas registradas.',
+      graveyardCount: '{count} bajas',
+      registerDeathBtn: 'Registrar baja',
+      exportMemorialBtn: 'Exportar memorial',
+      rulesTitle: 'Reglas',
+      ruleCapLevelByGym: 'Tope de nivel por gimnasio',
+      ruleNoHeal: 'Prohibido curar entre combates',
+      ruleNoItems: 'Prohibido usar objetos en combate',
+      ruleShuffle: 'Shuffle de equipo obligatorio',
+      statusLabel: 'Estado de la carrera',
+      statusActive: 'Activa',
+      statusWon: 'Ganada',
+      statusLost: 'Perdida',
+      statusAbandoned: 'Abandonada',
+      deleteRunBtn: 'Eliminar carrera',
+      deleteRunConfirm: '¿Eliminar esta carrera de forma permanente? No se puede deshacer.',
+      encounterModalTitle: 'Nuevo encuentro',
+      areaInputPlaceholder: 'Zona (ej. Ruta 1)',
+      searchPlaceholder: 'Buscar Pokémon salvaje...',
+      outcomeCaptured: 'Capturado',
+      outcomeFainted: 'Derrotado',
+      confirmBtn: 'Confirmar',
+      partyFullWarning:
+        'Encuentro registrado, pero el equipo de la carrera está lleno — no se añadió al equipo.',
+      deathModalTitle: 'Registrar baja',
+      deathPokemonLabel: 'Pokémon',
+      deathLevelPlaceholder: 'Nivel',
+      deathAreaPlaceholder: 'Zona',
+      deathCausePlaceholder: 'Causa (ej. crítico de Sableye)',
+      deathDateLabel: 'Fecha',
+      confirmDeathBtn: 'Registrar baja',
+      memorialModalTitle: 'Memorial Nuzlocke',
+      downloadMemorialPng: 'Descargar PNG',
     },
     strengthsWeaknesses: {
       title: 'Análisis del Equipo',

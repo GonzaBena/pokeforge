@@ -238,3 +238,45 @@ export interface CaptureLogEntry {
   method: CaptureMethod
   game: string | null // versionId (same namespace as poketeam:captured-by-game), null = unspecified
 }
+
+export interface NuzlockeRules {
+  capLevelByGym: boolean
+  noHeal: boolean
+  noItems: boolean
+  shuffle: boolean
+}
+
+export type NuzlockeOutcome = 'captured' | 'fainted'
+
+export interface NuzlockeArea {
+  pokemonId: number
+  outcome: NuzlockeOutcome
+  recordedAt: string // ISO 'YYYY-MM-DD'
+}
+
+export interface NuzlockeDeath {
+  pokemonId: number
+  atLevel: number | null
+  area: string
+  cause: string
+  date: string // ISO 'YYYY-MM-DD'
+}
+
+export type NuzlockeStatus = 'active' | 'won' | 'lost' | 'abandoned'
+
+export interface NuzlockePlaythrough {
+  id: string
+  game: string // versionId (same namespace as CaptureLogEntry.game)
+  startedAt: string // ISO 'YYYY-MM-DD'
+  areas: Record<string, NuzlockeArea> // key = free-text area name (trimmed)
+  deaths: NuzlockeDeath[]
+  party: (number | null)[] // fixed length 6, independent of TeamState (poketeam:team)
+  status: NuzlockeStatus
+}
+
+export interface NuzlockeState {
+  enabled: boolean
+  rules: NuzlockeRules
+  playthroughs: Record<string, NuzlockePlaythrough>
+  activeRunId: string | null
+}

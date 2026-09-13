@@ -11,11 +11,13 @@ import {
   getCaptureLog,
   getCaptureMeta,
   setCaptureMeta,
+  getNuzlockeState,
+  setNuzlockeState,
   type PokemonOverrides,
   CAPTURED_CHANGED_EVENT,
   CAPTURED_BY_GAME_CHANGED_EVENT,
 } from './storage'
-import type { CaptureLogEntry, TeamState } from './types'
+import type { CaptureLogEntry, NuzlockeDeath, NuzlockePlaythrough, NuzlockeState, TeamState } from './types'
 
 export interface SyncPayload {
   v: 1 | 2
@@ -26,6 +28,7 @@ export interface SyncPayload {
   overrides?: Record<number, PokemonOverrides>
   game?: string
   captureLog?: Record<number, CaptureLogEntry>
+  nuzlocke?: NuzlockeState
 }
 
 export interface SyncSummary {
@@ -121,6 +124,7 @@ export function createSyncPayload(): SyncPayload {
     overrides: getAllOverrides(),
     game: getSelectedGame(),
     captureLog: getCaptureLog(),
+    nuzlocke: getNuzlockeState(),
   }
 }
 
@@ -359,6 +363,57 @@ export function applySyncPayload(
     }
   }
 
+  // Save nuzlocke state. In merge mode, playthroughs are unioned by id; areas
+  // are unioned per-run with newest-wins on conflicting area names (same
+  // recordedAt comparison as captureLog above), deaths are unioned deduped
+  // by (pokemonId, date, area), and party only fills local empty slots —
+  // never overwrites an occupied one. Rules are local-device settings and
+  // are never overwritten by sync.
+  if (payload.nuzlocke) {
+    const current = getNuzlockeState()
+    if (mode === 'replace') {
+      setNuzlockeState(payload.nuzlocke)
+    } else {
+      const mergedPlaythroughs: Record<string, NuzlockePlaythrough> = { ...current.playthroughs }
+      for (const [id, incoming] of Object.entries(payload.nuzlocke.playthroughs)) {
+        const local = mergedPlaythroughs[id]
+        if (!local) {
+          mergedPlaythroughs[id] = incoming
+          continue
+        }
+
+        const areas = { ...local.areas }
+        for (const [areaName, incomingArea] of Object.entries(incoming.areas)) {
+          const localArea = areas[areaName]
+          if (!localArea || incomingArea.recordedAt > localArea.recordedAt) {
+            areas[areaName] = incomingArea
+          }
+        }
+
+        const deathKey = (d: NuzlockeDeath) => `${d.pokemonId}|${d.date}|${d.area}`
+        const seen = new Set(local.deaths.map(deathKey))
+        const deaths = [...local.deaths]
+        for (const d of incoming.deaths) {
+          if (!seen.has(deathKey(d))) {
+            deaths.push(d)
+            seen.add(deathKey(d))
+          }
+        }
+
+        const party = local.party.map((slot, i) => slot ?? incoming.party[i] ?? null)
+
+        mergedPlaythroughs[id] = { ...local, areas, deaths, party }
+      }
+
+      setNuzlockeState({
+        enabled: current.enabled || payload.nuzlocke.enabled,
+        rules: current.rules,
+        playthroughs: mergedPlaythroughs,
+        activeRunId: current.activeRunId ?? payload.nuzlocke.activeRunId,
+      })
+    }
+  }
+
   return { addedCaptures: addedCount, totalCaptures: finalCaptures.size }
 }
 
@@ -398,6 +453,7 @@ export function exportBackupFile(): void {
     overrides: payload.overrides,
     game: payload.game,
     captureLog: payload.captureLog,
+    nuzlocke: payload.nuzlocke,
   }
 
   const json = JSON.stringify(exportData, null, 2)
@@ -454,6 +510,7 @@ export async function importBackupFile(
     game: raw.game,
     captureLog:
       raw.captureLog && typeof raw.captureLog === 'object' ? raw.captureLog : undefined,
+    nuzlocke: raw.nuzlocke && typeof raw.nuzlocke === 'object' ? raw.nuzlocke : undefined,
   }
 
   return applySyncPayload(payload, mode)

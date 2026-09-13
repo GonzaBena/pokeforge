@@ -1,0 +1,141 @@
+/* -------------------------------------------------------- nuzlocke: encounter/death wizards */
+
+.nuzlocke-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nuzlocke-input-icon {
+  position: absolute;
+  left: 12px;
+  width: 15px;
+  height: 15px;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+.nuzlocke-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 14px 0 36px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.nuzlocke-input::placeholder {
+  color: var(--text-faint);
+}
+
+.nuzlocke-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+
+select.nuzlocke-input,
+.nuzlocke-form-field select,
+.nuzlocke-form-field input {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.nuzlocke-encounter-panel,
+.nuzlocke-death-panel {
+  max-width: 480px;
+}
+
+.nuzlocke-encounter-panel__body,
+.nuzlocke-death-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+}
+
+.nuzlocke-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.nuzlocke-encounter-results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.nuzlocke-encounter-results:empty {
+  display: none;
+}
+
+.nuzlocke-encounter-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.nuzlocke-encounter-result-item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+}
+
+.nuzlocke-encounter-result-item img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.nuzlocke-encounter-selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.nuzlocke-encounter-selected img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.nuzlocke-outcome-toggle {
+  width: 100%;
+  justify-content: center;
+}
+
+.nuzlocke-outcome-toggle .view-toggle__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
