@@ -1283,6 +1283,7 @@ movesInputEl?.addEventListener('input', () => {
       getAllPokemon().then((pokemon) => {
         allPokemon = pokemon
         allPokemonReady = true
+        filtered = computeFiltered(allPokemon)
         updateMoveCountMap()
         const curVal = movesInputEl?.value.trim() ?? ''
         if (curVal) {
@@ -1307,6 +1308,7 @@ movesInputEl?.addEventListener('focus', () => {
     getAllPokemon().then((pokemon) => {
       allPokemon = pokemon
       allPokemonReady = true
+      filtered = computeFiltered(allPokemon)
       updateMoveCountMap()
       const curVal = movesInputEl?.value.trim() ?? ''
       if (curVal) {
@@ -1665,6 +1667,7 @@ async function init(): Promise<void> {
     const onReady = (pokemon: Pokemon[]) => {
       allPokemon = pokemon
       allPokemonReady = true
+      filtered = computeFiltered(allPokemon)
       updateMoveCountMap()
     }
     if ('requestIdleCallback' in window) {
