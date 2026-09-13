@@ -8,6 +8,7 @@ import {
 import { CAPTURED_CHANGED_EVENT, TEAM_CHANGED_EVENT, GAME_CHANGED_EVENT } from './storage'
 import { getCurrentLocale, getTranslations } from './i18n/translations'
 import { toast } from './toast'
+import { apiGetVault, apiCreateVault, apiUpdateVault, apiDeleteVault } from './vaultApi'
 
 export const CLOUD_STATUS_EVENT = 'poketeam:cloud-status'
 
@@ -218,19 +219,15 @@ export async function fetchCloudVault(
   if (!cleanCode) return { success: false, error: 'Código requerido' }
 
   try {
-    const res = await fetch(`/api/vault?code=${encodeURIComponent(cleanCode)}&_t=${Date.now()}`, {
-      cache: 'no-store',
-    })
-    const data = await res.json()
-
-    if (!res.ok || !data.success) {
-      return { success: false, error: data.message || 'Bóveda no encontrada' }
+    const res = await apiGetVault(cleanCode)
+    if (!res.success || !res.payload) {
+      return { success: false, error: res.error || 'Bóveda no encontrada' }
     }
 
-    const payload = await decodeSyncPayload(data.payload)
-    return { success: true, payload, updatedAt: data.updatedAt }
+    const payload = await decodeSyncPayload(res.payload)
+    return { success: true, payload, updatedAt: res.updatedAt }
   } catch {
-    return { success: false, error: 'Error de conexión con el servidor' }
+    return { success: false, error: 'Error al decodificar datos de la bóveda' }
   }
 }
 
@@ -263,27 +260,21 @@ export async function createCloudVault(): Promise<{
     const localPayload = createSyncPayload()
     const token = await encodeSyncPayload(localPayload)
 
-    const res = await fetch('/api/vault', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ payload: token }),
-    })
-
-    const data = await res.json()
-    if (!res.ok || !data.success) {
-      lastSyncError = data.message || 'Error al crear bóveda en la nube'
-      return { success: false, error: lastSyncError ?? undefined }
+    const res = await apiCreateVault(token)
+    if (!res.success || !res.code || !res.secretKey) {
+      lastSyncError = res.error || 'Error al crear bóveda en la nube'
+      return { success: false, error: lastSyncError }
     }
 
-    localStorage.setItem(CLOUD_CODE_KEY, data.code)
-    localStorage.setItem(CLOUD_SECRET_KEY, data.secretKey)
-    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt))
+    localStorage.setItem(CLOUD_CODE_KEY, res.code)
+    localStorage.setItem(CLOUD_SECRET_KEY, res.secretKey)
+    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(res.updatedAt || Date.now()))
     lastSyncError = null
 
     initSyncWorker()
-    return { success: true, code: data.code }
+    return { success: true, code: res.code }
   } catch {
-    lastSyncError = 'Error de conexión con el servidor'
+    lastSyncError = 'Error al preparar datos de la bóveda'
     return { success: false, error: lastSyncError }
   } finally {
     isSyncing = false
@@ -307,17 +298,13 @@ export async function joinCloudVault(
     lastSyncError = null
     notifyStatusChange()
 
-    const res = await fetch(`/api/vault?code=${encodeURIComponent(cleanCode)}&_t=${Date.now()}`, {
-      cache: 'no-store',
-    })
-    const data = await res.json()
-
-    if (!res.ok || !data.success) {
-      lastSyncError = data.message || 'Bóveda no encontrada'
-      return { success: false, error: lastSyncError ?? undefined }
+    const res = await apiGetVault(cleanCode)
+    if (!res.success || !res.payload) {
+      lastSyncError = res.error || 'Bóveda no encontrada'
+      return { success: false, error: lastSyncError }
     }
 
-    const payload = await decodeSyncPayload(data.payload)
+    const payload = await decodeSyncPayload(res.payload)
     isApplyingRemoteUpdate = true
     try {
       applySyncPayload(payload, mode)
@@ -329,7 +316,7 @@ export async function joinCloudVault(
     if (secretKey) {
       localStorage.setItem(CLOUD_SECRET_KEY, secretKey.trim())
     }
-    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt))
+    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(res.updatedAt || Date.now()))
     lastSyncError = null
 
     initSyncWorker()
@@ -374,58 +361,39 @@ export async function syncToCloudNow(
     // Protección contra sobreescritura accidental: si otro dispositivo guardó algo más nuevo, descargarlo
     if (!skipRemoteCheck) {
       try {
-        const checkRes = await fetch(
-          `/api/vault?code=${encodeURIComponent(state.code)}&_t=${Date.now()}`,
-          {
-            cache: 'no-store',
-            headers: { 'Cache-Control': 'no-cache' },
-          },
-        )
-        if (checkRes.ok) {
-          const remoteData = await checkRes.json()
-          if (remoteData.success && remoteData.updatedAt) {
-            const remoteUpdated = Number(remoteData.updatedAt)
-            const localLastSync = state.lastSync || 0
-            if (remoteUpdated > localLastSync + 1500) {
-              isApplyingRemoteUpdate = true
-              try {
-                const remotePayload = await decodeSyncPayload(remoteData.payload)
-                applySyncPayload(remotePayload, 'replace')
-                localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated))
-                toast.info(getSyncRemoteUpdatedText())
-                return { success: true }
-              } finally {
-                isApplyingRemoteUpdate = false
-                notifyStatusChange()
-              }
+        const checkRes = await apiGetVault(state.code)
+        if (checkRes.success && checkRes.updatedAt && checkRes.payload) {
+          const remoteUpdated = checkRes.updatedAt
+          const localLastSync = state.lastSync || 0
+          if (remoteUpdated > localLastSync + 1500) {
+            isApplyingRemoteUpdate = true
+            try {
+              const remotePayload = await decodeSyncPayload(checkRes.payload)
+              applySyncPayload(remotePayload, 'replace')
+              localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated))
+              toast.info(getSyncRemoteUpdatedText())
+              return { success: true }
+            } finally {
+              isApplyingRemoteUpdate = false
+              notifyStatusChange()
             }
           }
         }
       } catch {
-        // En caso de fallo de red en el chequeo previo, continuar con el intento de guardado
+        // En caso de fallo en el chequeo previo, continuar con el intento de guardado
       }
     }
 
     const localPayload = createSyncPayload()
     const token = await encodeSyncPayload(localPayload)
 
-    const res = await fetch('/api/vault', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code: state.code,
-        secretKey: state.secretKey,
-        payload: token,
-      }),
-    })
-
-    const data = await res.json()
-    if (!res.ok || !data.success) {
-      lastSyncError = data.message || 'Error al actualizar nube'
-      return { success: false, error: lastSyncError ?? undefined }
+    const res = await apiUpdateVault(state.code, state.secretKey, token)
+    if (!res.success) {
+      lastSyncError = res.error || 'Error al actualizar nube'
+      return { success: false, error: lastSyncError }
     }
 
-    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(data.updatedAt))
+    localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(res.updatedAt || Date.now()))
     lastSyncError = null
     return { success: true }
   } catch {
@@ -450,22 +418,16 @@ export async function fetchFromCloud(force: boolean = false): Promise<boolean> {
   if (!state.isLinked || !state.code) return false
 
   try {
-    const res = await fetch(`/api/vault?code=${encodeURIComponent(state.code)}&_t=${Date.now()}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
-    })
-    if (!res.ok) return false
-
-    const data = await res.json()
-    if (!data.success || !data.updatedAt) return false
+    const res = await apiGetVault(state.code)
+    if (!res.success || !res.updatedAt || !res.payload) return false
 
     const localLastSync = state.lastSync || 0
-    const remoteUpdated = Number(data.updatedAt)
+    const remoteUpdated = res.updatedAt
     // Si la nube tiene cambios más nuevos por más de 1.5s o se solicita verificación forzada
     if (force || remoteUpdated > localLastSync + 1500) {
       isApplyingRemoteUpdate = true
       try {
-        const payload = await decodeSyncPayload(data.payload)
+        const payload = await decodeSyncPayload(res.payload)
         applySyncPayload(payload, 'replace')
         localStorage.setItem(CLOUD_LAST_SYNC_KEY, String(remoteUpdated))
         lastSyncError = null
@@ -537,26 +499,17 @@ export async function deleteCloudVault(): Promise<{ success: boolean; error?: st
     lastSyncError = null
     notifyStatusChange()
 
-    const res = await fetch('/api/vault', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code: state.code,
-        secretKey: state.secretKey,
-      }),
-    })
-
-    const data = await res.json()
-    if (!res.ok || !data.success) {
-      lastSyncError = data.message || 'Error al eliminar bóveda'
-      return { success: false, error: lastSyncError ?? undefined }
+    const res = await apiDeleteVault(state.code, state.secretKey)
+    if (!res.success) {
+      lastSyncError = res.error || 'Error al eliminar bóveda'
+      return { success: false, error: lastSyncError }
     }
 
     unlinkCloudVault()
     return { success: true }
   } catch {
     lastSyncError = 'Error al comunicar con la DB'
-    return { success: false, error: lastSyncError ?? undefined }
+    return { success: false, error: lastSyncError }
   } finally {
     isSyncing = false
     notifyStatusChange()
