@@ -44,6 +44,7 @@ Combinados: `type:fire pow:>80 cat:special` o `type:water !cat:status pow:>=90`.
 La idea de partida fue: *"quiero ver mis datos en cualquier lugar, pero que sigan siendo privados"*.
 
 - Tus datos se guardan como texto, **localmente** (para seguir usando la app sin internet) y en una **copia en la nube** (vault).
+- La copia en la nube se guarda y consulta en [Turso](https://turso.tech) (libSQL) cuando está configurado (ver [Variables de entorno](#variables-de-entorno)).
 - Cada vault tiene un **código de vinculación** y una **clave secreta**.
 - Con el código, otro dispositivo se conecta en **modo solo lectura**. Si además tiene la clave secreta, obtiene **permiso de escritura**.
 - El **QR** comparte el código junto con la clave para vincular un celular en un paso.
@@ -59,11 +60,11 @@ La idea de partida fue: *"quiero ver mis datos en cualquier lugar, pero que siga
 | Framework | [Astro](https://astro.build) 7 + TypeScript |
 | Despliegue | Netlify |
 | Datos de Pokémon | [PokeAPI](https://pokeapi.co) |
-| Copia en la nube | Cliente libSQL (`@libsql/client`) |
+| Copia en la nube | [Turso](https://turso.tech) (libSQL, con `@libsql/client`) |
 | UI y utilidades | anime.js, lucide, TanStack Table, qrcode, html-to-image |
 | Calidad | Playwright (e2e), ESLint, Prettier |
 
-Carga de datos: se usa un caché básico para las primeras entradas de la Pokédex y se van cacheando el resto de las peticiones de forma progresiva a medida que se usa la app.
+Carga de datos: los datos de Pokémon se descargan de PokeAPI con el script `fetch:pokedex` y se guardan como archivos estáticos en `public/data/`. Además, se usa un caché básico para las primeras entradas de la Pokédex y el resto de las peticiones se cachea de forma progresiva a medida que se usa la app.
 
 ## Primeros pasos
 
@@ -76,6 +77,24 @@ pnpm build
 pnpm preview
 ```
 
+### Variables de entorno
+
+La sincronización en la nube usa una base de datos de [Turso](https://turso.tech). Para activarla, creá un archivo `.env` en la raíz del proyecto:
+
+```bash
+TURSO_DATABASE_URL=libsql://tu-base.turso.io
+TURSO_AUTH_TOKEN=tu_token
+```
+
+| Variable | Qué es |
+| --- | --- |
+| `TURSO_DATABASE_URL` | URL de tu base de datos de Turso |
+| `TURSO_AUTH_TOKEN` | Token de autenticación para esa base |
+
+**Son opcionales.** Sin ellas la app funciona igual con tus datos guardados localmente en el navegador, pero la sincronización entre dispositivos no está disponible, porque los datos de los vaults se guardan en Turso.
+
+En producción (Netlify), cargalas como variables de entorno del sitio. Asegurate de que `.env` esté en `.gitignore` y no subas tus credenciales al repositorio.
+
 ### Scripts
 
 | Script | Qué hace |
@@ -87,7 +106,7 @@ pnpm preview
 | `pnpm check` | Chequeo de tipos de Astro |
 | `pnpm lint` / `pnpm lint:fix` | Análisis estático con ESLint |
 | `pnpm format` / `pnpm format:check` | Formato con Prettier |
-| `pnpm fetch:pokedex` | Obtiene los datos de la Pokédex (`:force` para forzar la descarga) |
+| `pnpm fetch:pokedex` | Descarga, procesa y guarda localmente los datos de Pokémon desde PokeAPI en `public/data/` (con `pnpm fetch:pokedex:force` se fuerza la descarga) |
 
 ## Estructura
 
@@ -95,7 +114,7 @@ pnpm preview
 .github/workflows/   CI
 docs/                documentación y capturas
 e2e/                 tests end-to-end (Playwright)
-public/              assets estáticos
+public/              assets estáticos y datos de la Pokédex (public/data/)
 scripts/             scripts de utilidad
 src/                 código de la aplicación
 tests/               tests
